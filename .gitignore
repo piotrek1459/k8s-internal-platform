@@ -31,3 +31,34 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# macOS
+.DS_Store
+
+# Thesis build artifacts; keep PDF illustrations in book/graf/.
+/book/build/
+/book/main.pdf
+/book/*.aux
+/book/*.bbl
+/book/*.bcf
+/book/*.blg
+/book/*.fdb_latexmk
+/book/*.fls
+/book/*.lof
+/book/*.log
+/book/*.lot
+/book/*.rks
+/book/*.run.xml
+/book/*.synctex.gz
+/book/*.toc
+/book/*-blx.bib
+
+# Local infrastructure state and credentials
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.example.tfvars
+crash.log
+.env.*
+!.env.example
