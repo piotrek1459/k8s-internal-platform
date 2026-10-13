@@ -2,6 +2,12 @@
 
 Title provided by the author: **Design and implementation of kubernetes platform for containerized application deployment**.
 
+The detailed product and implementation plan is now in [app-plan.md](app-plan.md).
+It records the refined requirements: a Raspberry Pi reference installation, an
+administrator web UI, public/private images, persistent deployment history, and
+LAN-first development followed by public application hosting. This outline keeps
+the original thesis context and source-document requirements.
+
 This is a working plan for organizing the repository, not thesis content or a
 completed implementation. The scope is based on the supplied `idea.pdf`. The
 longer title in that document does not replace the title provided in the conversation.
@@ -65,9 +71,11 @@ runnable platform, a Go module, or placeholder infrastructure configuration.
 - How can broker permissions be restricted and secrets handled without storing them in Git?
 - Is an API with documented request examples sufficient as the prototype's interface?
 
-These are design questions, not additional requirements from `idea.pdf`. A web
-interface, a custom CLI, and compliance with a particular Service Broker API
-standard have not been decided.
+These were the initial design questions, rather than additional requirements from
+`idea.pdf`. A web UI is now a confirmed requirement. Current answers and remaining
+decisions are recorded in [app-plan.md](app-plan.md); a custom application CLI and
+compliance with a particular Service Broker API standard remain outside the
+proposed initial scope.
 
 ## Proposed verification plan
 
