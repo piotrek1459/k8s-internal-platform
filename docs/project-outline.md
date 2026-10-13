@@ -2,25 +2,30 @@
 
 Title provided by the author: **Design and implementation of kubernetes platform for containerized application deployment**.
 
-The detailed product and implementation plan is now in [app-plan.md](app-plan.md).
+The current product and implementation plan is defined in [app-plan.md](app-plan.md).
 It records the refined requirements: a Raspberry Pi reference installation, an
 administrator web UI, public/private images, persistent deployment history, and
-LAN-first development followed by public application hosting. This outline keeps
-the original thesis context and source-document requirements.
+LAN-first development followed by public application hosting. This outline
+preserves the original thesis context and distinguishes source-document
+requirements from subsequent project decisions.
 
 The platform and the applications it deploys share one Kubernetes/K3s cluster.
 The reference Pi is initially both the control-plane node and the workload node;
 the [cluster layout](architecture.md#one-cluster-hosting-the-platform-and-its-applications)
 shows namespaces, traffic paths, and operational responsibilities.
 
-This is a working plan for organizing the repository, not thesis content or a
-completed implementation. The scope is based on the supplied `idea.pdf`. The
-longer title in that document does not replace the title provided in the conversation.
+This document provides repository planning context. It does not contain thesis
+chapters or describe a completed implementation. The original scope is based on
+the supplied `idea.pdf`. The longer title in that document does not replace the
+title provided by the author.
 
 ## Scope described in `idea.pdf`
 
-The platform is intended to run in the organization's own Kubernetes cluster and
-help the team deploy applications. It is not intended as public hosting for multiple clients.
+The source document describes a platform running in an organization's own
+Kubernetes cluster to support application deployment by its team. Public hosting
+for multiple independent clients is outside that original scope. The current
+plan permits public access to administrator-deployed applications while retaining
+a single administrator and a single managed cluster.
 
 - A broker written in Go exposes an API for deploying a new application, updating
   it, retrieving its status, rolling it back, and deleting a deployment.
@@ -29,7 +34,9 @@ help the team deploy applications. It is not intended as public hosting for mult
 - Infrastructure as Code provisions selected parts of the environment; the
   description identifies Terraform as a likely tool.
 - CI/CD builds and verifies images, publishes artifacts, and calls the platform API.
-  The choice between GitHub Actions and GitLab CI remains open.
+  The original description leaves the choice between GitHub Actions and GitLab CI
+  open. The current plan recommends GitHub Actions; implementation details are
+  recorded in [operations.md](operations.md).
 - The platform handles application configuration, ingress, secrets, and rollout verification.
 - Prometheus, Grafana, and Loki provide metrics, visualization, alerts, and logs.
   Tracing is an optional extension mentioned in the description.
@@ -52,35 +59,45 @@ help the team deploy applications. It is not intended as public hosting for mult
 At this stage, the directories define responsibilities. They do not contain a
 runnable platform, a Go module, or placeholder infrastructure configuration.
 
-## Proposed work sequence
+## Original work sequence
 
-1. **Refine the scope:** choose the cluster environment, intended API users, and
-   minimum requirements; record the success criteria and prototype boundaries.
-2. **Establish a manual deployment baseline:** deploy a simple application using
-   Helm and document a repeatable procedure for later comparison with the platform.
-3. **Implement the first broker workflow:** API → chart installation → readiness
-   check → response with deployment status.
-4. **Manage the lifecycle:** add updates, rollbacks, and deletion, along with error
-   handling and agreed rules for configuration and access to secrets.
-5. **Add automation and observability:** prepare a reproducible environment,
-   CI/CD, metrics and log collection, and selected dashboards and alerts.
-6. **Evaluate the prototype:** repeat the same scenarios, record experimental
-   conditions, raw results, and conclusions; collect material for the thesis.
+1. **Scope definition:** selection of the cluster environment, intended API users,
+   minimum requirements, success criteria, and prototype boundaries.
+2. **Manual deployment baseline:** deployment of a simple application using Helm
+   and documentation of a repeatable procedure for comparison with the platform.
+3. **Initial broker workflow:** application of the deployment chart and readiness
+   observation through the API. The current asynchronous request and operation
+   status contract is defined in [api-and-data.md](api-and-data.md).
+4. **Lifecycle management:** updates, rollbacks, deletion, error handling,
+   configuration rules, and controlled access to secrets.
+5. **Automation and observability:** a reproducible environment, CI/CD, metrics
+   and log collection, and selected dashboards and alerts.
+6. **Prototype evaluation:** repeatable scenarios with recorded experimental
+   conditions, raw results, and conclusions suitable for subsequent thesis work.
 
-## Decisions for the author
+The current implementation order and acceptance criteria are defined in
+[milestones.md](milestones.md). M0–M4 constitute the core prototype and include
+basic evaluation. M5–M8 define planned product extensions and extended evaluation.
+These implementation boundaries do not establish academic sufficiency.
 
-- Where will the demonstration cluster run, and which parts will IaC provision?
-- What input does the API accept, and how does it identify users and their permissions?
-- Are operations synchronous, or do they return a task identifier?
-- Where is operation state stored, and what happens when the broker restarts?
-- How can broker permissions be restricted and secrets handled without storing them in Git?
-- Is an API with documented request examples sufficient as the prototype's interface?
+## Original design questions and subsequent decisions
 
-These were the initial design questions, rather than additional requirements from
-`idea.pdf`. A web UI is now a confirmed requirement. Current answers and remaining
-decisions are recorded in [app-plan.md](app-plan.md); a custom application CLI and
-compliance with a particular Service Broker API standard remain outside the
-proposed initial scope.
+The initial design questions concerned the following areas:
+
+- Demonstration environment and the scope of Infrastructure as Code provisioning.
+- API inputs, user identification, and permission boundaries.
+- Synchronous processing versus asynchronous operations with identifiers.
+- Operation state storage and broker restart recovery.
+- Restricted broker permissions and secret management outside Git.
+- An API-only interface versus a web interface.
+
+These questions arose during project planning and do not constitute additional
+requirements from `idea.pdf`. The current plan specifies a Raspberry Pi reference
+installation, asynchronous operations, persistent operation state, restricted
+in-cluster permissions, and a web UI. Current decisions and remaining open items
+are recorded in [app-plan.md](app-plan.md). A custom application CLI and compliance
+with a particular Service Broker API standard remain outside the proposed initial
+scope.
 
 ## Proposed verification plan
 
@@ -93,7 +110,7 @@ proposed initial scope.
 | Failures | An invalid image or an application that fails readiness checks. | Operation state, logs, metrics, and recovery outcome. |
 
 These scenarios are proposed evaluation methods. They do not represent completed
-tests or verified platform capabilities. Acceptance thresholds should be defined
+tests or verified platform capabilities. Acceptance thresholds must be defined
 before measurements are taken.
 
 ## Requirements described in the supplied university document
@@ -135,6 +152,6 @@ regulations are current.
 | Verification and validation | Scenarios from `tests/`, measurement conditions, results, and failure analysis. |
 | Summary | Assessment of requirements met, prototype limitations, and future work. |
 
-This is a proposed arrangement of material, not completed chapters. The author
-should align numbering and titles with the existing template in `book/` while
-writing the thesis.
+This table proposes an arrangement of project material; it does not represent
+completed chapters. Thesis section numbering and titles must follow the existing
+template in `book/`.
