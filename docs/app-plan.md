@@ -8,6 +8,7 @@ software; it does not contain thesis chapters or claim completed implementation.
 
 Navigation: [scope](#2-scope-and-order-of-delivery),
 [components](#3-components-and-responsibilities),
+[cluster layout](#one-cluster-hosting-the-platform-and-its-applications),
 [installation](#4-hardware-installation-and-operating-limits),
 [application contract](#5-application-contract),
 [networking](#6-networking-lan-first-public-access-later),
@@ -29,10 +30,16 @@ An application can later be made publicly accessible over HTTPS.
 The reference outcome is to build a separate application, publish its container
 image, and run it publicly on the Raspberry Pi hosting this platform.
 
+**The platform itself and every application it deploys run in the same Kubernetes
+cluster.** K3s is the proposed Kubernetes distribution for the reference Pi.
+The product gives the administrator a managed application environment on their
+own cluster: install once, then operate applications through the platform UI/API.
+
 | Topic | Confirmed requirement |
 | --- | --- |
 | First host | Raspberry Pi 5, 8 GB RAM, 32 GB microSD, 64-bit Raspberry Pi OS. |
 | Operator | One administrator: the person installing the platform. |
+| Cluster topology | One shared cluster hosts both the platform and managed applications; initially one Pi runs the control plane and workloads. |
 | Interface | A web UI is a core part of the product. |
 | Application source | Support public and private container images. |
 | Operations | Deploy, inspect, update, and scale applications; add the lifecycle operations needed to make these reliable. |
@@ -95,27 +102,206 @@ automation and a large test matrix can follow later.
 
 ## 3. Components and responsibilities
 
-### Proposed architecture
+### One cluster hosting the platform and its applications
+
+The first installation has one Linux host, one K3s cluster, and one Kubernetes
+node. That node performs both server/control-plane duties and workload execution.
+The platform is itself deployed as a Kubernetes workload, alongside the
+applications it manages. Deploying another application creates resources inside
+this existing cluster; it does not create another cluster or start containers
+inside the platform's own container.
+
+K3s runs the API server, scheduler, controllers, datastore, and node services as
+host-side components. Platform and application pods use the node's container
+runtime. Those host processes are not pods in the platform namespace.
+[K3s architecture](https://docs.k3s.io/architecture)
+
+The following diagram shows the logical layout on the reference Pi. Namespace
+boxes group Kubernetes resources; they are not separate machines or clusters.
+Optional components appear to show where they will fit as milestones progress.
 
 ```mermaid
 flowchart TB
-    Admin[Administrator browser] --> Private[Private management endpoint]
-    Private --> Platform[Go service: UI assets and REST API]
-    Platform --> DB[(SQLite: configuration, operations, audit)]
-    Platform --> Worker[Durable operation worker]
-    Worker --> Helm[Helm SDK: application chart]
-    Worker --> KAPI[Kubernetes API]
-    Helm --> KAPI
-    KAPI --> Workloads[Deployments, Services and routes]
-    Observer[Go status observer] --> KAPI
-    Observer --> Platform
-    Registry[Public or private registry] --> Runtime[K3s container runtime]
-    Runtime --> Workloads
-    Visitor[LAN or Internet visitor] --> Edge[Configured application ingress]
-    Edge --> Workloads
-    Workloads --> Data[(Optional application data volumes)]
-    Workloads -. metrics and logs .-> Monitoring[Optional observability profile]
+    subgraph Cluster["ONE K3s cluster — Raspberry Pi 5, single node"]
+        direction TB
+        subgraph Host["Host processes — outside pod namespaces"]
+            HostComponents["API server, scheduler, controllers, K3s datastore<br/>kubelet, containerd, node networking"]
+        end
+
+        subgraph System["Namespace: kube-system"]
+            SystemComponents["Traefik: restricted private / public entrypoints<br/>CoreDNS, local-path provisioner, other K3s add-ons"]
+        end
+
+        subgraph PlatformNS["Namespace: platform-system"]
+            PlatformComponents["Private Service + platform Deployment: 1 pod<br/>Go UI/API, worker, observer, Helm SDK<br/>Platform PVC: SQLite configuration and history"]
+        end
+
+        subgraph AppsNS["Namespace: platform-apps"]
+            AppComponents["Notes app: Deployment + pods + Service + permitted route<br/>Other apps: separate releases and resources<br/>ConfigMaps, Secrets, optional retained PVCs<br/>Optional private database: separate workload and data"]
+        end
+
+        subgraph AddOns["Optional namespaces — same cluster"]
+            AddOnComponents["observability: Prometheus, Grafana, Loki, Alloy<br/>cert-manager: certificate controllers for direct HTTPS"]
+        end
+
+        Host ~~~ System
+        System ~~~ PlatformNS
+        PlatformNS ~~~ AppsNS
+        AppsNS ~~~ AddOns
+    end
 ```
+
+The platform database is a file used by the Go process on its own PVC, not another
+database server. The optional application database is a separate workload and
+volume; it is shown only as an example of a future app dependency. All persistent
+data initially shares the Pi's physical storage even though the claims are separate.
+
+### Namespace and resource layout
+
+| Location | What belongs there | Managed by |
+| --- | --- | --- |
+| Host, outside workload namespaces | Linux services, K3s control plane/datastore, kubelet, container runtime, host configuration. | Administrator through installer and maintenance tooling. |
+| `kube-system` | K3s-packaged ingress, cluster DNS, storage provisioner, and other system add-ons. | K3s and installer-controlled configuration. |
+| `platform-system` | Platform Deployment/Service, service account, metadata PVC, platform settings; optional tunnel connector when selected. | Platform installation/upgrade chart. |
+| `platform-apps` | One Helm release per managed app: Deployment, Service, configuration references, permitted route; separately owned Secrets and retained PVCs. | Go broker through Helm and its Kubernetes client. |
+| `observability` | Optional monitoring/logging stack and its data volumes. | Installer-selected observability chart/profile. |
+| `cert-manager` | Optional certificate controller workloads for direct HTTPS. Application Certificate objects and TLS Secrets remain with the relevant application/route. | Installer-selected certificate component. |
+| Cluster-scoped resources | Node, PersistentVolumes, StorageClasses, and installation-level RBAC. | Installer/system controllers; the broker gets only explicitly required access. |
+
+Each application has its own resource identity and Helm release even though apps
+initially share `platform-apps`. Application IDs, labels, and exact resource
+references prevent one app's update or deletion from touching another's resources.
+Namespaces organize resources but do not themselves allocate hardware or block
+network traffic. Use RBAC, network policies, and resource policies for those
+boundaries. [Kubernetes namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+
+The same cluster could contain additional worker nodes later, with the platform
+and apps scheduled onto appropriate nodes. This is a future topology change:
+namespaces span the cluster, while node-local data and single-server availability
+would need a separate migration/availability design.
+
+### Management requests and application traffic
+
+The platform manages applications through the Kubernetes API. Requests from
+visitors to a deployed application go through ingress to that application's
+Service/pods. The Go broker is not an application reverse proxy and does not need
+to handle each visitor request.
+
+```mermaid
+flowchart TB
+    Admin["Administrator on LAN / VPN"]
+    LAN["Private app visitor"]
+    Internet["Public app visitor"]
+
+    subgraph Cluster["Same K3s cluster"]
+        subgraph Edge["Traefik — explicitly selected, restricted entrypoints"]
+            Management["Private management access"]
+            PrivateApps["Private app access"]
+            PublicApps["Public app access — enabled later"]
+        end
+        Platform["platform-system<br/>Service → Go UI/API"]
+        KAPI["Kubernetes API"]
+        PrivateService["platform-apps<br/>Private app Service → pods"]
+        PublicService["platform-apps<br/>Public app Service → pods"]
+
+        Management --> Platform
+        Platform -. "deploy / update / observe" .-> KAPI
+        PrivateApps --> PrivateService
+        PublicApps --> PublicService
+    end
+
+    Admin --> Management
+    LAN --> PrivateApps
+    Internet -->|configured router or tunnel path| PublicApps
+```
+
+The private management and private application paths may share a restricted
+private listener with separate allowed routes. They never inherit the public
+listener. The public path is present only after the administrator configures it;
+the bootstrap SSH/port-forward path is omitted for clarity. Section 6 defines
+the network restrictions that make these access boundaries real.
+
+### How the platform deploys into its own cluster
+
+The broker uses its pod's service account and in-cluster Kubernetes configuration.
+The Go Kubernetes client and Helm SDK act on the same cluster API with that
+identity. Do not mount the host's administrator kubeconfig into the broker.
+The Helm SDK is a library in the Go process, not another management server.
+[Accessing the Kubernetes API from a pod](https://kubernetes.io/docs/tasks/run-application/access-api-from-pod/)
+
+```mermaid
+sequenceDiagram
+    actor Admin as Administrator
+    participant Platform as Go API
+    participant Store as Platform SQLite
+    participant Worker as Worker + Helm SDK
+    participant KAPI as Kubernetes API
+    participant Node as Controllers / node services
+    participant App as App pods
+
+    Note over Platform,Worker: API and worker run in one platform pod
+
+    Admin->>Platform: Deploy image through private UI
+    Platform->>Store: Persist app revision request and operation
+    Platform-->>Admin: Operation ID / accepted
+    Worker->>Store: Claim operation and freeze execution spec
+    Worker->>KAPI: Create release/resources in platform-apps
+    KAPI->>Node: Desired application workload
+    Node->>App: Pull image and start containers
+    Node-->>KAPI: Workload status and readiness
+    Worker->>KAPI: Observe target generation and readiness
+    Worker->>Store: Record outcome and revision
+    Admin->>Platform: Read operation and application status
+    Platform-->>Admin: Ready URL or actionable failure
+```
+
+The example shows the successful path. Failure, interrupted work, rollback, and
+storage rules remain those defined in sections 5 and 10. Cluster controllers
+maintain the platform Deployment itself in the same way they maintain other
+workloads, so starting the platform does not depend on the platform API already
+being available.
+
+### Meaning of a managed platform on administrator-owned hardware
+
+| Responsibility | What the product provides | What the administrator still owns |
+| --- | --- | --- |
+| Initial environment | Repeatable installation of the supported K3s and platform configuration. | A supported Linux host, access credentials, hardware, and initial network choices. |
+| Application lifecycle | Image validation, deployments, configuration, updates, supported scaling, recovery, and history. | Suitable application images, app-specific settings, data model, and migration decisions. |
+| Workload execution | Kubernetes scheduling, health-driven replacement, service discovery, and configured routing. | Sufficient hardware capacity and maintenance windows. |
+| Cluster maintenance | Diagnostics and a documented, versioned upgrade/recovery procedure. | Scheduling and running OS/K3s maintenance; it is not automatic provider-operated cluster administration. |
+| Data protection | Retained-volume behavior and tested backup/restore tooling or procedures. | Off-device backup destination, backup frequency, and verifying important app data can be restored. |
+| Internet access | Automation for the chosen routing/TLS mode once its prerequisites are configured. | Domain/account ownership and any router, ISP, or tunnel-provider dependencies. |
+
+Describe the product as a **self-hosted Kubernetes application platform with an
+integrated installation and management experience**. This makes its managed
+behavior explicit while keeping the existing single-administrator scope and
+documented cluster-maintenance responsibilities.
+
+### Shared resources, failures, and independent recovery
+
+Platform services and applications share the Pi's CPU, memory, storage, and
+network. Reserve measured capacity for Linux/K3s, ingress, and the broker before
+setting the application budget. Apply a `ResourceQuota` and default/maximum
+container requests/limits to `platform-apps`; include rolling-update surge pods
+in admission calculations. These policies limit declared resource consumption,
+but they do not provide physical isolation or enforce local-path disk quotas.
+[Kubernetes resource quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
+
+| Failure | Expected consequence and recovery boundary |
+| --- | --- |
+| Platform pod unavailable | UI/API and new operations are unavailable; existing apps normally continue if cluster, ingress, and their dependencies remain healthy. |
+| An application fails | Its own readiness/availability changes; the platform should remain usable to inspect and recover it within the configured resource policy. |
+| Ingress unavailable | Routed access is disrupted for apps and any UI routes using that controller; retain SSH-based recovery. |
+| Kubernetes API unavailable | Broker cannot manage or reliably observe workloads; mark status stale. Do not assume running containers imply a healthy cluster. |
+| Pi, power, or physical storage fails | The shared installation is affected; this single-node design provides no machine-level high availability. |
+
+Bootstrap, platform upgrades, and emergency recovery must remain runnable from
+the host over SSH without the web UI. Install K3s first, then install the platform
+as a workload. Keep the host-side recovery path even after the UI is complete.
+The application lifecycle API manages `platform-apps`; it must not uninstall or
+upgrade the platform, ingress, or cluster as though they were ordinary user apps.
+
+### Platform modules and component responsibilities
 
 The API, worker, and observer are modules inside **one Go service**. They do not
 need independent microservices, a message broker, or separate deployments.
@@ -162,8 +348,9 @@ database should not become a shared database for hosted applications.
 ### Kubernetes ownership and permissions
 
 Start with installer-created namespaces `platform-system` and `platform-apps`.
-The first contains platform components; the second contains managed applications.
-Use stable application IDs in resource names and labels.
+These are in the same cluster as `kube-system`. The first contains platform
+components; the second contains managed applications. Optional add-ons use the
+namespaces shown above. Use stable application IDs in resource names and labels.
 
 - The installer performs cluster-level setup, including RBAC and ingress configuration.
 - The running broker gets narrowly defined roles for the namespaces it manages,
@@ -389,8 +576,10 @@ visitors access to platform administration.
 
 ### LAN milestone
 
-Use the private management endpoint for the UI and a separate private application
-listener for LAN apps. Configure a local domain, for example `pi.home.arpa`, and
+Use the private management endpoint for the UI and explicit private routes for
+LAN apps. These may share a restricted private listener; public traffic uses a
+separate entrypoint as described in section 3. Configure a local domain, for
+example `pi.home.arpa`, and
 route an app as `notes.pi.home.arpa`. These are illustrative names, not records
 created automatically by Kubernetes.
 
@@ -1055,6 +1244,7 @@ or the full monitoring stack before proving that the target host can deploy the 
 
 | Area | Cases to cover |
 | --- | --- |
+| Shared cluster architecture | Platform and demo app run in the same cluster/on the reference node; app traffic still succeeds while the broker is stopped; host-side recovery restores management; workloads cannot reach protected management endpoints. |
 | Validation | Invalid image/name/port, unsupported architecture, missing secret/credential, forbidden exposure mode. |
 | Deployment | Public/private registry pulls, wrong credentials, nonexistent tag, registry unavailable, app binding to localhost. |
 | Lifecycle | Valid update, failed readiness, recovery failure, rollback, restart, scale 0/1/2, persistent scaling rejection. |

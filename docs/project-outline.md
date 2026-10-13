@@ -8,6 +8,11 @@ administrator web UI, public/private images, persistent deployment history, and
 LAN-first development followed by public application hosting. This outline keeps
 the original thesis context and source-document requirements.
 
+The platform and the applications it deploys share one Kubernetes/K3s cluster.
+The reference Pi is initially both the control-plane node and the workload node;
+the [cluster layout](app-plan.md#one-cluster-hosting-the-platform-and-its-applications)
+shows namespaces, traffic paths, and operational responsibilities.
+
 This is a working plan for organizing the repository, not thesis content or a
 completed implementation. The scope is based on the supplied `idea.pdf`. The
 longer title in that document does not replace the title provided in the conversation.
