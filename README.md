@@ -9,8 +9,6 @@ build tools.
 
 ## Building the thesis
 
-Requirements: Bash and [Docker Desktop on macOS](https://docs.docker.com/desktop/setup/install/mac-install/)
-or a running Docker Engine on Linux. A local LaTeX installation is not required.
 
 From the repository root, run:
 
@@ -50,13 +48,5 @@ The [project outline](docs/project-outline.md) describes the proposed scope,
 milestones, and how they relate to the supplied requirements. The application
 and infrastructure directories are placeholders for future implementation.
 
-## Writing the thesis
-
-Start by filling in the author and supervisor details and the Polish title in
-`book/main.tex`. Edit chapters in `book/chapters/`, bibliography entries in
-`book/biblio/biblio.bib`, and custom packages and macros in
-`book/config/my-settings.tex`. See [book/README.md](book/README.md) for more details.
-
-Replace the template's sample text, examples, and bibliography entries with your
-own material. The current PDF is a preview of the template. Git ignores build
-outputs and local Terraform state.
+The detailed [application platform plan](docs/app-plan.md) covers the Raspberry Pi
+target, components, UI, API, deployment workflows, and implementation milestones.
