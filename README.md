@@ -48,5 +48,11 @@ The [project outline](docs/project-outline.md) describes the proposed scope,
 milestones, and how they relate to the supplied requirements. The application
 and infrastructure directories are placeholders for future implementation.
 
-The detailed [application platform plan](docs/app-plan.md) covers the Raspberry Pi
-target, components, UI, API, deployment workflows, and implementation milestones.
+The detailed [application platform plan](docs/app-plan.md) is an index linking
+focused documents: [architecture](docs/architecture.md),
+[API and data model](docs/api-and-data.md),
+[networking and security](docs/networking-and-security.md),
+[operations](docs/operations.md), and
+[milestones](docs/milestones.md). It covers both the Raspberry Pi reference host
+and the rented-server target, components, UI, API, deployment workflows, and
+implementation milestones.
