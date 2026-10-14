@@ -23,6 +23,12 @@ incrementally. Basic tests, logs, and the minimum evaluation are part of M0–M4
 Each checklist item specifies an acceptance criterion. Unchecked items represent
 planned work rather than verified capabilities.
 
+The first implementation uses a local K3s development cluster and locally stored
+images. The [local development guide](local-development.md) defines this workflow.
+Local verification provides implementation evidence but does not satisfy the
+reference Pi, second-device LAN, published-image, or hardware-calibration criteria.
+The milestone checklists retain those outstanding acceptance requirements.
+
 ## Implementation readiness and entry criteria
 
 The documented architecture and initial application contract are sufficiently
@@ -34,7 +40,7 @@ declared complete and no host measurements or runtime tests are implied.
 | Implementation stage | Entry criteria |
 | --- | --- |
 | M0 and initial M1 development | The reference hardware, HTTP workload profile, shared-cluster topology, and LAN-first scope are defined. Host access, tool installation, and version selection are performed as M0 tasks. |
-| M2 backend implementation | M0/M1 evidence demonstrates a working manual deployment, update, and diagnosed failure on the reference host. The initial OpenAPI contract, schema, and pinned Helm SDK version are recorded before their implementation. |
+| M2 backend implementation | M0/M1 implementation evidence demonstrates deployment, update, and diagnosed failure on the selected development cluster. Initial development uses local K3s; Pi acceptance and resource calibration remain required before reference-host support is claimed. The initial OpenAPI contract, schema, and pinned Helm SDK version are recorded before their implementation. |
 | M3 administrator interface | M2 provides durable operations, an installed platform workload, versioned secret references, and the initial API. Authentication and private management access are implemented before LAN administration is enabled. |
 | M4 lifecycle and core evaluation | M2/M3 are complete; immutable configuration references and the recovery-blocking invariant are available. Numerical evaluation targets and measurement procedures are recorded before evaluation runs. |
 | M5–M8 extensions | The core prototype and its minimum evaluation are complete. Each extension requires the specific storage, networking, or distribution decisions identified below. |

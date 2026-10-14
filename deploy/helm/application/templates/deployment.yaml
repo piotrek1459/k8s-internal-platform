@@ -1,0 +1,77 @@
+{{- include "application.validateEnvironment" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 180
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "application.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "application.labels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: application
+          image: {{ include "application.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          {{- if or .Values.env .Values.secretRefs }}
+          env:
+            {{- range $name, $value := .Values.env }}
+            - name: {{ $name | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- range .Values.secretRefs }}
+            - name: {{ .name | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName | quote }}
+                  key: {{ .key | quote }}
+            {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            {{- include "application.probe" .Values.probes.readiness | nindent 12 }}
+          {{- end }}
+          {{- if .Values.probes.startup.enabled }}
+          startupProbe:
+            {{- include "application.probe" .Values.probes.startup | nindent 12 }}
+          {{- end }}
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            {{- include "application.probe" .Values.probes.liveness | nindent 12 }}
+          {{- end }}

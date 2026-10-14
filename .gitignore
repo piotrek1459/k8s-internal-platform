@@ -35,6 +35,10 @@ go.work.sum
 # macOS
 .DS_Store
 
+# Isolated development tools, kubeconfig, images, and raw experiment output.
+/.local/
+/tests/experiments/runs/
+
 # Thesis build artifacts; keep PDF illustrations in book/graf/.
 /book/build/
 /book/main.pdf

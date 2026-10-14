@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["appId", "image", "replicas", "containerPort", "env", "secretRefs", "imagePullSecrets", "resources", "probes", "ingress"],
+  "properties": {
+    "appId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 63,
+      "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$",
+      "description": "Stable platform application identity; immutable within a release."
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "tag", "digest", "pullPolicy"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9]+([a-z0-9._/-]|:[0-9]+/)*[a-z0-9]$|^[a-z0-9]$",
+          "description": "Image repository without a tag or digest. A registry port is permitted."
+        },
+        "tag": {"type": "string", "maxLength": 128, "pattern": "^$|^[a-zA-Z0-9_][a-zA-Z0-9_.-]*$"},
+        "digest": {"type": "string", "pattern": "^$|^sha256:[a-f0-9]{64}$"},
+        "pullPolicy": {"enum": ["Always", "IfNotPresent", "Never"]}
+      },
+      "oneOf": [
+        {"properties": {"tag": {"minLength": 1}, "digest": {"maxLength": 0}}},
+        {"properties": {"tag": {"maxLength": 0}, "digest": {"minLength": 1}}}
+      ]
+    },
+    "replicas": {"type": "integer", "minimum": 0},
+    "containerPort": {"type": "integer", "minimum": 1, "maximum": 65535},
+    "env": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/definitions/environmentName"},
+      "additionalProperties": {"type": "string"},
+      "description": "Non-sensitive environment values only."
+    },
+    "secretRefs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "secretName", "key"],
+        "properties": {
+          "name": {"$ref": "#/definitions/environmentName"},
+          "secretName": {"$ref": "#/definitions/dnsName"},
+          "key": {"type": "string", "minLength": 1, "maxLength": 253, "pattern": "^[a-zA-Z0-9_.-]+$"}
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {"name": {"$ref": "#/definitions/dnsName"}}
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests", "limits"],
+      "properties": {
+        "requests": {"$ref": "#/definitions/resourcePair"},
+        "limits": {"$ref": "#/definitions/resourcePair"}
+      }
+    },
+    "probes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readiness", "startup", "liveness"],
+      "properties": {
+        "readiness": {
+          "allOf": [{"$ref": "#/definitions/probe"}, {"properties": {"enabled": {"const": true}}}]
+        },
+        "startup": {"$ref": "#/definitions/probe"},
+        "liveness": {"$ref": "#/definitions/probe"}
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "className", "entrypoint", "hostname", "tls"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "className": {"const": "traefik"},
+        "entrypoint": {"const": "private", "description": "Explicit private Traefik listener; no public exposure in M1."},
+        "hostname": {"type": "string"},
+        "tls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "secretName"],
+          "properties": {"enabled": {"type": "boolean"}, "secretName": {"type": "string"}},
+          "if": {"properties": {"enabled": {"const": true}}},
+          "then": {"properties": {"secretName": {"$ref": "#/definitions/dnsName"}}}
+        }
+      },
+      "if": {"properties": {"enabled": {"const": true}}},
+      "then": {"properties": {"hostname": {"$ref": "#/definitions/dnsName"}}}
+    }
+  },
+  "definitions": {
+    "environmentName": {"type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"},
+    "dnsName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253,
+      "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)*[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$"
+    },
+    "resourcePair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu", "memory"],
+      "properties": {
+        "cpu": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?m?$"},
+        "memory": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E)?$"}
+      }
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "type", "path", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "failureThreshold"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "type": {"enum": ["http", "tcp"]},
+        "path": {"type": "string", "pattern": "^/[^\\r\\n]*$"},
+        "initialDelaySeconds": {"type": "integer", "minimum": 0},
+        "periodSeconds": {"type": "integer", "minimum": 1},
+        "timeoutSeconds": {"type": "integer", "minimum": 1},
+        "failureThreshold": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

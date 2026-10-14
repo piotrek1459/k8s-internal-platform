@@ -4,8 +4,26 @@ Engineering thesis project: **Design and implementation of kubernetes platform f
 
 The project aims to build a platform for deploying containerized applications on
 Kubernetes, using a Go service broker, Helm, infrastructure as code, monitoring,
-and logging. The repository currently contains the project structure and thesis
-build tools.
+and logging. The initial implementation includes an HTTP demonstration application,
+an application Helm chart, and local K3s deployment and recovery tests. The broker
+and administrator UI remain planned components.
+
+## Local application deployment
+
+With Docker running and k3d, kubectl, Python 3, and curl available:
+
+```bash
+./scripts/setup-dev-tools.sh
+./scripts/build-demo.sh native
+./scripts/dev-cluster.sh up
+./scripts/test-local.sh
+```
+
+The workflow uses a separate local K3s cluster, retains images locally, and
+preserves the default Kubernetes context. Successful verification leaves v2 of
+the demonstration application running at `http://demo.localhost:8082/version`.
+The [local development guide](docs/local-development.md) describes prerequisites,
+network boundaries, multi-architecture builds, evidence, and cleanup.
 
 ## Building the thesis
 
@@ -44,9 +62,9 @@ docker/latex/       thesis build image
 scripts/            helper scripts
 ```
 
-The [project outline](docs/project-outline.md) describes the proposed scope,
-milestones, and how they relate to the supplied requirements. The application
-and infrastructure directories are placeholders for future implementation.
+The [project outline](docs/project-outline.md) describes the proposed scope and
+its relationship to the supplied requirements. The broker, Terraform, and
+observability directories remain placeholders for subsequent implementation.
 
 The detailed [application platform plan](docs/app-plan.md) is an index linking
 focused documents: [architecture](docs/architecture.md),

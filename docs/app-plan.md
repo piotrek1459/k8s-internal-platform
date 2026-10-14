@@ -1,10 +1,14 @@
 # Application platform plan (index)
 
-Updated: 2026-10-13. Status: proposed implementation plan, with confirmed
+Updated: 2026-10-14. Status: implementation plan, with confirmed
 requirements recorded below. This document accompanies
 [project-outline.md](project-outline.md), which preserves the original thesis
 scope and supplied university requirements. This is a plan for building the
 software; it does not contain thesis chapters or claim completed implementation.
+
+The initial M0/M1 local development implementation and its verification procedure
+are described in [local-development.md](local-development.md). Reference-host
+acceptance and subsequent platform milestones remain outstanding.
 
 This file is the **index**. The detailed plan is split across focused documents:
 
