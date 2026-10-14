@@ -1,0 +1,66 @@
+# Stable platform identity. The Helm release name determines resource names.
+appId: ""
+
+image:
+  repository: ""
+  # Exactly one selector is required. Local M0/M1 experiments use tags;
+  # the M2 broker must resolve and supply an immutable digest.
+  tag: ""
+  digest: ""
+  pullPolicy: IfNotPresent
+
+replicas: 1
+containerPort: 8080
+
+# Plaintext, non-sensitive settings only. Secret material must not enter values.
+env: {}
+secretRefs: []
+# - name: APP_SECRET
+#   secretName: app-secret-v1
+#   key: value
+imagePullSecrets: []
+# - name: registry-credentials
+
+# Provisional demonstration settings; Raspberry Pi measurements remain required.
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi
+
+probes:
+  readiness:
+    enabled: true
+    type: http
+    path: /readyz
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 3
+  startup:
+    enabled: true
+    type: http
+    path: /healthz
+    initialDelaySeconds: 0
+    periodSeconds: 2
+    timeoutSeconds: 1
+    failureThreshold: 30
+  liveness:
+    enabled: false
+    type: http
+    path: /healthz
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+
+ingress:
+  enabled: false
+  className: traefik
+  entrypoint: private
+  hostname: ""
+  tls:
+    enabled: false
+    secretName: ""

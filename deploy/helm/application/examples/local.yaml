@@ -1,0 +1,9 @@
+# Local tags are imported into K3s by the development scripts.
+appId: demo
+image:
+  repository: platform-demo
+  tag: v1
+  pullPolicy: Never
+ingress:
+  enabled: true
+  hostname: demo.localhost

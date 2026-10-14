@@ -1,7 +1,8 @@
 # Example applications
 
-Placeholder for small demonstration applications, their Dockerfiles, and example
-deployment parameters. Start with one HTTP application with a readiness endpoint.
+The [HTTP demonstration application](http-demo/README.md) provides a minimal,
+stateless workload for local deployment, update, and recovery scenarios.
 
-Successive versions of the same application can demonstrate updates, rollbacks,
-and failed deployments. These are proposed scenarios for future implementation.
+Its healthy v1/v2 images and deliberately unready v3 image are built separately.
+Images remain local during initial development; registry publication and testing
+on the Raspberry Pi are subsequent validation activities.
