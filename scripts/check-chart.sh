@@ -47,3 +47,20 @@ for probe in readiness startup liveness; do
         --set "probes.$probe.enabled=true" --set-string "probes.$probe.path="
 done
 printf 'Chart rendering and input validation passed.\n'
+
+# The broker embeds a copy of this chart (broker/internal/helm/chart) so it ships
+# as a single binary. Verify the embedded copy matches the canonical chart for the
+# files they share; the broker copy intentionally omits examples/ and README.md.
+embedded="$PLATFORM_ROOT/broker/internal/helm/chart"
+if [[ -d "$embedded" ]]; then
+    for rel in Chart.yaml values.yaml values.schema.json .helmignore \
+        templates/_helpers.tpl templates/deployment.yaml templates/ingress.yaml templates/service.yaml; do
+        if ! diff -q "$PLATFORM_CHART/$rel" "$embedded/$rel" >/dev/null 2>&1; then
+            printf 'Embedded broker chart is out of sync with the canonical chart: %s\n' "$rel" >&2
+            printf 'Re-copy deploy/helm/application into broker/internal/helm/chart.\n' >&2
+            exit 1
+        fi
+    done
+    printf 'Embedded broker chart matches the canonical chart.\n'
+fi
+
