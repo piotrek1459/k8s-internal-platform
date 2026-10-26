@@ -6,6 +6,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -17,6 +19,7 @@ import (
 	"time"
 
 	"k8s-internal-platform/broker/internal/applications"
+	"k8s-internal-platform/broker/internal/auth"
 	"k8s-internal-platform/broker/internal/httpapi"
 	"k8s-internal-platform/broker/internal/platform"
 	"k8s-internal-platform/broker/internal/store"
@@ -44,10 +47,17 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	st := store.New(db)
 	logger.Info("store_ready", "path", dbPath)
 
+	authSvc, err := newAuthService(ctx, st, logger)
+	if err != nil {
+		return err
+	}
+
 	router := httpapi.NewRouter(httpapi.Config{
-		Logger:  logger,
-		Store:   st,
-		Factory: applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
+		Logger:        logger,
+		Store:         st,
+		Factory:       applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
+		Auth:          authSvc,
+		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
 	})
 	server := &http.Server{
 		Handler:           router.Handler(),
@@ -94,4 +104,39 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// bootstrapTTL bounds how long the first-run setup token remains valid.
+const bootstrapTTL = 60 * time.Minute
+
+// newAuthService builds the authentication service. When no administrator exists
+// yet, it generates a single-use bootstrap token and prints it to stderr for the
+// local administrator to use once during setup; the token is never persisted. The
+// token can be supplied explicitly via PLATFORM_BOOTSTRAP_TOKEN (for an installer
+// that shows it to the operator). Once an administrator exists, no token is
+// configured and the setup endpoint is closed.
+func newAuthService(ctx context.Context, st platform.Store, logger *slog.Logger) (*auth.Service, error) {
+	_, adminExists, err := st.GetAdministrator(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("check administrator: %w", err)
+	}
+	ids := platform.RandomIDGenerator{}
+	clock := platform.SystemClock{}
+	if adminExists {
+		return auth.NewService(st, ids, clock, "", 0), nil
+	}
+
+	token := os.Getenv("PLATFORM_BOOTSTRAP_TOKEN")
+	if token == "" {
+		b := make([]byte, 24)
+		if _, err := rand.Read(b); err != nil {
+			return nil, fmt.Errorf("generate bootstrap token: %w", err)
+		}
+		token = base64.RawURLEncoding.EncodeToString(b)
+		// Printed to stderr, not through the structured logger, so it is easy to
+		// read from a console and is not mingled with JSON log shipping.
+		fmt.Fprintf(os.Stderr, "\nBootstrap token (valid %s, single use):\n  %s\n\n", bootstrapTTL, token)
+	}
+	logger.Info("bootstrap_setup_available", "ttl", bootstrapTTL.String())
+	return auth.NewService(st, ids, clock, token, bootstrapTTL), nil
 }

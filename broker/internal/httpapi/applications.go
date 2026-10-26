@@ -17,9 +17,9 @@ import (
 const maxBodyBytes = 1 << 20 // 1 MiB
 
 func (r *Router) registerApplications() {
-	r.mux.HandleFunc("POST /api/v1/apps", r.handleCreateApp)
-	r.mux.HandleFunc("GET /api/v1/apps/{id}", r.handleGetApp)
-	r.mux.HandleFunc("GET /api/v1/operations/{id}", r.handleGetOperation)
+	r.mux.HandleFunc("POST /api/v1/apps", r.protect(r.handleCreateApp))
+	r.mux.HandleFunc("GET /api/v1/apps/{id}", r.protect(r.handleGetApp))
+	r.mux.HandleFunc("GET /api/v1/operations/{id}", r.protect(r.handleGetOperation))
 }
 
 // createAppBody mirrors the CreateApplicationRequest schema in api/openapi.yaml.

@@ -24,13 +24,16 @@ type Enqueuer interface {
 }
 
 // Config wires the HTTP layer's dependencies. The accept path (Step 5) needs the
-// Store and the applications Factory; later steps add auth and more handlers.
+// Store and the applications Factory; auth (Step 6) adds the Authenticator and
+// the cookie-security flag. Later steps add more handlers.
 type Config struct {
-	Logger   *slog.Logger
-	Cluster  ClusterPinger // optional; nil means cluster connectivity is reported unknown
-	Store    platform.Store
-	Factory  applications.Factory
-	Enqueuer Enqueuer // optional
+	Logger        *slog.Logger
+	Cluster       ClusterPinger // optional; nil means cluster connectivity is reported unknown
+	Store         platform.Store
+	Factory       applications.Factory
+	Enqueuer      Enqueuer      // optional
+	Auth          Authenticator // required for authenticated routes
+	SecureCookies bool          // set Secure on session cookies (true behind HTTPS)
 }
 
 // Router builds the HTTP handler with all registered routes.
@@ -47,6 +50,9 @@ func NewRouter(cfg Config) *Router {
 	}
 	r := &Router{cfg: cfg, mux: http.NewServeMux()}
 	r.registerHealth()
+	if cfg.Auth != nil {
+		r.registerAuth()
+	}
 	r.registerApplications()
 	return r
 }

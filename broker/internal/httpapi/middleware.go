@@ -12,9 +12,10 @@ type ctxKey int
 
 const (
 	requestIDKey ctxKey = iota
-	// actorKey holds the authenticated actor identity, set by the auth middleware
-	// in Step 6. Until then handlers fall back to the single administrator.
+	// actorKey holds the authenticated administrator ID, set by requireAuth.
 	actorKey
+	// sessionExpiryKey holds the authenticated session's expiry time.
+	sessionExpiryKey
 )
 
 // withRequestID attaches a generated request ID to every request so handlers and
