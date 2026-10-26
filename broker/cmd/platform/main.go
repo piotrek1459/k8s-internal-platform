@@ -20,6 +20,7 @@ import (
 
 	"k8s-internal-platform/broker/internal/applications"
 	"k8s-internal-platform/broker/internal/auth"
+	"k8s-internal-platform/broker/internal/cluster"
 	"k8s-internal-platform/broker/internal/httpapi"
 	"k8s-internal-platform/broker/internal/platform"
 	"k8s-internal-platform/broker/internal/registry"
@@ -53,14 +54,33 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		return err
 	}
 
-	router := httpapi.NewRouter(httpapi.Config{
+	// Cluster access is in-cluster only. Outside a cluster (local development),
+	// the observer, secret storage, and readiness cluster-check are unavailable,
+	// but the API still serves so the data layer can be exercised. The namespace
+	// the broker manages is configurable for tests and alternate installs.
+	appsNamespace := envOr("PLATFORM_APPS_NAMESPACE", "platform-apps")
+	var clusterClient *cluster.Client
+	if c, cerr := cluster.NewInCluster(appsNamespace); cerr != nil {
+		logger.Warn("cluster_unavailable", "error", cerr.Error(),
+			"note", "running without in-cluster access; observer and secret storage are disabled")
+	} else {
+		clusterClient = c
+		logger.Info("cluster_ready", "namespace", appsNamespace)
+	}
+
+	cfg := httpapi.Config{
 		Logger:        logger,
 		Store:         st,
 		Factory:       applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
 		Auth:          authSvc,
 		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
 		Inspector:     registry.NewInspector(nil),
-	})
+	}
+	if clusterClient != nil {
+		cfg.Cluster = clusterClient
+		cfg.Secrets = clusterClient
+	}
+	router := httpapi.NewRouter(cfg)
 	server := &http.Server{
 		Handler:           router.Handler(),
 		ReadHeaderTimeout: 5 * time.Second,

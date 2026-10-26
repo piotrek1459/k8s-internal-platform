@@ -35,6 +35,7 @@ type Config struct {
 	Auth          Authenticator // required for authenticated routes
 	SecureCookies bool          // set Secure on session cookies (true behind HTTPS)
 	Inspector     platform.ImageInspector // optional; enables POST /images/inspect
+	Secrets       platform.SecretManager  // optional; enables the secret endpoints
 }
 
 // Router builds the HTTP handler with all registered routes.
@@ -56,6 +57,9 @@ func NewRouter(cfg Config) *Router {
 	}
 	r.registerApplications()
 	r.registerImages()
+	if cfg.Store != nil {
+		r.registerSecrets()
+	}
 	return r
 }
 
