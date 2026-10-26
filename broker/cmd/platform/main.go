@@ -22,6 +22,7 @@ import (
 	"k8s-internal-platform/broker/internal/auth"
 	"k8s-internal-platform/broker/internal/httpapi"
 	"k8s-internal-platform/broker/internal/platform"
+	"k8s-internal-platform/broker/internal/registry"
 	"k8s-internal-platform/broker/internal/store"
 )
 
@@ -58,6 +59,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		Factory:       applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
 		Auth:          authSvc,
 		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
+		Inspector:     registry.NewInspector(nil),
 	})
 	server := &http.Server{
 		Handler:           router.Handler(),
