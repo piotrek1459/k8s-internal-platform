@@ -10,6 +10,7 @@ image:
   pullPolicy: IfNotPresent
 
 replicas: 1
+# Must match the image's actual listener; this declaration does not configure it.
 containerPort: 8080
 
 # Plaintext, non-sensitive settings only. Secret material must not enter values.

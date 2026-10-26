@@ -1,0 +1,4 @@
+# Overlay for local.yaml. PORT is specific to the demonstration application.
+containerPort: 9090
+env:
+  PORT: "9090"

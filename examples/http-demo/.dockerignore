@@ -1,3 +1,4 @@
 *
 !go.mod
 !*.go
+*_test.go

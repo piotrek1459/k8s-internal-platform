@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "$0")/lib/dev-common.sh"
+source "$PLATFORM_ROOT/scripts/lib/transcript.sh"
 require_helm
 require_local_cluster
 require_command docker
@@ -11,7 +12,7 @@ require_command python3
 run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 results="$PLATFORM_ROOT/tests/experiments/runs/$run_id"
 mkdir -p "$results"
-exec > >(tee "$results/transcript.log") 2>&1
+start_transcript "$results/transcript.log"
 printf 'Local K3s lifecycle experiment: %s\n' "$run_id"
 printf 'Results: %s\n' "$results"
 printf 'Environment: local Docker/K3s; these are not Raspberry Pi measurements.\n'
@@ -32,12 +33,13 @@ finish() {
     local status=$?
     trap - EXIT
     diagnostics
-    printf '%s\n' "$status" > "$results/exit-code.txt"
     if [[ "$status" == 0 ]]; then
-        printf '\nPASS: deployment, update, failed rollout, rollback, and route isolation.\n'
+        printf '\nPASS: deployment, update, failed rollout, rollback, non-default port, and route isolation.\n'
     else
         printf '\nFAIL: diagnostics retained at %s.\n' "$results" >&2
     fi
+    finish_transcript "$status" || status=$?
+    printf '%s\n' "$status" > "$results/exit-code.txt"
     exit "$status"
 }
 trap finish EXIT
@@ -48,7 +50,7 @@ git -C "$PLATFORM_ROOT" diff --binary > "$results/tracked-changes.patch"
 # Capture implementation sources, including untracked files, without kubeconfig
 # or unrelated credentials. The archive makes an uncommitted run reproducible.
 tar -czf "$results/implementation.tar.gz" -C "$PLATFORM_ROOT" \
-    examples/http-demo deploy/helm/application dev scripts/lib/dev-common.sh \
+    examples/http-demo deploy/helm/application dev scripts/lib tests/test_local_helpers.py \
     scripts/setup-dev-tools.sh scripts/dev-cluster.sh scripts/build-demo.sh \
     scripts/check-chart.sh scripts/test-local.sh
 platform_kubectl version -o json > "$results/kubernetes-version.json"
@@ -130,8 +132,33 @@ assert_version v2
 
 started=$SECONDS
 run platform_helm rollback demo "$previous_revision" --namespace "$PLATFORM_NAMESPACE" --wait --timeout 120s
+run platform_kubectl -n "$PLATFORM_NAMESPACE" rollout status deployment/demo --timeout=120s
+rollback_verified=false
+# Helm can finish before terminating Pods disappear. Collect bounded, repeated
+# snapshots rather than interpreting a surviving v2 HTTP response as recovery.
+for ((attempt=0; attempt<30; attempt++)); do
+    platform_helm status demo --namespace "$PLATFORM_NAMESPACE" -o json > "$results/rollback-release.json"
+    platform_kubectl -n "$PLATFORM_NAMESPACE" get deployment demo -o json > "$results/rollback-deployment.json"
+    platform_kubectl -n "$PLATFORM_NAMESPACE" get replicasets -l app.kubernetes.io/instance=demo -o json > "$results/rollback-replicasets.json"
+    platform_kubectl -n "$PLATFORM_NAMESPACE" get pods -l app.kubernetes.io/instance=demo -o json > "$results/rollback-pods.json"
+    if python3 "$PLATFORM_ROOT/scripts/lib/assert_rollback.py" "$results"; then
+        rollback_verified=true
+        break
+    fi
+    sleep 2
+done
+[[ "$rollback_verified" == true ]] || { printf 'Rollback state verification timed out.\n' >&2; exit 1; }
 assert_version v2
 printf 'rollback_v2,%s\n' "$((SECONDS-started))" >> "$results/timings.csv"
+
+started=$SECONDS
+run platform_helm upgrade demo "$PLATFORM_CHART" --namespace "$PLATFORM_NAMESPACE" \
+    --values "$PLATFORM_VALUES" --values "$PLATFORM_CHART/examples/local-port-9090.yaml" \
+    --set image.tag=v2 --wait --timeout 120s
+run platform_kubectl -n "$PLATFORM_NAMESPACE" rollout status deployment/demo --timeout=120s
+assert_version v2
+platform_kubectl -n "$PLATFORM_NAMESPACE" get deployment demo -o json > "$results/port-9090-deployment.json"
+printf 'port_9090,%s\n' "$((SECONDS-started))" >> "$results/timings.csv"
 
 code="$(curl --noproxy '*' -sS --max-time 5 -o "$results/wrong-listener-body.txt" -w '%{http_code}' -H 'Host: demo.localhost' http://127.0.0.1:8083/version)"
 [[ "$code" == 404 ]] || { printf 'Private route unexpectedly reachable on other listener: HTTP %s\n' "$code" >&2; exit 1; }
@@ -140,4 +167,4 @@ printf 'Forged private Host on other listener: HTTP %s (expected 404).\n' "$code
 platform_kubectl top nodes > "$results/node-usage.txt" 2>&1 || printf 'Node metrics were unavailable.\n'
 platform_kubectl -n "$PLATFORM_NAMESPACE" top pods > "$results/pod-usage.txt" 2>&1 || printf 'Pod metrics were unavailable.\n'
 docker stats --no-stream k3d-platform-dev-server-0 k3d-platform-dev-serverlb > "$results/container-usage.txt"
-printf 'version_2_ready=true\nprivate_route_rejected_on_other_listener=true\n' > "$results/assertions.txt"
+printf 'version_2_ready=true\nrollback_state_verified=true\nport_9090_ready=true\nprivate_route_rejected_on_other_listener=true\n' > "$results/assertions.txt"

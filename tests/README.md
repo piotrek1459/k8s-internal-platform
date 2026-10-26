@@ -5,6 +5,14 @@ It verifies the actual Helm/K3s application lifecycle and private ingress
 entrypoint selection. Demonstration unit tests reside alongside the Go source in
 [examples/http-demo](../examples/http-demo/).
 
+The helper regressions in [test_local_helpers.py](test_local_helpers.py) reject
+incomplete rollback states and verify transcript completion and exit-status
+preservation with a deliberately delayed logger. They run without a cluster:
+
+```sh
+python3 -B -m unittest discover -s tests -p 'test_*.py' -v
+```
+
 Each local run records its transcript, implementation archive, versions, image
 identities, manifests, diagnostics, response assertions, and resource snapshots
 under `experiments/runs/`. Raw output is ignored by Git. Curated reports identify

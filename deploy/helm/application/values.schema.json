@@ -126,15 +126,20 @@
     "probe": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["enabled", "type", "path", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "failureThreshold"],
+      "required": ["enabled", "type", "initialDelaySeconds", "periodSeconds", "timeoutSeconds", "failureThreshold"],
       "properties": {
         "enabled": {"type": "boolean"},
         "type": {"enum": ["http", "tcp"]},
-        "path": {"type": "string", "pattern": "^/[^\\r\\n]*$"},
+        "path": {"type": "string"},
         "initialDelaySeconds": {"type": "integer", "minimum": 0},
         "periodSeconds": {"type": "integer", "minimum": 1},
         "timeoutSeconds": {"type": "integer", "minimum": 1},
         "failureThreshold": {"type": "integer", "minimum": 1}
+      },
+      "if": {"properties": {"type": {"const": "http"}}},
+      "then": {
+        "required": ["path"],
+        "properties": {"path": {"pattern": "^/[^\\r\\n]*$"}}
       }
     }
   }

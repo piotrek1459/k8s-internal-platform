@@ -41,6 +41,12 @@ An unset or empty variable retains its default. The version is embedded at build
 time and has no runtime override. A v3 image therefore reports `v3` even if
 readiness failure is disabled explicitly.
 
+When deployed through the application chart, a non-default listener requires both
+`containerPort: 9090` and `env.PORT: "9090"`. The former configures the Service's
+target and probe port; the latter configures the Go process. The
+[local port overlay](../../deploy/helm/application/examples/local-port-9090.yaml)
+provides this example. `containerPort` alone does not change the process listener.
+
 ## Local tests
 
 Commands in this section run from the repository root:

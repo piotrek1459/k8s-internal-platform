@@ -47,8 +47,14 @@ The three local images are imported into the cluster without a registry upload:
 
 The test resets only the `demo` Helm release in the owned local cluster, then
 verifies installation, update, failed readiness, continued service from v2,
-explicit Helm rollback, and private-route isolation. The expected v3 timeout is
-an asserted failure scenario. Successful completion leaves v2 running.
+explicit Helm rollback, deployment on a non-default port, and private-route
+isolation. Rollback assertions require a newer deployed Helm revision, a
+converged v2 Deployment, a scaled-down failed ReplicaSet, and removal of v3 Pods.
+Retained ReplicaSet history is permitted. The expected v3 timeout is an asserted
+failure scenario. The final upgrade sets both `containerPort: 9090` and
+`env.PORT: "9090"`; successful completion leaves v2 running on container port 9090.
+The external URL remains unchanged because the Service and Ingress retain their
+existing ports.
 
 The application is accessible at `http://demo.localhost:8082/version`. An explicit
 loopback mapping avoids dependence on local resolver behavior:
@@ -84,6 +90,9 @@ controls defined for M3.
 
 # Chart rendering and rejection of unsupported configurations.
 ./scripts/check-chart.sh
+
+# Rollback assertion and transcript completion regressions, without a cluster.
+python3 -B -m unittest discover -s tests -p 'test_*.py' -v
 
 # Actual K3s lifecycle and private-route checks.
 ./scripts/test-local.sh
@@ -126,8 +135,12 @@ AMD64 host remains a separate portability test.
 Each lifecycle run creates `tests/experiments/runs/<UTC timestamp>-<process ID>/`.
 The output includes command transcripts, exact source archives, worktree status,
 component versions, image IDs, rendered manifests, failure diagnostics, Helm
-history, responses, durations, and resource snapshots. These files are ignored by
-Git. The kubeconfig and Secret values are excluded from the collected evidence.
+history, responses, durations, and resource snapshots. Rollback state snapshots
+and the final port-9090 Deployment are retained separately. The script drains and
+waits for the transcript writer before recording its final exit status. A logger
+failure fails an otherwise successful run; an existing test failure retains its
+original exit status. These files are ignored by Git. The kubeconfig and Secret
+values are excluded from the collected evidence.
 
 The recorded durations describe the local scenario with imported images. They
 exclude external image pulls and do not constitute a statistical performance
@@ -135,6 +148,9 @@ evaluation. Host measurements and the required repetitions are defined in the
 [evaluation plan](milestones.md#tests-and-thesis-evaluation).
 The [initial verification report](../tests/experiments/2026-10-14-local-m0-m1.md)
 records the observed results and outstanding host-specific acceptance work.
+The [PR #6 verification report](../tests/experiments/2026-10-26-pr6-review-fixes.md)
+records the stronger rollback assertions, non-default port deployment, and
+transcript completion checks added during review.
 
 ## Cleanup
 

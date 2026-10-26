@@ -62,7 +62,7 @@ an application-specific values file is expected to fail.
 | `image.tag`, `image.digest` | Exactly one is required. Digests use `sha256:` followed by 64 lowercase hexadecimal characters. |
 | `image.pullPolicy` | `IfNotPresent` by default; local examples use `Never`. |
 | `replicas` | Non-negative integer; defaults to one. Zero stops the workload while retaining the Service and route. |
-| `containerPort` | Integer in the range 1–65535; defaults to 8080. The Service exposes port 80. |
+| `containerPort` | Integer in the range 1–65535; defaults to 8080. Must match the application's listener; does not configure the process. The Service exposes port 80. |
 | `env` | Map of non-sensitive environment names to string values. |
 | `secretRefs` | Existing secret references of the form `{name, secretName, key}`. The name is the environment variable name. |
 | `imagePullSecrets` | Existing registry secret references of the form `{name}`. |
@@ -78,8 +78,9 @@ an application-specific values file is expected to fail.
 | `ingress.tls` | Optional existing TLS secret; `enabled: true` requires `secretName`. |
 
 Each probe accepts `type: http` or `type: tcp`, `path`, `initialDelaySeconds`,
-`periodSeconds`, `timeoutSeconds`, and `failureThreshold`. A TCP probe ignores
-`path` and verifies only that the port accepts connections. An application without
+`periodSeconds`, `timeoutSeconds`, and `failureThreshold`. An HTTP probe requires
+a path beginning with `/`. A TCP probe permits an omitted path, ignores any supplied
+path, and verifies only that the port accepts connections. An application without
 an HTTP health endpoint requires both readiness and startup to use TCP, or startup
 to be disabled. Optional liveness requires a suitable application endpoint.
 
@@ -94,6 +95,26 @@ preset. Reference-host measurements and suitable capacity for a surge pod remain
 M0/M1 completion requirements.
 
 ## Image selection and configuration
+
+`containerPort` declares the named `http` port used by the Service and probes.
+The application process must independently listen on that same port. The chart
+does not inject a `PORT` variable because container images use different
+configuration mechanisms.
+
+The demonstration image recognises `PORT`. A deployment on port 9090 therefore
+requires both values:
+
+```yaml
+containerPort: 9090
+env:
+  PORT: "9090"
+```
+
+The [local port overlay](examples/local-port-9090.yaml) supplies this pair and is
+applied after `examples/local.yaml`. The local lifecycle test verifies this
+configuration through the Service, probes, and private Ingress. Changing only
+`containerPort` leaves the demonstration process on 8080 and causes probe failures.
+Other images require their own documented listener configuration.
 
 Tagged images support the local M0/M1 experiment. A broker-managed revision must
 use a resolved immutable digest, with `image.tag` empty. For example:
