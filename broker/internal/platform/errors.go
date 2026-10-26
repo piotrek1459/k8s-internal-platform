@@ -8,22 +8,22 @@ import "fmt"
 type ErrorCode string
 
 const (
-	CodeInvalidInput         ErrorCode = "INVALID_INPUT"          // 400
-	CodeUnauthenticated      ErrorCode = "UNAUTHENTICATED"        // 401
-	CodeForbidden            ErrorCode = "FORBIDDEN"              // 403
-	CodeNotFound             ErrorCode = "NOT_FOUND"              // 404
-	CodeConflict             ErrorCode = "CONFLICT"               // 409 (active work / NeedsAttention)
-	CodeVersionConflict      ErrorCode = "VERSION_CONFLICT"       // 412 (stale If-Match)
-	CodeUnsupportedSpec      ErrorCode = "UNSUPPORTED_SPEC"       // 422
+	CodeInvalidInput          ErrorCode = "INVALID_INPUT"          // 400
+	CodeUnauthenticated       ErrorCode = "UNAUTHENTICATED"        // 401
+	CodeForbidden             ErrorCode = "FORBIDDEN"              // 403
+	CodeNotFound              ErrorCode = "NOT_FOUND"              // 404
+	CodeConflict              ErrorCode = "CONFLICT"               // 409 (active work / NeedsAttention)
+	CodeVersionConflict       ErrorCode = "VERSION_CONFLICT"       // 412 (stale If-Match)
+	CodeUnsupportedSpec       ErrorCode = "UNSUPPORTED_SPEC"       // 422
 	CodeDependencyUnavailable ErrorCode = "DEPENDENCY_UNAVAILABLE" // 503
-	CodeIdempotencyConflict  ErrorCode = "IDEMPOTENCY_CONFLICT"   // 409 (key reused with different body)
+	CodeIdempotencyConflict   ErrorCode = "IDEMPOTENCY_CONFLICT"   // 409 (key reused with different body)
 
 	CodeImageArchUnsupported ErrorCode = "IMAGE_ARCH_UNSUPPORTED" // 422
 	CodeImageNotFound        ErrorCode = "IMAGE_NOT_FOUND"        // 422
 	CodeRegistryUnavailable  ErrorCode = "REGISTRY_UNAVAILABLE"   // 503
 
-	CodeSecretInUse          ErrorCode = "SECRET_IN_USE"          // 409
-	CodeInternal             ErrorCode = "INTERNAL"               // 500
+	CodeSecretInUse ErrorCode = "SECRET_IN_USE" // 409
+	CodeInternal    ErrorCode = "INTERNAL"      // 500
 )
 
 // Error is a domain error carrying a stable code, a human-readable message, and

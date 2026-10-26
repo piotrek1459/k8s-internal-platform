@@ -11,10 +11,10 @@ import (
 // scanApplication reads one application row. The scanner is a *sql.Row or *sql.Rows.
 func scanApplication(sc interface{ Scan(...any) error }) (platform.Application, error) {
 	var (
-		app                            platform.Application
-		desired, lastSucc, activeOp    sql.NullString
-		deleted                        int
-		createdAt, updatedAt           string
+		app                         platform.Application
+		desired, lastSucc, activeOp sql.NullString
+		deleted                     int
+		createdAt, updatedAt        string
 	)
 	if err := sc.Scan(&app.ID, &app.Name, &app.Version, &desired, &lastSucc, &activeOp,
 		&deleted, &createdAt, &updatedAt); err != nil {
@@ -139,12 +139,12 @@ func (s *Store) ListRevisions(ctx context.Context, appID string) ([]platform.Rev
 
 func scanOperation(sc interface{ Scan(...any) error }) (platform.Operation, error) {
 	var (
-		op                       platform.Operation
-		source, idemKey          sql.NullString
-		reqHash                  sql.NullString
-		createdAt, updatedAt     string
-		deadlineAt, claimedAt    sql.NullString
-		state, typ               string
+		op                    platform.Operation
+		source, idemKey       sql.NullString
+		reqHash               sql.NullString
+		createdAt, updatedAt  string
+		deadlineAt, claimedAt sql.NullString
+		state, typ            string
 	)
 	if err := sc.Scan(&op.ID, &op.AppID, &typ, &source, &op.TargetRevision, &state,
 		&op.Stage, &idemKey, &reqHash, &op.RecoveryOutcome, &createdAt, &updatedAt,

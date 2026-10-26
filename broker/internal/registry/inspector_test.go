@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	regpkg "github.com/google/go-containerregistry/pkg/registry"
 	"github.com/google/go-containerregistry/pkg/name"
+	regpkg "github.com/google/go-containerregistry/pkg/registry"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/empty"
 	"github.com/google/go-containerregistry/pkg/v1/mutate"

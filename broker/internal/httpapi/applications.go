@@ -24,18 +24,18 @@ func (r *Router) registerApplications() {
 
 // createAppBody mirrors the CreateApplicationRequest schema in api/openapi.yaml.
 type createAppBody struct {
-	Name                 string                      `json:"name"`
-	Image                string                      `json:"image"`
-	RegistryCredentialID string                      `json:"registryCredentialId"`
-	ContainerPort        int                         `json:"containerPort"`
-	Profile              string                      `json:"profile"`
-	Replicas             *int                        `json:"replicas"`
-	Environment          map[string]string           `json:"environment"`
-	SecretRefs           []secretRefBody             `json:"secretRefs"`
-	Resources            *resourceBody               `json:"resources"`
-	Health               *healthBody                 `json:"health"`
-	Exposure             exposureBody                `json:"exposure"`
-	Storage              json.RawMessage             `json:"storage"`
+	Name                 string            `json:"name"`
+	Image                string            `json:"image"`
+	RegistryCredentialID string            `json:"registryCredentialId"`
+	ContainerPort        int               `json:"containerPort"`
+	Profile              string            `json:"profile"`
+	Replicas             *int              `json:"replicas"`
+	Environment          map[string]string `json:"environment"`
+	SecretRefs           []secretRefBody   `json:"secretRefs"`
+	Resources            *resourceBody     `json:"resources"`
+	Health               *healthBody       `json:"health"`
+	Exposure             exposureBody      `json:"exposure"`
+	Storage              json.RawMessage   `json:"storage"`
 }
 
 type secretRefBody struct {

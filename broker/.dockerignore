@@ -1,0 +1,5 @@
+# Keep the build context minimal and deterministic.
+.git
+*.md
+Dockerfile
+.dockerignore

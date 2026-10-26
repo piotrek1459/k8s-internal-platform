@@ -68,15 +68,15 @@ type Health struct {
 // RevisionSpec is the requested, mutable intent for a revision before it is
 // frozen. The image reference may still be a tag at this point.
 type RevisionSpec struct {
-	Image         string
-	Profile       WorkloadProfile
-	ContainerPort int
-	Replicas      int
-	Environment   map[string]string
-	SecretRefs    []SecretRef
-	Resources     ResourceRequirements
-	Health        Health
-	Exposure      Exposure
+	Image                string
+	Profile              WorkloadProfile
+	ContainerPort        int
+	Replicas             int
+	Environment          map[string]string
+	SecretRefs           []SecretRef
+	Resources            ResourceRequirements
+	Health               Health
+	Exposure             Exposure
 	RegistryCredentialID string
 }
 
@@ -103,14 +103,14 @@ const (
 
 // Revision is a candidate configuration and, once frozen, its execution spec.
 type Revision struct {
-	ID       string
-	AppID    string
-	Number   int64
-	Spec     RevisionSpec
-	Frozen   *FrozenSpec // nil until FreezeExecutionSpec runs
-	Result   RevisionResult
-	Actor    string
-	Created  time.Time
+	ID      string
+	AppID   string
+	Number  int64
+	Spec    RevisionSpec
+	Frozen  *FrozenSpec // nil until FreezeExecutionSpec runs
+	Result  RevisionResult
+	Actor   string
+	Created time.Time
 }
 
 // Operation is a durable unit of work. IdempotencyKey plus RequestHash deduplicate
@@ -180,12 +180,12 @@ type SecretVersion struct {
 // observation the broker could not refresh because the cluster was unreachable;
 // ObservedAt then refers to the last successful read.
 type ObservedStatus struct {
-	Phase                WorkloadPhase
-	DesiredReplicas      int
-	ReadyReplicas        int
-	WorkloadReady        bool
-	RouteReady           bool
-	ObservedGeneration   int64
-	ObservedAt           time.Time
-	Stale                bool
+	Phase              WorkloadPhase
+	DesiredReplicas    int
+	ReadyReplicas      int
+	WorkloadReady      bool
+	RouteReady         bool
+	ObservedGeneration int64
+	ObservedAt         time.Time
+	Stale              bool
 }

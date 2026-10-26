@@ -31,14 +31,14 @@ func BuildValues(appID string, rev platform.Revision) (map[string]any, error) {
 			"digest":     digest,
 			"pullPolicy": "IfNotPresent",
 		},
-		"replicas":      spec.Replicas,
-		"containerPort": spec.ContainerPort,
-		"env":           stringMap(spec.Environment),
-		"secretRefs":    secretRefValues(rev.Frozen.SecretVersions, spec),
+		"replicas":         spec.Replicas,
+		"containerPort":    spec.ContainerPort,
+		"env":              stringMap(spec.Environment),
+		"secretRefs":       secretRefValues(rev.Frozen.SecretVersions, spec),
 		"imagePullSecrets": pullSecretValues(spec.RegistryCredentialID),
-		"resources":     resourceValues(spec.Resources),
-		"probes":        probeValues(spec.Health),
-		"ingress":       ingressValues(spec.Exposure),
+		"resources":        resourceValues(spec.Resources),
+		"probes":           probeValues(spec.Health),
+		"ingress":          ingressValues(spec.Exposure),
 	}
 	return values, nil
 }

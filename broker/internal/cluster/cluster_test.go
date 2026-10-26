@@ -58,10 +58,10 @@ func TestObserveReady(t *testing.T) {
 
 func TestObservePhases(t *testing.T) {
 	tests := []struct {
-		name                              string
-		generation, observed              int64
-		desired, ready                    int32
-		wantPhase                         platform.WorkloadPhase
+		name                 string
+		generation, observed int64
+		desired, ready       int32
+		wantPhase            platform.WorkloadPhase
 	}{
 		{"stopped", 1, 1, 0, 0, platform.WorkloadStopped},
 		{"rollout in progress", 2, 1, 1, 1, platform.WorkloadUpdating},

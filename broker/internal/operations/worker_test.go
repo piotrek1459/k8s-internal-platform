@@ -197,9 +197,9 @@ func TestWorkerConfigChangeReusesRecordedDigest(t *testing.T) {
 	restartRev := "rev_restart"
 	restartOp := "op_restart"
 	_, err := st.AcceptOperation(context.Background(), platform.AcceptRequest{
-		Type:        platform.OperationRestart,
-		Application: platform.Application{ID: "app1"},
-		IsNewApp:    false,
+		Type:          platform.OperationRestart,
+		Application:   platform.Application{ID: "app1"},
+		IsNewApp:      false,
 		ExpectVersion: 1,
 		Revision: platform.Revision{ID: restartRev, AppID: "app1", Number: 2, Result: platform.RevisionPending, Actor: "t",
 			Spec: platform.RevisionSpec{Image: "ghcr.io/example/app@sha256:aaaa", Profile: platform.ProfileHTTP, ContainerPort: 8080, Replicas: 1,

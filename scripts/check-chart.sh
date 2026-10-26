@@ -64,3 +64,14 @@ if [[ -d "$embedded" ]]; then
     printf 'Embedded broker chart matches the canonical chart.\n'
 fi
 
+# Lint and render the platform (broker) chart. A tag is supplied so the image
+# selector is satisfied; the real install pins a digest.
+platform_chart="$PLATFORM_ROOT/deploy/helm/platform"
+if [[ -d "$platform_chart" ]]; then
+    "$PLATFORM_HELM" lint --strict "$platform_chart" --set image.tag=dev
+    "$PLATFORM_HELM" template platform "$platform_chart" \
+        --namespace platform-system --set image.tag=dev >/dev/null
+    printf 'Platform chart lint and render passed.\n'
+fi
+
+

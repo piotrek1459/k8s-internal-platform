@@ -1,0 +1,6 @@
+apiVersion: v2
+name: platform
+description: The self-hosted Kubernetes application platform broker (API, worker, observer).
+type: application
+version: 0.1.0
+kubeVersion: ">=1.30.0-0"

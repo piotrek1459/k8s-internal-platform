@@ -13,12 +13,12 @@ import (
 func newAccept(appID, name, opID, revID, idemKey, reqHash string) platform.AcceptRequest {
 	app := platform.Application{ID: appID, Name: name}
 	rev := platform.Revision{
-		ID:    revID,
-		AppID: appID,
+		ID:     revID,
+		AppID:  appID,
 		Number: 1,
-		Spec:  platform.RevisionSpec{Image: "example/app:v1", Profile: platform.ProfileHTTP, ContainerPort: 8080, Replicas: 1},
+		Spec:   platform.RevisionSpec{Image: "example/app:v1", Profile: platform.ProfileHTTP, ContainerPort: 8080, Replicas: 1},
 		Result: platform.RevisionPending,
-		Actor: "admin",
+		Actor:  "admin",
 	}
 	op := platform.Operation{ID: opID, AppID: appID, Type: platform.OperationCreate, TargetRevision: revID}
 	return platform.AcceptRequest{

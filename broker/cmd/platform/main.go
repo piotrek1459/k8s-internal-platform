@@ -29,6 +29,10 @@ import (
 	"k8s-internal-platform/broker/internal/store"
 )
 
+// buildVersion is set at build time via -ldflags. It defaults to "dev" for local
+// builds and is reported by GET /api/v1/system.
+var buildVersion = "dev"
+
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -77,6 +81,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		Auth:          authSvc,
 		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
 		Inspector:     registry.NewInspector(nil),
+		Version:       buildVersion,
 	}
 
 	// The Helm adapter and the operation worker require in-cluster access. When it

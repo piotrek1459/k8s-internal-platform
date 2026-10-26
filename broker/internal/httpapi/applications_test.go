@@ -18,11 +18,11 @@ import (
 type fakeStore struct {
 	platform.Store // embedded nil: any unimplemented method panics if called
 
-	accept    func(context.Context, platform.AcceptRequest) (platform.AcceptResult, error)
-	apps      map[string]platform.Application
-	ops       map[string]platform.Operation
-	events    map[string][]platform.OperationEvent
-	observed  map[string]platform.ObservedStatus
+	accept   func(context.Context, platform.AcceptRequest) (platform.AcceptResult, error)
+	apps     map[string]platform.Application
+	ops      map[string]platform.Operation
+	events   map[string][]platform.OperationEvent
+	observed map[string]platform.ObservedStatus
 }
 
 func newFakeStore() *fakeStore {

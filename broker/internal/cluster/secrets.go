@@ -32,8 +32,8 @@ func (c *Client) CreateImmutableSecret(ctx context.Context, secretID string, ver
 			Name:      name,
 			Namespace: c.namespace,
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "k8s-internal-platform",
-				"platform.local/secret-id":     sanitizeID(secretID),
+				"app.kubernetes.io/managed-by":  "k8s-internal-platform",
+				"platform.local/secret-id":      sanitizeID(secretID),
 				"platform.local/secret-version": fmt.Sprintf("%d", version),
 			},
 		},

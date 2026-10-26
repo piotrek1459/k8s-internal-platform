@@ -1,0 +1,37 @@
+# Platform broker chart values.
+#
+# The broker runs as a single replica with a Recreate strategy so only one
+# process ever writes the SQLite metadata file on the PVC. It manages
+# applications in a separate namespace (appsNamespace) through scoped RBAC.
+
+image:
+  repository: ghcr.io/piotrek1459/k8s-internal-platform
+  # Pin by digest in a release; a tag is accepted for development installs.
+  tag: ""
+  digest: ""
+  pullPolicy: IfNotPresent
+
+# Namespace holding managed applications. The broker receives write access here
+# and read-only access to selected cluster-scoped resources.
+appsNamespace: platform-apps
+
+# Persistent metadata volume for the SQLite database.
+persistence:
+  size: 1Gi
+  # storageClassName empty uses the cluster default (local-path on K3s).
+  storageClassName: ""
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# Private ClusterIP service port for the management API.
+service:
+  port: 80
+
+# When true, the broker sets Secure on session cookies (enable behind HTTPS).
+secureCookies: false
