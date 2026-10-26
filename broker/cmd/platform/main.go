@@ -21,7 +21,9 @@ import (
 	"k8s-internal-platform/broker/internal/applications"
 	"k8s-internal-platform/broker/internal/auth"
 	"k8s-internal-platform/broker/internal/cluster"
+	"k8s-internal-platform/broker/internal/helm"
 	"k8s-internal-platform/broker/internal/httpapi"
+	"k8s-internal-platform/broker/internal/operations"
 	"k8s-internal-platform/broker/internal/platform"
 	"k8s-internal-platform/broker/internal/registry"
 	"k8s-internal-platform/broker/internal/store"
@@ -76,10 +78,31 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
 		Inspector:     registry.NewInspector(nil),
 	}
+
+	// The Helm adapter and the operation worker require in-cluster access. When it
+	// is available, run startup recovery before serving so an interrupted mutation
+	// is resumed or durably blocked before any new work is accepted, then start the
+	// worker and wire its wake into the API.
+	var worker *operations.Worker
 	if clusterClient != nil {
 		cfg.Cluster = clusterClient
 		cfg.Secrets = clusterClient
+
+		helmAdapter, herr := helm.NewAdapter(appsNamespace, cluster.HelmActionConfig(appsNamespace, logger))
+		if herr != nil {
+			return fmt.Errorf("init helm adapter: %w", herr)
+		}
+		inspector := registry.NewInspector(nil)
+		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)
+
+		recovery := operations.NewRecovery(st, helmAdapter, logger)
+		if rerr := recovery.Scan(ctx); rerr != nil {
+			return fmt.Errorf("startup recovery: %w", rerr)
+		}
+		logger.Info("recovery_complete")
+		cfg.Enqueuer = worker
 	}
+
 	router := httpapi.NewRouter(cfg)
 	server := &http.Server{
 		Handler:           router.Handler(),
@@ -96,6 +119,13 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		return fmt.Errorf("listen: %w", err)
 	}
 	logger.Info("platform_started", "address", listener.Addr().String())
+
+	// Start the operation worker (when cluster access is available). It stops when
+	// ctx is cancelled during shutdown.
+	if worker != nil {
+		go worker.Run(ctx)
+		logger.Info("worker_started")
+	}
 
 	result := make(chan error, 1)
 	go func() { result <- server.Serve(listener) }()
