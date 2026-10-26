@@ -28,18 +28,25 @@ type AcceptResult struct {
 
 // AcceptRequest carries everything needed to persist one accepted mutation in a
 // single transaction: the (possibly new) application, its candidate revision, the
-// operation, and the originating actor/request for the audit trail.
+// operation, and the originating actor/request for the audit trail. The caller
+// (the applications package) mints the IDs and builds the Operation so the store
+// only persists; it does not decide policy.
 type AcceptRequest struct {
 	Type           OperationType
-	Application    Application  // existing or newly minted; IsNew distinguishes
+	Application    Application // existing or newly minted; IsNewApp distinguishes
 	IsNewApp       bool
-	ExpectVersion  int64        // required for existing apps (If-Match); ignored when IsNewApp
-	Revision       Revision
+	ExpectVersion  int64     // required for existing apps (If-Match); ignored when IsNewApp
+	Revision       Revision  // the candidate revision (not yet frozen)
+	Op             Operation // the operation to enqueue, with its ID and target revision
 	IdempotencyKey string
 	RequestHash    string
 	Actor          string
 	RequestID      string
 }
+
+// Operation returns the operation to be enqueued. It is a method so store code
+// reads intent clearly; the value lives in the Op field.
+func (r AcceptRequest) Operation() Operation { return r.Op }
 
 // Store is the durable persistence port backed by SQLite. All mutations that must
 // be atomic are expressed as single methods so the implementation can wrap them
