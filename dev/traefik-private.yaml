@@ -1,0 +1,16 @@
+# Development-only ingress. Host bindings are restricted to loopback by k3d.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      private:
+        port: 8082
+        exposedPort: 8082
+        protocol: TCP
+        asDefault: false
+        expose:
+          default: true

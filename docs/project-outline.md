@@ -56,8 +56,10 @@ a single administrator and a single managed cluster.
 | `examples/` | Small demonstration applications and their configuration. |
 | `tests/` | Integration scenarios, experiments, and measurement results. |
 
-At this stage, the directories define responsibilities. They do not contain a
-runnable platform, a Go module, or placeholder infrastructure configuration.
+The directories define implementation responsibilities. The initial HTTP
+demonstration application, application chart, and local verification workflow are
+implemented; the broker and full platform remain subsequent work. Current
+execution instructions are provided in [local-development.md](local-development.md).
 
 ## Original work sequence
 
