@@ -4,6 +4,9 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+
+	"k8s-internal-platform/broker/internal/applications"
+	"k8s-internal-platform/broker/internal/platform"
 )
 
 // ClusterPinger reports whether the Kubernetes API is reachable. Readiness
@@ -13,11 +16,21 @@ type ClusterPinger interface {
 	Ping(ctx context.Context) error
 }
 
-// Config wires the HTTP layer's dependencies. Fields added in later steps (Store,
-// enqueuer, auth) extend this struct; Step 1 needs only logging and the pinger.
+// Enqueuer wakes the operation worker after new work is accepted. Persistence is
+// the source of truth; this is only a latency optimization, so a nil Enqueuer is
+// valid (the worker's ticker will pick the work up).
+type Enqueuer interface {
+	Wake()
+}
+
+// Config wires the HTTP layer's dependencies. The accept path (Step 5) needs the
+// Store and the applications Factory; later steps add auth and more handlers.
 type Config struct {
-	Logger  *slog.Logger
-	Cluster ClusterPinger // optional; nil means cluster connectivity is reported unknown
+	Logger   *slog.Logger
+	Cluster  ClusterPinger // optional; nil means cluster connectivity is reported unknown
+	Store    platform.Store
+	Factory  applications.Factory
+	Enqueuer Enqueuer // optional
 }
 
 // Router builds the HTTP handler with all registered routes.
@@ -34,11 +47,12 @@ func NewRouter(cfg Config) *Router {
 	}
 	r := &Router{cfg: cfg, mux: http.NewServeMux()}
 	r.registerHealth()
+	r.registerApplications()
 	return r
 }
 
-// Handler returns the composed http.Handler.
-func (r *Router) Handler() http.Handler { return r.mux }
+// Handler returns the composed http.Handler with request-ID correlation applied.
+func (r *Router) Handler() http.Handler { return withRequestID(r.mux) }
 
 func (r *Router) registerHealth() {
 	// Liveness: the process is running. No sensitive information, no cluster call.

@@ -95,6 +95,44 @@ func TestAcceptOperationRollsBackOnFailure(t *testing.T) {
 	}
 }
 
+func TestAcceptOperationCreateIdempotentReplay(t *testing.T) {
+	ctx := context.Background()
+	s := newStore(t)
+
+	// A retried create must dedup to the original application and operation: the
+	// client may not have received the first 202 and is retrying the same request.
+	// Each attempt mints a fresh candidate app ID, so only the idempotency key
+	// ties the retry to the first submission.
+	first, err := s.AcceptOperation(ctx, newAccept("app_new1", "notes", "op_new1", "rev_new1", "create-key", "body-hash"))
+	if err != nil {
+		t.Fatalf("first create: %v", err)
+	}
+	if first.Deduplicated {
+		t.Fatal("first create should not be deduplicated")
+	}
+
+	retry, err := s.AcceptOperation(ctx, newAccept("app_new2", "notes", "op_new2", "rev_new2", "create-key", "body-hash"))
+	if err != nil {
+		t.Fatalf("create retry: %v", err)
+	}
+	if !retry.Deduplicated || retry.ApplicationID != first.ApplicationID || retry.OperationID != first.OperationID {
+		t.Fatalf("create retry not deduplicated to original: %+v (original %+v)", retry, first)
+	}
+
+	// Only one application exists despite two submissions.
+	apps, err := s.ListApplications(ctx, 10, 0)
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	if len(apps) != 1 {
+		t.Fatalf("got %d applications, want 1 (duplicate create created a second app)", len(apps))
+	}
+
+	// Same key, different body → idempotency conflict, even for creates.
+	_, err = s.AcceptOperation(ctx, newAccept("app_new3", "notes", "op_new3", "rev_new3", "create-key", "different-body"))
+	assertCode(t, err, platform.CodeIdempotencyConflict)
+}
+
 func TestAcceptOperationIdempotentReplay(t *testing.T) {
 	ctx := context.Background()
 	s := newStore(t)

@@ -38,9 +38,12 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 		}
 	}()
 
-	// Idempotency replay: same key on the same app returns the original operation.
-	if req.IdempotencyKey != "" && !req.IsNewApp {
-		if res, found, err := lookupIdempotent(ctx, tx, req.Application.ID, req.IdempotencyKey, req.RequestHash); err != nil {
+	// Idempotency replay: a prior operation with the same key returns the original
+	// result. This runs for creates too — a retried create mints a fresh candidate
+	// app ID each attempt, so the client-supplied key is the only stable identity
+	// that ties the retry back to the first submission.
+	if req.IdempotencyKey != "" {
+		if res, found, err := lookupIdempotent(ctx, tx, req.IdempotencyKey, req.RequestHash); err != nil {
 			return platform.AcceptResult{}, err
 		} else if found {
 			committed = true // nothing written; release the deferred rollback cleanly
@@ -95,11 +98,11 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 
 func (s *Store) nowString() string { return formatTime(s.db.now()) }
 
-func lookupIdempotent(ctx context.Context, tx *sql.Tx, appID, key, reqHash string) (platform.AcceptResult, bool, error) {
-	var opID, storedHash, state string
+func lookupIdempotent(ctx context.Context, tx *sql.Tx, key, reqHash string) (platform.AcceptResult, bool, error) {
+	var appID, opID, storedHash, state string
 	err := tx.QueryRowContext(ctx,
-		`SELECT id, request_hash, state FROM operations WHERE app_id = ? AND idempotency_key = ?`,
-		appID, key).Scan(&opID, &storedHash, &state)
+		`SELECT app_id, id, request_hash, state FROM operations WHERE idempotency_key = ?`,
+		key).Scan(&appID, &opID, &storedHash, &state)
 	if errors.Is(err, sql.ErrNoRows) {
 		return platform.AcceptResult{}, false, nil
 	}

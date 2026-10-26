@@ -68,9 +68,10 @@ CREATE TABLE operations (
     updated_at       TEXT NOT NULL,
     deadline_at      TEXT,
     claimed_at       TEXT,
-    -- An idempotency key is unique per application, so a retried submission maps
-    -- back to its original operation instead of creating a second one.
-    UNIQUE (app_id, idempotency_key)
+    -- An idempotency key is globally unique, so a retried submission (including a
+    -- create, which mints a fresh application each attempt) maps back to its
+    -- original operation instead of creating a duplicate.
+    UNIQUE (idempotency_key)
 );
 
 CREATE INDEX operations_state_idx ON operations(state);

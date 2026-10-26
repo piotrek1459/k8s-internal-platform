@@ -16,7 +16,10 @@ import (
 	"syscall"
 	"time"
 
+	"k8s-internal-platform/broker/internal/applications"
 	"k8s-internal-platform/broker/internal/httpapi"
+	"k8s-internal-platform/broker/internal/platform"
+	"k8s-internal-platform/broker/internal/store"
 )
 
 func main() {
@@ -31,8 +34,21 @@ func main() {
 
 func run(ctx context.Context, logger *slog.Logger) error {
 	addr := envOr("PLATFORM_LISTEN", "0.0.0.0:8080")
+	dbPath := envOr("PLATFORM_DB", "/var/lib/platform/platform.db")
 
-	router := httpapi.NewRouter(httpapi.Config{Logger: logger})
+	db, err := store.Open(ctx, dbPath)
+	if err != nil {
+		return fmt.Errorf("open database: %w", err)
+	}
+	defer db.Close()
+	st := store.New(db)
+	logger.Info("store_ready", "path", dbPath)
+
+	router := httpapi.NewRouter(httpapi.Config{
+		Logger:  logger,
+		Store:   st,
+		Factory: applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
+	})
 	server := &http.Server{
 		Handler:           router.Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
