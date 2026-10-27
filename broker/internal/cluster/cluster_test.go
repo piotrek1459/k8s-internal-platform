@@ -31,6 +31,17 @@ func deployment(appID string, generation, observed int64, desired, ready int32) 
 	}
 }
 
+func TestPingListsDeploymentsInManagedNamespace(t *testing.T) {
+	// Ping must query a resource the broker's Role authorises (Deployments in the
+	// managed namespace), not the cluster-scoped Namespace object. Against the fake
+	// clientset the call simply succeeds; the point is that it targets Deployments.
+	cs := fake.NewSimpleClientset()
+	c := NewWithClientset(cs, ns)
+	if err := c.Ping(context.Background()); err != nil {
+		t.Fatalf("ping failed: %v", err)
+	}
+}
+
 func TestObserveReady(t *testing.T) {
 	cs := fake.NewSimpleClientset(
 		deployment("app1", 1, 1, 2, 2),
@@ -122,5 +133,31 @@ func TestCreateImmutableSecretIsIdempotent(t *testing.T) {
 	}
 	if name2 != name {
 		t.Fatalf("idempotent create returned a different name: %s vs %s", name2, name)
+	}
+}
+
+func TestCreateImmutableSecretRejectsContentMismatch(t *testing.T) {
+	cs := fake.NewSimpleClientset()
+	c := NewWithClientset(cs, ns)
+
+	// Version 1 is created with the first attempt's value (modelling a K8s write
+	// that succeeded before a metadata write failed).
+	if _, _, err := c.CreateImmutableSecret(context.Background(), "sec_01", 1, map[string][]byte{"value": []byte("first")}); err != nil {
+		t.Fatalf("create v1: %v", err)
+	}
+
+	// A same-version retry with a DIFFERENT value must be rejected with a conflict,
+	// not acknowledged as success — otherwise a new request would silently bind to
+	// the earlier secret data.
+	_, _, err := c.CreateImmutableSecret(context.Background(), "sec_01", 1, map[string][]byte{"value": []byte("different")})
+	derr, ok := err.(*platform.Error)
+	if !ok || derr.Code != platform.CodeConflict {
+		t.Fatalf("content-mismatch retry = %v, want CONFLICT", err)
+	}
+
+	// A same-version retry with the SAME value remains idempotent (safe retry
+	// after an interrupted metadata write).
+	if _, _, err := c.CreateImmutableSecret(context.Background(), "sec_01", 1, map[string][]byte{"value": []byte("first")}); err != nil {
+		t.Fatalf("same-content retry should succeed: %v", err)
 	}
 }

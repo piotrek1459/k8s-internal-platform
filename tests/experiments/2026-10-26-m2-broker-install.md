@@ -79,21 +79,29 @@ inspection runs against an in-process OCI registry. No cluster is required.
 
 ## Gated integration test
 
-The real-cluster integration test drives the broker's Helm adapter and observer
-against k3d. It is gated so the default `go test` stays hermetic:
+The real-cluster integration test drives the broker's durable store and worker
+(not just the Helm adapter) against k3d, then simulates a broker restart. It is
+gated so the default `go test` stays hermetic:
 
 ```bash
 ./scripts/dev-cluster.sh up
 ./scripts/build-demo.sh native
 k3d image import platform-demo:v1 --cluster platform-dev
+# The broker deploys by digest, so provide the imported image's digest-pinned
+# reference (repo@sha256:...), not a tag:
+DIGEST=$(docker image inspect --format '{{.Id}}' platform-demo:v1)
 KUBECONFIG=.local/kubeconfig PLATFORM_INTEGRATION=1 \
-  go -C broker test -tags integration ./integration/... -run TestBrokerDeploysThroughHelm -v
+  PLATFORM_DEMO_IMAGE="platform-demo@${DIGEST}" \
+  go -C broker test -tags integration ./integration/... -v
 ```
 
-The test installs the demonstration image through the broker's Helm adapter into
-`platform-apps` and polls the cluster observer until the workload is Ready, then
-uninstalls it. Supply `PLATFORM_DEMO_IMAGE` with the imported image's
-digest-pinned reference, because the adapter deploys by digest.
+The test accepts a create operation through the durable store exactly as the API
+handler does, drains it with a real worker into a Helm release in
+`platform-apps`, polls the cluster observer until the workload is Ready, then
+closes and reopens the database and runs startup recovery to confirm the
+operation stays terminal and the application's records survive a restart. It
+finally uninstalls the release. `PLATFORM_DEMO_IMAGE` must be a digest-pinned
+reference; the test fails fast otherwise.
 
 ## Recorded component versions
 

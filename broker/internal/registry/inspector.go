@@ -104,13 +104,18 @@ func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID 
 		if err != nil {
 			return platform.ImageReport{}, classifyRemoteError(err)
 		}
-		report.Architectures = []string{cfg.Architecture}
+		// Only a Linux image is supported. A single-manifest image for another OS
+		// (for example windows/amd64) must be rejected here rather than passing
+		// preflight and failing during workload execution.
+		if cfg.OS == "linux" {
+			report.Architectures = []string{cfg.Architecture}
+		}
 		report.SuggestedPort = firstExposedPort(cfg)
 	}
 
 	if !containsArch(report.Architectures, i.hostArch) {
 		return platform.ImageReport{}, platform.FieldErrorf(platform.CodeImageArchUnsupported, "image",
-			"image has no linux/%s variant (available: %v)", i.hostArch, report.Architectures)
+			"image has no linux/%s variant (available linux platforms: %v)", i.hostArch, report.Architectures)
 	}
 	return report, nil
 }

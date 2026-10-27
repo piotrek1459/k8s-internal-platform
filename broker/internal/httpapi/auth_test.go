@@ -33,6 +33,47 @@ func newAuthRouter(t *testing.T, bootstrapToken string) http.Handler {
 	}).Handler()
 }
 
+func TestSetupRejectsInvalidPasswordAndKeepsTokenUsable(t *testing.T) {
+	h := newAuthRouter(t, "boot-token")
+
+	// An empty body (missing password) with a valid bootstrap token must be
+	// rejected, must not create an administrator, and must leave setup available.
+	for _, body := range []string{`{}`, `{"password":""}`, `{"password":"short"}`} {
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/setup", strings.NewReader(body))
+		req.Header.Set("Authorization", "Bearer boot-token")
+		req.Header.Set("X-Requested-With", "fetch")
+		rec := do(h, req)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("setup with %s: status=%d, want 400", body, rec.Code)
+		}
+	}
+
+	// Setup must still be available, and a valid password must now succeed.
+	status := do(h, httptest.NewRequest(http.MethodGet, "/api/v1/setup/status", nil))
+	if !strings.Contains(status.Body.String(), `"setupAvailable":true`) {
+		t.Fatalf("setup no longer available after invalid attempts: %s", status.Body.String())
+	}
+	ok := httptest.NewRequest(http.MethodPost, "/api/v1/setup", strings.NewReader(`{"password":"a-strong-password"}`))
+	ok.Header.Set("Authorization", "Bearer boot-token")
+	ok.Header.Set("X-Requested-With", "fetch")
+	if rec := do(h, ok); rec.Code != http.StatusCreated {
+		t.Fatalf("valid setup after invalid attempts: status=%d", rec.Code)
+	}
+
+	// A subsequent login with an empty password must not yield a session.
+	login := httptest.NewRequest(http.MethodPost, "/api/v1/auth/session", strings.NewReader(`{"password":""}`))
+	login.Header.Set("X-Requested-With", "fetch")
+	rec := do(h, login)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("empty-password login: status=%d, want 401", rec.Code)
+	}
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == sessionCookieName && c.Value != "" {
+			t.Fatal("empty-password login set a session cookie")
+		}
+	}
+}
+
 func TestUnauthenticatedMutationIsRejected(t *testing.T) {
 	h := newAuthRouter(t, "boot")
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/apps", strings.NewReader(validCreateJSON))

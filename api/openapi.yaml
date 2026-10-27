@@ -561,10 +561,7 @@ components:
       properties:
         name: { type: string, minLength: 1, maxLength: 253 }
         data:
-          type: object
-          minProperties: 1
-          additionalProperties: { type: string }
-          description: Write-only key/value material; never returned by any read.
+          $ref: "#/components/schemas/SecretData"
 
     SecretVersionRequest:
       type: object
@@ -572,9 +569,18 @@ components:
       required: [data]
       properties:
         data:
-          type: object
-          minProperties: 1
-          additionalProperties: { type: string }
+          $ref: "#/components/schemas/SecretData"
+
+    SecretData:
+      type: object
+      additionalProperties: false
+      required: [value]
+      properties:
+        value: { type: string }
+      description: >-
+        Write-only secret material under the single supported key "value", which
+        the application chart references as secretKeyRef.key: value. Never
+        returned by any read. A per-reference key selector is a later extension.
 
     SecretMetadata:
       type: object

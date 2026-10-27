@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -121,6 +122,68 @@ func TestSetupTokenExpires(t *testing.T) {
 	}
 	if err := svc.Setup(ctx, "boot-token", "a-long-enough-password"); err == nil {
 		t.Fatal("expired bootstrap token accepted")
+	}
+}
+
+func TestSetupValidatesPasswordAndPreservesTokenOnInvalid(t *testing.T) {
+	ctx := context.Background()
+	cases := []struct {
+		name     string
+		password string
+		ok       bool
+	}{
+		{"empty", "", false},
+		{"too short", "short", false},
+		{"one below min", "elevenchars", false},                      // 11 chars
+		{"min boundary", "twelvechars!", true},                       // 12 chars
+		{"overlong", string(make([]byte, MaxPasswordLen+1)), false},  // 257 chars
+		{"max boundary", string(make([]byte, MaxPasswordLen)), true}, // 256 chars
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			clock := &testClock{t: time.Unix(1_000_000, 0).UTC()}
+			svc, store := newService(clock, "boot-token", time.Hour)
+			err := svc.Setup(ctx, "boot-token", tc.password)
+			if tc.ok {
+				if err != nil {
+					t.Fatalf("valid password rejected: %v", err)
+				}
+				if store.admin == nil {
+					t.Fatal("valid setup did not create an administrator")
+				}
+				return
+			}
+			// Invalid: must be an INVALID_INPUT error, no admin created, and the
+			// bootstrap token must remain usable for a subsequent valid setup.
+			var derr *platform.Error
+			if !errors.As(err, &derr) || derr.Code != platform.CodeInvalidInput {
+				t.Fatalf("expected INVALID_INPUT, got %v", err)
+			}
+			if store.admin != nil {
+				t.Fatal("invalid setup created an administrator")
+			}
+			if ok, _ := svc.SetupAvailable(ctx); !ok {
+				t.Fatal("bootstrap token was consumed by an invalid setup attempt")
+			}
+			if err := svc.Setup(ctx, "boot-token", "a-valid-password"); err != nil {
+				t.Fatalf("token not usable after invalid attempt: %v", err)
+			}
+		})
+	}
+}
+
+func TestLoginRejectsEmptyAndOverlongInput(t *testing.T) {
+	ctx := context.Background()
+	clock := &testClock{t: time.Unix(1_000_000, 0).UTC()}
+	svc, _ := newService(clock, "boot-token", time.Hour)
+	if err := svc.Setup(ctx, "boot-token", "a-valid-password"); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	if _, _, err := svc.Login(ctx, ""); err == nil {
+		t.Fatal("empty login password accepted")
+	}
+	if _, _, err := svc.Login(ctx, string(make([]byte, MaxPasswordLen+1))); err == nil {
+		t.Fatal("overlong login password accepted")
 	}
 }
 

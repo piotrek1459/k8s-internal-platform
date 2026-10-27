@@ -31,8 +31,13 @@ func startRegistry(t *testing.T) string {
 	return u.Host
 }
 
-// pushSingleArch pushes a one-architecture image and returns its reference.
+// pushSingleArch pushes a one-architecture Linux image and returns its reference.
 func pushSingleArch(t *testing.T, host, repo, arch string) string {
+	return pushSingleOSArch(t, host, repo, "linux", arch)
+}
+
+// pushSingleOSArch pushes a one-manifest image for an explicit OS/arch.
+func pushSingleOSArch(t *testing.T, host, repo, osName, arch string) string {
 	t.Helper()
 	img, err := random.Image(1024, 1)
 	if err != nil {
@@ -44,7 +49,7 @@ func pushSingleArch(t *testing.T, host, repo, arch string) string {
 	}
 	cfg = cfg.DeepCopy()
 	cfg.Architecture = arch
-	cfg.OS = "linux"
+	cfg.OS = osName
 	img, err = mutate.ConfigFile(img, cfg)
 	if err != nil {
 		t.Fatalf("mutate config: %v", err)
@@ -124,6 +129,18 @@ func TestInspectSingleArchImage(t *testing.T) {
 	}
 	if len(report.Architectures) != 1 || report.Architectures[0] != "arm64" {
 		t.Fatalf("architectures = %v", report.Architectures)
+	}
+}
+
+func TestInspectRejectsNonLinuxSingleManifest(t *testing.T) {
+	host := startRegistry(t)
+	ref := pushSingleOSArch(t, host, "demo/win", "windows", "amd64")
+
+	insp := NewInspector(nil).WithHostArch("amd64")
+	_, err := insp.Inspect(context.Background(), ref, "")
+	derr, ok := err.(*platform.Error)
+	if !ok || derr.Code != platform.CodeImageArchUnsupported {
+		t.Fatalf("expected IMAGE_ARCH_UNSUPPORTED for a windows/amd64 image, got %v", err)
 	}
 }
 

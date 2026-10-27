@@ -47,6 +47,25 @@ func postJSON(h http.Handler, path, body string) *httptest.ResponseRecorder {
 	return rec
 }
 
+func TestCreateSecretRejectsNonValueKey(t *testing.T) {
+	h, _ := newSecretsRouter(t)
+	// The chart references secretKeyRef.key: value, so the API must reject any key
+	// other than "value" rather than accept input that renders a broken reference.
+	for _, body := range []string{
+		`{"name":"s","data":{"PASSWORD":"x"}}`,
+		`{"name":"s","data":{"value":"x","extra":"y"}}`,
+	} {
+		rec := postJSON(h, "/api/v1/secrets", body)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("body %s: status=%d, want 400", body, rec.Code)
+		}
+	}
+	// The supported single "value" key is accepted.
+	if rec := postJSON(h, "/api/v1/secrets", `{"name":"ok","data":{"value":"x"}}`); rec.Code != http.StatusCreated {
+		t.Fatalf("value key rejected: status=%d", rec.Code)
+	}
+}
+
 func TestCreateSecretStoresMetadataOnly(t *testing.T) {
 	h, _ := newSecretsRouter(t)
 	rec := postJSON(h, "/api/v1/secrets", `{"name":"db-password","data":{"value":"s3cr3t"}}`)

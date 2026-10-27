@@ -126,10 +126,17 @@ func (s *Store) ListSecrets(ctx context.Context) ([]platform.SecretMetadata, err
 	return out, rows.Err()
 }
 
-// DeleteSecret removes a secret only when no revision — active or
-// rollback-eligible — references any of its versions. Because revisions record
-// their secret versions inside the frozen spec JSON, the reference check matches
-// the secret ID against every frozen revision's secret_versions_json.
+// DeleteSecret removes a secret only when nothing still depends on it. Two kinds
+// of reference block deletion:
+//
+//   - A frozen revision that is pending or succeeded (running or
+//     rollback-eligible), via its recorded secret versions.
+//   - A revision attached to a nonterminal operation (queued, running,
+//     recovering, or NeedsAttention), via its requested spec — even before it is
+//     frozen — so an accepted deployment cannot lose the secret it will use.
+//
+// Both checks run inside the deletion transaction so acceptance and deletion stay
+// consistent. The match uses the "SecretID" field the revision JSON serialises.
 func (s *Store) DeleteSecret(ctx context.Context, id string) error {
 	tx, err := s.db.sql.BeginTx(ctx, nil)
 	if err != nil {
@@ -145,18 +152,34 @@ func (s *Store) DeleteSecret(ctx context.Context, id string) error {
 		return platform.Errorf(platform.CodeNotFound, "secret %q not found", id)
 	}
 
-	// A frozen revision that is pending or succeeded is either running or
-	// rollback-eligible; such a revision referencing this secret blocks deletion.
-	var referencing int
+	idMatch := "%\"SecretID\":\"" + id + "\"%"     // requested spec_json
+	frozenMatch := "%\"SecretID\":\"" + id + "\"%" // frozen secret_versions_json
+
+	// Frozen active / rollback-eligible references.
+	var frozenRefs int
 	if err := tx.QueryRowContext(ctx,
 		`SELECT COUNT(1) FROM revisions
 		 WHERE frozen = 1 AND result IN ('pending','succeeded')
-		   AND secret_versions_json LIKE ?`, "%\""+id+"\"%").Scan(&referencing); err != nil {
+		   AND secret_versions_json LIKE ?`, frozenMatch).Scan(&frozenRefs); err != nil {
 		return err
 	}
-	if referencing > 0 {
+
+	// References from any revision bound to a nonterminal operation, whether or not
+	// it is frozen yet. This protects a queued/accepted deployment and any
+	// NeedsAttention recovery dependency.
+	var pendingRefs int
+	if err := tx.QueryRowContext(ctx,
+		`SELECT COUNT(1) FROM revisions r
+		 JOIN operations o ON o.target_revision = r.id
+		 WHERE o.state NOT IN ('succeeded','failed')
+		   AND r.spec_json LIKE ?`, idMatch).Scan(&pendingRefs); err != nil {
+		return err
+	}
+
+	if frozenRefs+pendingRefs > 0 {
 		return platform.Errorf(platform.CodeSecretInUse,
-			"secret %q is referenced by %d active or rollback-eligible revision(s)", id, referencing)
+			"secret %q is referenced by %d active/rollback-eligible and %d in-flight revision(s)",
+			id, frozenRefs, pendingRefs)
 	}
 
 	if _, err := tx.ExecContext(ctx, `DELETE FROM secret_versions WHERE secret_id = ?`, id); err != nil {

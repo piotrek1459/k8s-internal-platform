@@ -88,6 +88,27 @@ func TestRecoveryResumesInterruptedInstallWithNoRelease(t *testing.T) {
 	}
 }
 
+func TestRecoveryBlocksPendingHelmRelease(t *testing.T) {
+	st := newStore(t)
+	opID, _ := seedInterrupted(t, st, "app1", true)
+	// Helm reports a pending release left by an interrupted operation. Re-executing
+	// would be rejected by the SDK, so recovery must block rather than resume.
+	rec := NewRecovery(st, statusHelm{status: platform.ReleaseStatus{Status: "pending-upgrade"}, exists: true}, discard())
+
+	if err := rec.Scan(context.Background()); err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	op, _ := st.GetOperation(context.Background(), opID)
+	if op.State != platform.OperationNeedsAttention {
+		t.Fatalf("state = %s, want needs_attention for a pending release", op.State)
+	}
+	// Blocked: no claimable operation, so the worker cannot retry into the SDK's
+	// "another operation in progress" rejection.
+	if _, ok, _ := st.ClaimNextOperation(context.Background()); ok {
+		t.Fatal("a pending-release app should have no claimable operation")
+	}
+}
+
 func TestRecoveryBlocksWhenClusterUnknown(t *testing.T) {
 	st := newStore(t)
 	opID, _ := seedInterrupted(t, st, "app1", true)

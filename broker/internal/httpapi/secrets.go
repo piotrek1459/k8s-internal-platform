@@ -34,6 +34,10 @@ func (r *Router) handleCreateSecret(w http.ResponseWriter, req *http.Request) {
 			"a name and at least one data entry are required"))
 		return
 	}
+	if err := validateSecretData(body.Data); err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
 
 	secretID := r.cfg.Factory.IDs.NewID("sec")
 	// Version 1 is created as an immutable Kubernetes Secret first; only then is
@@ -63,6 +67,10 @@ func (r *Router) handleAddSecretVersion(w http.ResponseWriter, req *http.Request
 	}
 	if len(body.Data) == 0 {
 		writeError(w, r.cfg.Logger, reqID, platform.FieldErrorf(platform.CodeInvalidInput, "data", "at least one data entry is required"))
+		return
+	}
+	if err := validateSecretData(body.Data); err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
 	_, existing, err := r.cfg.Store.GetSecret(req.Context(), secretID)
@@ -153,4 +161,23 @@ func nextVersion(existing []platform.SecretVersion) int {
 		}
 	}
 	return max + 1
+}
+
+// secretValueKey is the single data key supported for configuration secrets. The
+// application chart references a secret as secretKeyRef.key: value, so the
+// accepted input and the rendered workload must agree on this key. A key selector
+// per reference is deferred; until then the API accepts only this key, which
+// keeps the contract honest rather than rendering a reference to a missing key.
+const secretValueKey = "value"
+
+func validateSecretData(data map[string]string) error {
+	if len(data) != 1 {
+		return platform.FieldErrorf(platform.CodeInvalidInput, "data",
+			"a secret must contain exactly one entry under the key %q", secretValueKey)
+	}
+	if _, ok := data[secretValueKey]; !ok {
+		return platform.FieldErrorf(platform.CodeInvalidInput, "data",
+			"the secret data key must be %q", secretValueKey)
+	}
+	return nil
 }

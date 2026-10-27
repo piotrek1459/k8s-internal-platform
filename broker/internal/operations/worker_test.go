@@ -160,6 +160,52 @@ func TestWorkerFreezesDigestAgainstMovedTag(t *testing.T) {
 	}
 }
 
+func TestWorkerApplyFailureEntersNeedsAttentionAndRetainsLock(t *testing.T) {
+	st := newStore(t)
+	// A Helm apply that times out may have changed the cluster; the outcome is
+	// unresolved, so the operation must not terminate and must keep the lock.
+	helm := &fakeHelm{err: errors.New("rollout timed out")}
+	insp := &fakeInspector{digest: "sha256:aaaa"}
+	w := NewWorker(st, helm, nil, insp, fixedClock{t: time.Unix(1, 0).UTC()}, discard())
+
+	opID, revID := seedCreate(t, st, "app1", "ghcr.io/example/app:1.0")
+	w.drain(context.Background())
+
+	op, _ := st.GetOperation(context.Background(), opID)
+	if op.State != platform.OperationNeedsAttention {
+		t.Fatalf("operation state = %s, want needs_attention", op.State)
+	}
+	if op.RecoveryOutcome == "" {
+		t.Fatal("expected a recorded recovery reason")
+	}
+	// The failed candidate is still recorded.
+	rev, _ := st.GetRevision(context.Background(), revID)
+	if rev.Result != platform.RevisionFailed {
+		t.Fatalf("revision result = %s, want failed", rev.Result)
+	}
+	// The application lock is retained (not cleared).
+	app, _ := st.GetApplication(context.Background(), "app1")
+	if app.ActiveOperationID != opID {
+		t.Fatalf("lock released: active=%q, want %q", app.ActiveOperationID, opID)
+	}
+	// A conflicting mutation is rejected with 409...
+	_, err := st.AcceptOperation(context.Background(), platform.AcceptRequest{
+		Type: platform.OperationUpdate, Application: platform.Application{ID: "app1"}, IsNewApp: false,
+		ExpectVersion: 1, Revision: platform.Revision{ID: "rev_x", AppID: "app1", Number: 2, Result: platform.RevisionPending, Actor: "t"},
+		Op: platform.Operation{ID: "op_x", AppID: "app1", Type: platform.OperationUpdate, TargetRevision: "rev_x"}, RequestHash: "h2",
+	})
+	var derr *platform.Error
+	if !errors.As(err, &derr) || derr.Code != platform.CodeConflict {
+		t.Fatalf("mutation against NeedsAttention app = %v, want CONFLICT", err)
+	}
+	// ...and the blocked app exposes no claimable operation, so the worker cannot
+	// run a second operation against it — the block survives a restart (a fresh
+	// drain re-reads durable state and finds nothing claimable).
+	if _, ok, _ := st.ClaimNextOperation(context.Background()); ok {
+		t.Fatal("a NeedsAttention app should have no claimable operation")
+	}
+}
+
 func TestWorkerRecordsApplyFailure(t *testing.T) {
 	st := newStore(t)
 	helm := &fakeHelm{err: errors.New("rollout timed out")}
@@ -170,8 +216,8 @@ func TestWorkerRecordsApplyFailure(t *testing.T) {
 	w.drain(context.Background())
 
 	op, _ := st.GetOperation(context.Background(), opID)
-	if op.State != platform.OperationFailed {
-		t.Fatalf("operation state = %s, want failed", op.State)
+	if op.State != platform.OperationNeedsAttention {
+		t.Fatalf("operation state = %s, want needs_attention", op.State)
 	}
 	rev, _ := st.GetRevision(context.Background(), revID)
 	if rev.Result != platform.RevisionFailed {

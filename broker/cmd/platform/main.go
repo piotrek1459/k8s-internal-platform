@@ -89,6 +89,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	// is resumed or durably blocked before any new work is accepted, then start the
 	// worker and wire its wake into the API.
 	var worker *operations.Worker
+	var observer *operations.Observer
 	if clusterClient != nil {
 		cfg.Cluster = clusterClient
 		cfg.Secrets = clusterClient
@@ -99,6 +100,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		}
 		inspector := registry.NewInspector(nil)
 		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)
+		observer = operations.NewObserver(st, clusterClient, platform.SystemClock{}, logger)
 
 		recovery := operations.NewRecovery(st, helmAdapter, logger)
 		if rerr := recovery.Scan(ctx); rerr != nil {
@@ -125,11 +127,15 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	}
 	logger.Info("platform_started", "address", listener.Addr().String())
 
-	// Start the operation worker (when cluster access is available). It stops when
-	// ctx is cancelled during shutdown.
+	// Start the operation worker and the background status observer (when cluster
+	// access is available). Both stop when ctx is cancelled during shutdown.
 	if worker != nil {
 		go worker.Run(ctx)
 		logger.Info("worker_started")
+	}
+	if observer != nil {
+		go observer.Run(ctx)
+		logger.Info("observer_started")
 	}
 
 	result := make(chan error, 1)

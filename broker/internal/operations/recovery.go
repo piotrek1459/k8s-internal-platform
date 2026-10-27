@@ -85,12 +85,15 @@ func (r *Recovery) recoverInterrupted(ctx context.Context, op platform.Operation
 		// The target release is applied and healthy; finish the operation.
 		r.finish(ctx, op, rev)
 	case !exists && op.Type == platform.OperationCreate:
-		// An interrupted initial install left no release; the frozen spec (if any)
-		// is reused on resume, so a retry cannot change the image.
-		r.resume(ctx, op, "resuming interrupted install")
-	case exists && status.Status == "pending-install", exists && status.Status == "pending-upgrade":
-		// Helm recorded a pending release: a tested resume reuses the frozen spec.
-		r.resume(ctx, op, "resuming pending release")
+		// An interrupted initial install left no release at all, so re-executing is
+		// safe: the frozen spec (if any) is reused, and there is no pending Helm
+		// release to conflict with.
+		r.resume(ctx, op, "resuming interrupted install (no release present)")
+	case exists && (status.Status == "pending-install" || status.Status == "pending-upgrade" || status.Status == "pending-rollback"):
+		// Helm recorded a pending release. Re-executing would make the SDK reject
+		// the operation with "another operation is in progress", so this must not
+		// be resumed automatically; block for a documented recovery instead.
+		r.block(ctx, op, "a pending Helm release is in progress; manual recovery required before retry")
 	default:
 		// Anything else (failed release, ambiguous status) is not safe to resume
 		// automatically.

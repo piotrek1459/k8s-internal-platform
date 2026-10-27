@@ -39,9 +39,12 @@ func NewWithClientset(cs kubernetes.Interface, namespace string) *Client {
 	return &Client{cs: cs, namespace: namespace}
 }
 
-// Ping checks Kubernetes API reachability for the readiness probe. It performs a
-// cheap namespace get rather than listing workloads.
+// Ping checks Kubernetes API reachability for the readiness probe. It lists
+// Deployments in the managed namespace with a limit of 1 — a resource the
+// broker's Role already authorises — rather than reading the cluster-scoped
+// Namespace object, which the chart grants no permission for. A probe against an
+// unauthorised resource would report a healthy installation as unreachable.
 func (c *Client) Ping(ctx context.Context) error {
-	_, err := c.cs.CoreV1().Namespaces().Get(ctx, c.namespace, metav1.GetOptions{})
+	_, err := c.cs.AppsV1().Deployments(c.namespace).List(ctx, metav1.ListOptions{Limit: 1})
 	return err
 }

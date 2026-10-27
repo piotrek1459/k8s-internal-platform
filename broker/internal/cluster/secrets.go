@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"context"
+	"crypto/subtle"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
@@ -43,9 +44,17 @@ func (c *Client) CreateImmutableSecret(ctx context.Context, secretID string, ver
 	}
 	created, err := c.cs.CoreV1().Secrets(c.namespace).Create(ctx, secret, metav1.CreateOptions{})
 	if apierrors.IsAlreadyExists(err) {
+		// A same-name object already exists. This is a safe idempotent retry only
+		// when its contents match the request; otherwise a different request is
+		// trying to bind this version name to different data, which must not be
+		// acknowledged as success.
 		existing, getErr := c.cs.CoreV1().Secrets(c.namespace).Get(ctx, name, metav1.GetOptions{})
 		if getErr != nil {
 			return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "read existing secret: %v", getErr)
+		}
+		if !secretDataEqual(existing.Data, data) {
+			return "", "", platform.Errorf(platform.CodeConflict,
+				"secret version %q already exists with different contents", name)
 		}
 		return existing.Name, string(existing.UID), nil
 	}
@@ -53,6 +62,22 @@ func (c *Client) CreateImmutableSecret(ctx context.Context, secretID string, ver
 		return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "create secret: %v", err)
 	}
 	return created.Name, string(created.UID), nil
+}
+
+// secretDataEqual reports whether two secret data maps hold the same keys and
+// byte values. It compares in constant-ish fashion over the full content; the
+// comparison does not short-circuit on the first differing byte for a given key.
+func secretDataEqual(a, b map[string][]byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, av := range a {
+		bv, ok := b[k]
+		if !ok || subtle.ConstantTimeCompare(av, bv) != 1 {
+			return false
+		}
+	}
+	return true
 }
 
 // sanitizeID lowercases and replaces characters invalid in a DNS-1123 subdomain

@@ -14,6 +14,25 @@ import (
 // SessionTTL is how long a login session remains valid.
 const SessionTTL = 12 * time.Hour
 
+// Password length bounds, matching the setup contract in api/openapi.yaml. They
+// are enforced server-side before hashing so an invalid request cannot create an
+// account or be used to obtain a session.
+const (
+	MinPasswordLen = 12
+	MaxPasswordLen = 256
+)
+
+// validateSetupPassword enforces the documented password constraints. It returns
+// an INVALID_INPUT domain error attributed to the password field so the caller
+// maps it to 400 without creating an administrator or consuming the setup token.
+func validateSetupPassword(password string) error {
+	if n := len(password); n < MinPasswordLen || n > MaxPasswordLen {
+		return platform.FieldErrorf(platform.CodeInvalidInput, "password",
+			"password must be between %d and %d characters", MinPasswordLen, MaxPasswordLen)
+	}
+	return nil
+}
+
 // Service performs authentication against the store. The bootstrap token lives in
 // memory only: it is shown once to the local administrator at install time and is
 // never persisted, so a database compromise cannot reveal it. Setup consumes it
@@ -68,6 +87,13 @@ func (s *Service) Setup(ctx context.Context, bootstrapToken, password string) er
 		return platform.Errorf(platform.CodeUnauthenticated, "invalid or expired bootstrap token")
 	}
 
+	// Validate before hashing or account creation. An invalid password must not
+	// create an administrator and must leave the bootstrap token usable, so this
+	// returns before the token is consumed below.
+	if err := validateSetupPassword(password); err != nil {
+		return err
+	}
+
 	hash, err := HashPassword(password)
 	if err != nil {
 		return err
@@ -90,6 +116,11 @@ func (s *Service) Setup(ctx context.Context, bootstrapToken, password string) er
 // verified in constant time via argon2id; a missing administrator still performs
 // a comparison-shaped amount of work by returning the same error.
 func (s *Service) Login(ctx context.Context, password string) (token string, expires time.Time, err error) {
+	// Bound the input per the login contract (1-256) before the costly argon2
+	// verification, so an overlong body cannot be used to burn CPU.
+	if len(password) < 1 || len(password) > MaxPasswordLen {
+		return "", time.Time{}, platform.Errorf(platform.CodeUnauthenticated, "authentication failed")
+	}
 	admin, exists, err := s.store.GetAdministrator(ctx)
 	if err != nil {
 		return "", time.Time{}, err

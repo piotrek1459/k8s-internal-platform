@@ -12,6 +12,8 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/go-containerregistry/pkg/name"
+
 	"k8s-internal-platform/broker/internal/platform"
 )
 
@@ -20,16 +22,22 @@ import (
 // missed wake never strands work.
 const pollInterval = 5 * time.Second
 
+// defaultInspectTimeout bounds registry inspection for a single operation. A
+// registry that accepts the connection and then stalls must not block the serial
+// worker indefinitely; dial/TLS timeouts alone do not cover that case.
+const defaultInspectTimeout = 30 * time.Second
+
 // Worker executes persisted operations serially. One Worker runs per broker
 // process; the store's claim guarantees at most one operation per application and
 // skips applications blocked by an unresolved NeedsAttention operation.
 type Worker struct {
-	store     platform.Store
-	helm      platform.HelmInstaller
-	observer  platform.ClusterObserver
-	inspector platform.ImageInspector
-	clock     platform.Clock
-	logger    *slog.Logger
+	store          platform.Store
+	helm           platform.HelmInstaller
+	observer       platform.ClusterObserver
+	inspector      platform.ImageInspector
+	clock          platform.Clock
+	logger         *slog.Logger
+	inspectTimeout time.Duration
 
 	wake chan struct{}
 }
@@ -42,10 +50,14 @@ func NewWorker(store platform.Store, helm platform.HelmInstaller, observer platf
 	}
 	return &Worker{
 		store: store, helm: helm, observer: observer, inspector: inspector,
-		clock: clock, logger: logger,
+		clock: clock, logger: logger, inspectTimeout: defaultInspectTimeout,
 		wake: make(chan struct{}, 1),
 	}
 }
+
+// SetInspectTimeout overrides the per-operation registry inspection budget. Used
+// by tests to force a fast, deterministic timeout.
+func (w *Worker) SetInspectTimeout(d time.Duration) { w.inspectTimeout = d }
 
 // Wake signals the worker that new work may be available. It never blocks: a
 // pending wake already covers the next drain.
@@ -72,6 +84,11 @@ func (w *Worker) Run(ctx context.Context) {
 		}
 	}
 }
+
+// DrainOnce claims and executes all currently claimable operations, returning
+// when none remain. It is exported for integration tests and tools that drive the
+// worker synchronously; the running broker uses Run.
+func (w *Worker) DrainOnce(ctx context.Context) { w.drain(ctx) }
 
 // drain claims and executes operations until none are claimable or ctx ends.
 func (w *Worker) drain(ctx context.Context) {
@@ -124,9 +141,15 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 	w.event(ctx, op.ID, "applying", "applying workload through Helm")
 	status, err := w.helm.InstallOrUpgrade(ctx, op.AppID, rev)
 	if err != nil {
-		// A failed apply is recorded on the operation; recovery/restoration is M4.
+		// The Helm call may have created or changed resources before failing (for
+		// example a timed-out rollout). The cluster state is therefore unresolved,
+		// so the failed candidate is recorded but the operation enters
+		// NeedsAttention and retains the application lock rather than terminating.
+		// Verified restoration to the previous revision is M4; until then a
+		// documented recovery must resolve the block. (See the M2 completion
+		// boundary in docs/milestones.md.)
 		_ = w.store.MarkRevisionResult(ctx, rev.ID, platform.RevisionFailed)
-		w.fail(ctx, op, "apply", err)
+		w.needsAttention(ctx, op, "apply", err)
 		return
 	}
 	w.event(ctx, op.ID, "applied", "helm release "+status.Status)
@@ -147,7 +170,9 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 func (w *Worker) executeDelete(ctx context.Context, op platform.Operation) {
 	w.event(ctx, op.ID, "deleting", "removing workload and routes")
 	if err := w.helm.Uninstall(ctx, op.AppID); err != nil {
-		w.fail(ctx, op, "delete", err)
+		// A partial uninstall leaves the cluster in an unresolved state; retain the
+		// lock for recovery rather than terminating.
+		w.needsAttention(ctx, op, "delete", err)
 		return
 	}
 	if err := w.store.TransitionOperation(ctx, op.ID, platform.OperationSucceeded, "succeeded", ""); err != nil {
@@ -172,11 +197,20 @@ func (w *Worker) freeze(ctx context.Context, op platform.Operation, rev platform
 	digest := rev.Spec.Image
 	resolvesDigest := op.Type == platform.OperationCreate || op.Type == platform.OperationUpdate
 	if resolvesDigest && w.inspector != nil {
-		report, err := w.inspector.Inspect(ctx, rev.Spec.Image, rev.Spec.RegistryCredentialID)
+		// Bound the inspection with its own deadline so a registry that accepts the
+		// connection and then stalls cannot block the serial worker. The outer ctx
+		// (used by the caller to persist the outcome) is left untouched, so a
+		// timeout here is still recorded on a live store context.
+		inspectCtx, cancel := context.WithTimeout(ctx, w.inspectTimeout)
+		report, err := w.inspector.Inspect(inspectCtx, rev.Spec.Image, rev.Spec.RegistryCredentialID)
+		cancel()
 		if err != nil {
 			return platform.FrozenSpec{}, err
 		}
-		digest = pinDigest(rev.Spec.Image, report.Digest)
+		digest, err = pinDigest(rev.Spec.Image, report.Digest)
+		if err != nil {
+			return platform.FrozenSpec{}, err
+		}
 	}
 
 	frozen := platform.FrozenSpec{
@@ -215,10 +249,28 @@ func (w *Worker) observeBestEffort(ctx context.Context, appID string) {
 	_ = w.store.SaveObservedStatus(ctx, appID, status)
 }
 
+// fail records a terminal Failed outcome and releases the application lock. It is
+// used only for failures that are known to precede any cluster mutation
+// (validation, image inspection, freeze), where the working release is unchanged
+// and no recovery is required.
 func (w *Worker) fail(ctx context.Context, op platform.Operation, stage string, cause error) {
 	w.logger.Warn("operation_failed", "operation", op.ID, "stage", stage, "error", cause.Error())
 	w.event(ctx, op.ID, stage, sanitize(cause))
 	if err := w.store.TransitionOperation(ctx, op.ID, platform.OperationFailed, stage, ""); err != nil {
+		w.logger.Error("transition_failed", "operation", op.ID, "error", err.Error())
+	}
+}
+
+// needsAttention records a nonterminal NeedsAttention outcome and retains the
+// application lock. It is used when a failure may have left the cluster partially
+// changed and the broker has not verified or restored a known-good state, so
+// conflicting mutations must keep returning 409 until a documented recovery
+// resolves it. Automatic restoration is M4.
+func (w *Worker) needsAttention(ctx context.Context, op platform.Operation, stage string, cause error) {
+	w.logger.Warn("operation_needs_attention", "operation", op.ID, "app", op.AppID, "stage", stage, "error", cause.Error())
+	w.event(ctx, op.ID, "needs_attention", sanitize(cause))
+	outcome := "unresolved after " + stage + "; manual recovery required"
+	if err := w.store.TransitionOperation(ctx, op.ID, platform.OperationNeedsAttention, stage, outcome); err != nil {
 		w.logger.Error("transition_failed", "operation", op.ID, "error", err.Error())
 	}
 }
@@ -239,37 +291,18 @@ func sanitize(err error) string {
 	return "operation failed"
 }
 
-// pinDigest returns an image reference pinned to digest. A reference that is
-// already digest-pinned is returned unchanged; otherwise any tag is stripped and
-// the digest appended.
-func pinDigest(ref, digest string) string {
-	for i := 0; i < len(ref); i++ {
-		if ref[i] == '@' {
-			return ref // already digest-pinned
-		}
+// pinDigest returns an image reference pinned to the resolved digest. It parses
+// the reference to recover the repository context (registry, port, repository
+// path) and appends "@<digest>", discarding any tag or existing digest in the
+// input. Using the registry name parser rather than hand-splitting handles
+// registry ports, tag-plus-digest references, and digest-only references
+// correctly, so the frozen reference is always a valid repository@digest form.
+func pinDigest(ref, digest string) (string, error) {
+	parsed, err := name.ParseReference(ref)
+	if err != nil {
+		return "", platform.FieldErrorf(platform.CodeInvalidInput, "image",
+			"invalid image reference %q: %v", ref, err)
 	}
-	return stripTag(ref) + "@" + digest
-}
-
-// stripTag removes a trailing :tag from an image reference, preserving a
-// registry:port host. It returns the repository without tag or digest.
-func stripTag(ref string) string {
-	lastColon := -1
-	lastSlash := -1
-	for i := 0; i < len(ref); i++ {
-		switch ref[i] {
-		case ':':
-			lastColon = i
-		case '/':
-			lastSlash = i
-		case '@':
-			return ref[:i]
-		}
-	}
-	// A ':' after the final '/' is a tag separator; before it (or absent) it is a
-	// registry port and there is no tag to strip.
-	if lastColon > lastSlash {
-		return ref[:lastColon]
-	}
-	return ref
+	// Context().Name() is the fully qualified repository without tag or digest.
+	return parsed.Context().Name() + "@" + digest, nil
 }

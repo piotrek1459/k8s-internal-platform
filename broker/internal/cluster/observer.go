@@ -48,8 +48,16 @@ func (c *Client) Observe(ctx context.Context, appID string) (platform.ObservedSt
 	}
 
 	// Endpoint readiness confirms the Service actually has ready backends, which a
-	// replica count alone does not guarantee.
-	status.RouteReady = c.hasReadyEndpoints(ctx, appID)
+	// replica count alone does not guarantee. A read *failure* (as opposed to an
+	// empty, not-yet-ready result) is a cluster-availability problem and is
+	// propagated so the caller marks status stale rather than reporting a fresh
+	// routeReady=false.
+	routeReady, err := c.hasReadyEndpoints(ctx, appID)
+	if err != nil {
+		return platform.ObservedStatus{}, platform.Errorf(platform.CodeDependencyUnavailable,
+			"could not read service endpoints: %v", err)
+	}
+	status.RouteReady = routeReady
 	status.Phase, status.WorkloadReady = classify(d, desired, ready)
 	return status, nil
 }
@@ -75,29 +83,34 @@ func classify(d appsv1.Deployment, desired, ready int32) (platform.WorkloadPhase
 	return platform.WorkloadDegraded, false
 }
 
-func (c *Client) hasReadyEndpoints(ctx context.Context, appID string) bool {
+// hasReadyEndpoints reports whether the application's Service has at least one
+// ready backend. It returns an error only when the cluster reads themselves fail,
+// so a genuinely empty/not-ready result (false, nil) is distinguished from an
+// unavailable cluster (false, err).
+func (c *Client) hasReadyEndpoints(ctx context.Context, appID string) (bool, error) {
 	// Find the application's Service by its ownership label, then list the
 	// EndpointSlices Kubernetes maintains for that Service (labelled with the
 	// service name). This avoids assuming the Service's name from the app ID.
 	services, err := c.cs.CoreV1().Services(c.namespace).List(ctx, metav1.ListOptions{LabelSelector: appIDLabel + "=" + appID})
-	if err != nil || len(services.Items) == 0 {
-		return false
+	if err != nil {
+		return false, err
+	}
+	if len(services.Items) == 0 {
+		return false, nil // no Service yet; not an error
 	}
 	svcName := services.Items[0].Name
 	slices, err := c.cs.DiscoveryV1().EndpointSlices(c.namespace).List(ctx, metav1.ListOptions{
 		LabelSelector: "kubernetes.io/service-name=" + svcName,
 	})
 	if err != nil {
-		// Endpoint readiness is a refinement; if it cannot be read, fall back to
-		// "not confirmed ready" rather than failing the whole observation.
-		return false
+		return false, err
 	}
 	for _, s := range slices.Items {
 		for _, ep := range s.Endpoints {
 			if ep.Conditions.Ready != nil && *ep.Conditions.Ready {
-				return true
+				return true, nil
 			}
 		}
 	}
-	return false
+	return false, nil
 }
