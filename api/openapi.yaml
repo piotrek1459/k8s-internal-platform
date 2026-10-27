@@ -1,0 +1,629 @@
+# Management API contract for the Kubernetes application-deployment platform.
+#
+# This document defines the HTTP interface under /api/v1. It is the authoritative
+# contract referenced by docs/api-and-data.md; endpoint groups are implemented per
+# milestone. This file covers the M2 (durable backend) subset: health, setup,
+# authentication, system, image inspection, application create/retrieve/list,
+# operations, and versioned configuration secrets. Later milestones add the
+# remaining lifecycle, diagnostics, registry-credential, and observability paths.
+#
+# Conventions (see docs/api-and-data.md "Request and response conventions"):
+#   - JSON over HTTP; all management endpoints require an authenticated session
+#     except the health and setup-status probes and the credential-protected
+#     setup and session entry points.
+#   - Lifecycle mutations require an Idempotency-Key; changes to an existing
+#     application require If-Match carrying the current ETag.
+#   - Accepted mutations return 202 with a Location header for the operation.
+openapi: 3.1.0
+info:
+  title: Kubernetes application-deployment platform API
+  version: 0.2.0
+  description: >-
+    Management API for a single administrator operating one Kubernetes cluster.
+    The M2 subset establishes durable application creation, operation tracking,
+    authentication, image inspection, and versioned configuration secrets.
+  license:
+    name: See repository LICENSE
+servers:
+  - url: /
+tags:
+  - name: health
+  - name: setup
+  - name: auth
+  - name: system
+  - name: images
+  - name: applications
+  - name: operations
+  - name: secrets
+
+paths:
+  /healthz:
+    get:
+      tags: [health]
+      summary: Process liveness
+      security: []
+      responses:
+        "200":
+          description: The process is running.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  /readyz:
+    get:
+      tags: [health]
+      summary: API readiness with separate cluster connectivity
+      description: >-
+        Reports that the API can serve requests. Cluster connectivity is reported
+        separately and does not by itself fail readiness, so the API remains
+        usable to inspect and recover applications while the cluster is degraded.
+      security: []
+      responses:
+        "200":
+          description: The API is ready to serve.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReadyStatus" }
+
+  /api/v1/setup/status:
+    get:
+      tags: [setup]
+      summary: Whether initial administrator setup is available
+      security: []
+      responses:
+        "200":
+          description: Setup availability.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SetupStatus" }
+
+  /api/v1/setup:
+    post:
+      tags: [setup]
+      summary: Create the administrator using the single-use bootstrap token
+      description: >-
+        Consumes the single-use, expiring bootstrap token presented to the local
+        administrator at installation. Succeeds once; the token is then spent.
+      security:
+        - bootstrapToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetupRequest" }
+      responses:
+        "201": { description: Administrator created. }
+        "401": { $ref: "#/components/responses/Error" }
+        "409":
+          description: Setup already completed or token already consumed.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+
+  /api/v1/auth/session:
+    post:
+      tags: [auth]
+      summary: Authenticate and establish a session
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "204":
+          description: Session established; a HttpOnly session cookie is set.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+        "401": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [auth]
+      summary: Revoke the current session
+      responses:
+        "204": { description: Session revoked. }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: Current administrator and session summary
+      responses:
+        "200":
+          description: Current session.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /api/v1/system:
+    get:
+      tags: [system]
+      summary: Version, host architecture, capabilities, capacity, component health
+      responses:
+        "200":
+          description: System summary.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/System" }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /api/v1/images/inspect:
+    post:
+      tags: [images]
+      summary: Inspect an image reference and optional credential
+      description: >-
+        Reports architecture, resolved digest, and a suggested port. Advisory for
+        the creation form; the worker re-resolves and freezes the digest before
+        any cluster mutation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ImageInspectRequest" }
+      responses:
+        "200":
+          description: Inspection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImageReport" }
+        "401": { $ref: "#/components/responses/Error" }
+        "422":
+          description: Unsupported image (for example IMAGE_ARCH_UNSUPPORTED).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "503":
+          description: Registry temporarily unavailable; retryable.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+
+  /api/v1/apps:
+    get:
+      tags: [applications]
+      summary: List applications with summarized status
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        "200":
+          description: Paginated applications.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationList" }
+        "401": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [applications]
+      summary: Create an application and queue its installation
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateApplicationRequest" }
+      responses:
+        "202":
+          description: Accepted; an operation has been queued.
+          headers:
+            Location:
+              description: URL of the created operation.
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AcceptResult" }
+        "401": { $ref: "#/components/responses/Error" }
+        "409":
+          description: Duplicate idempotency key with a different body, or a name conflict.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+        "422":
+          description: Unsupported specification.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+
+  /api/v1/apps/{id}:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    get:
+      tags: [applications]
+      summary: Application configuration, observed status, active operation, and version
+      responses:
+        "200":
+          description: Application detail. The ETag carries the current version.
+          headers:
+            ETag:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Application" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /api/v1/operations/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [operations]
+      summary: Durable operation progress, outcome, and recovery details
+      responses:
+        "200":
+          description: Operation state and ordered events.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Operation" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /api/v1/secrets:
+    get:
+      tags: [secrets]
+      summary: Secret metadata; values are never returned
+      responses:
+        "200":
+          description: Secret metadata.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SecretList" }
+        "401": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [secrets]
+      summary: Create a versioned secret before use in an application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateSecretRequest" }
+      responses:
+        "201":
+          description: Secret created with its first immutable version.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SecretMetadata" }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /api/v1/secrets/{id}/versions:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [secrets]
+      summary: Add an immutable replacement secret version
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SecretVersionRequest" }
+      responses:
+        "201":
+          description: New immutable version created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SecretVersionMetadata" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /api/v1/secrets/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    delete:
+      tags: [secrets]
+      summary: Delete a secret after verifying no active or rollback references
+      responses:
+        "204": { description: Secret deleted. }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409":
+          description: A referenced version prevents deletion (SECRET_IN_USE).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorBody" }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: platform_session
+    bootstrapToken:
+      type: http
+      scheme: bearer
+      description: Single-use bootstrap token presented to the local administrator.
+
+  parameters:
+    AppID:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Deduplicates retried submissions of the same mutation.
+      schema: { type: string, minLength: 1, maxLength: 200 }
+
+  responses:
+    Error:
+      description: Standard error envelope.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorBody" }
+
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ok] }
+
+    ReadyStatus:
+      type: object
+      required: [status, cluster]
+      properties:
+        status: { type: string, enum: [ready] }
+        cluster: { type: string, enum: [available, unavailable, unknown] }
+
+    SetupStatus:
+      type: object
+      required: [setupAvailable]
+      properties:
+        setupAvailable: { type: boolean }
+
+    SetupRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password: { type: string, minLength: 12, maxLength: 256 }
+
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password: { type: string, minLength: 1, maxLength: 256 }
+
+    Me:
+      type: object
+      required: [administratorId, sessionExpiresAt]
+      properties:
+        administratorId: { type: string }
+        sessionExpiresAt: { type: string, format: date-time }
+
+    System:
+      type: object
+      required: [version, architecture, clusterReachable]
+      properties:
+        version: { type: string }
+        architecture: { type: string, examples: [arm64, amd64] }
+        clusterReachable: { type: boolean }
+        capabilities:
+          type: array
+          items: { type: string }
+
+    ImageInspectRequest:
+      type: object
+      additionalProperties: false
+      required: [image]
+      properties:
+        image: { type: string, minLength: 1 }
+        registryCredentialId: { type: string }
+
+    ImageReport:
+      type: object
+      required: [digest, architectures]
+      properties:
+        digest: { type: string, examples: ["sha256:aaaa...."] }
+        architectures:
+          type: array
+          items: { type: string }
+        suggestedPort: { type: integer, minimum: 1, maximum: 65535 }
+
+    ResourceRequirements:
+      type: object
+      additionalProperties: false
+      properties:
+        cpuRequest: { type: string }
+        cpuLimit: { type: string }
+        memoryRequest: { type: string }
+        memoryLimit: { type: string }
+
+    SecretRefInput:
+      type: object
+      additionalProperties: false
+      required: [environmentVariable, secretId, version]
+      properties:
+        environmentVariable: { type: string, pattern: "^[a-zA-Z_][a-zA-Z0-9_]*$" }
+        secretId: { type: string }
+        version: { type: integer, minimum: 1 }
+
+    Exposure:
+      type: object
+      additionalProperties: false
+      required: [mode]
+      properties:
+        mode: { type: string, enum: [internal, lan] }
+        hostname: { type: string }
+
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        readinessPath: { type: string, pattern: "^/.*" }
+
+    CreateApplicationRequest:
+      type: object
+      additionalProperties: false
+      required: [name, image, containerPort, profile, exposure]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 63 }
+        image: { type: string, minLength: 1 }
+        registryCredentialId: { type: string }
+        containerPort: { type: integer, minimum: 1, maximum: 65535 }
+        profile: { type: string, enum: [http] }
+        replicas: { type: integer, minimum: 0, default: 1 }
+        environment:
+          type: object
+          additionalProperties: { type: string }
+        secretRefs:
+          type: array
+          items: { $ref: "#/components/schemas/SecretRefInput" }
+        resources: { $ref: "#/components/schemas/ResourceRequirements" }
+        health: { $ref: "#/components/schemas/Health" }
+        exposure: { $ref: "#/components/schemas/Exposure" }
+        storage:
+          description: Reserved for M5; must be null in the core prototype.
+          type: ["null"]
+
+    AcceptResult:
+      type: object
+      required: [applicationId, operationId, state]
+      properties:
+        applicationId: { type: string }
+        operationId: { type: string }
+        state: { $ref: "#/components/schemas/OperationState" }
+        deduplicated: { type: boolean }
+
+    OperationState:
+      type: string
+      enum: [queued, running, recovering, succeeded, failed, needs_attention]
+
+    ObservedStatus:
+      type: object
+      required: [phase, observedAt, stale]
+      properties:
+        phase: { type: string, enum: [deploying, updating, ready, degraded, stopped, failed, unknown] }
+        desiredReplicas: { type: integer }
+        readyReplicas: { type: integer }
+        workloadReady: { type: boolean }
+        routeReady: { type: boolean }
+        observedAt: { type: string, format: date-time }
+        stale: { type: boolean }
+
+    Application:
+      type: object
+      required: [id, name, version, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        version: { type: integer, format: int64 }
+        desiredRevision: { type: string }
+        lastSuccessfulRevision: { type: string }
+        activeOperationId: { type: string }
+        status: { $ref: "#/components/schemas/ObservedStatus" }
+
+    ApplicationSummary:
+      type: object
+      required: [id, name, version]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        version: { type: integer, format: int64 }
+        phase: { type: string }
+
+    ApplicationList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ApplicationSummary" }
+
+    OperationEvent:
+      type: object
+      required: [at, stage, message]
+      properties:
+        at: { type: string, format: date-time }
+        stage: { type: string }
+        message: { type: string }
+
+    Operation:
+      type: object
+      required: [id, applicationId, type, state]
+      properties:
+        id: { type: string }
+        applicationId: { type: string }
+        type: { type: string, enum: [create, update, restart, reapply, rollback, delete] }
+        state: { $ref: "#/components/schemas/OperationState" }
+        stage: { type: string }
+        recoveryOutcome: { type: string }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/OperationEvent" }
+
+    CreateSecretRequest:
+      type: object
+      additionalProperties: false
+      required: [name, data]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 253 }
+        data:
+          $ref: "#/components/schemas/SecretData"
+
+    SecretVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/SecretData"
+
+    SecretData:
+      type: object
+      additionalProperties: false
+      required: [value]
+      properties:
+        value: { type: string }
+      description: >-
+        Write-only secret material under the single supported key "value", which
+        the application chart references as secretKeyRef.key: value. Never
+        returned by any read. A per-reference key selector is a later extension.
+
+    SecretMetadata:
+      type: object
+      required: [id, name, versions]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        versions:
+          type: array
+          items: { $ref: "#/components/schemas/SecretVersionMetadata" }
+
+    SecretVersionMetadata:
+      type: object
+      required: [version, keys, createdAt]
+      properties:
+        version: { type: integer, minimum: 1 }
+        keys:
+          type: array
+          items: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    SecretList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/SecretMetadata" }
+
+    ErrorBody:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, requestId]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            field: { type: string }
+            requestId: { type: string }
+
+# All management endpoints require a session cookie unless they override security
+# locally (health and the credential-protected setup/session entry points).
+security:
+  - sessionCookie: []

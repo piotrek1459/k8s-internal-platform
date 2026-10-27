@@ -4,9 +4,12 @@ Engineering thesis project: **Design and implementation of kubernetes platform f
 
 The project aims to build a platform for deploying containerized applications on
 Kubernetes, using a Go service broker, Helm, infrastructure as code, monitoring,
-and logging. The initial implementation includes an HTTP demonstration application,
-an application Helm chart, and local K3s deployment and recovery tests. The broker
-and administrator UI remain planned components.
+and logging. The current implementation includes an HTTP demonstration
+application, an application Helm chart, local K3s deployment and recovery tests,
+and the **M2 durable backend**: an in-cluster Go broker with a management API, a
+durable SQLite operation queue, authentication, in-process Helm integration,
+status observation, image inspection, and versioned secrets. The administrator UI
+(M3) and reliable-lifecycle operations (M4) remain planned.
 
 ## Local application deployment
 
