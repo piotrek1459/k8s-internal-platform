@@ -33,5 +33,16 @@ for version in v1 v2 v3; do
         --tag "platform-demo:$version" \
         --metadata-file "$PLATFORM_LOCAL/images/$version-$mode.json" \
         "$PLATFORM_ROOT/examples/http-demo"
+    if [[ "$mode" == native ]]; then
+        # Tag and push via the host-side port (localhost:5001). Docker records the
+        # digest under this address; callers swap it for the cluster-visible name
+        # (k3d-platform-registry:5001) when building image references.
+        docker tag "platform-demo:$version" "localhost:5001/platform-demo:$version"
+        docker push "localhost:5001/platform-demo:$version"
+    fi
 done
-printf 'Completed %s demonstration image builds. No images were published.\n' "$mode"
+if [[ "$mode" == native ]]; then
+    printf 'Completed native demonstration image builds and pushed to %s.\n' "$PLATFORM_REGISTRY"
+else
+    printf 'Completed %s demonstration image builds. No images were published.\n' "$mode"
+fi

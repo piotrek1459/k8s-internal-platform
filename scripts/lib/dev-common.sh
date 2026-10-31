@@ -11,6 +11,13 @@ PLATFORM_CHART="$PLATFORM_ROOT/deploy/helm/application"
 PLATFORM_VALUES="$PLATFORM_CHART/examples/local.yaml"
 source "$PLATFORM_ROOT/dev/versions.env"
 PLATFORM_HELM="$PLATFORM_LOCAL/bin/helm"
+PLATFORM_REGISTRY_NAME=platform-registry
+PLATFORM_REGISTRY="k3d-$PLATFORM_REGISTRY_NAME:5001"
+# The registry is reachable from the Mac host on localhost:5001 (Docker maps the
+# container's port 5000 to host port 5001). The cluster nodes use the DNS name
+# k3d-platform-registry:5001 injected by k3d. Push with PLATFORM_REGISTRY_HOST;
+# reference images in specs with PLATFORM_REGISTRY.
+PLATFORM_REGISTRY_HOST="localhost:5001"
 
 require_command() {
     command -v "$1" >/dev/null 2>&1 || { printf 'Required command is unavailable: %s\n' "$1" >&2; exit 1; }

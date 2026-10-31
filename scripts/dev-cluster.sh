@@ -12,12 +12,17 @@ case "$action" in
     up)
         docker info >/dev/null
         mkdir -p "$PLATFORM_LOCAL"
+        # Create the local registry if it doesn't exist yet.
+        if ! k3d registry list -o json | python3 -c 'import json,sys; sys.exit(0 if any(x["name"] == "k3d-'"$PLATFORM_REGISTRY_NAME"'" for x in json.load(sys.stdin)) else 1)' 2>/dev/null; then
+            k3d registry create "$PLATFORM_REGISTRY_NAME" --port 5001
+        fi
         if k3d cluster list -o json | python3 -c 'import json,sys; sys.exit(0 if any(x["name"] == "platform-dev" for x in json.load(sys.stdin)) else 1)'; then
             [[ -f "$PLATFORM_LOCAL/cluster-owned" ]] || { printf 'Refusing to reuse an unrecognized platform-dev cluster.\n' >&2; exit 1; }
             KUBECONFIG="$PLATFORM_KUBECONFIG" k3d cluster start "$PLATFORM_CLUSTER" --wait --timeout 180s
         else
             KUBECONFIG="$PLATFORM_KUBECONFIG" k3d cluster create "$PLATFORM_CLUSTER" \
                 --servers 1 --agents 0 --image "$K3S_IMAGE" \
+                --registry-use "k3d-$PLATFORM_REGISTRY_NAME:5001" \
                 --k3s-arg '--secrets-encryption@server:0' \
                 --api-port 127.0.0.1:6445 \
                 --port '127.0.0.1:8082:8082@loadbalancer' \
@@ -49,6 +54,7 @@ case "$action" in
     down)
         [[ -f "$PLATFORM_LOCAL/cluster-owned" ]] || { printf 'No owned local cluster is recorded.\n' >&2; exit 1; }
         KUBECONFIG="$PLATFORM_KUBECONFIG" k3d cluster delete "$PLATFORM_CLUSTER"
+        k3d registry delete "k3d-$PLATFORM_REGISTRY_NAME" 2>/dev/null || true
         rm -f "$PLATFORM_LOCAL/cluster-owned" "$PLATFORM_KUBECONFIG"
         ;;
     status)

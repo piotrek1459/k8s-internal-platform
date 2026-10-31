@@ -85,13 +85,15 @@ gated so the default `go test` stays hermetic:
 
 ```bash
 ./scripts/dev-cluster.sh up
-./scripts/build-demo.sh native
-k3d image import platform-demo:v1 --cluster platform-dev
-# The broker deploys by digest, so provide the imported image's digest-pinned
-# reference (repo@sha256:...), not a tag:
-DIGEST=$(docker image inspect --format '{{.Id}}' platform-demo:v1)
-KUBECONFIG=.local/kubeconfig PLATFORM_INTEGRATION=1 \
-  PLATFORM_DEMO_IMAGE="platform-demo@${DIGEST}" \
+./scripts/build-demo.sh native   # builds and pushes to the local registry via localhost:5001
+# The broker deploys by digest. build-demo.sh pushes to the local registry so the
+# image gets a real RepoDigest that containerd inside the cluster can resolve.
+# Docker records the digest under the push address (localhost:5001); swap it for
+# the cluster-visible registry name (k3d-platform-registry:5001):
+RAW=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-demo:v1)
+DIGEST="${RAW/localhost:5001/k3d-platform-registry:5001}"
+KUBECONFIG="$(pwd)/.local/kubeconfig" PLATFORM_INTEGRATION=1 \
+  PLATFORM_DEMO_IMAGE="$DIGEST" \
   go -C broker test -tags integration ./integration/... -v
 ```
 
