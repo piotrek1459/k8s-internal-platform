@@ -40,30 +40,34 @@ inspection runs against an in-process OCI registry. No cluster is required.
 
 ## Manual broker installation on the local cluster
 
-1. Start the local cluster and build the demonstration image:
+1. Start the local cluster with its local registry and build the demonstration image:
 
    ```bash
    ./scripts/setup-dev-tools.sh
    ./scripts/dev-cluster.sh up
-   ./scripts/build-demo.sh native
+   ./scripts/build-demo.sh native   # builds and pushes all three demo versions to localhost:5001
    ```
 
-2. Build and import the broker image into the cluster:
+2. Build and push the broker image to the local registry:
 
    ```bash
-   docker build -t platform-broker:dev broker
-   k3d image import platform-broker:dev --cluster platform-dev
+   docker build -t localhost:5001/platform-broker:dev broker
+   docker push localhost:5001/platform-broker:dev
    ```
 
-3. Create the platform namespace and install the chart. The broker deploys
-   applications into `platform-apps` (created by `dev/namespace.yaml`) using its
-   own service account; no administrator kubeconfig is mounted.
+3. Create the platform namespace and install the chart using the digest-pinned
+   registry reference. The broker deploys applications into `platform-apps`
+   (created by `dev/namespace.yaml`) using its own service account; no
+   administrator kubeconfig is mounted.
 
    ```bash
    kubectl --kubeconfig .local/kubeconfig create namespace platform-system
+   RAW=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-broker:dev)
+   DIGEST="${RAW/localhost:5001/k3d-platform-registry:5001}"
    .local/bin/helm --kubeconfig .local/kubeconfig install platform deploy/helm/platform \
      --namespace platform-system \
-     --set image.repository=platform-broker --set image.tag=dev --set image.pullPolicy=Never \
+     --set "image.repository=${DIGEST%%@*}" \
+     --set "image.digest=${DIGEST##*@}" \
      --wait --timeout 120s
    ```
 
@@ -76,6 +80,34 @@ inspection runs against an in-process OCI registry. No cluster is required.
    kubectl --kubeconfig .local/kubeconfig -n platform-system port-forward svc/platform 8080:80 &
    curl -fsS http://127.0.0.1:8080/readyz
    ```
+
+5. Set up the admin account and deploy the demo app:
+
+   ```bash
+   TOKEN=<token-from-logs>
+   curl -fsS -X POST http://127.0.0.1:8080/api/v1/setup \
+     -H "Content-Type: application/json" \
+     -H "X-Requested-With: XMLHttpRequest" \
+     -H "Authorization: Bearer $TOKEN" \
+     -d '{"password":"changeme123456"}' -c /tmp/platform-cookies.txt
+
+   curl -fsS -X POST http://127.0.0.1:8080/api/v1/auth/session \
+     -H "Content-Type: application/json" \
+     -H "X-Requested-With: XMLHttpRequest" \
+     -d '{"password":"changeme123456"}' \
+     -c /tmp/platform-cookies.txt -b /tmp/platform-cookies.txt
+
+   DEMO=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-demo:v1 | sed 's|localhost:5001|k3d-platform-registry:5001|')
+   curl -fsS -X POST http://127.0.0.1:8080/api/v1/apps \
+     -H "Content-Type: application/json" \
+     -H "X-Requested-With: XMLHttpRequest" \
+     -H "Idempotency-Key: deploy-demo-001" \
+     -b /tmp/platform-cookies.txt \
+     -d "{\"name\":\"demo\",\"image\":\"$DEMO\",\"containerPort\":8080,\"profile\":\"http\",\"exposure\":{\"mode\":\"internal\"}}"
+   ```
+
+> **Shortcut:** `./scripts/dev-env.sh up` performs steps 1–4 automatically and
+> prints the bootstrap token and ready-to-run curl commands.
 
 ## Gated integration test
 

@@ -37,7 +37,6 @@ cmd_up() {
     docker push "$BROKER_PUSH"
 
     printf '\n==> Installing platform chart...\n'
-    BROKER_PUSH="localhost:5001/platform-broker:dev"
     RAW_DIGEST=$(docker image inspect --format '{{index .RepoDigests 0}}' "$BROKER_PUSH")
     # Swap push address for the cluster-visible registry name.
     DIGEST="${RAW_DIGEST/localhost:5001/$PLATFORM_REGISTRY}"
@@ -63,7 +62,10 @@ cmd_up() {
     fi
 
     printf '\n==> Broker is up. Starting port-forward to http://127.0.0.1:8080 ...\n'
-    # Kill any stale port-forward for this service.
+    # Kill any stale port-forward for this service. Note: if dev-env.sh up is
+    # run again and the broker pod restarts (e.g. after a code change), the
+    # port-forward will drop and must be restarted manually:
+    #   kubectl --kubeconfig .local/kubeconfig -n platform-system port-forward svc/platform 8080:80 &
     pkill -f "port-forward svc/platform 8080" 2>/dev/null || true
     kubectl --kubeconfig "$PLATFORM_KUBECONFIG" --context "$PLATFORM_CONTEXT" \
         -n "$PLATFORM_SYSTEM_NS" port-forward svc/platform 8080:80 \
@@ -96,17 +98,19 @@ cmd_up() {
     printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/setup \\\n'
     printf '        -H "Content-Type: application/json" \\\n'
     printf '        -H "X-Requested-With: XMLHttpRequest" \\\n'
-    printf '        -d "{\"token\":\"$TOKEN\",\"password\":\"changeme123456\"}" -c /tmp/platform-cookies.txt\n'
+    printf '        -H "Authorization: Bearer $TOKEN" \\\n'
+    printf '        -d '"'"'{"password":"changeme123456"}'"'"' -c /tmp/platform-cookies.txt\n'
     printf '\n      # 2. Login (creates a session cookie):\n'
-    printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/session \\\n'
+    printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/auth/session \\\n'
     printf '        -H "Content-Type: application/json" \\\n'
     printf '        -H "X-Requested-With: XMLHttpRequest" \\\n'
     printf '        -d '"'"'{"password":"changeme123456"}'"'"' -c /tmp/platform-cookies.txt -b /tmp/platform-cookies.txt\n'
     printf '\n      # 3. Deploy the demo app:\n'
     printf '      DEMO_IMAGE=$(docker image inspect --format '"'"'{{index .RepoDigests 0}}'"'"' localhost:5001/platform-demo:v1 | sed '"'"'s|localhost:5001|k3d-platform-registry:5001|'"'"')\n'
-    printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/applications \\\n'
+    printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/apps \\\n'
     printf '        -H "Content-Type: application/json" \\\n'
     printf '        -H "X-Requested-With: XMLHttpRequest" \\\n'
+    printf '        -H "Idempotency-Key: deploy-demo-001" \\\n'
     printf '        -b /tmp/platform-cookies.txt \\\n'
     printf '        -d "{\"name\":\"demo\",\"image\":\"$DEMO_IMAGE\",\"containerPort\":8080,\"profile\":\"http\",\"exposure\":{\"mode\":\"internal\"}}"\n'
 }
