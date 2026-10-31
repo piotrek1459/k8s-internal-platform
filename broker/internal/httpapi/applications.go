@@ -13,16 +13,55 @@ import (
 	"k8s-internal-platform/broker/internal/platform"
 )
 
-// maxBodyBytes bounds request bodies so a client cannot exhaust memory.
-const maxBodyBytes = 1 << 20 // 1 MiB
-
 func (r *Router) registerApplications() {
+	r.mux.HandleFunc("GET /api/v1/apps", r.protect(r.handleListApps))
 	r.mux.HandleFunc("POST /api/v1/apps", r.protect(r.handleCreateApp))
 	r.mux.HandleFunc("GET /api/v1/apps/{id}", r.protect(r.handleGetApp))
 	r.mux.HandleFunc("GET /api/v1/operations/{id}", r.protect(r.handleGetOperation))
 }
 
-// createAppBody mirrors the CreateApplicationRequest schema in api/openapi.yaml.
+// maxBodyBytes bounds request bodies so a client cannot exhaust memory.
+const maxBodyBytes = 1 << 20 // 1 MiB
+
+func (r *Router) handleListApps(w http.ResponseWriter, req *http.Request) {
+	reqID := requestID(req)
+	limit := parseIntParam(req, "limit", 50, 1, 100)
+	offset := parseIntParam(req, "offset", 0, 0, 1<<31)
+	apps, err := r.cfg.Store.ListApplications(req.Context(), limit, offset)
+	if err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	items := make([]map[string]any, 0, len(apps))
+	for _, app := range apps {
+		status, _ := r.cfg.Store.GetObservedStatus(req.Context(), app.ID)
+		items = append(items, map[string]any{
+			"id":      app.ID,
+			"name":    app.Name,
+			"version": app.Version,
+			"phase":   status.Phase,
+		})
+	}
+	writeJSON(w, r.cfg.Logger, http.StatusOK, map[string]any{"items": items})
+}
+
+// parseIntParam reads an integer query parameter, clamping to [min, max] and
+// falling back to defaultVal when the parameter is absent or unparseable.
+func parseIntParam(req *http.Request, name string, defaultVal, min, max int) int {
+	s := req.URL.Query().Get(name)
+	if s == "" {
+		return defaultVal
+	}
+	v, err := strconv.Atoi(s)
+	if err != nil || v < min {
+		return min
+	}
+	if v > max {
+		return max
+	}
+	return v
+}
+
 type createAppBody struct {
 	Name                 string            `json:"name"`
 	Image                string            `json:"image"`

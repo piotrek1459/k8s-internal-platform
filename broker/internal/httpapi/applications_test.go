@@ -61,6 +61,20 @@ func (f *fakeStore) GetOperation(_ context.Context, id string) (platform.Operati
 func (f *fakeStore) ListOperationEvents(_ context.Context, id string) ([]platform.OperationEvent, error) {
 	return f.events[id], nil
 }
+func (f *fakeStore) ListApplications(_ context.Context, limit, offset int) ([]platform.Application, error) {
+	out := make([]platform.Application, 0, len(f.apps))
+	for _, app := range f.apps {
+		out = append(out, app)
+	}
+	if offset >= len(out) {
+		return []platform.Application{}, nil
+	}
+	out = out[offset:]
+	if limit < len(out) {
+		out = out[:limit]
+	}
+	return out, nil
+}
 
 type countingEnqueuer struct{ woken int }
 

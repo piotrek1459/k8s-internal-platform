@@ -62,6 +62,8 @@ func NewRouter(cfg Config) *Router {
 	if cfg.Store != nil {
 		r.registerSecrets()
 	}
+	// SPA catch-all: must be registered last so API routes win.
+	r.registerUI()
 	return r
 }
 

@@ -31,6 +31,9 @@ cmd_up() {
     printf '\n==> Building demo images and pushing to local registry...\n'
     "$PLATFORM_ROOT/scripts/build-demo.sh" native
 
+    printf '\n==> Building admin UI and embedding into broker...\n'
+    "$PLATFORM_ROOT/scripts/build-ui.sh"
+
     printf '\n==> Building broker image...\n'
     BROKER_PUSH="localhost:5001/platform-broker:dev"
     docker build -t "$BROKER_PUSH" "$PLATFORM_ROOT/broker"
@@ -90,9 +93,11 @@ cmd_up() {
         | grep -A1 'Bootstrap token' | tail -1 || printf '    (token already consumed or not yet printed — check logs manually)\n'
 
     printf '\n==> Dev environment ready.\n'
-    printf '    API:       http://127.0.0.1:8080\n'
+    printf '    UI:        http://127.0.0.1:8080  (open in browser)\n'
+    printf '    API:       http://127.0.0.1:8080/api/v1/\n'
     printf '    Kubeconfig: %s\n' "$PLATFORM_KUBECONFIG"
-    printf '\n    Quick start:\n'
+    printf '\n    Open http://127.0.0.1:8080 to complete setup via the browser.\n'
+    printf '    Or use the curl quick start below:\n'
     printf '      # 1. Set up admin account (one-time):\n'
     printf '      TOKEN=<token-from-above>\n'
     printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/setup \\\n'
