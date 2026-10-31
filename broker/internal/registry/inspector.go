@@ -32,8 +32,9 @@ type CredentialResolver interface {
 type Inspector struct {
 	hostArch           string
 	resolver           CredentialResolver
-	transport          remote.Option // optional override for tests (e.g. a fake registry)
-	insecureRegistries []string      // hosts that must be accessed over plain HTTP
+	transport          remote.Option     // optional override for tests (e.g. a fake registry)
+	insecureRegistries []string          // hosts that must be accessed over plain HTTP
+	registryAliases    map[string]string // rewrite "host:extPort" -> "host:intPort" before inspection
 }
 
 // NewInspector builds an Inspector for the current host architecture. The
@@ -56,6 +57,15 @@ func (i *Inspector) WithInsecureRegistries(hosts []string) *Inspector {
 	return i
 }
 
+// WithRegistryAliases sets a rewrite map for registry addresses. Keys are the
+// addresses used in image references (e.g. "k3d-platform-registry:5001"); values
+// are the addresses the broker can actually reach (e.g. "k3d-platform-registry:5000").
+// Used when the image tag port differs from the in-cluster port (k3d dev setup).
+func (i *Inspector) WithRegistryAliases(aliases map[string]string) *Inspector {
+	i.registryAliases = aliases
+	return i
+}
+
 // WithRemoteOption injects a remote option, letting tests point the inspector at
 // an in-process fake registry.
 func (i *Inspector) WithRemoteOption(opt remote.Option) *Inspector {
@@ -70,7 +80,8 @@ var _ platform.ImageInspector = (*Inspector)(nil)
 // network failures are reported as retryable CodeRegistryUnavailable; a genuine
 // architecture mismatch is CodeImageArchUnsupported.
 func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID string) (platform.ImageReport, error) {
-	ref, err := name.ParseReference(imageRef, i.nameOptionsFor(imageRef)...)
+	inspectRef := i.applyAlias(imageRef)
+	ref, err := name.ParseReference(inspectRef, i.nameOptionsFor(inspectRef)...)
 	if err != nil {
 		return platform.ImageReport{}, platform.FieldErrorf(platform.CodeInvalidInput, "image",
 			"invalid image reference: %v", err)
@@ -199,6 +210,18 @@ func sortedKeys(set map[string]bool) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+func (i *Inspector) applyAlias(imageRef string) string {
+	for from, to := range i.registryAliases {
+		if strings.HasPrefix(imageRef, from+"/") {
+			return to + "/" + imageRef[len(from)+1:]
+		}
+		if strings.HasPrefix(imageRef, from+"@") {
+			return to + "@" + imageRef[len(from)+1:]
+		}
+	}
+	return imageRef
 }
 
 func (i *Inspector) nameOptionsFor(imageRef string) []name.Option {

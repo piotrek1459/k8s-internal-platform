@@ -39,3 +39,8 @@ secureCookies: false
 # Comma-separated list of registry host:port entries that speak plain HTTP
 # (no TLS). Used for local k3d registries in development.
 insecureRegistries: ""
+
+# Comma-separated "from=to" pairs: rewrite registry host:port in image refs
+# before inspection. Used when the image tag port differs from the in-cluster
+# port (k3d maps host :5001 → container :5000).
+registryAliases: ""
