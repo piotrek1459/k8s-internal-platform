@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"runtime"
 	"sort"
+	"strings"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
@@ -29,9 +30,10 @@ type CredentialResolver interface {
 // architecture the cluster nodes run (for example "arm64" on the reference Pi);
 // an image lacking a linux/<hostArch> variant is rejected.
 type Inspector struct {
-	hostArch  string
-	resolver  CredentialResolver
-	transport remote.Option // optional override for tests (e.g. a fake registry)
+	hostArch           string
+	resolver           CredentialResolver
+	transport          remote.Option // optional override for tests (e.g. a fake registry)
+	insecureRegistries []string      // hosts that must be accessed over plain HTTP
 }
 
 // NewInspector builds an Inspector for the current host architecture. The
@@ -44,6 +46,13 @@ func NewInspector(resolver CredentialResolver) *Inspector {
 // callers targeting a cluster whose architecture differs from the broker's).
 func (i *Inspector) WithHostArch(arch string) *Inspector {
 	i.hostArch = arch
+	return i
+}
+
+// WithInsecureRegistries marks a list of registry hostnames (host:port) as
+// plain-HTTP. Requests to these hosts skip TLS. Used for local k3d registries.
+func (i *Inspector) WithInsecureRegistries(hosts []string) *Inspector {
+	i.insecureRegistries = hosts
 	return i
 }
 
@@ -61,7 +70,7 @@ var _ platform.ImageInspector = (*Inspector)(nil)
 // network failures are reported as retryable CodeRegistryUnavailable; a genuine
 // architecture mismatch is CodeImageArchUnsupported.
 func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID string) (platform.ImageReport, error) {
-	ref, err := name.ParseReference(imageRef)
+	ref, err := name.ParseReference(imageRef, i.nameOptionsFor(imageRef)...)
 	if err != nil {
 		return platform.ImageReport{}, platform.FieldErrorf(platform.CodeInvalidInput, "image",
 			"invalid image reference: %v", err)
@@ -190,6 +199,15 @@ func sortedKeys(set map[string]bool) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+func (i *Inspector) nameOptionsFor(imageRef string) []name.Option {
+	for _, host := range i.insecureRegistries {
+		if strings.HasPrefix(imageRef, host+"/") || strings.HasPrefix(imageRef, host+"@") {
+			return []name.Option{name.Insecure}
+		}
+	}
+	return nil
 }
 
 // classifyRemoteError maps registry transport errors to domain errors. Transport

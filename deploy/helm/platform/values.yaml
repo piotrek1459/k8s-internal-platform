@@ -35,3 +35,7 @@ service:
 
 # When true, the broker sets Secure on session cookies (enable behind HTTPS).
 secureCookies: false
+
+# Comma-separated list of registry host:port entries that speak plain HTTP
+# (no TLS). Used for local k3d registries in development.
+insecureRegistries: ""

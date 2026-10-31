@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -46,6 +47,15 @@ func main() {
 func run(ctx context.Context, logger *slog.Logger) error {
 	addr := envOr("PLATFORM_LISTEN", "0.0.0.0:8080")
 	dbPath := envOr("PLATFORM_DB", "/var/lib/platform/platform.db")
+
+	var insecureRegistries []string
+	if v := os.Getenv("PLATFORM_INSECURE_REGISTRIES"); v != "" {
+		for _, h := range strings.Split(v, ",") {
+			if h = strings.TrimSpace(h); h != "" {
+				insecureRegistries = append(insecureRegistries, h)
+			}
+		}
+	}
 
 	db, err := store.Open(ctx, dbPath)
 	if err != nil {
@@ -80,7 +90,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		Factory:       applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
 		Auth:          authSvc,
 		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
-		Inspector:     registry.NewInspector(nil),
+		Inspector:     registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries),
 		Version:       buildVersion,
 	}
 
@@ -98,7 +108,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		if herr != nil {
 			return fmt.Errorf("init helm adapter: %w", herr)
 		}
-		inspector := registry.NewInspector(nil)
+		inspector := registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries)
 		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)
 		observer = operations.NewObserver(st, clusterClient, platform.SystemClock{}, logger)
 
