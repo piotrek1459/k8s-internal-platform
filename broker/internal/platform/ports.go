@@ -111,6 +111,11 @@ type Store interface {
 	CreateSession(ctx context.Context, s Session) error
 	GetSession(ctx context.Context, id string) (Session, error)
 	RevokeSession(ctx context.Context, id string) error
+
+	// Registry credentials. The plaintext password is stored only in Kubernetes.
+	CreateRegistryCredential(ctx context.Context, cred RegistryCredential) error
+	ListRegistryCredentials(ctx context.Context) ([]RegistryCredential, error)
+	DeleteRegistryCredential(ctx context.Context, id string) error
 }
 
 // ImageReport is the result of inspecting a registry image reference.

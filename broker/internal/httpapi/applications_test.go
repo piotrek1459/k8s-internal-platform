@@ -76,6 +76,16 @@ func (f *fakeStore) ListApplications(_ context.Context, limit, offset int) ([]pl
 	return out, nil
 }
 
+func (f *fakeStore) CreateRegistryCredential(_ context.Context, _ platform.RegistryCredential) error {
+	return nil
+}
+func (f *fakeStore) ListRegistryCredentials(_ context.Context) ([]platform.RegistryCredential, error) {
+	return nil, nil
+}
+func (f *fakeStore) DeleteRegistryCredential(_ context.Context, _ string) error {
+	return nil
+}
+
 type countingEnqueuer struct{ woken int }
 
 func (c *countingEnqueuer) Wake() { c.woken++ }

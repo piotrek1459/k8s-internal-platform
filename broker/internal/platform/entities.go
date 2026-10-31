@@ -176,6 +176,18 @@ type SecretVersion struct {
 	CreatedAt     time.Time
 }
 
+// RegistryCredential stores the metadata for a private registry credential.
+// The plaintext password is stored only in Kubernetes as an image pull secret.
+type RegistryCredential struct {
+	ID                 string
+	Label              string
+	Registry           string
+	Username           string
+	K8sSecretName      string
+	VerificationStatus string
+	CreatedAt          time.Time
+}
+
 // ObservedStatus is a point-in-time observation of a workload. Stale marks an
 // observation the broker could not refresh because the cluster was unreachable;
 // ObservedAt then refers to the last successful read.
