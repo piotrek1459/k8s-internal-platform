@@ -16,7 +16,6 @@ require_command k3d
 require_command kubectl
 require_helm
 
-BROKER_IMAGE="$PLATFORM_REGISTRY/platform-broker:dev"
 PLATFORM_SYSTEM_NS=platform-system
 PLATFORM_CHART_DIR="$PLATFORM_ROOT/deploy/helm/platform"
 
@@ -33,14 +32,14 @@ cmd_up() {
     "$PLATFORM_ROOT/scripts/build-demo.sh" native
 
     printf '\n==> Building broker image...\n'
-    docker build -t "$BROKER_IMAGE" "$PLATFORM_ROOT/broker"
-    docker push "${BROKER_IMAGE/$PLATFORM_REGISTRY/localhost:5001}"
+    BROKER_PUSH="localhost:5001/platform-broker:dev"
+    docker build -t "$BROKER_PUSH" "$PLATFORM_ROOT/broker"
+    docker push "$BROKER_PUSH"
 
     printf '\n==> Installing platform chart...\n'
-    PUSH_REF="${BROKER_IMAGE/$PLATFORM_REGISTRY/localhost:5001}"
-    RAW_DIGEST=$(docker image inspect --format '{{index .RepoDigests 0}}' "$PUSH_REF" 2>/dev/null || \
-                 docker image inspect --format '{{index .RepoDigests 0}}' "$BROKER_IMAGE" 2>/dev/null)
-    # Swap the push host for the cluster-visible registry name so k3d nodes can pull it.
+    BROKER_PUSH="localhost:5001/platform-broker:dev"
+    RAW_DIGEST=$(docker image inspect --format '{{index .RepoDigests 0}}' "$BROKER_PUSH")
+    # Swap push address for the cluster-visible registry name.
     DIGEST="${RAW_DIGEST/localhost:5001/$PLATFORM_REGISTRY}"
     REPO="${DIGEST%%@*}"
     SHA="${DIGEST##*@}"
@@ -104,7 +103,7 @@ cmd_up() {
     printf '        -H "X-Requested-With: XMLHttpRequest" \\\n'
     printf '        -d '"'"'{"password":"changeme123456"}'"'"' -c /tmp/platform-cookies.txt -b /tmp/platform-cookies.txt\n'
     printf '\n      # 3. Deploy the demo app:\n'
-    printf '      DEMO_IMAGE=$(docker image inspect --format '"'"'{{index .RepoDigests 0}}'"'"' k3d-platform-registry:5001/platform-demo:v1)\n'
+    printf '      DEMO_IMAGE=$(docker image inspect --format '"'"'{{index .RepoDigests 0}}'"'"' localhost:5001/platform-demo:v1 | sed '"'"'s|localhost:5001|k3d-platform-registry:5001|'"'"')\n'
     printf '      curl -fsS -X POST http://127.0.0.1:8080/api/v1/applications \\\n'
     printf '        -H "Content-Type: application/json" \\\n'
     printf '        -H "X-Requested-With: XMLHttpRequest" \\\n'
