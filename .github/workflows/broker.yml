@@ -1,0 +1,37 @@
+name: Broker
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Format / Vet / Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: broker
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: broker/go.mod
+          cache-dependency-path: broker/go.sum
+
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [[ -n "$unformatted" ]]; then
+            echo "Files not gofmt-clean:" >&2
+            echo "$unformatted" >&2
+            exit 1
+          fi
+
+      - name: Vet
+        run: GOTOOLCHAIN=local go vet ./...
+
+      - name: Test
+        run: GOTOOLCHAIN=local go test ./...

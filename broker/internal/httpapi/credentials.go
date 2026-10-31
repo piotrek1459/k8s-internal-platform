@@ -83,4 +83,3 @@ func (r *Router) handleDeleteCredential(w http.ResponseWriter, req *http.Request
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
-

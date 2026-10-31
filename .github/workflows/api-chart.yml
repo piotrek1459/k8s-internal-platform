@@ -1,0 +1,63 @@
+name: API & Chart
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  api:
+    name: OpenAPI spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate OpenAPI spec
+        run: python3 scripts/lib/validate_openapi.py api/openapi.yaml
+
+  chart:
+    name: Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: '3.17.0'
+
+      - name: Lint application chart
+        run: |
+          helm lint --strict deploy/helm/application \
+            --values deploy/helm/application/examples/local.yaml
+
+      - name: Render application chart (smoke)
+        run: |
+          helm template demo deploy/helm/application \
+            --namespace platform-apps \
+            --values deploy/helm/application/examples/local.yaml > /dev/null
+
+      - name: Lint platform chart
+        run: |
+          helm lint --strict deploy/helm/platform \
+            --set image.tag=dev
+
+      - name: Render platform chart (smoke)
+        run: |
+          helm template platform deploy/helm/platform \
+            --namespace platform-system \
+            --set image.tag=dev > /dev/null
+
+      - name: Embedded chart in sync with canonical
+        run: |
+          for rel in Chart.yaml values.yaml values.schema.json .helmignore \
+              templates/_helpers.tpl templates/deployment.yaml \
+              templates/ingress.yaml templates/service.yaml; do
+            if ! diff -q "deploy/helm/application/$rel" \
+                        "broker/internal/helm/chart/$rel" >/dev/null 2>&1; then
+              echo "Embedded broker chart out of sync: $rel" >&2
+              exit 1
+            fi
+          done
+          echo "Embedded chart matches canonical chart."
