@@ -242,6 +242,119 @@ paths:
               schema: { $ref: "#/components/schemas/Application" }
         "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [applications]
+      summary: Update image, configuration, resources, or replica count
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateApplicationRequest" }
+      responses:
+        "202": { $ref: "#/components/responses/Accepted" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "412": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [applications]
+      summary: Delete an application and remove its workload from the cluster
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [version]
+              properties:
+                version: { type: integer, description: "Optimistic lock version." }
+      responses:
+        "202": { $ref: "#/components/responses/Accepted" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "412": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/revisions:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    get:
+      tags: [applications]
+      summary: Ordered revision history for an application
+      responses:
+        "200":
+          description: Revision list, newest first.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RevisionList" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/restart:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    post:
+      tags: [applications]
+      summary: Restart an application with its current spec unchanged
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VersionBody" }
+      responses:
+        "202": { $ref: "#/components/responses/Accepted" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "412": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/reapply:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    post:
+      tags: [applications]
+      summary: Reapply the current desired spec to correct drift
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VersionBody" }
+      responses:
+        "202": { $ref: "#/components/responses/Accepted" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "412": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/rollback:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    post:
+      tags: [applications]
+      summary: Roll back to a prior succeeded revision
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RollbackRequest" }
+      responses:
+        "202": { $ref: "#/components/responses/Accepted" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "412": { $ref: "#/components/responses/Error" }
 
   /api/v1/operations/{id}:
     parameters:
@@ -351,6 +464,15 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorBody" }
+    Accepted:
+      description: Mutation accepted; poll the Location URL for outcome.
+      headers:
+        Location:
+          schema: { type: string }
+          description: URL of the created operation.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/AcceptResult" }
 
   schemas:
     HealthStatus:
@@ -609,6 +731,64 @@ components:
         items:
           type: array
           items: { $ref: "#/components/schemas/SecretMetadata" }
+
+    UpdateApplicationRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer, format: int64, description: "Optimistic lock version." }
+        image: { type: string, minLength: 1 }
+        registryCredentialId: { type: string }
+        containerPort: { type: integer, minimum: 1, maximum: 65535 }
+        replicas: { type: integer, minimum: 0 }
+        environment:
+          type: object
+          additionalProperties: { type: string }
+        secretRefs:
+          type: array
+          items: { $ref: "#/components/schemas/SecretRefInput" }
+        resources: { $ref: "#/components/schemas/ResourceRequirements" }
+        health: { $ref: "#/components/schemas/Health" }
+        exposure: { $ref: "#/components/schemas/Exposure" }
+
+    VersionBody:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer, format: int64, description: "Optimistic lock version." }
+
+    RollbackRequest:
+      type: object
+      additionalProperties: false
+      required: [revisionId, version]
+      properties:
+        revisionId: { type: string, description: "ID of a prior succeeded revision." }
+        version: { type: integer, format: int64, description: "Optimistic lock version." }
+
+    RevisionSummary:
+      type: object
+      required: [id, number, result, createdAt]
+      properties:
+        id: { type: string }
+        number: { type: integer, format: int64 }
+        result: { type: string, enum: [pending, succeeded, failed] }
+        frozenAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        spec:
+          type: object
+          properties:
+            image: { type: string }
+            replicas: { type: integer }
+
+    RevisionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/RevisionSummary" }
 
     ErrorBody:
       type: object

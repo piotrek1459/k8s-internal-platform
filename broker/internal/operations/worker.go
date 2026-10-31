@@ -180,6 +180,12 @@ func (w *Worker) executeDelete(ctx context.Context, op platform.Operation) {
 		w.logger.Error("transition_failed", "operation", op.ID, "error", err.Error())
 		return
 	}
+	// Mark the application row as deleted so the list endpoint excludes it. This
+	// runs after the lock is released; a failure here is logged but does not
+	// re-open the operation because the cluster resources are already gone.
+	if err := w.store.MarkApplicationDeleted(ctx, op.AppID); err != nil {
+		w.logger.Error("mark_deleted_failed", "app", op.AppID, "error", err.Error())
+	}
 	w.event(ctx, op.ID, "succeeded", "deletion completed; data retained")
 }
 
