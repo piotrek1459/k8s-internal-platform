@@ -11,7 +11,7 @@ import (
 // When the directory contains only the README placeholder (dev mode without a UI build),
 // the SPA handler is not registered and /api/* routes still work normally.
 
-//go:embed ui_dist
+//go:embed all:ui_dist
 var uiFS embed.FS
 
 // registerUI mounts the SPA under "/" if built assets are present in ui_dist.
