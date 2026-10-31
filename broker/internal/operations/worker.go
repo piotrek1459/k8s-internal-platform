@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/google/go-containerregistry/pkg/name"
@@ -195,7 +196,8 @@ func (w *Worker) freeze(ctx context.Context, op platform.Operation, rev platform
 	}
 
 	digest := rev.Spec.Image
-	resolvesDigest := op.Type == platform.OperationCreate || op.Type == platform.OperationUpdate
+	alreadyPinned := strings.Contains(rev.Spec.Image, "@sha256:")
+	resolvesDigest := (op.Type == platform.OperationCreate || op.Type == platform.OperationUpdate) && !alreadyPinned
 	if resolvesDigest && w.inspector != nil {
 		// Bound the inspection with its own deadline so a registry that accepts the
 		// connection and then stalls cannot block the serial worker. The outer ctx
