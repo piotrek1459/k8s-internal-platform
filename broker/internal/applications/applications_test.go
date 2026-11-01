@@ -152,6 +152,14 @@ func currentSpec() platform.RevisionSpec {
 	}
 }
 
+func currentRevision() platform.Revision {
+	return platform.Revision{
+		ID:    "rev_old",
+		AppID: "app_1",
+		Spec:  currentSpec(),
+	}
+}
+
 func assertMutation(t *testing.T, req platform.AcceptRequest, wantType platform.OperationType, wantVersion int64) {
 	t.Helper()
 	if req.IsNewApp {
@@ -189,14 +197,14 @@ func TestNewUpdateRequestBuildsConsistentRequest(t *testing.T) {
 func TestNewRestartRequestBuildsConsistentRequest(t *testing.T) {
 	f := Factory{IDs: &fixedIDs{}, Clock: fixedClock{t: time.Unix(0, 0).UTC()}}
 	app := existingApp()
-	req := f.NewRestartRequest(app, currentSpec(), app.Version, "idem-1", "hash-1", "admin", "req-1")
+	req := f.NewRestartRequest(app, currentRevision(), app.Version, "idem-1", "hash-1", "admin", "req-1")
 	assertMutation(t, req, platform.OperationRestart, app.Version)
 }
 
 func TestNewReapplyRequestBuildsConsistentRequest(t *testing.T) {
 	f := Factory{IDs: &fixedIDs{}, Clock: fixedClock{t: time.Unix(0, 0).UTC()}}
 	app := existingApp()
-	req := f.NewReapplyRequest(app, currentSpec(), app.Version, "idem-1", "hash-1", "admin", "req-1")
+	req := f.NewReapplyRequest(app, currentRevision(), app.Version, "idem-1", "hash-1", "admin", "req-1")
 	assertMutation(t, req, platform.OperationReapply, app.Version)
 }
 

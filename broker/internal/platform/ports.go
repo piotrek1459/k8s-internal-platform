@@ -115,9 +115,10 @@ type Store interface {
 	GetSession(ctx context.Context, id string) (Session, error)
 	RevokeSession(ctx context.Context, id string) error
 
-	// MarkApplicationDeleted sets the deleted flag on an application after a
-	// successful delete operation removes the workload from the cluster.
-	MarkApplicationDeleted(ctx context.Context, appID string) error
+	// TransitionDeleteOperation atomically transitions a delete operation to
+	// OperationSucceeded and sets deleted=1 on the application in the same
+	// transaction, closing the window that existed when these were two separate calls.
+	TransitionDeleteOperation(ctx context.Context, operationID string) error
 
 	// Registry credentials. The plaintext password is stored only in Kubernetes.
 	CreateRegistryCredential(ctx context.Context, cred RegistryCredential) error

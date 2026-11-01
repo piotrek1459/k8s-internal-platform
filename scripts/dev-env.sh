@@ -52,7 +52,7 @@ cmd_up() {
     # rewrites the address before connecting. The registry speaks plain HTTP.
     DEV_VALUES_FILE="$(mktemp /tmp/platform-dev-values-XXXXXX.yaml)"
     cat > "$DEV_VALUES_FILE" <<YAML
-insecureRegistries: "${PLATFORM_REGISTRY}"
+insecureRegistries: "${PLATFORM_REGISTRY},${PLATFORM_REGISTRY_NAME}:5000"
 registryAliases: "${PLATFORM_REGISTRY}=${PLATFORM_REGISTRY_NAME}:5000"
 YAML
 

@@ -214,7 +214,13 @@
 							<td class="py-2 pr-4">
 								<StatusBadge phase={rev.result} />
 							</td>
-							<td class="py-2 pr-4 font-mono text-xs truncate max-w-xs">{rev.spec.image}</td>
+							<td class="py-2 pr-4 font-mono text-xs truncate max-w-xs">
+								{#if rev.frozenImage}
+									{rev.frozenImage}
+								{:else}
+									{rev.spec.image}
+								{/if}
+							</td>
 							<td class="py-2 pr-4">{rev.spec.replicas}</td>
 							<td class="py-2 pr-4 text-xs text-gray-500">{new Date(rev.createdAt).toLocaleString()}</td>
 							<td class="py-2">

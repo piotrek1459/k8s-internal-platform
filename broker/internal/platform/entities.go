@@ -90,6 +90,7 @@ type FrozenSpec struct {
 	SecretVersions      []SecretRef
 	ValuesHash          string
 	FrozenAt            time.Time
+	RestartToken        string // non-empty only for OperationRestart; forces a pod template change
 }
 
 // RevisionResult records the terminal outcome of a revision.

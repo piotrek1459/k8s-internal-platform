@@ -104,6 +104,10 @@
       },
       "if": {"properties": {"enabled": {"const": true}}},
       "then": {"properties": {"hostname": {"$ref": "#/definitions/dnsName"}}}
+    },
+    "restartToken": {
+      "type": "string",
+      "description": "Unique token set by the broker for restart operations; changes the pod template annotation to trigger a rolling restart."
     }
   },
   "definitions": {

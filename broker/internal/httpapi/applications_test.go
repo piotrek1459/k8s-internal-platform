@@ -85,7 +85,7 @@ func (f *fakeStore) ListRegistryCredentials(_ context.Context) ([]platform.Regis
 func (f *fakeStore) DeleteRegistryCredential(_ context.Context, _ string) error {
 	return nil
 }
-func (f *fakeStore) MarkApplicationDeleted(_ context.Context, _ string) error { return nil }
+func (f *fakeStore) TransitionDeleteOperation(_ context.Context, _ string) error { return nil }
 func (f *fakeStore) GetApplicationWithRevision(_ context.Context, id string) (platform.Application, platform.Revision, error) {
 	app, ok := f.apps[id]
 	if !ok {

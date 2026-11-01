@@ -67,10 +67,11 @@ Choose an exposure mode:
 | Mode | Description |
 |---|---|
 | `internal` | ClusterIP only, no ingress. Reachable from within the cluster. |
-| `private` | Ingress on the private entrypoint (LAN/VPN only). |
-| `public` | Ingress on the public entrypoint (internet-facing). |
+| `lan` | Ingress on the private entrypoint (LAN/VPN only). Requires a hostname. |
 
-For `private` or `public`, supply a hostname (e.g. `myapp.example.com`).
+`public` exposure is defined but not yet available in this version of the platform.
+
+For `lan` mode, supply a hostname (e.g. `myapp.example.com`).
 
 ### Step 4 — Configuration
 

@@ -176,15 +176,12 @@ func (w *Worker) executeDelete(ctx context.Context, op platform.Operation) {
 		w.needsAttention(ctx, op, "delete", err)
 		return
 	}
-	if err := w.store.TransitionOperation(ctx, op.ID, platform.OperationSucceeded, "succeeded", ""); err != nil {
+	// TransitionDeleteOperation atomically marks the operation succeeded and sets
+	// deleted=1 on the application in one transaction, eliminating the crash window
+	// that existed between the two separate calls.
+	if err := w.store.TransitionDeleteOperation(ctx, op.ID); err != nil {
 		w.logger.Error("transition_failed", "operation", op.ID, "error", err.Error())
 		return
-	}
-	// Mark the application row as deleted so the list endpoint excludes it. This
-	// runs after the lock is released; a failure here is logged but does not
-	// re-open the operation because the cluster resources are already gone.
-	if err := w.store.MarkApplicationDeleted(ctx, op.AppID); err != nil {
-		w.logger.Error("mark_deleted_failed", "app", op.AppID, "error", err.Error())
 	}
 	w.event(ctx, op.ID, "succeeded", "deletion completed; data retained")
 }
@@ -224,6 +221,12 @@ func (w *Worker) freeze(ctx context.Context, op platform.Operation, rev platform
 	frozen := platform.FrozenSpec{
 		ImageDigest: digest,
 		FrozenAt:    w.clock.Now(),
+	}
+	// Restart operations need a unique pod template annotation so Kubernetes
+	// triggers a rolling restart even when all other values are identical. Using
+	// the operation ID as the token makes it stable across worker retries.
+	if op.Type == platform.OperationRestart {
+		frozen.RestartToken = op.ID
 	}
 	if len(rev.Spec.SecretRefs) > 0 {
 		frozen.SecretVersions = rev.Spec.SecretRefs

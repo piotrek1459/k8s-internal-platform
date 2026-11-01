@@ -46,9 +46,9 @@ func (f Factory) NewUpdateRequest(app platform.Application, spec platform.Revisi
 }
 
 // NewRestartRequest builds the AcceptRequest for restarting an application with
-// its current spec unchanged. The caller must supply the current desired revision's
-// spec so the worker can apply (and re-freeze) it.
-func (f Factory) NewRestartRequest(app platform.Application, currentSpec platform.RevisionSpec, expectVersion int64, idempotencyKey, requestHash, actor, requestID string) platform.AcceptRequest {
+// its current spec unchanged. The current revision's frozen spec (if set) is
+// carried forward so the worker skips re-inspection and keeps the same digest.
+func (f Factory) NewRestartRequest(app platform.Application, currentRevision platform.Revision, expectVersion int64, idempotencyKey, requestHash, actor, requestID string) platform.AcceptRequest {
 	revID := f.IDs.NewID("rev")
 	opID := f.IDs.NewID("op")
 	now := f.Clock.Now()
@@ -57,7 +57,8 @@ func (f Factory) NewRestartRequest(app platform.Application, currentSpec platfor
 		ID:      revID,
 		AppID:   app.ID,
 		Number:  app.Version + 1,
-		Spec:    currentSpec,
+		Spec:    currentRevision.Spec,
+		Frozen:  currentRevision.Frozen, // carry frozen digest so worker skips re-inspection
 		Result:  platform.RevisionPending,
 		Actor:   actor,
 		Created: now,
@@ -130,8 +131,9 @@ func (f Factory) NewRollbackRequest(app platform.Application, targetRevision pla
 }
 
 // NewReapplyRequest builds the AcceptRequest for reapplying the current desired
-// spec verbatim (drift recovery). The caller supplies the current revision's spec.
-func (f Factory) NewReapplyRequest(app platform.Application, currentSpec platform.RevisionSpec, expectVersion int64, idempotencyKey, requestHash, actor, requestID string) platform.AcceptRequest {
+// spec verbatim (drift recovery). The current revision's frozen spec (if set) is
+// carried forward so the worker skips re-inspection and keeps the same digest.
+func (f Factory) NewReapplyRequest(app platform.Application, currentRevision platform.Revision, expectVersion int64, idempotencyKey, requestHash, actor, requestID string) platform.AcceptRequest {
 	revID := f.IDs.NewID("rev")
 	opID := f.IDs.NewID("op")
 	now := f.Clock.Now()
@@ -140,7 +142,8 @@ func (f Factory) NewReapplyRequest(app platform.Application, currentSpec platfor
 		ID:      revID,
 		AppID:   app.ID,
 		Number:  app.Version + 1,
-		Spec:    currentSpec,
+		Spec:    currentRevision.Spec,
+		Frozen:  currentRevision.Frozen, // carry frozen digest so worker skips re-inspection
 		Result:  platform.RevisionPending,
 		Actor:   actor,
 		Created: now,

@@ -65,3 +65,6 @@ ingress:
   tls:
     enabled: false
     secretName: ""
+
+# Set by the broker for restart operations to force a pod template change.
+restartToken: ""

@@ -64,8 +64,16 @@ func (r *Router) handleUpdateApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// When the caller did not supply a new image reference, substitute the currently
+	// deployed digest. This prevents the worker from re-resolving the tag on a
+	// config-only PATCH, which would silently upgrade to a newer image if the tag
+	// has moved since the original deploy.
+	if body.Image == nil && curRev.Frozen != nil && curRev.Frozen.ImageDigest != "" {
+		newSpec.Image = curRev.Frozen.ImageDigest
+	}
+
 	raw, _ := json.Marshal(body)
-	hash := hashBytes(raw)
+	hash := requestHash(id, "update", raw)
 	acceptReq := r.cfg.Factory.NewUpdateRequest(app, newSpec, body.Version, idemKey, hash, actorFrom(req), reqID)
 
 	res, err := r.cfg.Store.AcceptOperation(req.Context(), acceptReq)
@@ -148,7 +156,7 @@ func (r *Router) handleDeleteApp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	raw, _ := json.Marshal(body)
-	hash := hashBytes(raw)
+	hash := requestHash(id, "delete", raw)
 	acceptReq := r.cfg.Factory.NewDeleteRequest(app, body.Version, idemKey, hash, actorFrom(req), reqID)
 
 	res, err := r.cfg.Store.AcceptOperation(req.Context(), acceptReq)
@@ -193,8 +201,8 @@ func (r *Router) handleRestartApp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	raw, _ := json.Marshal(body)
-	hash := hashBytes(raw)
-	acceptReq := r.cfg.Factory.NewRestartRequest(app, curRev.Spec, body.Version, idemKey, hash, actorFrom(req), reqID)
+	hash := requestHash(id, "restart", raw)
+	acceptReq := r.cfg.Factory.NewRestartRequest(app, curRev, body.Version, idemKey, hash, actorFrom(req), reqID)
 
 	res, err := r.cfg.Store.AcceptOperation(req.Context(), acceptReq)
 	if err != nil {
@@ -234,8 +242,8 @@ func (r *Router) handleReapplyApp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	raw, _ := json.Marshal(body)
-	hash := hashBytes(raw)
-	acceptReq := r.cfg.Factory.NewReapplyRequest(app, curRev.Spec, body.Version, idemKey, hash, actorFrom(req), reqID)
+	hash := requestHash(id, "reapply", raw)
+	acceptReq := r.cfg.Factory.NewReapplyRequest(app, curRev, body.Version, idemKey, hash, actorFrom(req), reqID)
 
 	res, err := r.cfg.Store.AcceptOperation(req.Context(), acceptReq)
 	if err != nil {
@@ -301,7 +309,7 @@ func (r *Router) handleRollbackApp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	raw, _ := json.Marshal(body)
-	hash := hashBytes(raw)
+	hash := requestHash(id, "rollback", raw)
 	acceptReq := r.cfg.Factory.NewRollbackRequest(app, targetRev, body.Version, idemKey, hash, actorFrom(req), reqID)
 
 	res, err := r.cfg.Store.AcceptOperation(req.Context(), acceptReq)
@@ -347,6 +355,7 @@ func (r *Router) handleListRevisions(w http.ResponseWriter, req *http.Request) {
 		}
 		if rev.Frozen != nil {
 			item["frozenAt"] = rev.Frozen.FrozenAt
+			item["frozenImage"] = rev.Frozen.ImageDigest
 		}
 		items = append(items, item)
 	}
@@ -367,4 +376,17 @@ func acceptResult(res platform.AcceptResult) map[string]any {
 func hashBytes(b []byte) string {
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:])
+}
+
+// requestHash produces a hash that uniquely identifies a specific operation type
+// on a specific application with a specific body. Scoping by appID and opType
+// prevents cross-application and cross-operation idempotency key collisions.
+func requestHash(appID, opType string, body []byte) string {
+	h := sha256.New()
+	h.Write([]byte(appID))
+	h.Write([]byte{0})
+	h.Write([]byte(opType))
+	h.Write([]byte{0})
+	h.Write(body)
+	return hex.EncodeToString(h.Sum(nil))
 }

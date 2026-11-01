@@ -22,6 +22,10 @@ spec:
     metadata:
       labels:
         {{- include "application.labels" . | nindent 8 }}
+      {{- if .Values.restartToken }}
+      annotations:
+        platform.k8s.io/restart-token: {{ .Values.restartToken | quote }}
+      {{- end }}
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false

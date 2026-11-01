@@ -113,6 +113,7 @@ export interface Revision {
 	number: number;
 	result: 'pending' | 'succeeded' | 'failed';
 	frozenAt?: string;
+	frozenImage?: string;
 	createdAt: string;
 	spec: {
 		image: string;

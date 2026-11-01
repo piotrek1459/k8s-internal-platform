@@ -81,7 +81,7 @@ var _ platform.ImageInspector = (*Inspector)(nil)
 // architecture mismatch is CodeImageArchUnsupported.
 func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID string) (platform.ImageReport, error) {
 	inspectRef := i.applyAlias(imageRef)
-	ref, err := name.ParseReference(inspectRef, i.nameOptionsFor(inspectRef)...)
+	ref, err := name.ParseReference(inspectRef, i.nameOptionsFor(imageRef, inspectRef)...)
 	if err != nil {
 		return platform.ImageReport{}, platform.FieldErrorf(platform.CodeInvalidInput, "image",
 			"invalid image reference: %v", err)
@@ -224,9 +224,16 @@ func (i *Inspector) applyAlias(imageRef string) string {
 	return imageRef
 }
 
-func (i *Inspector) nameOptionsFor(imageRef string) []name.Option {
+// nameOptionsFor returns name.Insecure when either the original or the aliased
+// image reference matches a configured insecure registry host. Both addresses are
+// checked because applyAlias rewrites the host before ParseReference is called,
+// and the caller may have listed either the external or the internal address.
+func (i *Inspector) nameOptionsFor(originalRef, aliasedRef string) []name.Option {
 	for _, host := range i.insecureRegistries {
-		if strings.HasPrefix(imageRef, host+"/") || strings.HasPrefix(imageRef, host+"@") {
+		prefix1 := host + "/"
+		prefix2 := host + "@"
+		if strings.HasPrefix(originalRef, prefix1) || strings.HasPrefix(originalRef, prefix2) ||
+			strings.HasPrefix(aliasedRef, prefix1) || strings.HasPrefix(aliasedRef, prefix2) {
 			return []name.Option{name.Insecure}
 		}
 	}
