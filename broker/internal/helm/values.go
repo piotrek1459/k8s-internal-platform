@@ -39,6 +39,7 @@ func BuildValues(appID string, rev platform.Revision) (map[string]any, error) {
 		"resources":        resourceValues(spec.Resources),
 		"probes":           probeValues(spec.Health),
 		"ingress":          ingressValues(spec.Exposure),
+		"restartToken":     rev.Frozen.RestartToken,
 	}
 	return values, nil
 }

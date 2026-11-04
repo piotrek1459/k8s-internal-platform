@@ -62,6 +62,9 @@ type Store interface {
 
 	GetApplication(ctx context.Context, id string) (Application, error)
 	ListApplications(ctx context.Context, limit, offset int) ([]Application, error)
+	// GetApplicationWithRevision fetches an application and its current desired
+	// revision in a single logical call. Used by mutation handlers.
+	GetApplicationWithRevision(ctx context.Context, appID string) (Application, Revision, error)
 	GetRevision(ctx context.Context, id string) (Revision, error)
 	ListRevisions(ctx context.Context, appID string) ([]Revision, error)
 	GetOperation(ctx context.Context, id string) (Operation, error)
@@ -111,6 +114,11 @@ type Store interface {
 	CreateSession(ctx context.Context, s Session) error
 	GetSession(ctx context.Context, id string) (Session, error)
 	RevokeSession(ctx context.Context, id string) error
+
+	// TransitionDeleteOperation atomically transitions a delete operation to
+	// OperationSucceeded and sets deleted=1 on the application in the same
+	// transaction, closing the window that existed when these were two separate calls.
+	TransitionDeleteOperation(ctx context.Context, operationID string) error
 
 	// Registry credentials. The plaintext password is stored only in Kubernetes.
 	CreateRegistryCredential(ctx context.Context, cred RegistryCredential) error

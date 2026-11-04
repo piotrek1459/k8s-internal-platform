@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"runtime"
 	"sort"
+	"strings"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
@@ -29,9 +30,11 @@ type CredentialResolver interface {
 // architecture the cluster nodes run (for example "arm64" on the reference Pi);
 // an image lacking a linux/<hostArch> variant is rejected.
 type Inspector struct {
-	hostArch  string
-	resolver  CredentialResolver
-	transport remote.Option // optional override for tests (e.g. a fake registry)
+	hostArch           string
+	resolver           CredentialResolver
+	transport          remote.Option     // optional override for tests (e.g. a fake registry)
+	insecureRegistries []string          // hosts that must be accessed over plain HTTP
+	registryAliases    map[string]string // rewrite "host:extPort" -> "host:intPort" before inspection
 }
 
 // NewInspector builds an Inspector for the current host architecture. The
@@ -44,6 +47,22 @@ func NewInspector(resolver CredentialResolver) *Inspector {
 // callers targeting a cluster whose architecture differs from the broker's).
 func (i *Inspector) WithHostArch(arch string) *Inspector {
 	i.hostArch = arch
+	return i
+}
+
+// WithInsecureRegistries marks a list of registry hostnames (host:port) as
+// plain-HTTP. Requests to these hosts skip TLS. Used for local k3d registries.
+func (i *Inspector) WithInsecureRegistries(hosts []string) *Inspector {
+	i.insecureRegistries = hosts
+	return i
+}
+
+// WithRegistryAliases sets a rewrite map for registry addresses. Keys are the
+// addresses used in image references (e.g. "k3d-platform-registry:5001"); values
+// are the addresses the broker can actually reach (e.g. "k3d-platform-registry:5000").
+// Used when the image tag port differs from the in-cluster port (k3d dev setup).
+func (i *Inspector) WithRegistryAliases(aliases map[string]string) *Inspector {
+	i.registryAliases = aliases
 	return i
 }
 
@@ -61,7 +80,8 @@ var _ platform.ImageInspector = (*Inspector)(nil)
 // network failures are reported as retryable CodeRegistryUnavailable; a genuine
 // architecture mismatch is CodeImageArchUnsupported.
 func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID string) (platform.ImageReport, error) {
-	ref, err := name.ParseReference(imageRef)
+	inspectRef := i.applyAlias(imageRef)
+	ref, err := name.ParseReference(inspectRef, i.nameOptionsFor(imageRef, inspectRef)...)
 	if err != nil {
 		return platform.ImageReport{}, platform.FieldErrorf(platform.CodeInvalidInput, "image",
 			"invalid image reference: %v", err)
@@ -190,6 +210,34 @@ func sortedKeys(set map[string]bool) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+func (i *Inspector) applyAlias(imageRef string) string {
+	for from, to := range i.registryAliases {
+		if strings.HasPrefix(imageRef, from+"/") {
+			return to + "/" + imageRef[len(from)+1:]
+		}
+		if strings.HasPrefix(imageRef, from+"@") {
+			return to + "@" + imageRef[len(from)+1:]
+		}
+	}
+	return imageRef
+}
+
+// nameOptionsFor returns name.Insecure when either the original or the aliased
+// image reference matches a configured insecure registry host. Both addresses are
+// checked because applyAlias rewrites the host before ParseReference is called,
+// and the caller may have listed either the external or the internal address.
+func (i *Inspector) nameOptionsFor(originalRef, aliasedRef string) []name.Option {
+	for _, host := range i.insecureRegistries {
+		prefix1 := host + "/"
+		prefix2 := host + "@"
+		if strings.HasPrefix(originalRef, prefix1) || strings.HasPrefix(originalRef, prefix2) ||
+			strings.HasPrefix(aliasedRef, prefix1) || strings.HasPrefix(aliasedRef, prefix2) {
+			return []name.Option{name.Insecure}
+		}
+	}
+	return nil
 }
 
 // classifyRemoteError maps registry transport errors to domain errors. Transport

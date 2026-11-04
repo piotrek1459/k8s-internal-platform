@@ -85,6 +85,20 @@ func (f *fakeStore) ListRegistryCredentials(_ context.Context) ([]platform.Regis
 func (f *fakeStore) DeleteRegistryCredential(_ context.Context, _ string) error {
 	return nil
 }
+func (f *fakeStore) TransitionDeleteOperation(_ context.Context, _ string) error { return nil }
+func (f *fakeStore) GetApplicationWithRevision(_ context.Context, id string) (platform.Application, platform.Revision, error) {
+	app, ok := f.apps[id]
+	if !ok {
+		return platform.Application{}, platform.Revision{}, platform.Errorf(platform.CodeNotFound, "application %q not found", id)
+	}
+	return app, platform.Revision{}, nil
+}
+func (f *fakeStore) ListRevisions(_ context.Context, _ string) ([]platform.Revision, error) {
+	return nil, nil
+}
+func (f *fakeStore) GetRevision(_ context.Context, _ string) (platform.Revision, error) {
+	return platform.Revision{}, nil
+}
 
 type countingEnqueuer struct{ woken int }
 

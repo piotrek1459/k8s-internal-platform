@@ -1,4 +1,4 @@
-// Types mirroring api/openapi.yaml (M2/M3 subset).
+// Types mirroring api/openapi.yaml (M2/M3/M4 subset).
 
 export interface SetupStatus {
 	setupAvailable: boolean;
@@ -106,4 +106,17 @@ export interface CreateApplicationRequest {
 	};
 	health?: { readinessPath?: string };
 	exposure: { mode: string; hostname?: string };
+}
+
+export interface Revision {
+	id: string;
+	number: number;
+	result: 'pending' | 'succeeded' | 'failed';
+	frozenAt?: string;
+	frozenImage?: string;
+	createdAt: string;
+	spec: {
+		image: string;
+		replicas: number;
+	};
 }

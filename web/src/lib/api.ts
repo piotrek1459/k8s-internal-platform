@@ -7,6 +7,7 @@ import type {
 	Me,
 	Operation,
 	RegistryCredential,
+	Revision,
 	Secret,
 	SetupStatus,
 	SystemInfo
@@ -93,6 +94,61 @@ export function createApp(
 	body: CreateApplicationRequest
 ): Promise<AcceptResult> {
 	return requestWithHeaders('POST', '/api/v1/apps', body, { 'Idempotency-Key': idempotencyKey });
+}
+
+export function updateApp(
+	id: string,
+	idempotencyKey: string,
+	body: Record<string, unknown>
+): Promise<AcceptResult> {
+	return requestWithHeaders('PATCH', `/api/v1/apps/${id}`, body, {
+		'Idempotency-Key': idempotencyKey
+	});
+}
+
+export function deleteApp(
+	id: string,
+	idempotencyKey: string,
+	version: number
+): Promise<AcceptResult> {
+	return requestWithHeaders('DELETE', `/api/v1/apps/${id}`, { version }, {
+		'Idempotency-Key': idempotencyKey
+	});
+}
+
+export function restartApp(
+	id: string,
+	idempotencyKey: string,
+	version: number
+): Promise<AcceptResult> {
+	return requestWithHeaders('POST', `/api/v1/apps/${id}/restart`, { version }, {
+		'Idempotency-Key': idempotencyKey
+	});
+}
+
+export function reapplyApp(
+	id: string,
+	idempotencyKey: string,
+	version: number
+): Promise<AcceptResult> {
+	return requestWithHeaders('POST', `/api/v1/apps/${id}/reapply`, { version }, {
+		'Idempotency-Key': idempotencyKey
+	});
+}
+
+export function rollbackApp(
+	id: string,
+	idempotencyKey: string,
+	revisionId: string,
+	version: number
+): Promise<AcceptResult> {
+	return requestWithHeaders('POST', `/api/v1/apps/${id}/rollback`, { revisionId, version }, {
+		'Idempotency-Key': idempotencyKey
+	});
+}
+
+export function listRevisions(id: string): Promise<{ items: Revision[] }> {
+	return request('GET', `/api/v1/apps/${id}/revisions`);
 }
 
 // --- Operations ---

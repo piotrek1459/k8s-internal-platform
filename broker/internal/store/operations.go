@@ -70,10 +70,10 @@ func (s *Store) FreezeExecutionSpec(ctx context.Context, revisionID string, spec
 	res, err := s.db.sql.ExecContext(ctx,
 		`UPDATE revisions
 		 SET frozen = 1, image_digest = ?, chart_version = ?, chart_artifact_digest = ?,
-		     secret_versions_json = ?, values_hash = ?, frozen_at = ?
+		     secret_versions_json = ?, values_hash = ?, frozen_at = ?, restart_token = ?
 		 WHERE id = ? AND frozen = 0`,
 		spec.ImageDigest, spec.ChartVersion, spec.ChartArtifactDigest,
-		secretVersJSON, spec.ValuesHash, formatTime(spec.FrozenAt), revisionID)
+		secretVersJSON, spec.ValuesHash, formatTime(spec.FrozenAt), spec.RestartToken, revisionID)
 	if err != nil {
 		return fmt.Errorf("freeze revision: %w", err)
 	}

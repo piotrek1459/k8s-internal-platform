@@ -1,79 +1,112 @@
 # k8s-internal-platform
 
-Engineering thesis project: **Design and implementation of kubernetes platform for containerized application deployment**.
+An internal application platform built on Kubernetes. Administrators deploy and
+operate containerised HTTP applications through a browser UI or REST API, without
+writing Kubernetes YAML or running Helm commands directly.
 
-The project aims to build a platform for deploying containerized applications on
-Kubernetes, using a Go service broker, Helm, infrastructure as code, monitoring,
-and logging. The current implementation includes an HTTP demonstration
-application, an application Helm chart, local K3s deployment and recovery tests,
-and the **M2 durable backend**: an in-cluster Go broker with a management API, a
-durable SQLite operation queue, authentication, in-process Helm integration,
-status observation, image inspection, and versioned secrets. The administrator UI
-(M3) and reliable-lifecycle operations (M4) remain planned.
+Built as an engineering thesis project at Silesian University of Technology.
 
-## Local application deployment
+## What is built
 
-With Docker running and k3d, kubectl, Python 3, and curl available:
+Milestones M0–M4 are complete:
 
-```bash
-./scripts/setup-dev-tools.sh
-./scripts/build-demo.sh native
-./scripts/dev-cluster.sh up
-./scripts/test-local.sh
-```
+| Milestone | Outcome |
+|---|---|
+| M0 | K3s baseline, application Helm chart, local lifecycle test |
+| M1 | Multi-architecture demo image, ARM64/AMD64 CI artifacts |
+| M2 | Go broker: durable operation queue, SQLite, in-cluster Helm, auth, image inspection, secrets |
+| M3 | Embedded Svelte 5 SPA: six screens, wizard deploy flow, operation progress |
+| M4 | Full lifecycle API: update, restart, reapply, rollback, delete; revision history; operation page |
 
-The workflow uses a separate local K3s cluster, retains images locally, and
-preserves the default Kubernetes context. Successful verification leaves v2 of
-the demonstration application running at `http://demo.localhost:8082/version`.
-The [local development guide](docs/local-development.md) describes prerequisites,
-network boundaries, multi-architecture builds, evidence, and cleanup.
-
-## Building the thesis
-
-
-From the repository root, run:
-
-```bash
-./scripts/build-book.sh
-```
-
-On macOS, the script starts Docker Desktop if the engine is unavailable and waits
-up to 120 seconds for it to become ready. It then builds the LaTeX image and
-compiles `book/main.tex`. The first run requires internet access to download
-TeX Live packages and may take several minutes. Later runs use Docker's cache.
-
-Output: **[book/build/main.pdf](book/build/main.pdf)**.
-Build log: `book/build/main.log`.
-The script does not update the `book/main.pdf` supplied with the template.
-
-You can also use `make -C book` or run the script by its absolute path from any
-directory. Run the same command again after editing the thesis. `latexmk`
-manages the pdfLaTeX and BibTeX passes, cross-references, and table of contents.
+The platform runs as a single binary inside the cluster. It embeds the admin UI
+as static assets, manages a SQLite database on a PVC, and drives Helm to install
+and update applications in a dedicated namespace.
 
 ## Repository layout
 
-```text
-book/               LaTeX template and thesis content
-broker/             Go service for managing deployments
-deploy/helm/        Helm charts and deployment configuration
-infra/terraform/    infrastructure definitions
-observability/      monitoring and logging configuration
-examples/           demonstration applications
-tests/              test scenarios and experiments
-docs/               project scope, plan, and decisions
-docker/latex/       thesis build image
-scripts/            helper scripts
+```
+api/                OpenAPI specification (api/openapi.yaml)
+book/               LaTeX thesis document
+broker/             Go broker source
+  cmd/platform/     main binary
+  internal/
+    applications/   deployment policy (validation, factory methods)
+    auth/           session authentication
+    cluster/        Kubernetes client wrapper
+    helm/           Helm adapter
+    httpapi/        HTTP handlers and router
+    operations/     worker, observer, recovery
+    platform/       domain types and port interfaces
+    registry/       image inspection
+    store/          SQLite persistence
+deploy/helm/
+  application/      Helm chart for managed applications
+  platform/         Helm chart for the broker itself
+docs/               Design documents and guides
+  user/             User-facing guides
+  contributor/      Contributor and development guides
+examples/           Demo application source
+infra/              Terraform (planned)
+observability/      Monitoring and logging (planned)
+scripts/            Helper scripts
+tests/              Test scenarios and experiment evidence
+web/                Svelte 5 SPA source
 ```
 
-The [project outline](docs/project-outline.md) describes the proposed scope and
-its relationship to the supplied requirements. The broker, Terraform, and
-observability directories remain placeholders for subsequent implementation.
+## Prerequisites
 
-The detailed [application platform plan](docs/app-plan.md) is an index linking
-focused documents: [architecture](docs/architecture.md),
-[API and data model](docs/api-and-data.md),
-[networking and security](docs/networking-and-security.md),
-[operations](docs/operations.md), and
-[milestones](docs/milestones.md). It covers both the Raspberry Pi reference host
-and the rented-server target, components, UI, API, deployment workflows, and
-implementation milestones.
+| Tool | Purpose |
+|---|---|
+| Docker Desktop | Container builds and k3d nodes |
+| k3d ≥ 5.8 | Local Kubernetes cluster |
+| kubectl | Cluster commands |
+| Helm ≥ 3.17 | Chart operations |
+| Go ≥ 1.25 | Broker development |
+| Node.js 22 + npm | UI development |
+| Python 3 | OpenAPI validation script |
+
+Install dev tools (Helm, pinned versions):
+
+```bash
+./scripts/setup-dev-tools.sh
+```
+
+## Quick start
+
+```bash
+# 1. Start the local cluster, build everything, deploy the broker
+./scripts/dev-env.sh up
+
+# 2. Open the UI
+open http://127.0.0.1:8080
+
+# 3. Complete one-time setup using the bootstrap token printed by the script
+#    (or retrieve it later):
+./scripts/dev-env.sh token
+```
+
+Follow the setup wizard in the browser to create an admin password, then log in.
+
+To deploy the bundled demo application, get its image reference:
+
+```bash
+docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-demo:v1 \
+  | sed 's|localhost:5001|k3d-platform-registry:5001|'
+```
+
+Paste the resulting digest reference into the **Image reference** field in the
+New Application wizard. Use container port `8080` and profile `http`.
+
+Tear everything down:
+
+```bash
+./scripts/dev-env.sh down
+```
+
+## Documentation
+
+- [User guide](docs/user/README.md) — UI walkthrough, application lifecycle, operations
+- [API reference](docs/user/api-reference.md) — all endpoints, request/response shapes
+- [Contributor guide](docs/contributor/README.md) — development setup, checks, CI
+- [Architecture](docs/architecture.md) — system design and component layout
+- [Local development (M0–M1)](docs/local-development.md) — baseline K3s workflow

@@ -75,12 +75,13 @@ func scanRevision(sc interface{ Scan(...any) error }) (platform.Revision, error)
 		secretVers   sql.NullString
 		valuesHash   sql.NullString
 		frozenAt     sql.NullString
+		restartToken string
 		result       string
 		createdAt    string
 	)
 	if err := sc.Scan(&rev.ID, &rev.AppID, &rev.Number, &specJSON, &frozen,
 		&imageDigest, &chartVersion, &chartDigest, &secretVers, &valuesHash, &frozenAt,
-		&result, &rev.Actor, &createdAt); err != nil {
+		&restartToken, &result, &rev.Actor, &createdAt); err != nil {
 		return platform.Revision{}, err
 	}
 	if err := json.Unmarshal([]byte(specJSON), &rev.Spec); err != nil {
@@ -95,6 +96,7 @@ func scanRevision(sc interface{ Scan(...any) error }) (platform.Revision, error)
 			ChartArtifactDigest: chartDigest.String,
 			ValuesHash:          valuesHash.String,
 			FrozenAt:            parseTime(frozenAt.String),
+			RestartToken:        restartToken,
 		}
 		if secretVers.Valid && secretVers.String != "" {
 			if err := json.Unmarshal([]byte(secretVers.String), &fs.SecretVersions); err != nil {
@@ -107,7 +109,7 @@ func scanRevision(sc interface{ Scan(...any) error }) (platform.Revision, error)
 }
 
 const revisionColumns = `id, app_id, number, spec_json, frozen, image_digest, chart_version,
-	chart_artifact_digest, secret_versions_json, values_hash, frozen_at, result, actor, created_at`
+	chart_artifact_digest, secret_versions_json, values_hash, frozen_at, restart_token, result, actor, created_at`
 
 func (s *Store) GetRevision(ctx context.Context, id string) (platform.Revision, error) {
 	row := s.db.sql.QueryRowContext(ctx,

@@ -79,6 +79,14 @@ spec:
               value: {{ .Values.appsNamespace | quote }}
             - name: PLATFORM_SECURE_COOKIES
               value: {{ .Values.secureCookies | quote }}
+            {{- if .Values.insecureRegistries }}
+            - name: PLATFORM_INSECURE_REGISTRIES
+              value: {{ .Values.insecureRegistries | quote }}
+            {{- end }}
+            {{- if .Values.registryAliases }}
+            - name: PLATFORM_REGISTRY_ALIASES
+              value: {{ .Values.registryAliases | quote }}
+            {{- end }}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

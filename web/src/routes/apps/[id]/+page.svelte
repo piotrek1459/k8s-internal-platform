@@ -2,15 +2,36 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { getApp, ApiError } from '$lib/api.js';
+	import {
+		getApp, listRevisions,
+		restartApp, reapplyApp, rollbackApp, deleteApp,
+		ApiError
+	} from '$lib/api.js';
 	import StatusBadge from '$components/StatusBadge.svelte';
-	import type { Application } from '$lib/types.js';
+	import type { Application, Revision } from '$lib/types.js';
 
 	const id = $derived(page.params.id ?? '');
 	let app = $state<Application | null>(null);
+	let revisions = $state<Revision[]>([]);
 	let loading = $state(true);
 	let error = $state('');
 	let activeTab = $state<'overview' | 'events' | 'history'>('overview');
+	let actionError = $state('');
+	let actionPending = $state(false);
+
+	function newKey() {
+		return crypto.randomUUID();
+	}
+
+	async function loadRevisions() {
+		if (!app) return;
+		try {
+			const res = await listRevisions(id);
+			revisions = res.items;
+		} catch {
+			// non-fatal
+		}
+	}
 
 	onMount(async () => {
 		try {
@@ -23,6 +44,63 @@
 			loading = false;
 		}
 	});
+
+	async function handleRestart() {
+		if (!app || actionPending) return;
+		actionPending = true;
+		actionError = '';
+		try {
+			const res = await restartApp(id, newKey(), app.version);
+			goto(`/apps/${id}/operation?op=${res.operationId}`);
+		} catch (e) {
+			actionError = e instanceof Error ? e.message : 'Restart failed';
+		} finally {
+			actionPending = false;
+		}
+	}
+
+	async function handleReapply() {
+		if (!app || actionPending) return;
+		actionPending = true;
+		actionError = '';
+		try {
+			const res = await reapplyApp(id, newKey(), app.version);
+			goto(`/apps/${id}/operation?op=${res.operationId}`);
+		} catch (e) {
+			actionError = e instanceof Error ? e.message : 'Reapply failed';
+		} finally {
+			actionPending = false;
+		}
+	}
+
+	async function handleRollback(revisionId: string) {
+		if (!app || actionPending) return;
+		actionPending = true;
+		actionError = '';
+		try {
+			const res = await rollbackApp(id, newKey(), revisionId, app.version);
+			goto(`/apps/${id}/operation?op=${res.operationId}`);
+		} catch (e) {
+			actionError = e instanceof Error ? e.message : 'Rollback failed';
+		} finally {
+			actionPending = false;
+		}
+	}
+
+	async function handleDelete() {
+		if (!app || actionPending) return;
+		if (!confirm(`Delete application "${app.name}"? This cannot be undone.`)) return;
+		actionPending = true;
+		actionError = '';
+		try {
+			const res = await deleteApp(id, newKey(), app.version);
+			goto(`/apps/${id}/operation?op=${res.operationId}`);
+		} catch (e) {
+			actionError = e instanceof Error ? e.message : 'Delete failed';
+		} finally {
+			actionPending = false;
+		}
+	}
 </script>
 
 {#if loading}
@@ -41,11 +119,38 @@
 		<a href="/apps" class="text-sm text-gray-500 hover:text-gray-700">← Applications</a>
 	</div>
 
+	<!-- Action bar -->
+	<div class="flex flex-wrap gap-2 mb-6">
+		<button
+			onclick={handleRestart}
+			disabled={actionPending || !!app.activeOperationId}
+			class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+		>Restart</button>
+		<button
+			onclick={handleReapply}
+			disabled={actionPending || !!app.activeOperationId}
+			class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+		>Reapply</button>
+		<a
+			href="/apps/{id}/update"
+			class="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded {app.activeOperationId ? 'opacity-40 pointer-events-none' : ''}"
+		>Update</a>
+		<button
+			onclick={handleDelete}
+			disabled={actionPending || !!app.activeOperationId}
+			class="px-3 py-1.5 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
+		>Delete</button>
+	</div>
+
+	{#if actionError}
+		<div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">{actionError}</div>
+	{/if}
+
 	<!-- Tabs -->
 	<div class="border-b border-gray-200 mb-6 flex gap-6">
 		{#each [['overview', 'Overview'], ['events', 'Events'], ['history', 'History']] as [tab, label]}
 			<button
-				onclick={() => activeTab = tab as typeof activeTab}
+				onclick={() => { activeTab = tab as typeof activeTab; if (tab === 'history') loadRevisions(); }}
 				class="pb-2 text-sm border-b-2 transition-colors
 					{activeTab === tab ? 'border-blue-600 text-blue-700 font-medium' : 'border-transparent text-gray-500 hover:text-gray-700'}"
 			>{label}</button>
@@ -88,8 +193,49 @@
 			{/if}
 		</p>
 	{:else if activeTab === 'history'}
-		<p class="text-sm text-gray-500">
-			Desired revision: <span class="font-mono">{app.desiredRevision || '—'}</span>
-		</p>
+		{#if revisions.length === 0}
+			<p class="text-sm text-gray-500">No revisions loaded.</p>
+		{:else}
+			<table class="w-full text-sm border-collapse">
+				<thead>
+					<tr class="text-left text-xs text-gray-500 border-b border-gray-200">
+						<th class="pb-2 pr-4">#</th>
+						<th class="pb-2 pr-4">Result</th>
+						<th class="pb-2 pr-4">Image</th>
+						<th class="pb-2 pr-4">Replicas</th>
+						<th class="pb-2 pr-4">Created</th>
+						<th class="pb-2"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each revisions as rev}
+						<tr class="border-b border-gray-100 hover:bg-gray-50">
+							<td class="py-2 pr-4 font-mono text-xs text-gray-500">{rev.number}</td>
+							<td class="py-2 pr-4">
+								<StatusBadge phase={rev.result} />
+							</td>
+							<td class="py-2 pr-4 font-mono text-xs truncate max-w-xs">
+								{#if rev.frozenImage}
+									{rev.frozenImage}
+								{:else}
+									{rev.spec.image}
+								{/if}
+							</td>
+							<td class="py-2 pr-4">{rev.spec.replicas}</td>
+							<td class="py-2 pr-4 text-xs text-gray-500">{new Date(rev.createdAt).toLocaleString()}</td>
+							<td class="py-2">
+								{#if rev.result === 'succeeded' && rev.id !== app.desiredRevision}
+									<button
+										onclick={() => handleRollback(rev.id)}
+										disabled={actionPending || !!app!.activeOperationId}
+										class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded disabled:opacity-40"
+									>Roll back</button>
+								{/if}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{/if}
 	{/if}
 {/if}

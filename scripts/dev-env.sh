@@ -46,10 +46,21 @@ cmd_up() {
     REPO="${DIGEST%%@*}"
     SHA="${DIGEST##*@}"
 
+    # k3d maps host :5001 → registry container :5000 internally. The broker's
+    # image inspector must use port 5000 to reach the registry from inside the
+    # cluster, but images are tagged with :5001. Supply an alias so the inspector
+    # rewrites the address before connecting. The registry speaks plain HTTP.
+    DEV_VALUES_FILE="$(mktemp /tmp/platform-dev-values-XXXXXX.yaml)"
+    cat > "$DEV_VALUES_FILE" <<YAML
+insecureRegistries: "${PLATFORM_REGISTRY},${PLATFORM_REGISTRY_NAME}:5000"
+registryAliases: "${PLATFORM_REGISTRY}=${PLATFORM_REGISTRY_NAME}:5000"
+YAML
+
     if platform_helm -n "$PLATFORM_SYSTEM_NS" status platform >/dev/null 2>&1; then
         printf '    Platform release already exists — upgrading.\n'
         platform_helm upgrade platform "$PLATFORM_CHART_DIR" \
             --namespace "$PLATFORM_SYSTEM_NS" --create-namespace \
+            -f "$DEV_VALUES_FILE" \
             --set "image.repository=$REPO" \
             --set "image.digest=$SHA" \
             --set "image.pullPolicy=Always" \
@@ -58,11 +69,13 @@ cmd_up() {
         platform_kubectl create namespace "$PLATFORM_SYSTEM_NS" 2>/dev/null || true
         platform_helm install platform "$PLATFORM_CHART_DIR" \
             --namespace "$PLATFORM_SYSTEM_NS" \
+            -f "$DEV_VALUES_FILE" \
             --set "image.repository=$REPO" \
             --set "image.digest=$SHA" \
             --set "image.pullPolicy=Always" \
             --wait --timeout 120s
     fi
+    rm -f "$DEV_VALUES_FILE"
 
     printf '\n==> Broker is up. Starting port-forward to http://127.0.0.1:8080 ...\n'
     # Kill any stale port-forward for this service. Note: if dev-env.sh up is

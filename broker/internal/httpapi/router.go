@@ -57,6 +57,7 @@ func NewRouter(cfg Config) *Router {
 		r.registerAuth()
 	}
 	r.registerApplications()
+	r.registerApplicationMutations()
 	r.registerImages()
 	r.registerSystem()
 	if cfg.Store != nil {

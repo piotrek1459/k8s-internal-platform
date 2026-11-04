@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -46,6 +47,25 @@ func main() {
 func run(ctx context.Context, logger *slog.Logger) error {
 	addr := envOr("PLATFORM_LISTEN", "0.0.0.0:8080")
 	dbPath := envOr("PLATFORM_DB", "/var/lib/platform/platform.db")
+
+	var insecureRegistries []string
+	if v := os.Getenv("PLATFORM_INSECURE_REGISTRIES"); v != "" {
+		for _, h := range strings.Split(v, ",") {
+			if h = strings.TrimSpace(h); h != "" {
+				insecureRegistries = append(insecureRegistries, h)
+			}
+		}
+	}
+
+	registryAliases := map[string]string{}
+	if v := os.Getenv("PLATFORM_REGISTRY_ALIASES"); v != "" {
+		for _, pair := range strings.Split(v, ",") {
+			pair = strings.TrimSpace(pair)
+			if k, val, ok := strings.Cut(pair, "="); ok {
+				registryAliases[strings.TrimSpace(k)] = strings.TrimSpace(val)
+			}
+		}
+	}
 
 	db, err := store.Open(ctx, dbPath)
 	if err != nil {
@@ -80,7 +100,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		Factory:       applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
 		Auth:          authSvc,
 		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
-		Inspector:     registry.NewInspector(nil),
+		Inspector:     registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases),
 		Version:       buildVersion,
 	}
 
@@ -98,7 +118,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		if herr != nil {
 			return fmt.Errorf("init helm adapter: %w", herr)
 		}
-		inspector := registry.NewInspector(nil)
+		inspector := registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases)
 		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)
 		observer = operations.NewObserver(st, clusterClient, platform.SystemClock{}, logger)
 

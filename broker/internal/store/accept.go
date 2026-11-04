@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -183,12 +184,37 @@ func guardExistingApplication(ctx context.Context, tx *sql.Tx, appID string, exp
 }
 
 func insertRevision(ctx context.Context, tx *sql.Tx, rev platform.Revision, now string) error {
+	if rev.Frozen == nil {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO revisions (id, app_id, number, spec_json, frozen, result, actor, created_at)
+			 VALUES (?, ?, ?, ?, 0, 'pending', ?, ?)`,
+			rev.ID, rev.AppID, rev.Number, mustJSON(rev.Spec), rev.Actor, now)
+		if err != nil {
+			return fmt.Errorf("insert revision: %w", err)
+		}
+		return nil
+	}
+
+	// Insert with frozen fields pre-populated (e.g. for rollback, which reuses a
+	// prior revision's already-resolved digest and skips re-inspection).
+	secretsJSON := "null"
+	if len(rev.Frozen.SecretVersions) > 0 {
+		b, _ := json.Marshal(rev.Frozen.SecretVersions)
+		secretsJSON = string(b)
+	}
+	frozenAt := formatTime(rev.Frozen.FrozenAt)
 	_, err := tx.ExecContext(ctx,
-		`INSERT INTO revisions (id, app_id, number, spec_json, frozen, result, actor, created_at)
-		 VALUES (?, ?, ?, ?, 0, 'pending', ?, ?)`,
-		rev.ID, rev.AppID, rev.Number, mustJSON(rev.Spec), rev.Actor, now)
+		`INSERT INTO revisions
+		 (id, app_id, number, spec_json, frozen, image_digest, chart_version,
+		  chart_artifact_digest, secret_versions_json, values_hash, frozen_at,
+		  restart_token, result, actor, created_at)
+		 VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`,
+		rev.ID, rev.AppID, rev.Number, mustJSON(rev.Spec),
+		rev.Frozen.ImageDigest, rev.Frozen.ChartVersion, rev.Frozen.ChartArtifactDigest,
+		secretsJSON, rev.Frozen.ValuesHash, frozenAt, rev.Frozen.RestartToken,
+		rev.Actor, now)
 	if err != nil {
-		return fmt.Errorf("insert revision: %w", err)
+		return fmt.Errorf("insert frozen revision: %w", err)
 	}
 	return nil
 }
