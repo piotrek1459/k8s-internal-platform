@@ -1,263 +1,122 @@
 # Contributor guide
 
-Everything you need to develop, test, and ship changes to the platform.
+## One local entry point
 
-## Contents
-
-- [Repository structure](#repository-structure)
-- [Development environment](#development-environment)
-- [Running checks](#running-checks)
-- [CI workflows](#ci-workflows)
-- [Broker development](#broker-development)
-- [UI development](#ui-development)
-- [Adding an API endpoint](#adding-an-api-endpoint)
-- [Configuration reference](#configuration-reference)
-- [Scripts reference](#scripts-reference)
-
----
-
-## Repository structure
-
-```
-broker/             Go source (single binary: API + embedded UI + worker)
-web/                Svelte 5 SPA (built and embedded into the broker)
-api/                OpenAPI specification
-deploy/helm/        Helm charts
-scripts/            Helper scripts (check-*, dev-*, build-*)
-.github/workflows/  CI: broker.yml, ui.yml, api-chart.yml
-```
-
-The broker embeds the compiled UI from `broker/internal/httpapi/ui_dist/`. Run
-`./scripts/build-ui.sh` to rebuild and copy the assets before building the broker
-image.
-
----
-
-## Development environment
-
-**Prerequisites:** Docker Desktop, k3d, kubectl, Helm, Go ≥ 1.25, Node 22, Python 3.
+`scripts/platform.sh` contains the shared build and local execution workflow.
+Defaults match the working `platform-local` environment. The default Kubernetes
+context is never switched. Cluster commands explicitly select
+`.local/platform-local.kubeconfig` and `k3d-platform-local`.
 
 ```bash
-./scripts/setup-dev-tools.sh   # downloads pinned Helm into .local/bin/
-./scripts/dev-env.sh up        # cluster + registry + broker deployed + port-forward
+./scripts/platform.sh build          # UI + broker + native demo images only
+./scripts/platform.sh up             # build + registry + cluster install + UI forward
+./scripts/platform.sh up --no-ui     # installation without a long-running forward
+./scripts/platform.sh ui             # foreground UI forward
+./scripts/platform.sh demo v2        # build/publish one demo version
+./scripts/platform.sh image v2       # exact digest for UI/API input
+./scripts/platform.sh status
+./scripts/platform.sh stop           # retain cluster, registry and metadata
 ```
 
-The dev environment creates a k3d cluster (`platform-dev`) with a local registry
-(`k3d-platform-registry`, exposed as `localhost:5001` on the host). The broker is
-installed via the platform Helm chart with a values override that configures the
-k3d registry for insecure (plain HTTP) access.
+`build` needs Docker and Node/npm. `up` additionally needs k3d, kubectl, Python 3,
+curl, tar and shasum. The pinned Helm version from `dev/versions.env` is installed
+automatically. The Go compiler for runtime image builds runs inside Docker.
 
-To rebuild and redeploy after a Go or UI change:
+The UI build performs `npm ci`, builds static assets and copies them into
+`broker/internal/httpapi/ui_dist/` before compiling the broker image. Generated
+assets remain ignored by Git. The standalone broker Dockerfile expects those
+assets to have been generated when a UI is required.
+
+Advanced targets:
 
 ```bash
-./scripts/build-ui.sh          # rebuild SPA and copy assets into broker/
-docker build -t localhost:5001/platform-broker:dev broker/
-docker push localhost:5001/platform-broker:dev
-DIGEST=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-broker:dev \
-  | sed 's|localhost:5001|k3d-platform-registry:5001|')
-REPO="${DIGEST%%@*}"; SHA="${DIGEST##*@}"
-# write a values override then helm upgrade (see dev-env.sh cmd_up for the full snippet)
+./scripts/platform.sh build-ui
+./scripts/platform.sh build-demo native  # local images only; no registry required
+./scripts/platform.sh build-demo multi   # ARM64/AMD64 OCI archives under .local/images/
+./scripts/platform.sh tools
 ```
 
-For iterating on the broker only (no UI change), skip `build-ui.sh`.
+## Local configuration
 
----
+| Environment variable | Default |
+| --- | --- |
+| `PLATFORM_CLUSTER_NAME` | `platform-local` |
+| `PLATFORM_REGISTRY_PORT` | `5002` |
+| `PLATFORM_API_PORT` | `6446` |
+| `PLATFORM_UI_PORT` | `8080` |
+| `PLATFORM_APP_PORT` | `8081` |
 
-## Running checks
+The registry name derives from the cluster name: `k3d-<cluster>-registry`.
+Registry, API and forwarded listeners bind to `127.0.0.1`. Container workloads
+use the registry's container address; Docker publishes through localhost. The
+broker chart receives an explicit alias from the published registry identity to
+the container's HTTP port 5000.
 
-All checks are hermetic — no running cluster required.
+A separate environment uses a different cluster name and unused ports. Export
+these settings in every terminal interacting with that environment:
 
 ```bash
-./scripts/check-broker.sh   # gofmt + go vet + go test ./...
-./scripts/check-ui.sh       # svelte-check + eslint + vite build
-./scripts/check-api.sh      # OpenAPI structural validation
-./scripts/check-chart.sh    # helm lint + helm template (both charts)
+export PLATFORM_CLUSTER_NAME=platform-experiment
+export PLATFORM_REGISTRY_PORT=5003
+export PLATFORM_API_PORT=6447
+export PLATFORM_UI_PORT=18080
+export PLATFORM_APP_PORT=18081
+./scripts/platform.sh up
 ```
 
-Run all four before opening a PR. CI runs the same checks.
+An existing cluster requires its matching repository kubeconfig and expected
+local API endpoint. A mismatched registry setup is reported as an error; the
+script does not silently recreate a cluster. The historical `platform-dev`
+baseline is separate from the default platform installation.
 
----
-
-## CI workflows
-
-Three GitHub Actions workflows run on every PR and on push to `main`:
-
-### `.github/workflows/broker.yml`
-- `gofmt -l` — fails if any file is not formatted
-- `go vet ./...`
-- `go test ./...`
-
-Working directory: `broker/`. Uses `actions/setup-go@v5` with `go-version-file`.
-
-### `.github/workflows/ui.yml`
-- `npm ci`
-- `npm run check` (svelte-check)
-- `npm run lint` (eslint)
-- `npm run build` (vite)
-
-Working directory: `web/`. Uses `actions/setup-node@v4` with npm cache on
-`web/package-lock.json`. The lock file must be committed.
-
-### `.github/workflows/api-chart.yml`
-- Installs `pyyaml` then runs `python3 scripts/lib/validate_openapi.py api/openapi.yaml`
-- `helm lint` + `helm template` for the application chart and the platform chart
-
----
-
-## Broker development
-
-### Package layout
-
-| Package | Responsibility |
-|---|---|
-| `platform` | Domain types, port interfaces (Store, ImageInspector, etc.) |
-| `applications` | Pure policy: input validation, operation factory methods |
-| `store` | SQLite persistence (accept, reads, operations, lifecycle) |
-| `httpapi` | HTTP handlers, router, middleware |
-| `operations` | Worker (execute), observer (status), recovery (restart scan) |
-| `helm` | Helm adapter (install, upgrade, uninstall) |
-| `cluster` | Kubernetes client (Secrets, status reads, Ping) |
-| `registry` | Image inspection via go-containerregistry |
-| `auth` | Session authentication |
-| `audit` | Append-only event log |
-
-### Adding a new operation type
-
-1. Add the type constant to `platform/entities.go`.
-2. Add a factory method to `applications/lifecycle.go` (mirrors existing methods).
-3. The worker dispatches by type in `operations/worker.go` — add a case if a new
-   `execute*` function is needed (most types reuse `executeApply`).
-4. Add the HTTP handler in `httpapi/mutations.go` and register it in
-   `httpapi/mutations.go:registerApplicationMutations`.
-5. Add the path to `api/openapi.yaml`.
-6. Add unit tests in `applications/applications_test.go` and handler tests in
-   `httpapi/applications_test.go` (extend `fakeStore` if new Store methods are needed).
-
-### Store interface
-
-All persistence goes through `platform.Store`. To add a method:
-
-1. Declare it in `platform/ports.go`.
-2. Implement it in the appropriate `store/` file (reads, operations, lifecycle).
-3. Add a stub to the `fakeStore` in `httpapi/applications_test.go`.
-
-### Formatting
-
-The CI gate is strict: `gofmt -l .` must produce no output. Run
-`gofmt -w ./...` from the `broker/` directory before committing.
-
----
-
-## UI development
-
-The UI is a Svelte 5 SPA in `web/`. It is built with Vite and served by the broker
-as embedded static files.
+## Checks
 
 ```bash
-cd web
-npm install
-npm run dev        # dev server at http://localhost:5173 (proxies /api to the broker)
-npm run check      # svelte-check type checking
-npm run lint       # eslint
-npm run build      # production build into web/build/
+./scripts/check-broker.sh
+./scripts/check-ui.sh
+./scripts/check-api.sh
+./scripts/check-chart.sh
+python3 -B -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-The dev server (`vite.config.ts`) proxies `/api` and `/readyz` to
-`http://127.0.0.1:8080`, so you need the broker running (`dev-env.sh up`) for API
-calls to work. UI-only changes (styling, layout) don't need the broker.
-
-**Key conventions:**
-
-- Svelte 5 runes throughout: `$state`, `$derived`, `$props`, `onMount`.
-- `$app/state` (not `$app/stores`) for page and navigation.
-- `requireAuth()` returns `void` — do not test its return value.
-- `crypto.randomUUID()` is a browser global — no import needed.
-- API client is `web/src/lib/api.ts`; types are `web/src/lib/types.ts`.
-
-After a production build, copy the assets into the broker:
+The Go suite uses temporary SQLite and fake/in-process adapters. UI checks run
+Svelte type checking, ESLint and production bundling. API validation requires
+PyYAML; `openapi-spec-validator` enables full validation. Install those optional
+check dependencies in a virtual environment:
 
 ```bash
-./scripts/build-ui.sh
+python3 -m venv .local/checks-venv
+.local/checks-venv/bin/python -m pip install pyyaml openapi-spec-validator
+PATH="$PWD/.local/checks-venv/bin:$PATH" ./scripts/check-api.sh
 ```
 
-This runs `npm run build` and copies `web/build/` into
-`broker/internal/httpapi/ui_dist/`. The broker embeds this directory with
-`//go:embed`. Commit both the web source changes and the updated `ui_dist/`.
+GitHub Actions currently runs the broker, UI and API/chart workflows. Python CLI
+regressions additionally check command validation and registry-specific digest
+selection without requiring a Docker daemon. Real-cluster integration remains a
+separate acceptance step; fake adapters do not verify actual Pod replacement.
 
----
+## Development structure
 
-## Adding an API endpoint
+| Directory/package | Responsibility |
+| --- | --- |
+| `broker/internal/platform` | Domain types and adapter interfaces. |
+| `applications` | Input policy and operation request construction. |
+| `store` | SQLite transactions, revisions, operations and metadata. |
+| `operations` | Queue worker, status observation and recovery. |
+| `httpapi` | HTTP handlers, authentication middleware and embedded UI. |
+| `helm`, `cluster`, `registry` | External system adapters. |
+| `web/src` | Svelte application and API client. |
+| `api/openapi.yaml` | API contract. |
 
-1. **Handler** — add to the appropriate `httpapi/*.go` file (mutations, reads, etc.).
-2. **Registration** — call `r.mux.HandleFunc(...)` inside the relevant `register*` function.
-3. **OpenAPI** — add the path and schemas to `api/openapi.yaml`.
-4. **API client** — add a function to `web/src/lib/api.ts`.
-5. **Types** — update `web/src/lib/types.ts` if new response shapes are introduced.
-6. **Tests** — handler tests in `httpapi/applications_test.go`; extend `fakeStore` if needed.
+A lifecycle change should be tested through request construction, persistence,
+worker execution and chart mapping, in addition to focused unit tests. Browser
+checks should follow UI links and submit the relevant forms. An accepted API
+request must be polled to completion before its workload result is evaluated.
 
----
+## Supporting scripts
 
-## Configuration reference
-
-### Broker environment variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `PLATFORM_LISTEN` | `0.0.0.0:8080` | TCP address to listen on |
-| `PLATFORM_DB` | `/var/lib/platform/platform.db` | SQLite database path |
-| `PLATFORM_APPS_NAMESPACE` | `platform-apps` | Kubernetes namespace for managed apps |
-| `PLATFORM_SECURE_COOKIES` | `false` | Set `Secure` flag on session cookies (enable behind HTTPS) |
-| `PLATFORM_INSECURE_REGISTRIES` | _(empty)_ | Comma-separated `host:port` list for plain-HTTP registries |
-| `PLATFORM_REGISTRY_ALIASES` | _(empty)_ | Comma-separated `from=to` pairs to rewrite registry addresses before inspection |
-
-`PLATFORM_INSECURE_REGISTRIES` and `PLATFORM_REGISTRY_ALIASES` are used together
-for k3d development where the registry is exposed on host port 5001 but listens on
-container port 5000 internally:
-
-```
-PLATFORM_INSECURE_REGISTRIES=k3d-platform-registry:5000
-PLATFORM_REGISTRY_ALIASES=k3d-platform-registry:5001=k3d-platform-registry:5000
-```
-
-### Platform Helm chart values (`deploy/helm/platform/values.yaml`)
-
-| Value | Default | Description |
-|---|---|---|
-| `image.repository` | `ghcr.io/piotrek1459/k8s-internal-platform` | Broker image |
-| `image.tag` | _(empty)_ | Image tag (use `image.digest` for production) |
-| `image.digest` | _(empty)_ | Image digest (takes precedence over tag) |
-| `image.pullPolicy` | `IfNotPresent` | Kubernetes pull policy |
-| `appsNamespace` | `platform-apps` | Namespace for managed applications |
-| `persistence.size` | `1Gi` | PVC size for SQLite |
-| `persistence.storageClassName` | _(empty)_ | Storage class (empty = cluster default) |
-| `resources.requests.cpu` | `50m` | CPU request |
-| `resources.requests.memory` | `64Mi` | Memory request |
-| `resources.limits.cpu` | `500m` | CPU limit |
-| `resources.limits.memory` | `256Mi` | Memory limit |
-| `service.port` | `80` | ClusterIP service port |
-| `secureCookies` | `false` | Enable `Secure` cookie flag |
-| `insecureRegistries` | _(empty)_ | Plain-HTTP registry hosts (see env var above) |
-| `registryAliases` | _(empty)_ | Registry address rewrites (see env var above) |
-
----
-
-## Scripts reference
-
-| Script | Description |
-|---|---|
-| `./scripts/setup-dev-tools.sh` | Download pinned Helm binary into `.local/bin/` |
-| `./scripts/dev-env.sh up` | Start cluster, build everything, deploy broker, start port-forward |
-| `./scripts/dev-env.sh down` | Tear down cluster and stop port-forward |
-| `./scripts/dev-env.sh status` | Show cluster and broker pod status |
-| `./scripts/dev-env.sh token` | Print the bootstrap token from broker logs |
-| `./scripts/dev-cluster.sh up` | Start k3d cluster and registry only |
-| `./scripts/dev-cluster.sh down` | Delete k3d cluster and registry |
-| `./scripts/build-ui.sh` | Build SPA and copy assets into `broker/internal/httpapi/ui_dist/` |
-| `./scripts/build-demo.sh native` | Build demo app image for the host architecture |
-| `./scripts/build-demo.sh multi` | Build multi-arch OCI archives into `.local/images/` |
-| `./scripts/check-broker.sh` | gofmt + go vet + go test |
-| `./scripts/check-ui.sh` | svelte-check + eslint + vite build |
-| `./scripts/check-api.sh` | OpenAPI structural validation |
-| `./scripts/check-chart.sh` | Helm lint + template (both charts) |
-| `./scripts/test-local.sh` | Full K3s lifecycle integration test (requires cluster) |
-| `./scripts/build-book.sh` | Build LaTeX thesis PDF |
+The former `dev-env.sh`, `build-ui.sh`, `build-demo.sh` and `setup-dev-tools.sh`
+are compatibility wrappers around the single implementation. `dev-env.sh down`
+now maps to `platform.sh stop` and retains data. The [script inventory](../../scripts/README.md)
+identifies CI checks, the thesis build and the retained M0/M1 baseline tooling.
+Historical experiment reports describe their original commands and environments.
