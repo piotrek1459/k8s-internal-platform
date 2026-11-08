@@ -1,7 +1,8 @@
 # Engineering thesis
 
-The English title is set in `main.tex`. Fill in the author details, student ID,
-supervisor, diploma path, department, and Polish title.
+The English title is set in `main.tex`. Author details, student ID, supervisor,
+diploma path, department and Polish title remain editable template fields.
+The thesis chapters are authored separately from the implementation docs.
 
 ## Building the PDF
 
@@ -40,7 +41,9 @@ details are available in `build/main.log`.
 | `graf/` | Figures and diagrams |
 | `config/my-settings.tex` | Custom macros and additional packages |
 
-Replace the template's sample content and references with your own material.
+The template sample content and references require replacement with the authored
+thesis and its sources. Software implementation does not establish chapter or
+evaluation completion; [current status](../docs/status.md) records that boundary.
 The formatting settings in `config/settings.tex` and the title page layout in
 `config/titlepage.tex` come from the supplied template. Its front matter includes
 fields for both English and Polish abstracts, titles, and keywords.

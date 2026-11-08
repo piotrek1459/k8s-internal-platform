@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// ui_dist is populated by scripts/build-ui.sh (cp web/build/* broker/internal/httpapi/ui_dist/).
+// ui_dist is populated by scripts/platform.sh build-ui from web/build/.
 // When the directory contains only the README placeholder (dev mode without a UI build),
 // the SPA handler is not registered and /api/* routes still work normally.
 
@@ -24,7 +24,7 @@ func (r *Router) registerUI() {
 	}
 	// Check whether a real build exists (not just the README placeholder).
 	if _, err := sub.Open("index.html"); err != nil {
-		r.cfg.Logger.Info("ui_dist has no index.html — UI not served (run scripts/build-ui.sh)")
+		r.cfg.Logger.Info("ui_dist has no index.html — UI not served (run scripts/platform.sh build-ui)")
 		return
 	}
 	fileServer := http.FileServer(http.FS(sub))

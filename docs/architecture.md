@@ -7,6 +7,18 @@ sequence. The API and data model are in
 [networking-and-security.md](networking-and-security.md); installation, recovery, and
 observability are in [operations.md](operations.md).
 
+## Current implementation boundary
+
+The Go broker, SQLite store, embedded application chart, Svelte administrator UI
+and k3d development workflow are implemented. The platform and managed apps share
+one cluster. Current access uses loopback forwards and Internal application
+Services. The [status report](status.md) records verified workflows and open
+correctness gaps.
+
+The diagrams and responsibility tables below describe the target architecture.
+Private/public ingress separation, application volumes, production installation,
+monitoring and complete recovery are requirements rather than accepted features.
+
 ## Deployment targets: host-agnostic by design
 
 The platform is intended for installation on an administrator-controlled Linux
@@ -18,7 +30,8 @@ The single-node K3s design is host-agnostic. The practical differences between
 the reference Pi installation on a home network and a rented server are:
 
 - **Architecture:** ARM64 on the Pi, usually AMD64 on a rented server. Platform
-  and demonstration images are built for both (see
+  and demonstration release images shall support both. Current startup builds
+  native images, and the demo supports cross-build packaging (see
   [application contract](api-and-data.md#application-contract) and
   [operations.md](operations.md#cicd-and-release-artifacts)).
 - **Capacity:** available CPU, memory, and storage depend on the selected server
@@ -72,8 +85,9 @@ and an extended test matrix are introduced in later milestones.
 
 ## One cluster hosting the platform and its applications
 
-The first installation has one Linux host, one K3s cluster, and one Kubernetes
-node. That node performs both server/control-plane duties and workload execution.
+The reference installation targets one Linux host, one K3s cluster, and one
+Kubernetes node. Current local development runs that K3s node in Docker using
+k3d; native Raspberry Pi and AMD64 acceptance remain outstanding. That node performs both server/control-plane duties and workload execution.
 The platform is itself deployed as a Kubernetes workload, alongside the
 applications it manages. Deploying another application creates resources inside
 this existing cluster; it does not create another cluster or start containers
@@ -183,6 +197,10 @@ flowchart TB
     Internet -->|configured router or tunnel path| PublicApps
 ```
 
+These ingress paths are planned. The current launcher exposes management and
+Internal application access through loopback forwarding; it does not configure
+the private/public listeners shown in this target diagram.
+
 The private management and private application paths may share a restricted
 private listener with separate allowed routes. They never inherit the public
 listener. The public path is present only after the administrator configures it;
@@ -224,20 +242,26 @@ sequenceDiagram
     Platform-->>Admin: Ready URL or actionable failure
 ```
 
-The example shows the successful path. Failure, interrupted work, rollback, and
+The example specifies the successful target path. The current worker waits for
+Helm and records a best-effort observation; exact interrupted-target verification,
+complete chart identity and controlled failed-rollout restoration remain open. Failure, interrupted work, rollback, and
 storage rules are defined in the [application contract](api-and-data.md#application-contract)
 and [execution and recovery](operations.md#deployment-execution-recovery-and-reconciliation).
 Cluster controllers maintain the platform Deployment itself in the same way they
 maintain other workloads, so starting the platform does not depend on the
-platform API already being available. M2 includes installation of the platform
-Deployment, Service, metadata PVC, service account, and scoped RBAC. Verification
-must demonstrate that the broker can deploy an application using its pod identity
-and that platform state survives replacement of the platform pod. Automated
-installation and release packaging are introduced later.
+platform API already being available. The implemented platform chart provides the Deployment, Service, metadata PVC,
+service account and scoped RBAC. Local deployment and stop/rebuild persistence
+are recorded in the [test reports](../tests/README.md#historical-reports). Those
+results do not establish safe recovery at every interruption point. Production
+installation and release packaging remain planned.
 
 ## Meaning of a managed platform on administrator-owned hardware
 
-| Responsibility | What the product provides | What the administrator still owns |
+The table defines target product responsibilities. The current development
+launcher implements local build/install/access; production host installation,
+backup/restore and public networking are not yet available.
+
+| Responsibility | Target product responsibility | Administrator responsibility |
 | --- | --- | --- |
 | Initial environment | Repeatable installation of the supported K3s and platform configuration. | A supported Linux host, access credentials, hardware, and initial network choices. |
 | Application lifecycle | Image validation, deployments, configuration, updates, supported scaling, recovery, and history. | Suitable application images, app-specific settings, data model, and migration decisions. |
@@ -283,11 +307,11 @@ The browser communicates only with this service, never directly with Kubernetes.
 
 | Component | Responsibility | Where it runs |
 | --- | --- | --- |
-| Installer | Host checks, K3s configuration, namespaces/RBAC, platform installation, initial admin access. | On the host, with explicit administrative privileges. |
+| Installer (planned) | Production host checks, K3s configuration, installation and recovery; the current launcher handles local k3d only. | Host-side tooling. |
 | K3s | Kubernetes control plane and node services, scheduling, image pulling, networking, restarting containers. | Host service. |
-| Web UI | Setup, application forms, status, logs, history, and lifecycle actions. | Built static assets served by the Go service. |
+| Web UI | Implemented setup, forms, progress and lifecycle/history screens; response alignment, Secret submission and log browsing remain incomplete. | Static assets served by the Go service. |
 | Go API | Authentication, validation, application model, operation submission, API responses. | One platform pod. |
-| Operation worker | Execute persisted deployment work and recover interrupted operations. | Background worker in the Go service. |
+| Operation worker | Execute persisted work; recovery exists but requires target verification and restoration corrections. | Background worker in the Go service. |
 | Status observer | Read actual workload state and publish timestamped observations. | Background worker in the Go service. |
 | SQLite | Persist platform users, specifications, operations, settings, and audit records. | Platform PVC; one writer process. |
 | Helm adapter | Install and change a versioned first-party application chart. | Go Helm SDK, called by the worker. |
@@ -295,7 +319,7 @@ The browser communicates only with this service, never directly with Kubernetes.
 | Traefik | Route HTTP traffic to the correct application. | K3s-provided ingress controller. |
 | Certificate component | Issue and renew certificates for the selected direct HTTPS mode. | cert-manager when that mode is implemented. |
 | Local storage provisioner | Supply node-local persistent volumes. | K3s storage component. |
-| Registry | Store application and platform images. | GHCR, Docker Hub, or another configured registry. |
+| Registry | Current local anonymous registry; public-image inspection exists; private authentication and release publication remain incomplete. | Local Docker registry in development; external registry in the target product. |
 | Observability profile | Historical metrics/logs, dashboards, and selected alerts. | Optional services sized to the host. |
 
 K3s supplies Traefik and ServiceLB; its default ingress setup uses host ports
@@ -303,10 +327,10 @@ K3s supplies Traefik and ServiceLB; its default ingress setup uses host ports
 mechanisms; the initial design does not require a second ingress controller.
 [K3s networking services](https://docs.k3s.io/networking/networking-services)
 
-React with TypeScript is the proposed UI implementation. A static client is
-sufficient for the planned administration interface; server-side rendering and a
-separate Node.js runtime are outside the initial architecture.
-[React TypeScript support](https://react.dev/learn/typescript)
+The implemented UI uses Svelte 5, SvelteKit static SPA output, TypeScript and
+Tailwind. `platform.sh build-ui` copies `web/build/` into
+`broker/internal/httpapi/ui_dist/` before Go embedding. Node.js is a build-time
+dependency. The [UI decision](decisions/m3-ui-stack.md) records this selection.
 
 ### Three different kinds of database
 
@@ -322,7 +346,9 @@ database must remain separate from hosted application databases.
 
 ### Kubernetes ownership and permissions
 
-The installer creates namespaces `platform-system` and `platform-apps`.
+Current local startup creates `platform-apps` from the development manifest and
+creates `platform-system` during chart installation. A production installer is
+planned to perform the equivalent setup.
 These are in the same cluster as `kube-system`. The first contains platform
 components; the second contains managed applications. Optional add-ons use the
 namespaces shown above. Resource names and labels must contain stable application IDs.
@@ -332,8 +358,9 @@ namespaces shown above. Resource names and labels must contain stable applicatio
   plus only the cluster reads required for capacity and diagnostics.
 - Helm owns workload manifests; scaling, restarting, and updating all pass through
   the same chart configuration path.
-- The broker owns versioned application Secrets and retained PVCs separately from
-  the workload release. The chart refers to them by name.
+- The broker owns versioned application Secrets separately from the workload
+  release, and the chart refers to them by name. Separately retained application
+  PVC ownership is planned for M5.
 - Application pods receive no Kubernetes API credentials by default.
 - Users cannot use the UI to deploy arbitrary cluster-scoped resources.
 
@@ -348,7 +375,13 @@ shall use **Application**, **Image**, **Version**, **Instances**, **URL**, and
 **Storage**. Every action requires visible progress, an explicit result, and a
 recommended recovery action on failure.
 
-| Screen | Main content and actions |
+The table specifies the target interface. Current routes provide setup/login,
+applications, create/update, operation progress, history, Secret management and
+credential metadata. Overview capacity, settings, audit browsing, application
+logs and storage screens are planned. Existing UI/API mismatches are tracked in
+[implementation status](status.md#known-correctness-and-integration-gaps).
+
+| Target screen | Required content and actions |
 | --- | --- |
 | Setup | Administrator creation, host checks, private access, LAN/DNS setup, optional registry login. |
 | Overview | Host capacity, application summary, recent failed operations, disk/backup attention items. |

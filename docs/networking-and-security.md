@@ -7,6 +7,21 @@ management, data protection, and operational safety. The architecture is defined
 [api-and-data.md](api-and-data.md); installation and recovery are described in
 [operations.md](operations.md).
 
+## Current implementation boundary
+
+Current local access uses loopback management/application forwards and Internal
+Services. The backend accepts `lan`, and the chart can render an explicit private
+entrypoint, but the launcher does not configure a usable LAN HTTPS installation.
+The UI LAN value/hostname fields also require correction. Public exposure is
+rejected by the current application policy.
+
+Password hashing, expiring setup/session credentials, mutation-header checks,
+scoped RBAC, restricted workload defaults and immutable configuration Secrets are
+implemented. Login throttling, host-local password recovery, network policies,
+registry-destination restrictions, private credential use and verified
+backup/restore remain outstanding. The sections below specify target controls;
+[current status](status.md) records acceptance boundaries.
+
 ## Networking: LAN first, public access later
 
 ### Visibility and authentication
@@ -23,7 +38,8 @@ application access does not give visitors access to platform administration.
 
 ### LAN milestone
 
-The UI uses the private management endpoint, and LAN applications use explicitly
+The target UI shall use a private HTTPS management endpoint, and LAN applications
+shall use explicitly
 configured private routes. These may share a restricted private listener; public
 traffic uses a separate entrypoint as described in [architecture.md](architecture.md#management-requests-and-application-traffic).
 A local domain, such as `pi.home.arpa`, provides application hostnames such as
@@ -71,7 +87,7 @@ credentials. Certificate issuance must be validated against the ACME staging
 service before production issuance. [Let's Encrypt challenge types](https://letsencrypt.org/docs/challenge-types/),
 [cert-manager ACME](https://cert-manager.io/docs/configuration/acme/)
 
-The Cloudflare adapter requires a named tunnel, explicit public-hostname routes,
+A future Cloudflare adapter would require a named tunnel, explicit public-hostname routes,
 and rejection of unmatched hostnames. A wildcard is acceptable only when it points
 to an ingress dedicated to public applications. Administrator and internal routes
 must be excluded. Edge HTTPS and the local tunnel-to-service connection are distinct
@@ -150,7 +166,8 @@ still controls the host and cluster. [Kubernetes secret practices](https://kuber
 
 ### Backup and restore
 
-The backup design comprises three coordinated tasks:
+Backup/restore tooling and acceptance are not implemented. The target design
+comprises three coordinated tasks:
 
 1. Platform database, settings, secret references/material, and version manifest.
 2. K3s datastore and the server token required by its restore procedure.

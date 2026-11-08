@@ -1,27 +1,28 @@
 # Management API contract for the Kubernetes application-deployment platform.
 #
-# This document defines the HTTP interface under /api/v1. It is the authoritative
-# contract referenced by docs/api-and-data.md; endpoint groups are implemented per
-# milestone. This file covers the M2 (durable backend) subset: health, setup,
-# authentication, system, image inspection, application create/retrieve/list,
-# operations, and versioned configuration secrets. Later milestones add the
-# remaining lifecycle, diagnostics, registry-credential, and observability paths.
+# This schema documents the implemented core/lifecycle API and credential
+# metadata endpoints. Diagnostics, settings, automation tokens, application
+# volumes and observability endpoints remain planned. Current implementation
+# gaps are recorded in docs/status.md; in particular, application detail status
+# currently uses PascalCase instead of the camelCase contract below.
 #
-# Conventions (see docs/api-and-data.md "Request and response conventions"):
-#   - JSON over HTTP; all management endpoints require an authenticated session
-#     except the health and setup-status probes and the credential-protected
-#     setup and session entry points.
-#   - Lifecycle mutations require an Idempotency-Key; changes to an existing
-#     application require If-Match carrying the current ETag.
-#   - Accepted mutations return 202 with a Location header for the operation.
+# Management routes use session cookies except setup/login and health probes.
+# State-changing requests require X-Requested-With. Application lifecycle
+# mutations also require Idempotency-Key; existing applications require the
+# current integer version in the JSON body. If-Match is not enforced.
+# Accepted application mutations return 202 and an operation Location.
 openapi: 3.1.0
 info:
   title: Kubernetes application-deployment platform API
   version: 0.2.0
   description: >-
     Management API for a single administrator operating one Kubernetes cluster.
-    The M2 subset establishes durable application creation, operation tracking,
-    authentication, image inspection, and versioned configuration secrets.
+    Includes authentication, applications and lifecycle operations, image
+    inspection, operations, configuration Secrets and registry credential metadata.
+    State-changing requests require X-Requested-With. Private credential use,
+    restart and complete recovery remain incomplete; see docs/status.md. The
+    ObservedStatus schema is the intended camelCase contract, with a known current
+    PascalCase serialization mismatch.
   license:
     name: See repository LICENSE
 servers:
@@ -35,6 +36,7 @@ tags:
   - name: applications
   - name: operations
   - name: secrets
+  - name: registry-credentials
 
 paths:
   /healthz:
@@ -139,7 +141,7 @@ paths:
   /api/v1/system:
     get:
       tags: [system]
-      summary: Version, host architecture, capabilities, capacity, component health
+      summary: Version, architecture, cluster reachability and capability names
       responses:
         "200":
           description: System summary.
@@ -154,8 +156,9 @@ paths:
       summary: Inspect an image reference and optional credential
       description: >-
         Reports architecture, resolved digest, and a suggested port. Advisory for
-        the creation form; the worker re-resolves and freezes the digest before
-        any cluster mutation.
+        the creation form. The worker resolves a newly selected tag and freezes
+        its digest before mutation; an already pinned image is reused. Stored
+        private registry credential authentication is not yet wired end to end.
       requestBody:
         required: true
         content:
@@ -434,6 +437,53 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorBody" }
 
+  /api/v1/registry-credentials:
+    get:
+      tags: [registry-credentials]
+      summary: List registry credential metadata
+      description: Passwords are never returned. Authentication and pull Secret provisioning remain incomplete.
+      responses:
+        "200":
+          description: Credential metadata.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryCredentialList" }
+        "401": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [registry-credentials]
+      summary: Create registry credential metadata
+      description: >-
+        The current handler requires a password but does not persist it or create
+        an image-pull Secret. A created metadata record does not establish working
+        private registry authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateRegistryCredentialRequest" }
+      responses:
+        "201":
+          description: Metadata created; private authentication is not configured.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryCredentialMetadata" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+
+  /api/v1/registry-credentials/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    delete:
+      tags: [registry-credentials]
+      summary: Delete registry credential metadata
+      description: The current metadata deletion does not establish dependency-aware credential cleanup.
+      responses:
+        "204": { description: Credential metadata deleted. }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
 components:
   securitySchemes:
     sessionCookie:
@@ -542,7 +592,7 @@ components:
         architectures:
           type: array
           items: { type: string }
-        suggestedPort: { type: integer, minimum: 1, maximum: 65535 }
+        suggestedPort: { type: integer, minimum: 0, maximum: 65535, description: "Zero means no port hint." }
 
     ResourceRequirements:
       type: object
@@ -614,6 +664,10 @@ components:
       enum: [queued, running, recovering, succeeded, failed, needs_attention]
 
     ObservedStatus:
+      description: >-
+        Intended camelCase response contract. The current server serializes
+        exported Go names such as Phase and ReadyReplicas; alignment is an open
+        implementation defect documented in docs/status.md.
       type: object
       required: [phase, observedAt, stale]
       properties:
@@ -732,6 +786,38 @@ components:
           type: array
           items: { $ref: "#/components/schemas/SecretMetadata" }
 
+    CreateRegistryCredentialRequest:
+      type: object
+      additionalProperties: false
+      required: [label, registry, username, password]
+      properties:
+        label: { type: string, minLength: 1 }
+        registry: { type: string, minLength: 1 }
+        username: { type: string, minLength: 1 }
+        password:
+          type: string
+          minLength: 1
+          writeOnly: true
+          description: Accepted input; not persisted by the current metadata-only implementation.
+
+    RegistryCredentialMetadata:
+      type: object
+      required: [id, label, registry, username, createdAt]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        registry: { type: string }
+        username: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    RegistryCredentialList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/RegistryCredentialMetadata" }
+
     UpdateApplicationRequest:
       type: object
       additionalProperties: false
@@ -775,6 +861,7 @@ components:
         number: { type: integer, format: int64 }
         result: { type: string, enum: [pending, succeeded, failed] }
         frozenAt: { type: string, format: date-time }
+        frozenImage: { type: string, description: "Recorded digest-pinned image when a snapshot exists." }
         createdAt: { type: string, format: date-time }
         spec:
           type: object

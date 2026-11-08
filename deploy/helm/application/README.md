@@ -135,7 +135,9 @@ an architecture.
 Secret references resolve in the release namespace and are required at runtime.
 Plaintext secrets must not be supplied through `env` or other values because Helm
 stores release values. Immutable secret versions are provisioned outside this
-chart, and the M2 broker will retain their references in application revisions.
+chart, and the broker retains configuration Secret version references in application
+revisions. Private registry credential provisioning remains incomplete; existing
+image-pull Secret support in the chart does not establish that workflow.
 The chart does not verify secret immutability. A reference example is:
 
 ```yaml

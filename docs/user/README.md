@@ -3,7 +3,9 @@
 Commands are executed from the repository root. The default workflow runs in the
 `platform-local` cluster, with the management UI on port 8080 and an application
 forward on port 8081. Installation, rebuilds and local access are managed through
-`scripts/platform.sh`.
+`scripts/platform.sh`. [Implementation status](../status.md) records the full
+capability and verification boundaries. The installation may be absent after
+cleanup; startup creates a fresh one when necessary.
 
 ## 1. Start the platform
 
@@ -150,8 +152,11 @@ newer accepted configuration.
 ## Secrets and credentials
 
 The Secrets screen accepts write-only values and records immutable versions.
-Use the single `value` key for the current environment-variable mapping profile.
-An application's reference selects the secret and exact version. Values must not
+The API supports the single `value` key for the environment-variable mapping
+profile and explicit secret/version references. The current application creation
+form does not submit its optional Secret-reference controls, and the version list
+has a response-type mismatch. Application Secret references currently require
+explicit API submission and verification; the UI path is not accepted as complete. Values must not
 be placed in ordinary environment fields or source control.
 
 Registry credential endpoints currently provide metadata CRUD; private registry
@@ -178,6 +183,13 @@ registry used by this walkthrough does not require a credential.
 
 ## Current limitations
 
+Application details currently receive status fields with exported Go names,
+while the UI expects camelCase. A healthy operation can therefore coexist with
+missing or incorrect detail labels. Use the operation result, HTTP response and
+`platform.sh status` to investigate the actual workload. The UI also loses nested
+API error details; generic messages require checking the API response or broker
+logs. These issues are tracked in [implementation status](../status.md).
+
 The restart token is not yet assigned correctly for an already-frozen revision;
 a Restart operation can report success without replacing its Pods. Pod identity
 must be checked when evaluating restart behaviour.
@@ -190,7 +202,8 @@ fails readiness and should be reserved for a disposable failure experiment.
 The initial UI offers a limited update form. A non-empty environment text area
 replaces the complete ordinary environment map. Public HTTPS and application data
 volumes are outside this local walkthrough. The existing creation form's LAN
-mode also requires UI/API alignment; Internal is the supported guide path.
+mode uses the wrong API value and lacks the required hostname field; Internal
+is the supported guide path. Application log browsing is not implemented.
 
 ## Stop and resume
 

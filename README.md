@@ -4,6 +4,8 @@ A self-hosted application platform built with Go, Kubernetes/K3s, Helm and a
 Svelte web interface. The platform and managed applications run in one cluster.
 The broker stores application revisions and operations in SQLite on a persistent
 volume; application changes are executed by its durable worker.
+[Implementation status and next work](docs/status.md) separates verified behavior
+from known defects and planned capabilities.
 
 ## Local startup
 
@@ -84,7 +86,8 @@ image references, operation tracking and revision history. Public HTTPS,
 application data volumes, release automation and reference-hardware acceptance
 remain planned. The UI defaults to Internal exposure for the documented workflow.
 The [user guide](docs/user/README.md#current-limitations) records lifecycle
-limitations, including restart verification and unresolved failed rollouts.
+limitations. UI/API contract alignment, restart, interrupted recovery, private
+registry authentication and failed-rollout restoration remain incomplete.
 Milestone completion is determined by the acceptance evidence in
 [the implementation plan](docs/milestones.md).
 
@@ -99,6 +102,6 @@ Milestone completion is determined by the acceptance evidence in
 | `docs/` | Design, user and contributor documentation. |
 | `tests/` | Regression checks and recorded experiments. |
 | `examples/` | Healthy and deliberately unhealthy demonstration applications. |
-| `scripts/` | Local entry point, checks and supporting experiment tooling. |
+| `scripts/` | One local entry point, focused checks, thesis build and manual baseline tooling; no compatibility wrappers. |
 | `book/` | Engineering thesis LaTeX source. |
 | `infra/`, `observability/` | Planned infrastructure and monitoring work. |

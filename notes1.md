@@ -1,39 +1,38 @@
 # Presentation 1 — speaker notes
 
-Audience file: `presentation1.pptx`.
-The deck has **20 slides** (19 content + a references appendix), paced for
-**15–17 minutes**. Slide 20 is a reference appendix. Timing guidance is not shown
-on the audience slides. Advance slides manually. Rehearse once with a timer; the
-script is roughly 2,400 words, so keep a steady pace and brief pauses around the
-diagrams to stay within the window. These notes are also embedded in PowerPoint
-Presenter View.
+Audience file: `presentation1.pptx`. Reviewed: 2026-11-08.
+The deck has **20 slides**: 19 presented slides and a references appendix.
+The target schedule is **13 minutes 15 seconds**, within the required 10–15
+minute window. Approximately 2,100 words require a steady speaking pace and
+brief pauses; timing remains subject to rehearsal. Slide 20 is an appendix and
+has no allocated speaking time. Updated notes are embedded in Presenter View.
 
 | Slide | Topic | Target | Cumulative |
 | --- | --- | --- | --- |
-| 1 | Title and central idea | 30 s | 0:30 |
-| 2 | Motivation — an image is only the start | 55 s | 1:25 |
-| 3 | The problem, quantified | 55 s | 2:20 |
-| 4 | Use cases and visibility | 60 s | 3:20 |
-| 5 | Why not just use the cloud? | 70 s | 4:30 |
-| 6 | State of the art — overview | 65 s | 5:35 |
-| 7 | State of the art — comparison matrix | 60 s | 6:35 |
-| 8 | What is different / planned contribution | 60 s | 7:35 |
-| 9 | Target user experience | 55 s | 8:30 |
-| 10 | Single-cluster architecture | 70 s | 9:40 |
-| 11 | Deployment and recovery workflow | 65 s | 10:45 |
-| 12 | Network exposure and responsibilities | 55 s | 11:40 |
-| 13 | Current implementation and next stages | 60 s | 12:40 |
-| 14 | Evaluation method | 60 s | 13:40 |
-| 15 | Example workloads | 55 s | 14:35 |
-| 16 | Example — deploying an AI agent service | 60 s | 15:35 |
-| 17 | Example — why self-host agents | 50 s | 16:25 |
-| 18 | Scope and limitations | 45 s | 17:10 |
-| 19 | Closing message / goal | 30 s | 17:40 |
+| 1 | Title and central idea | 25 s | 0:25 |
+| 2 | Motivation — an image is only the start | 40 s | 1:05 |
+| 3 | The problem and operator effort | 40 s | 1:45 |
+| 4 | Use cases and visibility | 45 s | 2:30 |
+| 5 | Why not just use the cloud? | 50 s | 3:20 |
+| 6 | State of the art — overview | 50 s | 4:10 |
+| 7 | State of the art — comparison matrix | 45 s | 4:55 |
+| 8 | What is different / planned contribution | 45 s | 5:40 |
+| 9 | Target user experience | 40 s | 6:20 |
+| 10 | Single-cluster architecture | 55 s | 7:15 |
+| 11 | Deployment and recovery workflow | 50 s | 8:05 |
+| 12 | Network exposure and responsibilities | 40 s | 8:45 |
+| 13 | Current implementation and next stages | 50 s | 9:35 |
+| 14 | Evaluation method | 45 s | 10:20 |
+| 15 | Example workloads | 35 s | 10:55 |
+| 16 | Example — deploying an AI agent service | 40 s | 11:35 |
+| 17 | Example — why self-host agents | 30 s | 12:05 |
+| 18 | Scope and limitations | 45 s | 12:50 |
+| 19 | Closing message / goal | 25 s | 13:15 |
 | 20 | Reference appendix | — | — |
 
-If you need to land closer to 15 minutes, the examples section (slides 15–17) is
-the natural place to trim: keep the walk-through (16) and summarise 15 and 17
-briefly.
+The examples on slides 15–17 can be shortened during rehearsal. The factual
+implementation boundary is maintained in [status.md](docs/status.md); target
+architecture and recovery diagrams do not establish completed acceptance.
 
 ## Slide 1 — Title and central idea
 
@@ -59,13 +58,13 @@ stays with the administrator.
 
 Before proposing a solution it helps to see where the manual effort actually
 goes. Deploying an image on Kubernetes by hand is not one action; it is a
-repeated sequence. You prepare supporting objects — a namespace, an image-pull
-secret, configuration and secrets. You author several manifests: Deployment,
-Service, Ingress, probes, resource limits. You apply them and then read rollout
-status, events and logs yourself to judge success. And when an update fails, you
+repeated sequence. The administrator prepares supporting objects — a namespace, an image-pull
+secret, configuration and secrets. The workflow defines several manifests: Deployment,
+Service, Ingress, probes, resource limits. The resources are applied and rollout status, events and logs are inspected to
+judge success. And when an update fails, you
 diagnose it and roll back by hand, with nothing recording what happened. This
 effort scales with every application and every update, and because it is manual
-it is neither reproducible nor auditable. The container ecosystem removed
+repeatability and auditability require explicit automation and recordkeeping. The container ecosystem removed
 packaging friction but not this operational friction [3]. That gap is the target.
 
 ## Slide 4 — Use cases and visibility
@@ -161,16 +160,16 @@ failure affects the whole installation.
 
 ## Slide 11 — Deployment and recovery workflow
 
-A deployment is modelled as an operation with a recorded outcome. The
-administrator submits an image and configuration; validation checks that the
-request is supported; the operation is persisted before execution begins. The
-worker applies the desired resources and observes the resulting workload rather
-than treating acceptance as completion. The version sequence shows why this
-matters: v1 deployed, v2 a healthy update, v3 deliberately failing readiness.
-Healthy v2 Pods keep serving while the v3 update fails, so recovery must verify
-more than an HTTP response — it confirms the restored desired state, the release
-outcome and removal of the failed Pods. This distinction is reflected in the
-local baseline tests, and the durable backend now records every such operation.
+A deployment is an operation with a persisted request and recorded outcome.
+Validation checks the supported configuration, then the worker freezes the image
+reference before applying resources through Helm. Kubernetes creates the Pods
+and reports readiness. The demo provides healthy v1/v2 and deliberately unhealthy
+v3. In the manual baseline, healthy v2 kept serving during the failed v3 rollout;
+explicit Helm rollback then verified restoration and removal of failed Pods.
+The broker's healthy lifecycle is verified separately. Automatic restoration after
+an unhealthy update remains incomplete: an unresolved mutation currently enters
+NeedsAttention and retains its lock. A successful HTTP response alone cannot
+prove that the intended revision was restored.
 
 ## Slide 12 — Network exposure and responsibilities
 
@@ -186,17 +185,17 @@ objectives and security review.
 
 ## Slide 13 — Current implementation and next stages
 
-The project has a verified local foundation and now a durable backend. A small Go
-application provides healthy versions and a deliberately unhealthy update; a
-reusable Helm chart deploys it; and the test workflow exercises installation, a
-healthy update, a failed rollout, explicit rollback and route isolation. Built on
-that, the M2 backend adds the Go broker: a management API, a durable operation
-queue, authentication, image inspection, versioned secrets, in-process Helm
-integration and a status observer. This evidence comes from a local Docker-based
-K3s cluster; it does not yet establish Raspberry Pi performance. The next stages
-are the administrator web UI (M3) and the reliable-lifecycle operations — rollback
-and recovery (M4) — followed by persistent data, public HTTPS, releases and Pi
-validation.
+The local prototype includes the Go demo, application and platform Helm charts,
+a durable Go broker, and a Svelte administrator UI. The API lifecycle has been
+verified on Docker-based K3s: setup, deployment, update, manual scaling, rollback
+and deletion. Stopping and rebuilding retained the administrator session and
+application history. These are local functional observations, not Pi performance
+or complete M0–M4 acceptance. Current work must align UI/API fields, correct
+restart, verify interrupted and failed-rollout recovery, and complete private
+registry authentication. Native Pi/LAN evaluation follows. Application volumes,
+public HTTPS, production installation, releases and monitoring remain later
+capabilities. The current status and verification reports distinguish code that
+exists from behavior that has been accepted.
 
 ## Slide 14 — Evaluation method
 
@@ -214,8 +213,8 @@ the relevant runs.
 ## Slide 15 — Example workloads
 
 To make the value concrete, here is what an administrator would actually put on
-the platform. The only requirement is a long-running HTTP service shipped as a
-container image, so the range is wide: a self-hosted AI agent or LLM-tooling
+the platform. The current contract is a compatible stateless Linux HTTP image with a suitable
+port, health behavior and restricted runtime requirements. Candidate uses include: a self-hosted AI agent or LLM-tooling
 service kept on controlled infrastructure so prompts and data stay in-house; an
 internal web tool such as a dashboard or wiki, private on the LAN; an automation
 or webhook endpoint reacting to Git, CI or chat events; a monitoring or status
@@ -308,5 +307,5 @@ allocated.
 - [12] Bernstein. *Containers and Cloud: From LXC to Docker to Kubernetes.* IEEE
   Cloud Computing, 2014. — the container-to-orchestration progression.
 
-Project documents: `app-plan.md` · `architecture.md` · `milestones.md` · local
-verification reports and the M2 broker module.
+Project documents: `docs/status.md` · `docs/app-plan.md` · `docs/architecture.md` ·
+`docs/milestones.md` · dated verification reports and the broker/UI source.

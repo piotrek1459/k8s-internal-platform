@@ -1,15 +1,17 @@
 # Helm deployments
 
-The [application chart](application/README.md) implements the M1 stateless HTTP
-profile. It supports manual deployment of the demonstration image before broker
-implementation, with private routing, health probes, resource settings, stable
-ownership labels, and existing secret references.
+The [platform chart](platform/README.md) installs the Go broker and embedded UI,
+metadata PVC, Service, service account and scoped RBAC. The
+[application chart](application/README.md) defines each managed stateless HTTP
+workload. The broker uses an embedded copy of that chart; synchronization checks
+compare it with the canonical source.
 
-The [platform chart](platform/README.md) installs the M2 broker and its metadata
-volume in `platform-system`, with a service account and scoped RBAC granting
-workload management in `platform-apps` and read-only cluster reads for capacity
-and volumes.
+Current local installation uses `./scripts/platform.sh up`. The separate
+[manual Helm baseline](../../docs/local-development.md#manual-helm-baseline)
+remains an executable comparison workflow. It does not install the platform.
 
-Committed values contain publishable example configuration only. Application
-secrets and registry credentials are created outside the application chart;
-values contain references rather than secret material.
+Committed values contain publishable configuration. Configuration Secrets are
+created separately, and chart values carry references. Private registry
+credential provisioning is incomplete even though the workload chart accepts
+image-pull Secret names. [Implementation status](../../docs/status.md) records
+recovery, networking, storage and release boundaries.

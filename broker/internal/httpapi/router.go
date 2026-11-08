@@ -23,9 +23,8 @@ type Enqueuer interface {
 	Wake()
 }
 
-// Config wires the HTTP layer's dependencies. The accept path (Step 5) needs the
-// Store and the applications Factory; auth (Step 6) adds the Authenticator and
-// the cookie-security flag. Later steps add more handlers.
+// Config wires the HTTP layer to application policy, persistence, authentication
+// and optional cluster/image/Secret capabilities.
 type Config struct {
 	Logger        *slog.Logger
 	Cluster       ClusterPinger // optional; nil means cluster connectivity is reported unknown
@@ -45,8 +44,8 @@ type Router struct {
 	mux *http.ServeMux
 }
 
-// NewRouter constructs the API router. Health and readiness probes are registered
-// here; management routes are added by later steps.
+// NewRouter registers probes, management routes and the embedded SPA when its
+// generated assets are available.
 func NewRouter(cfg Config) *Router {
 	if cfg.Logger == nil {
 		cfg.Logger = slog.Default()

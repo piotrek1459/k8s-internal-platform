@@ -1,7 +1,11 @@
 # Infrastructure
 
-Placeholder for Terraform configuration, if Terraform is selected to provision
-the environment. First, define the target cluster and the resources to manage.
+Terraform provisioning is not implemented. This directory is a placeholder for a
+possible rented-server/DNS boundary; the decision remains open. Current local
+installation uses `scripts/platform.sh` and k3d, not Terraform.
 
-Future documentation should cover prerequisites, initialisation, provisioning,
-and teardown. Keep credentials and Terraform state files out of the repository.
+The [implementation plan](../../docs/milestones.md) and
+[status report](../../docs/status.md) distinguish production installation and
+release requirements from the existing local workflow. Any future implementation
+must document initialization, provisioning and teardown and exclude credentials
+and Terraform state from source control.

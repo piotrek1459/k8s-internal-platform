@@ -5,18 +5,10 @@
 // PLATFORM_INTEGRATION=1 environment variable so the default `go test ./...`
 // stays hermetic and fast.
 //
-// Run with the local k3d cluster from scripts/dev-cluster.sh. The demo image must
-// be imported and referenced by its digest-pinned form, because the broker
-// deploys by digest:
-//
-//	./scripts/dev-cluster.sh up
-//	./scripts/build-demo.sh native
-//	k3d image import platform-demo:v1 --cluster platform-dev
-//	# resolve the imported image's digest, e.g. with: docker image inspect
-//	#   --format '{{index .RepoDigests 0}}' platform-demo:v1   (or the local id)
-//	KUBECONFIG=.local/kubeconfig PLATFORM_INTEGRATION=1 \
-//	  PLATFORM_DEMO_IMAGE='platform-demo@sha256:<64-hex>' \
-//	  go test -tags integration ./integration/... -v
+// Run against the disposable installation described in
+// docs/local-development.md#real-cluster-broker-integration. That procedure uses
+// scripts/platform.sh to publish the digest-pinned demo reference and keeps the
+// integration environment separate from the manual Helm baseline.
 //
 // The test drives the broker's durable store and worker (not just the Helm
 // adapter) against the cluster, then simulates a broker restart with a fresh

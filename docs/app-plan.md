@@ -1,19 +1,23 @@
 # Application platform plan (index)
 
-Updated: 2026-10-14. Status: implementation plan, with confirmed
-requirements recorded below. This document accompanies
+Updated: 2026-11-08. Status: local core prototype implemented in part;
+UI/API alignment, reliable recovery and reference-host acceptance remain open. This document accompanies
 [project-outline.md](project-outline.md), which preserves the original thesis
-scope and supplied university requirements. This is a plan for building the
-software; it does not contain thesis chapters or claim completed implementation.
+scope and supplied university requirements. The plan records target requirements and does not contain thesis chapters.
+[Implementation status and next work](status.md) records current capabilities,
+verification evidence and known gaps.
 
-The initial M0/M1 local development implementation and its verification procedure
-are described in [local-development.md](local-development.md). Reference-host
-acceptance and subsequent platform milestones remain outstanding.
+The broker, Svelte UI, application/platform charts and unified local workflow are
+implemented. The healthy local API lifecycle has been verified. The
+[local development guide](local-development.md) covers current execution and the
+separate manual Helm baseline. No M0–M4 milestone is declared fully accepted on
+the reference hardware.
 
 This file is the **index**. The detailed plan is split across focused documents:
 
 | Document | Covers |
 | --- | --- |
+| [status.md](status.md) | Current implementation, known limitations, verification boundaries and immediate next work. |
 | [architecture.md](architecture.md) | System architecture: deployment targets, scope and delivery sequence, cluster layout, components, traffic paths, databases, permissions, and UI structure. |
 | [api-and-data.md](api-and-data.md) | Application contract (inputs, health, scaling, storage), platform data model, and the HTTP API with examples. |
 | [networking-and-security.md](networking-and-security.md) | Visibility modes (LAN first, public later), network isolation and verification, credentials, secrets, and backup/restore. |
@@ -32,7 +36,7 @@ The reference outcome is the public deployment of a separate application from
 its published container image on the host running the platform.
 
 **The platform itself and every application it deploys run in the same Kubernetes
-cluster.** K3s is the proposed Kubernetes distribution. The product gives the
+cluster.** K3s is the selected Kubernetes distribution; local development uses k3d. The product gives the
 administrator a managed application environment in an administrator-controlled
 cluster, with application operations available through the platform UI/API after
 installation.
@@ -55,14 +59,16 @@ target-specific validation remains required. See the
 | Application source | Public and private container images. |
 | Operations | Application deployment, inspection, updates, scaling, and supporting recovery and lifecycle operations. |
 | Traceability | Persistent configuration, deployment history, operations, and an audit trail. |
-| Initial networking | Initial development and demonstration on the LAN; domain acquisition is deferred. |
+| Initial networking | Current development uses loopback forwarding. LAN/HTTPS is the next deployment target; domain acquisition remains deferred. |
 | Final networking | Public application access on the host through a connection method selected after network validation: direct ingress or an outbound tunnel. |
 | Distribution | Installable GitHub releases for both ARM64 and AMD64. |
 | Working language | English for project documentation, code, and UI. |
 
-The following are **proposed design choices**, subject to validation during the
-initial implementation experiments: K3s, a Go modular monolith, a React/TypeScript
-UI, SQLite for platform metadata, and a platform-owned Helm chart for applications.
+The implemented choices are K3s/k3d, a Go modular monolith, SQLite metadata,
+first-party Helm charts, and a Svelte 5/SvelteKit/TypeScript/Tailwind static UI.
+The [UI decision](decisions/m3-ui-stack.md) supersedes the original React proposal.
+Reference-host resource presets, public access mode and production installation
+procedures still require validation.
 
 The future application's own database, uploads, background jobs, and traffic
 requirements are still unknown. They are separate from the platform's database.
@@ -85,9 +91,9 @@ and immutable application secret versions belong to the core. Application data
 volumes are introduced in M5. Academic sufficiency must be assessed against the
 agreed thesis requirements and cannot be inferred from a milestone label.
 
-The specification is sufficiently defined to begin **M0 and M1**. Progression to
-later milestones depends on the recorded acceptance evidence for their
-prerequisites, as specified in the
-[implementation entry criteria](milestones.md#implementation-readiness-and-entry-criteria). This readiness
-assessment concerns the implementation plan; no implementation or runtime
-validation is claimed.
+The next implementation work aligns UI/API contracts, corrects restart and
+recovery semantics, completes private image support, and automates core acceptance.
+The [status report](status.md#next-implementation-order) defines that order.
+[Milestone acceptance](milestones.md#implementation-readiness-and-entry-criteria)
+continues to require evidence for hardware, networking, failure recovery and
+evaluation; existing code alone does not satisfy those requirements.

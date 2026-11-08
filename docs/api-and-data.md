@@ -7,6 +7,19 @@ persistence, and the HTTP API. System architecture is described in
 [networking-and-security.md](networking-and-security.md); execution and recovery
 are in [operations.md](operations.md#deployment-execution-recovery-and-reconciliation).
 
+## Current implementation boundary
+
+The HTTP application profile, durable operations, metadata persistence,
+configuration Secret APIs and healthy lifecycle are implemented. The supported
+local walkthrough uses Internal exposure and an anonymous local registry.
+[Implementation status](status.md) records response-shape defects, incomplete
+private credentials and recovery, and the remaining hardware acceptance.
+
+The requirements below include planned behavior. Application storage, production
+LAN/public routing, automation tokens and complete diagnostics are not available.
+The endpoint table identifies the implemented subset; executable current commands
+are in the [API walkthrough](user/api-reference.md).
+
 ## Application contract
 
 ### Minimum deployment workflow
@@ -37,11 +50,11 @@ is running or published. [Dockerfile reference](https://docs.docker.com/referenc
 | Environment | Optional non-sensitive key/value settings. |
 | Secrets | Write-only input or references to stored secret versions. |
 | Replicas | One initially; manual changes for supported stateless applications. |
-| Resources | A tested default request/limit preset, editable within host policy. |
+| Resources | Provisional local defaults; reference-host measurements and admission policy remain outstanding. |
 | Readiness | Optional HTTP path; otherwise a documented TCP readiness fallback. |
-| Startup check | Configurable startup allowance for applications that need it. |
-| Liveness | Optional; activation requires a suitable health endpoint. |
-| Storage | Off by default; one retained volume and mount path in the initial persistent profile. |
+| Startup check | The chart supports separate probes; the current API mapping reuses a supplied readiness path for startup and needs correction. |
+| Liveness | Configurable in direct chart values; disabled in broker-generated values and not exposed through the current application API. |
+| Storage | Planned M5 profile; non-null storage is rejected by the current create API. |
 
 A compatible application must listen on `0.0.0.0` inside the container, support
 the host's Linux CPU architecture, and obtain runtime settings from the configured
@@ -63,7 +76,9 @@ server target. The Pi deployment requires native ARM64 images.
 
 ### Health and status
 
-The API and UI distinguish the following state categories:
+The model distinguishes the following state categories. Operation/workload
+observations are implemented; detailed exposure/TLS/reachability states are
+planned. UI response alignment remains incomplete:
 
 - **Operation:** queued, running, recovering, succeeded, failed, or needs attention
   (`NeedsAttention` in the state model; `needs_attention` in JSON).
@@ -94,7 +109,8 @@ check. [Kubernetes probe behavior](https://kubernetes.io/docs/tasks/configure-po
 
 Stateless applications support manual replica changes, including zero. Zero means
 **Stopped**; automatic scale-to-zero and wake-on-request are outside this scope.
-The UI displays requested and ready replica counts and scheduling/resource errors.
+The backend observes requested and ready counts. Correct detail rendering and
+actionable UI error parsing remain pending contract alignment.
 Additional replicas on a single host do not increase hardware capacity or
 provide protection against host failure.
 
@@ -102,7 +118,8 @@ Applications sharing local files, in-memory sessions, or background task ownersh
 need an application-level scaling design. The UI must not imply that any image
 can safely run with several copies.
 
-The first persistent profile has the following requirements:
+Application persistence is not implemented. The planned first persistent
+profile has the following requirements:
 
 - Replica counts are restricted to zero or one, with `Recreate` updates and a
   visible indication of expected downtime.
@@ -135,9 +152,9 @@ building a general managed-database product.
 
 ## Platform data model and traceability
 
-SQLite is the recommended first database because one broker instance serves one
-administrator. Its database must reside on a persistent volume, with schema
-migrations, transactions, foreign keys, and a tested backup procedure. The broker
+SQLite is the implemented metadata database because one broker instance serves
+one administrator. Migrations, transactions, foreign keys and a metadata PVC
+exist; a tested backup/restore procedure remains outstanding. The broker
 is restricted to one replica; additional replicas require a revised coordination
 and storage design.
 
@@ -145,16 +162,16 @@ and storage design.
 | --- | --- |
 | Administrator | ID, password hash, creation/change timestamps. |
 | Session | Hashed session identifier, administrator ID, expiry/revocation data. |
-| Machine token | Hash, app/action scopes, issuer, expiry/revocation metadata; added with API automation. |
+| Machine token (planned) | Hash, app/action scopes, issuer and expiry/revocation metadata. |
 | Application | Stable ID/name, optimistic version, effective desired revision, last successful revision, durable active operation reference, deletion state. |
-| Application revision | Requested candidate, then frozen execution specification: image reference/digest, chart version/artifact digest, secret versions, actor/time, result. |
+| Application revision | Requested candidate, frozen image and secret references, actor/time and result. Chart identity and values-hash fields exist but are not populated by execution. |
 | Operation | Application/type, source and target revision, durable state/stage, idempotency key and request hash, timestamps/deadline, recovery outcome. |
 | Operation event | Ordered progress entries with sanitized diagnostics and request correlation. |
 | Audit event | Actor, action, target, time, outcome, request/operation ID, safe configuration diff. |
-| Registry credential metadata | Registry, label, credential Secret reference/version, verification status, usage. |
+| Registry credential metadata | Current ID, registry, label, username and unverified metadata. Credential Secret storage, verification and usage protection remain incomplete. |
 | Secret metadata | Owner, name/key metadata, immutable Kubernetes Secret reference/version; no plaintext value. |
-| Volume | PVC identity, requested size, mount association, retained/orphaned state, deletion status. |
-| Settings | Validated non-secret installation preferences and capability references. |
+| Volume (planned) | The schema has a placeholder table; application PVC/mount/retention APIs are not implemented. |
+| Settings (planned API) | A placeholder schema table exists; no settings endpoints are registered. |
 
 Audit data answers **who requested what and when**. Operation history records
 what the platform did. Application logs show what the workload emitted. Metrics
@@ -165,7 +182,8 @@ Configuration snapshots and history are stored in SQLite. Kubernetes and Helm
 provide the observed runtime state. Cached status must include `observedAt` and
 must not be presented as fresh while the cluster is unavailable.
 
-Retention bounds apply to stored operation details and revision history. Versions
+Automated retention is not implemented. Required retention bounds shall apply
+to stored operation details and revision history. Versions
 required for supported rollback remain available, and the retention period must
 be documented. Nonterminal operations and their recovery dependencies must not be
 removed by retention. The local audit table provides traceability; it is not
@@ -178,53 +196,56 @@ is independent of optional application-volume support.
 
 ## API contract
 
-The API uses JSON over HTTP under `/api/v1`. The contract is defined in
-`api/openapi.yaml` before implementation of each endpoint group. Frontend types
-may be generated from this contract.
-The following is a proposed contract, not an implemented interface.
+The API uses JSON under `/api/v1`, with health probes outside that prefix.
+`api/openapi.yaml` describes the implemented core/lifecycle surface and documented
+response contract. Frontend types are currently maintained manually. Known wire
+response mismatches are recorded in [status.md](status.md).
+
+The table combines implemented endpoints and planned extensions. Availability is
+explicit; planned rows are not callable interfaces.
 
 ### Endpoints
 
-| Method and path | Purpose | Stage |
+| Method and path | Purpose | Availability |
 | --- | --- | --- |
-| `GET /healthz` | Process health, without sensitive information. | First service |
-| `GET /readyz` | API readiness, with cluster connectivity reported separately. | First service |
-| `GET /api/v1/setup/status` | Availability of initial administrator setup. | Setup |
-| `POST /api/v1/setup` | Administrator creation using the single-use bootstrap token. | Setup |
-| `POST /api/v1/auth/session` | Authentication and session creation. | Setup |
-| `DELETE /api/v1/auth/session` | Current session revocation. | Setup |
-| `GET /api/v1/auth/me` | Current administrator/session summary. | Setup |
-| `GET /api/v1/tokens` | Machine-token metadata and scopes; never token values. | Automation |
-| `POST /api/v1/tokens` | Creation of an application-scoped automation token; its value is displayed once. | Automation |
-| `DELETE /api/v1/tokens/{id}` | Automation token revocation. | Automation |
-| `GET /api/v1/system` | Version, host architecture, capabilities, capacity, component health. | Core |
-| `GET /api/v1/settings` | Supported non-secret platform settings. | Core |
-| `PATCH /api/v1/settings` | Supported preference changes; host-level changes remain in installer tooling. | Later core |
-| `POST /api/v1/images/inspect` | Image/credential inspection, reporting architecture, digest, and suggested ports. | Deployment |
-| `GET /api/v1/apps` | Paginated applications with summarized status. | Deployment |
-| `POST /api/v1/apps` | Persistence of application intent and queued installation. | Deployment |
-| `GET /api/v1/apps/{id}` | Configuration, observed status, active operation, and version. | Deployment |
-| `PATCH /api/v1/apps/{id}` | Image/configuration/resources/exposure/replica change. | Lifecycle |
-| `POST /api/v1/apps/{id}/restart` | Queued restart through a chart revision. | Lifecycle |
-| `POST /api/v1/apps/{id}/reapply` | Explicit restoration of managed resources from the recorded specification/digest after drift. | Lifecycle |
-| `GET /api/v1/apps/{id}/revisions` | Revision history and rollback eligibility. | Lifecycle |
-| `POST /api/v1/apps/{id}/rollback` | Queued restoration of a selected revision. | Lifecycle |
-| `DELETE /api/v1/apps/{id}` | Queued workload deletion with data retention by default. | Lifecycle |
-| `GET /api/v1/apps/{id}/logs` | Bounded recent logs, optionally a selected pod/previous container. | Diagnostics |
-| `GET /api/v1/apps/{id}/events` | Recent cluster diagnostics and operation progress. | Diagnostics |
-| `GET /api/v1/operations/{id}` | Durable progress, outcome, and recovery details. | Deployment |
-| `GET /api/v1/audit-events` | Paginated administrator action history. | Traceability |
-| `GET /api/v1/registry-credentials` | Credential metadata and usage, never passwords/tokens. | Private images |
-| `POST /api/v1/registry-credentials` | Secure credential creation. | Private images |
-| `PUT /api/v1/registry-credentials/{id}` | Credential rotation with reference-aware behavior. | Private images |
-| `DELETE /api/v1/registry-credentials/{id}` | Credential deletion after verification that no active or retained dependency requires it. | Private images |
-| `GET /api/v1/secrets` | Secret metadata; values are never returned. | Core configuration (M2) |
-| `POST /api/v1/secrets` | Versioned secret creation before use in an application. | Core configuration (M2) |
-| `POST /api/v1/secrets/{id}/versions` | Creation of an immutable replacement secret version. | Core configuration (M2) |
-| `DELETE /api/v1/secrets/{id}` | Secret deletion after verification of active and rollback references. | Core configuration (M2) |
-| `GET /api/v1/volumes` | Attached and retained data volumes. | Persistence |
-| `DELETE /api/v1/volumes/{id}` | Explicit, tracked deletion of an unused retained volume. | Persistence |
-| `GET /metrics` | Private platform metrics for the monitoring profile. | Observability |
+| `GET /healthz` | Process health, without sensitive information. | Implemented |
+| `GET /readyz` | API readiness, with cluster connectivity reported separately. | Implemented; cluster reported separately |
+| `GET /api/v1/setup/status` | Availability of initial administrator setup. | Implemented |
+| `POST /api/v1/setup` | Administrator creation using the single-use bootstrap token. | Implemented |
+| `POST /api/v1/auth/session` | Authentication and session creation. | Implemented |
+| `DELETE /api/v1/auth/session` | Current session revocation. | Implemented |
+| `GET /api/v1/auth/me` | Current administrator/session summary. | Implemented |
+| `GET /api/v1/tokens` | Machine-token metadata and scopes; never token values. | Planned |
+| `POST /api/v1/tokens` | Creation of an application-scoped automation token; its value is displayed once. | Planned |
+| `DELETE /api/v1/tokens/{id}` | Automation token revocation. | Planned |
+| `GET /api/v1/system` | Version, host architecture, configured capability names and cluster reachability. | Version, architecture, cluster reachability and capability names; capacity planned |
+| `GET /api/v1/settings` | Supported non-secret platform settings. | Planned |
+| `PATCH /api/v1/settings` | Supported preference changes; host-level changes remain in installer tooling. | Planned |
+| `POST /api/v1/images/inspect` | Image/credential inspection, reporting architecture, digest, and suggested ports. | Implemented anonymously; stored private credentials incomplete |
+| `GET /api/v1/apps` | Paginated applications with summarized status. | Implemented |
+| `POST /api/v1/apps` | Persistence of application intent and queued installation. | Implemented for stateless HTTP |
+| `GET /api/v1/apps/{id}` | Configuration, observed status, active operation, and version. | Implemented; status JSON naming defect |
+| `PATCH /api/v1/apps/{id}` | Image/configuration/resources/exposure/replica change. | Implemented for supported fields |
+| `POST /api/v1/apps/{id}/restart` | Queued restart through a chart revision. | Implemented endpoint; restart-token defect |
+| `POST /api/v1/apps/{id}/reapply` | Explicit restoration of managed resources from the recorded specification/digest after drift. | Implemented; real drift acceptance outstanding |
+| `GET /api/v1/apps/{id}/revisions` | Revision history and rollback eligibility. | Implemented |
+| `POST /api/v1/apps/{id}/rollback` | Queued restoration of a selected revision. | Implemented; full chart-artifact guarantee incomplete |
+| `DELETE /api/v1/apps/{id}` | Queued workload deletion with data retention by default. | Implemented for stateless workloads |
+| `GET /api/v1/apps/{id}/logs` | Bounded recent logs, optionally a selected pod/previous container. | Planned |
+| `GET /api/v1/apps/{id}/events` | Recent cluster diagnostics and operation progress. | Planned |
+| `GET /api/v1/operations/{id}` | Durable progress, outcome, and recovery details. | Implemented |
+| `GET /api/v1/audit-events` | Paginated administrator action history. | Planned |
+| `GET /api/v1/registry-credentials` | Credential metadata and usage, never passwords/tokens. | Metadata only |
+| `POST /api/v1/registry-credentials` | Credential metadata creation; secure credential provisioning remains planned. | Metadata only; password is not persisted |
+| `PUT /api/v1/registry-credentials/{id}` | Credential rotation with reference-aware behavior. | Planned |
+| `DELETE /api/v1/registry-credentials/{id}` | Delete stored credential metadata. | Metadata deletion; dependency protection incomplete |
+| `GET /api/v1/secrets` | Secret metadata; values are never returned. | Implemented |
+| `POST /api/v1/secrets` | Versioned secret creation before use in an application. | Implemented; single value key |
+| `POST /api/v1/secrets/{id}/versions` | Creation of an immutable replacement secret version. | Implemented |
+| `DELETE /api/v1/secrets/{id}` | Secret deletion after verification of active and rollback references. | Implemented with reference checks |
+| `GET /api/v1/volumes` | Attached and retained data volumes. | Planned |
+| `DELETE /api/v1/volumes/{id}` | Explicit, tracked deletion of an unused retained volume. | Planned |
+| `GET /metrics` | Private platform metrics for the monitoring profile. | Planned |
 
 Secrets created during an abandoned form submission require visible unused status
 and reference-aware cleanup. Operation payloads must not contain plaintext secret
@@ -243,8 +264,11 @@ endpoints are outside the first release.
   rules; it must not reuse the administrator's browser password or session.
 - Lifecycle mutations require `Idempotency-Key`. The same key/body returns the
   original result; the same key with different input returns a conflict.
-- Responses include an ETag for the application version; `If-Match` is required for changes to
-  an existing application, including rollback, restart, and deletion.
+- Application detail responses include an ETag. Current mutations of an existing
+  application require its integer `version` in the JSON body; the handler does
+  not enforce `If-Match`. This includes rollback, restart, reapply and deletion.
+- Cookie-authenticated mutations require `X-Requested-With`. Setup additionally
+  requires a bearer bootstrap token; login uses the administrator password.
 - Accepted changes are persisted before `202 Accepted` and an operation URL are returned.
   The request's disconnection must not cancel an accepted deployment.
 - Status codes are `400` for malformed input, `401/403` for access errors, `404` for missing
@@ -265,13 +289,13 @@ defaults must be measured on the reference host before being adopted.
 POST /api/v1/apps
 Content-Type: application/json
 Idempotency-Key: deploy-notes-001
+X-Requested-With: XMLHttpRequest
 ```
 
 ```json
 {
   "name": "notes",
   "image": "ghcr.io/example/notes:1.0.0",
-  "registryCredentialId": "reg_01",
   "containerPort": 8080,
   "profile": "http",
   "replicas": 1,
@@ -286,7 +310,7 @@ Idempotency-Key: deploy-notes-001
     "memoryLimit": "256Mi"
   },
   "health": {"readinessPath": "/readyz"},
-  "exposure": {"mode": "lan", "hostname": "notes.pi.home.arpa"},
+  "exposure": {"mode": "internal"},
   "storage": null
 }
 ```
@@ -304,19 +328,25 @@ Location: /api/v1/operations/op_01
 }
 ```
 
-The worker resolves and records the digest before changing the cluster. For public
-images, `registryCredentialId` can be omitted. The effective image digest and chart
-version become part of the immutable revision used for execution and later recovery.
+The example requires an authenticated session and an already-created `sec_01`
+version 1; it is a schema illustration rather than an executable deployment.
+The [API walkthrough](user/api-reference.md) supplies a reproducible local example.
+The worker records the execution image digest and Secret references before a
+mutation. Chart version/artifact/hash recording remains incomplete. Private
+credential IDs must not be treated as working authentication until that path is
+implemented.
 
 Image inspection in the form is an advisory preview unless the client submits the
 resolved `image@sha256:...` reference. The actual execution digest is displayed
 after the worker freezes it. Only initial creation, a changed image selection, or an explicit
 request to resolve that image again can select a new digest.
 
-For persistent creation, `storage` takes either a new-volume specification such
+For the planned M5 persistent profile, `storage` shall take either a new-volume
+specification such
 as `{"size":"1Gi","mountPath":"/data"}` or a reuse specification such as
 `{"existingVolumeId":"vol_01","mountPath":"/data"}`. The server rejects both
-forms being supplied together. Attaching an existing volume requires the
+forms being supplied together. Current code rejects either form as unsupported.
+The target existing-volume attachment requires the
 single-instance persistent profile and an unused compatible retained volume.
 
 ### Example: scale or update through the same mutation path
@@ -324,12 +354,12 @@ single-instance persistent profile and an unused compatible retained volume.
 ```http
 PATCH /api/v1/apps/app_01
 Content-Type: application/json
-If-Match: "app-3"
 Idempotency-Key: scale-notes-002
+X-Requested-With: XMLHttpRequest
 ```
 
 ```json
-{"replicas": 2}
+{"version": 3, "replicas": 2}
 ```
 
 Changing `image` uses this same endpoint. Both actions create a revision and an
@@ -338,22 +368,27 @@ Direct scaling through Kubernetes without updating Helm values is unsupported.
 
 ### Example: observed state during an update
 
+This illustrates the current status wire shape. Its PascalCase keys are a known
+serialization defect relative to the documented camelCase schema and UI. Revision
+references are opaque IDs, not Helm or software version numbers. TLS and external
+reachability fields are not currently returned.
+
 ```json
 {
   "id": "app_01",
   "version": 4,
-  "desiredRevision": 4,
-  "lastSuccessfulRevision": 3,
+  "desiredRevision": "rev_04",
+  "lastSuccessfulRevision": "rev_03",
   "activeOperationId": "op_02",
   "status": {
-    "phase": "updating",
-    "desiredReplicas": 2,
-    "readyReplicas": 1,
-    "workloadReady": false,
-    "routeReady": true,
-    "tlsReady": true,
-    "externalReachability": "not-verified",
-    "observedAt": "2026-10-13T12:00:00Z"
+    "Phase": "updating",
+    "DesiredReplicas": 2,
+    "ReadyReplicas": 1,
+    "WorkloadReady": false,
+    "RouteReady": true,
+    "ObservedGeneration": 4,
+    "ObservedAt": "2026-11-08T12:00:00Z",
+    "Stale": false
   }
 }
 ```

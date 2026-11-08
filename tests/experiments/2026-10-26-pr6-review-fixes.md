@@ -1,5 +1,10 @@
 # PR #6 review verification — 2026-10-26
 
+Historical report: observations below describe the dated run. The temporary
+clusters and ignored raw output were subsequently removed during cleanup.
+Current commands and acceptance boundaries are in the
+[local guide](../../docs/local-development.md) and [status report](../../docs/status.md).
+
 ## Scope
 
 This run verifies the review corrections for PR #6 against the owned local
@@ -22,7 +27,7 @@ execution are outside this verification.
 | Route isolation | The private hostname returned HTTP 404 through the separate listener. |
 | Transcript completion | The process exited with status 0 after the final PASS message was written to the transcript. |
 
-The local lifecycle command was `./scripts/test-local.sh`. The final release is
+The local lifecycle command was `./scripts/test-local.sh`. The final release at the time was
 revision 5, running v2 on container port 9090; the external URL remains
 `http://demo.localhost:8082/version`. The retained rollback snapshot records
 revision 4 as deployed before the subsequent port-change upgrade superseded it.
@@ -36,12 +41,12 @@ conclusion is drawn from this run.
 ## Evidence
 
 The raw evidence directory is
-`tests/experiments/runs/20261026T200015Z-36180/`. It contains the transcript,
+`tests/experiments/runs/20261026T200015Z-36180/`. It contained the transcript,
 source archive, component versions, image identities, failed-release evidence,
 rollback snapshots, final port-9090 Deployment, Helm history, timings, and
-exit status. Raw runs remain excluded from Git.
+exit status. Raw runs were excluded from Git and later removed during cleanup.
 
-The SHA-256 of `implementation.tar.gz` is:
+The recorded SHA-256 of the now-removed `implementation.tar.gz` was:
 
 ```text
 b45f69ce8534403189c86fd90a5b7a2710ab3a5b8a81c5d2c00abef21c8fa414
