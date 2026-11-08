@@ -9,7 +9,7 @@ from known defects and planned capabilities.
 
 ## Install a release on Linux
 
-The initial `v0.0.1` preview provides native ARM64/AMD64 OCI bundles and an
+The [v0.0.1 preview](https://github.com/piotrek1459/k8s-internal-platform/releases/tag/v0.0.1) provides native ARM64/AMD64 OCI bundles and an
 installer for a dedicated Raspberry Pi or Linux server. The
 [installation guide](docs/installation.md) covers host checks, download verification,
 installation and SSH access. Native Pi acceptance is pending; public HTTPS,

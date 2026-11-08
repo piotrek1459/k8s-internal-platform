@@ -16,6 +16,7 @@ embedded first-party chart through the Helm SDK.
 | Area | Implemented and recorded evidence | Remaining boundary |
 | --- | --- | --- |
 | Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | A preview Linux installer and native OCI release workflow are implemented; native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
+| Preview distribution | [v0.0.1](https://github.com/piotrek1459/k8s-internal-platform/releases/tag/v0.0.1) is published with ARM64/AMD64 native bundles, installer, installation guide, source/compatibility metadata and checksums. Release gates and public-download integrity checks passed. | Native Pi/systemd installation and cross-version backup/upgrade/recovery remain pending. |
 | Application chart | Deployment, Service, probes, resource settings, ownership labels, Secret references and optional private ingress. Local manual lifecycle and route-isolation reports are retained. | Resource defaults are provisional; reference-Pi and second-device LAN acceptance remain outstanding. |
 | Durable backend | SQLite migrations, transactional acceptance, idempotency, application version checks, a serial worker, status observer, operation history and audit records. | Interrupted-operation target verification and complete execution snapshots require further work. |
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashes, hashed sessions, logout and mutation-header checks. | Login throttling, password recovery and normal private HTTPS administration remain outstanding. |
@@ -83,8 +84,13 @@ establish acceptance for the affected paths.
   workflow builds isolated K3s platforms and drives the API/browser; known status
   and restart signatures remain explicit acceptance skips. Schedule: 02:00 UTC.
   Suite locations and workflow mapping are in the [test guide](../tests/README.md).
+- The [preview verification report](../tests/experiments/2026-11-08-release-preview.md)
+  records the tagged-source release gate: 11 E2E passes, zero failures and two
+  explicit known-gap skips. Both architecture jobs and public asset checks passed.
+  This establishes containerized K3s workflows and packaging, not native Pi boot
+  or systemd installer acceptance.
 - The [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)
-  records the latest full healthy API lifecycle and stop/rebuild test. Earlier
+  records the earlier healthy API lifecycle and stop/rebuild test. Earlier
   [reports](../tests/README.md#historical-reports) cover the manual chart baseline
   and implementation snapshots. A procedure or unit test is distinguished from
   a real-cluster or browser acceptance result.
