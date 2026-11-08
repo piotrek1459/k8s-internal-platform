@@ -73,34 +73,49 @@ local API endpoint. A mismatched registry setup is reported as an error; the
 script does not silently recreate a cluster. The historical `platform-dev`
 baseline is separate from the default platform installation.
 
-## Checks
-
-```bash
-./scripts/check-broker.sh
-./scripts/check-ui.sh
-./scripts/check-api.sh
-./scripts/check-chart.sh
-python3 -B -m unittest discover -s tests -p 'test_*.py' -v
-```
-
-The Go suite uses temporary SQLite and fake/in-process adapters. UI checks run
-Svelte type checking, ESLint and production bundling. API validation requires
-PyYAML; `openapi-spec-validator` enables full validation. Install those optional
-check dependencies in a virtual environment:
+## Checks and acceptance
 
 ```bash
 python3 -m venv .local/checks-venv
-.local/checks-venv/bin/python -m pip install pyyaml openapi-spec-validator
-PATH="$PWD/.local/checks-venv/bin:$PATH" ./scripts/check-api.sh
+.local/checks-venv/bin/python -m pip install -r tests/requirements.txt
+PATH="$PWD/.local/checks-venv/bin:$PATH" python3 -B tests/run.py unit
+python3 -B tests/run.py unit --suite broker --suite python
 ```
 
-Every PR runs broker/demo Go regressions, UI checks, structural API validation,
-shell/Python tests and the full local chart matrix. Go jobs use `-count=1` to
-execute tests on each run. The [test inventory](../../tests/README.md#regression-tests-on-every-pull-request)
-maps regression cases to their locations and workflows. Python CLI regressions
-check command validation and registry-specific digest selection without a Docker
-daemon. Real-cluster integration remains a
-separate acceptance step; fake adapters do not verify actual Pod replacement.
+Every PR runs uncached broker/demo Go regressions, UI checks, full OpenAPI
+validation, shell/Python tests and the chart matrix. Go tests remain beside
+packages; orchestration, helper regressions, integration scripts and browser
+workflows are grouped under `tests/`. The [test guide](../../tests/README.md)
+records dependencies, exact commands, workflow triggers and acceptance limits.
+
+The full E2E suite builds an isolated platform and drives its API and browser,
+checks real Pods and HTTP responses, tests release bundles on a second node,
+and cleans owned resources. It runs at 02:00 UTC nightly, manually, and before
+release publication. Documented status/restart gaps remain explicit acceptance
+skips rather than silently passing checks. Scheduled/manual execution requires
+the workflow to be merged into the default branch.
+
+## Release distribution
+
+Releases are started through **Actions → Release → Run workflow**, with an explicit
+source `branch` (default `main`) and `version`. The branch's HEAD is captured once;
+all checks, E2E, native builds and publication use that SHA. The workflow creates
+the tag only after validation and packaging succeed. PR, branch and tag pushes
+do not start release publication. The workflow definition must first be merged
+into `main` to expose manual dispatch.
+
+`release/version.txt` supplies a development fallback. The dispatch input supplies
+the broker/chart/E2E release version and generated installation examples, so a
+version-bump PR is not required for each release. `release/package.py` validates
+native OCI identity and creates bundles; `release/manifest.py` assembles metadata
+and checksums. `release/workflow.py` validates branch/tag/release identity and
+publishes only the tested commit. The [release guide](../../release/README.md)
+records exact UI/CLI steps and retry behavior.
+
+The [native installation guide](../installation.md) describes `installer/install.sh`.
+The initial release uses GitHub-hosted OCI bundles instead of requiring a public
+container registry. Image digests remain immutable and are imported directly
+into K3s. Native Pi acceptance and cross-version upgrade/recovery remain pending.
 
 ## Development structure
 
@@ -124,8 +139,7 @@ request must be polled to completion before its workload result is evaluated.
 
 Compatibility wrappers have been removed. Build, startup, forwarding and tool
 installation use `platform.sh` directly. The
-[script inventory](../../scripts/README.md) identifies the focused checks, thesis
-build and manual Helm baseline, each of which performs separate work.
+[script inventory](../../scripts/README.md) identifies local operations, thesis building and the separate test/release entry points.
 
 The [local development guide](../local-development.md) documents the gated broker
 integration test and baseline commands. Historical reports identify their dated

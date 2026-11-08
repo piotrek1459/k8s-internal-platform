@@ -34,7 +34,7 @@ Commands run from the repository root:
 
 ```bash
 ./scripts/platform.sh build
-./scripts/check-broker.sh
+./tests/checks/broker.sh
 go -C broker test ./...
 ```
 

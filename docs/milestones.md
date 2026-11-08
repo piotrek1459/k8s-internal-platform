@@ -45,7 +45,7 @@ local prototype; remaining acceptance work is summarized below.
 | M2 | Transactional store, operation queue, in-cluster chart/adapters, Secret backend, observer and completed-state persistence. | Exact interrupted-target verification, full snapshots and real-cluster acceptance of all durable invariants. |
 | M3 | Svelte setup/login, application and progress screens, update/history and configuration screens. | UI/API alignment, Secret submission, private images, application logs and normal LAN HTTPS. |
 | M4 | Healthy update/scale/rollback/delete and local API lifecycle evidence. | Restart, verified failed-rollout recovery, interruption/drift acceptance and core evaluation. |
-| M5–M8 | Planned persistence, networking, distribution and monitoring requirements; some local development automation already exists. | Separate implementation and evidence for each extension. |
+| M5–M8 | Persistence, public networking, native host/upgrade acceptance and monitoring remain planned; preview installation, native OCI packaging and manual releases are implemented. | Separate implementation and evidence for each extension. |
 
 The immediate order is UI/API contract alignment, restart correctness, recovery
 and snapshot completion, private images, then repeatable core acceptance and
@@ -133,8 +133,9 @@ and drift handling are completed in M4.
 
 **Completion evidence:** an in-cluster broker deploys an application, retains
 state after pod replacement, preserves secret references, and handles duplicate
-requests and disconnected clients without losing accepted work. Installer
-automation remains part of M7.
+requests and disconnected clients without losing accepted work. Complete native
+installer/upgrade acceptance remains part of M7; the preview installer and manual
+release controller are already implemented.
 
 ## M3 — Administrator UI (core)
 
@@ -256,7 +257,7 @@ host and networking mode differ from M6.
 - [ ] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh host reaches the setup wizard using the installer from a checkout.
 - [ ] A clean installation is performed on a rented AMD64 server. **Acceptance:** the platform operates using only the documented installation procedure.
 - [ ] Platform upgrade includes backup, compatibility validation, chart upgrade, and failure recovery. **Acceptance:** both a successful upgrade and recovery through rollback with state restoration are exercised.
-- [ ] Tagged releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** GHCR contains both image variants with recorded digests and published checksums.
+- [ ] Manually dispatched releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** both native OCI image bundles, installer assets, recorded digests and published checksums are available on GitHub Releases. The initial preview uses direct containerd import; registry publishing is optional.
 - [ ] Machine-token endpoints provide hashed storage, application/action scopes, expiry, and revocation. **Acceptance:** a token scoped to one application cannot access another.
 - [ ] A sample CI deployment invokes the API over a private path and polls the operation. **Acceptance:** an image publication followed by an authorized API call completes deployment without public exposure of administration.
 
@@ -420,7 +421,7 @@ do not prevent the first implementation increment.
 | Domain and DNS provider | M6. | Selection follows the public access mode; purchase is not required for M0–M4. |
 | LAN resolver and private certificate trust | Initial configuration in M0; normal administration in M3; repeatable setup in M7. | Explicit host mapping is acceptable initially; private DNS and HTTPS trust procedures are documented before LAN administration. |
 | SSD upgrade | Before sustained Pi operation with valuable data. | The decision uses measured microSD capacity and reliability requirements, with off-device backups retained. |
-| Library and component versions | Partly recorded. | Go/JS dependencies and local versions are pinned in module/lock/version files. Local and CI chart checks share the Helm version pin. A release compatibility manifest remains outstanding. |
+| Library and component versions | Partly recorded. | Go/JS dependencies and local versions are pinned in module/lock/version files. Local and CI chart checks share the Helm version pin. The preview release compatibility manifest records source, K3s/Helm pins and native image digests. Native host acceptance remains pending. |
 | UI stack | Decided and implemented. | Svelte 5/SvelteKit static SPA, TypeScript and Tailwind; see the accepted [decision](decisions/m3-ui-stack.md). |
 | Terraform scope | Before infrastructure evaluation. | Rented VPS and DNS provisioning is the candidate use case; an alternative boundary with the host installer requires a recorded rationale. |
 
@@ -454,12 +455,16 @@ web/
 deploy/helm/
   platform/                   broker/UI, RBAC, database volume
   application/                managed application workload chart
-installer/                    planned production installer; local tooling is scripts/platform.sh
+installer/                    preview dedicated Linux/K3s installer
+release/                      manual branch-HEAD publisher, OCI bundles, source identity and pins
 observability/                placeholder; monitoring profiles remain planned
 examples/                     healthy/unhealthy demonstration versions
 tests/
-  integration/                planned broader acceptance; current gated test is broker/integration
-  e2e/                        planned automated browser workflows
+  run.py                      shared suite selector
+  checks/                     fast checks and OpenAPI helper
+  regression/                 CLI, evidence and release integrity regressions
+  integration/                direct Helm baseline; gated Go test is broker/integration
+  e2e/                        isolated build/API/browser/OCI-bundle workflows
   experiments/                repeatable measurement procedures/results
 docs/
   project-outline.md          thesis context and original scope

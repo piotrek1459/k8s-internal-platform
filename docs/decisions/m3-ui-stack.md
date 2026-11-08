@@ -43,8 +43,11 @@ it. No bundle-size or framework-performance claim is used as acceptance evidence
 
 ## Verification boundary
 
-`./scripts/check-ui.sh` runs Svelte/TypeScript checks, ESLint and a production
+`./tests/checks/ui.sh` runs Svelte/TypeScript checks, ESLint and a production
 build. These checks do not validate live response shapes or browser workflows.
 Manual frontend types and Go responses currently disagree in several places;
 [implementation status](../status.md#known-correctness-and-integration-gaps)
-records those issues and the need for contract/browser acceptance tests.
+records the remaining contract issues. The separate [E2E suite](../../tests/README.md#end-to-end-workflows)
+now drives browser setup, deployment, update, progress, history rollback and
+deletion against a real K3s platform. Passing supported workflows does not
+establish acceptance for unsupported fields or the documented status/restart gaps.

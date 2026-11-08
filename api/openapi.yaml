@@ -96,6 +96,7 @@ paths:
       responses:
         "201": { description: Administrator created. }
         "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
         "409":
           description: Setup already completed or token already consumed.
           content:
@@ -119,12 +120,14 @@ paths:
             Set-Cookie:
               schema: { type: string }
         "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
     delete:
       tags: [auth]
       summary: Revoke the current session
       responses:
         "204": { description: Session revoked. }
         "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
 
   /api/v1/auth/me:
     get:

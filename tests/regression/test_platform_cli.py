@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/platform.sh"
 
 
@@ -32,6 +32,23 @@ class PlatformCommandTests(unittest.TestCase):
                 ["bash", str(SCRIPT), *args], cwd=ROOT, env=env,
                 capture_output=True, text=True, timeout=10,
             )
+
+    def test_token_survives_interleaved_stdout_and_stderr(self):
+        # Kubernetes may merge the structured stdout record between stderr lines.
+        token = "a" * 32
+        for middle in ("", '{"msg":"bootstrap_setup_available"}\n'):
+            with self.subTest(interleaved=bool(middle)):
+                logs = "Bootstrap token (valid 1h0m0s, single use):\n" + middle + "  " + token + "\n"
+                command = '''source "$1"
+require_target() { :; }
+service_json() { printf '%s' '{"setupAvailable":true}'; }
+local_kubectl() { printf '%s' "$TOKEN_FIXTURE"; }
+print_token
+'''
+                result = subprocess.run(["bash", "-c", command, str(SCRIPT.with_name("token-test")), str(SCRIPT)],
+                                        env=dict(os.environ, TOKEN_FIXTURE=logs), capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout.strip(), token)
 
     def test_help_does_not_require_a_configured_cluster(self):
         result = self.run_cli("--help", settings={"PLATFORM_CLUSTER_NAME": "invalid/name"})

@@ -1,6 +1,9 @@
 # Presentation 1 — speaker notes
 
 Audience file: `presentation1.pptx`. Reviewed: 2026-11-08.
+This deck and its speaker text form a presentation snapshot.
+Current capabilities and operating procedures are maintained
+in [implementation status](docs/status.md) and the [release guide](release/README.md).
 The deck has **20 slides**: 19 presented slides and a references appendix.
 The target schedule is **13 minutes 15 seconds**, within the required 10–15
 minute window. Approximately 2,100 words require a steady speaking pace and

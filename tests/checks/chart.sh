@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$(dirname "$0")/lib/dev-common.sh"
+source "$(dirname "$0")/../../scripts/lib/dev-common.sh"
 require_helm
 
 "$PLATFORM_HELM" lint --strict "$PLATFORM_CHART" --values "$PLATFORM_VALUES"

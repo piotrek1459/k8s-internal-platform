@@ -26,14 +26,8 @@ func (r *Router) protect(next http.HandlerFunc) http.HandlerFunc {
 // simple cross-site requests and that cannot be set cross-origin without a
 // pre-flighted CORS request the server never allows.
 func (r *Router) requireAuth(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
+	return r.requireCSRF(func(w http.ResponseWriter, req *http.Request) {
 		reqID := requestID(req)
-
-		if isStateChanging(req.Method) && !hasCSRFHeader(req) {
-			writeError(w, r.cfg.Logger, reqID, platform.Errorf(platform.CodeForbidden,
-				"missing CSRF header; include X-Requested-With on state-changing requests"))
-			return
-		}
 
 		cookie, err := req.Cookie(sessionCookieName)
 		if err != nil {
@@ -48,6 +42,19 @@ func (r *Router) requireAuth(next http.HandlerFunc) http.HandlerFunc {
 		ctx := context.WithValue(req.Context(), actorKey, adminID)
 		ctx = context.WithValue(ctx, sessionExpiryKey, expires)
 		next(w, req.WithContext(ctx))
+	})
+}
+
+// requireCSRF also protects session creation and removal, which must be callable
+// before authentication but must not accept cross-origin form submissions.
+func (r *Router) requireCSRF(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		if isStateChanging(req.Method) && !hasCSRFHeader(req) {
+			writeError(w, r.cfg.Logger, requestID(req), platform.Errorf(platform.CodeForbidden,
+				"missing CSRF header; include X-Requested-With on state-changing requests"))
+			return
+		}
+		next(w, req)
 	}
 }
 

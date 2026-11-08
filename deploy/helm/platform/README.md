@@ -61,8 +61,11 @@ kubectl --kubeconfig "$PLATFORM_CONFIG" apply -f dev/namespace.yaml
   --wait --timeout 180s
 ```
 
-The development namespace manifest assumes the pinned local K3s/Pod Security
-version. Production namespace/network policy is part of the planned installer.
+The shared namespace manifest assumes the pinned K3s/Pod Security version.
+The [preview installer](../../../docs/installation.md) applies it and installs
+this chart from a verified native OCI bundle, with `image.pullPolicy=Never` for
+the imported broker. Public routing and production network-policy acceptance
+remain separate requirements.
 A local HTTP registry also requires the documented alias/HTTP settings and node
 registry configuration; the unified launcher supplies them for its own cluster.
 

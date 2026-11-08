@@ -1,0 +1,158 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Source branch whose HEAD will be released
+        required: true
+        type: string
+        default: main
+      version:
+        description: Version to publish (for example v0.0.2); no existing tag required
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ startsWith(inputs.version, 'v') && inputs.version || format('v{0}', inputs.version) }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.identity.outputs.version }}
+      sha: ${{ steps.identity.outputs.sha }}
+      app_version: ${{ steps.identity.outputs.app_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Validate dispatched branch and release identity
+        id: identity
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          SOURCE_BRANCH: ${{ inputs.branch }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 release/workflow.py prepare --version "$INPUT_VERSION" --branch "$SOURCE_BRANCH"
+  verify:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: broker/go.mod
+          cache-dependency-path: broker/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r tests/requirements.txt
+      - run: python3 -B tests/run.py unit
+  e2e:
+    needs: [prepare, verify]
+    uses: ./.github/workflows/e2e.yml
+    with:
+      source_ref: ${{ needs.prepare.outputs.sha }}
+      release_version: ${{ needs.prepare.outputs.app_version }}
+  bundles:
+    needs: [prepare, verify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, amd64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: docker/setup-buildx-action@v3
+      - name: Prepare UI and packaging tools
+        run: |
+          ./scripts/platform.sh build-ui
+          ./scripts/platform.sh tools
+          mkdir -p dist/images dist/bundles
+      - name: Build native broker OCI archive
+        uses: docker/build-push-action@v6
+        with:
+          context: broker
+          platforms: linux/${{ matrix.arch }}
+          tags: platform.local/platform-broker:${{ needs.prepare.outputs.version }}
+          build-args: VERSION=${{ needs.prepare.outputs.app_version }}
+          provenance: false
+          outputs: type=oci,dest=dist/images/platform.oci.tar
+          cache-from: type=gha,scope=release-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=release-${{ matrix.arch }}
+      - name: Build demo OCI archives
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          for version in v1 v2 v3; do
+            unhealthy=false
+            [[ "$version" != v3 ]] || unhealthy=true
+            docker buildx build --platform "linux/$ARCH" --provenance=false \
+              --build-arg "VERSION=$version" --build-arg "UNHEALTHY=$unhealthy" \
+              --tag "platform.local/http-demo:$version" \
+              --output "type=oci,dest=dist/images/$version.oci.tar" examples/http-demo
+          done
+      - name: Package checked native bundle
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          python3 release/package.py --version "$VERSION" --arch "$ARCH" \
+            --platform dist/images/platform.oci.tar \
+            --v1 dist/images/v1.oci.tar --v2 dist/images/v2.oci.tar --v3 dist/images/v3.oci.tar \
+            --output dist/bundles
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-${{ matrix.arch }}
+          path: dist/bundles/*
+          retention-days: 7
+          if-no-files-found: error
+  publish:
+    needs: [prepare, verify, e2e, bundles]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-linux-*
+          path: dist
+          merge-multiple: true
+      - name: Assemble installer, compatibility manifest and checksums
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+        run: |
+          cp installer/install.sh dist/install.sh
+          cp docs/installation.md dist/INSTALL.md
+          python3 release/manifest.py --directory dist --version "$VERSION" --commit "$SOURCE_SHA"
+          (cd dist && sha256sum -c SHA256SUMS)
+      - name: Create tested tag and publish complete preview release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+        run: python3 release/workflow.py publish --directory dist --version "$VERSION" --sha "$SOURCE_SHA"

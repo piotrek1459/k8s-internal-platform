@@ -7,6 +7,20 @@ volume; application changes are executed by its durable worker.
 [Implementation status and next work](docs/status.md) separates verified behavior
 from known defects and planned capabilities.
 
+## Install a release on Linux
+
+Release assets are created through **Actions → Release → Run workflow**. Select
+`branch` (default `main`) and a version; the selected branch's HEAD is captured,
+validated and built before its tag and GitHub preview are published. The
+[release guide](release/README.md) describes manual publication. Published assets
+are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
+
+The [installation guide](docs/installation.md) describes the resulting native
+ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.0.1`
+commands are version examples; the downloaded guide matches the selected release.
+Native Pi acceptance, public HTTPS, application volumes and cross-version upgrades remain
+outside current acceptance.
+
 ## Local startup
 
 Prerequisites: a running Linux Docker engine (Docker Desktop on macOS), k3d,
@@ -76,15 +90,23 @@ for controlled failure experiments.
   rollback and deletion.
 - [Contributor guide](docs/contributor/README.md): build targets, checks, local
   configuration and script responsibilities.
-- [Script inventory](scripts/README.md): the main entry point, compatibility
-  wrappers, CI checks, thesis build and historical baseline experiments.
+- [Script inventory](scripts/README.md): local operations, thesis building and test/release entry points.
+
+## Verification
+
+`python3 -B tests/run.py unit` selects all fast suites. Required checks run on
+every PR. Real-cluster E2E workflows run at 02:00 UTC nightly, manually and before
+release publication; they build the platform and verify API/browser lifecycles,
+failure locks and packaged images. The [test guide](tests/README.md) explains
+prerequisites, reports and known acceptance gaps.
 
 ## Current scope
 
 The current implementation provides a local HTTP application workflow, immutable
 image references, operation tracking and revision history. Public HTTPS,
-application data volumes, release automation and reference-hardware acceptance
-remain planned. The UI defaults to Internal exposure for the documented workflow.
+application data volumes and reference-hardware acceptance remain planned.
+Release automation and the preview installer are implemented with explicit
+validation boundaries. The UI defaults to Internal exposure for the documented workflow.
 The [user guide](docs/user/README.md#current-limitations) records lifecycle
 limitations. UI/API contract alignment, restart, interrupted recovery, private
 registry authentication and failed-rollout restoration remain incomplete.
@@ -100,8 +122,9 @@ Milestone completion is determined by the acceptance evidence in
 | `api/` | OpenAPI contract. |
 | `deploy/helm/` | Platform and managed application charts. |
 | `docs/` | Design, user and contributor documentation. |
-| `tests/` | Regression checks and recorded experiments. |
+| `tests/` | Common runner, regressions, real-cluster/browser workflows and recorded experiments. |
+| `installer/`, `release/` | Native host installer, OCI bundles and release metadata. |
 | `examples/` | Healthy and deliberately unhealthy demonstration applications. |
-| `scripts/` | One local entry point, focused checks, thesis build and manual baseline tooling; no compatibility wrappers. |
+| `scripts/` | Local build/startup, shared paths and thesis build. |
 | `book/` | Engineering thesis LaTeX source. |
 | `infra/`, `observability/` | Planned infrastructure and monitoring work. |

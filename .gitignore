@@ -37,6 +37,8 @@ go.work.sum
 
 # Isolated development tools, kubeconfig, images, and raw experiment output.
 /.local/
+/dist/
+__pycache__/
 /tests/experiments/runs/
 
 # Thesis build artifacts; keep PDF illustrations in book/graf/.

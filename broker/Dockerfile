@@ -16,6 +16,8 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     -o /out/platform ./cmd/platform
 
 FROM gcr.io/distroless/static-debian12:nonroot
+ARG VERSION=dev
+LABEL org.opencontainers.image.version=$VERSION
 # Distroless static provides a nonroot user (65532) and CA certificates for
 # reaching container registries over HTTPS, while staying minimal.
 COPY --from=build /out/platform /platform

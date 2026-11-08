@@ -146,7 +146,7 @@ build_all() {
     require_docker
     build_ui
     printf '\n==> Building the broker image\n'
-    docker build --provenance=false --tag platform-broker:dev "$PLATFORM_ROOT/broker"
+    docker build --provenance=false --build-arg "VERSION=${PLATFORM_BUILD_VERSION:-dev}" --tag platform-broker:dev "$PLATFORM_ROOT/broker"
     build_demos native
     printf '\nBuilt platform-broker:dev and platform-demo:v1/v2/v3. v3 deliberately fails readiness.\n'
 }
@@ -269,7 +269,8 @@ print_token() {
     fi
     local_kubectl -n platform-system logs deployment/platform | python3 -c '
 import re,sys
-m=re.search(r"Bootstrap token[^\n]*\n\s*([A-Za-z0-9_-]+)",sys.stdin.read())
+logs=sys.stdin.read()
+m=re.search(r"(?m)^  ([A-Za-z0-9_-]{32})[ \t]*$",logs) if "Bootstrap token" in logs else None
 if not m: sys.exit("No generated token in current pod logs; check the installer-provided token.")
 print(m.group(1))'
 }

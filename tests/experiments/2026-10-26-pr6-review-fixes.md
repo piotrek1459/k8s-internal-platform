@@ -27,7 +27,7 @@ execution are outside this verification.
 | Route isolation | The private hostname returned HTTP 404 through the separate listener. |
 | Transcript completion | The process exited with status 0 after the final PASS message was written to the transcript. |
 
-The local lifecycle command was `./scripts/test-local.sh`. The final release at the time was
+The local lifecycle command was `./tests/integration/helm-lifecycle.sh`. The final release at the time was
 revision 5, running v2 on container port 9090; the external URL remains
 `http://demo.localhost:8082/version`. The retained rollback snapshot records
 revision 4 as deployed before the subsequent port-change upgrade superseded it.

@@ -100,6 +100,27 @@ func TestStateChangingRequestRequiresCSRFHeader(t *testing.T) {
 	}
 }
 
+func TestAuthenticationMutationsRequireCSRFHeader(t *testing.T) {
+	h := newAuthRouter(t, "boot-token")
+	for _, route := range []struct{ method, path string }{
+		{http.MethodPost, "/api/v1/setup"},
+		{http.MethodPost, "/api/v1/auth/session"},
+		{http.MethodDelete, "/api/v1/auth/session"},
+	} {
+		t.Run(route.method+route.path, func(t *testing.T) {
+			req := httptest.NewRequest(route.method, route.path, strings.NewReader(`{"password":"a-strong-password"}`))
+			req.Header.Set("Authorization", "Bearer boot-token")
+			if rec := do(h, req); rec.Code != http.StatusForbidden {
+				t.Fatalf("missing CSRF header: status=%d, want 403", rec.Code)
+			}
+		})
+	}
+	status := do(h, httptest.NewRequest(http.MethodGet, "/api/v1/setup/status", nil))
+	if !strings.Contains(status.Body.String(), `"setupAvailable":true`) {
+		t.Fatal("rejected setup consumed bootstrap availability")
+	}
+}
+
 func TestSetupLoginAndAuthenticatedDeployFlow(t *testing.T) {
 	h := newAuthRouter(t, "boot-token")
 

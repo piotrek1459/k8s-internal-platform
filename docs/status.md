@@ -1,6 +1,6 @@
 # Implementation status and next work
 
-Updated: 2026-11-08. Source baseline: merged PR #10 (`e68570c`).
+Updated: 2026-11-08. Source baseline: merged PR #11 (`da23d67`), with manual-release and verification additions.
 This document records implementation and verification boundaries. The detailed
 plans describe target requirements; a planned requirement is not evidence of
 completion. Runtime installations and generated files are not part of the source
@@ -15,20 +15,21 @@ embedded first-party chart through the Helm SDK.
 
 | Area | Implemented and recorded evidence | Remaining boundary |
 | --- | --- | --- |
-| Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | A production Linux/K3s installer and published releases are not implemented. |
+| Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | Native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
+| Preview distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub preview. | Manual publication, native Pi/systemd installation and cross-version backup/upgrade/recovery acceptance remain pending. |
 | Application chart | Deployment, Service, probes, resource settings, ownership labels, Secret references and optional private ingress. Local manual lifecycle and route-isolation reports are retained. | Resource defaults are provisional; reference-Pi and second-device LAN acceptance remain outstanding. |
 | Durable backend | SQLite migrations, transactional acceptance, idempotency, application version checks, a serial worker, status observer, operation history and audit records. | Interrupted-operation target verification and complete execution snapshots require further work. |
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashes, hashed sessions, logout and mutation-header checks. | Login throttling, password recovery and normal private HTTPS administration remain outstanding. |
-| Administrator UI | Setup/login, application creation, operation polling, update/scale, history, rollback, deletion, Secret and credential screens. | UI/API contract mismatches remain; browser workflows are not covered by an automated acceptance suite. |
+| Administrator UI | Setup/login, application creation, operation polling, update/scale, history, rollback, deletion, Secret and credential screens. | Automated browser setup and healthy lifecycle workflows exist; UI/API contract mismatches remain and are not blanket acceptance. |
 | Healthy lifecycle | Local API deployment of v1, update to v2, scaling to 2/0/1, rollback to v1 and deletion with retained history were verified. | Restart, unhealthy-rollout restoration and crash recovery are not accepted as complete. |
-| Configuration Secrets | Immutable Kubernetes Secret creation/versioning, metadata-only SQLite records, explicit version references and deletion guards. | UI application-reference submission and real-cluster configuration rollback need verification. |
+| Configuration Secrets | Immutable Kubernetes Secret creation/versioning, metadata-only SQLite records, explicit version references and deletion guards. | Real-cluster configuration rollback is covered by E2E; UI application-reference submission remains incomplete. |
 | Private images | Credential metadata endpoints and image-inspector authentication interfaces exist. | Password persistence, credential resolution and image-pull Secret provisioning are incomplete. |
 | Diagnostics | Structured broker logs, operation events and cached workload observations. | Application log/event endpoints, audit browsing, metrics, capacity reporting and retention automation remain planned. |
 | Persistence | The platform has a metadata PVC. | Application volumes, retained-volume operations and verified backup/restore belong to M5. |
 | Networking | Current development access uses loopback forwarding and Internal application exposure. | LAN HTTPS, public routing/TLS and direct-ingress/tunnel acceptance remain outstanding. |
-| Portability | The demo Dockerfile supports ARM64/AMD64 cross-builds; earlier local OCI packaging is recorded. | Native Raspberry Pi/AMD64 acceptance and published multi-architecture platform artifacts remain outstanding. |
+| Portability | Broker and demo native OCI packaging supports ARM64/AMD64. Native OCI identity, version propagation and containerized runtime checks are recorded in the verification report. | Native Raspberry Pi/AMD64 host acceptance remains outstanding. |
 
-The current supported walkthrough uses an anonymous local registry, the stateless
+The local source walkthrough uses an anonymous local registry, the stateless
 HTTP profile, port 8080 and readiness path `/readyz`. A public image registry and
 public application exposure are separate concepts. Replica changes are manual;
 several replicas on one host do not provide host-level availability.
@@ -69,21 +70,29 @@ establish acceptance for the affected paths.
 
 ## Verification available
 
-- The ordinary broker suite has 97 top-level test functions using temporary
+- The ordinary broker suite has 98 top-level test functions using temporary
   SQLite, fake Kubernetes clients, in-memory Helm storage and an in-process
   registry. One additional real-cluster test is gated by the `integration` build
   tag and `PLATFORM_INTEGRATION=1`.
-- The demo has five top-level Go tests. Fifteen Python test methods cover
-  rollback evidence, transcript completion, command validation and digest
-  selection. Table-driven subcases are additional to these counts.
+- The demo has five top-level Go tests. The 45 Python release/installer and helper
+  regressions cover rollback evidence, transcript completion, command validation,
+  digest selection, metadata/checksum integrity, manual publication guards and
+  bootstrap-log redaction. Table-driven subcases are additional to these counts.
 - Every pull request runs broker/demo Go regression suites, UI type-check/lint/
-  build, structural OpenAPI validation, shell/Python checks, and the full local
+  build, full OpenAPI validation, shell/Python checks, and the full local
   chart lint/render/negative/synchronization matrix. Go tests use `-count=1`;
-  local and CI chart checks share the Helm version pin. The default CI does not
-  run the real-cluster test or an automated browser suite. Suite locations and
-  workflow mapping are in the [test guide](../tests/README.md#regression-tests-on-every-pull-request).
+  local and CI chart checks share the Helm version pin. The fast PR jobs do not
+  run a cluster. A separate nightly/manual/release E2E
+  workflow builds isolated K3s platforms and drives the API/browser; known status
+  and restart signatures remain explicit acceptance skips. Schedule: 02:00 UTC.
+  Suite locations and workflow mapping are in the [test guide](../tests/README.md).
+- The [manual release verification report](../tests/experiments/2026-11-08-manual-release.md)
+  records publication-controller regressions, read-only branch HEAD resolution and
+  a native ARM64 bundle run with an explicitly supplied release version. The full
+  publication workflow has not been dispatched. These checks establish packaging
+  and containerized runtime behavior, not native Pi boot or systemd installation.
 - The [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)
-  records the latest full healthy API lifecycle and stop/rebuild test. Earlier
+  records the earlier healthy API lifecycle and stop/rebuild test. Earlier
   [reports](../tests/README.md#historical-reports) cover the manual chart baseline
   and implementation snapshots. A procedure or unit test is distinguished from
   a real-cluster or browser acceptance result.
@@ -101,8 +110,8 @@ measurements require new retained evidence.
 | 2 | Correct restart semantics. | Pod identity changes, the image digest remains fixed, and retries retain the same restart token. |
 | 3 | Verify interrupted recovery and failed-rollout restoration; complete execution snapshots. | Interruption before/during/after Helm execution never produces false success. Restored state is verified before a lock is released; unresolved state remains blocked. |
 | 4 | Complete private registry authentication and pull credentials. | A private image deploys; invalid credentials produce an actionable error without leaking values. |
-| 5 | Automate real-cluster acceptance and perform reference-host evaluation. | Isolated runs verify resources and HTTP responses, clean their own resources, and retain evidence. Pi/LAN measurements use predefined targets and repetitions. |
-| 6 | Implement M5–M8 capabilities. | Application data/backup, public HTTPS, installable releases and monitoring satisfy their separate acceptance criteria. |
+| 5 | Extend real-cluster failure acceptance and perform reference-host evaluation. | Isolated runs verify resources and HTTP responses, clean their own resources, and retain evidence. Pi/LAN measurements use predefined targets and repetitions. |
+| 6 | Implement M5–M8 capabilities. | Application data/backup, public HTTPS, stable upgrades and monitoring satisfy their separate acceptance criteria; preview distribution does not complete M7. |
 
 The [milestone checklists](milestones.md) retain the full project scope. Local
 implementation progress does not establish completion of reference-hardware,
