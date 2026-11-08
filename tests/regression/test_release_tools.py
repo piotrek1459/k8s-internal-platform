@@ -68,6 +68,29 @@ class ReleaseIntegrityTests(unittest.TestCase):
                 with self.subTest(arch=arch, version=version), self.assertRaises(ValueError):
                     packaging.image_digest(path, arch, version)
 
+    def test_wrapped_oci_index_is_normalized_to_the_recorded_native_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory); source = folder / "source.tar"
+            digest = image(source)
+            wrapper = json.dumps({"schemaVersion": 2, "manifests": [{"digest": digest}]}).encode()
+            wrapped_digest = "sha256:" + hashlib.sha256(wrapper).hexdigest()
+            wrapped = folder / "wrapped.tar"
+            with tarfile.open(source) as original, tarfile.open(wrapped, "w") as archive:
+                for member in original.getmembers():
+                    if member.name != "index.json": archive.addfile(member, original.extractfile(member))
+                for name, raw in (("index.json", json.dumps({"manifests": [{"digest": wrapped_digest}]}).encode()),
+                                  ("blobs/sha256/" + wrapped_digest.split(":")[1], wrapper)):
+                    member = tarfile.TarInfo(name); member.size = len(raw); archive.addfile(member, io.BytesIO(raw))
+            native = packaging.image_digest(wrapped, "arm64", "0.0.1")
+            output = folder / "normalized.tar"
+            packaging.native_archive(wrapped, output, native, "arm64", "platform.local/platform-broker:0.0.1")
+            with tarfile.open(output) as archive:
+                index = json.load(archive.extractfile("index.json"))
+                self.assertEqual(index["manifests"][0]["digest"], digest)
+                self.assertEqual(index["manifests"][0]["platform"]["architecture"], "arm64")
+                self.assertEqual(len(index["manifests"]), 1)
+                self.assertNotIn("blobs/sha256/" + wrapped_digest.split(":")[1], archive.getnames())
+
     def test_corrupt_oci_metadata_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "image.tar"; image(path, corrupt=True)

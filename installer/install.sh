@@ -31,7 +31,7 @@ architecture() {
 preflight() {
     [[ "$(uname -s)" == Linux ]] || fail 'The host installer requires Linux.'
     [[ "$(id -u)" == 0 ]] || fail 'Run the installer with sudo.'
-    for command in curl tar sha256sum awk grep systemctl install df sort uniq; do
+    for command in curl tar sha256sum awk grep systemctl install df sort uniq ln; do
         command -v "$command" >/dev/null || fail "Missing required host tool: $command"
     done
     [[ "$(cat /proc/1/comm)" == systemd ]] || fail 'A systemd-based host is required.'
@@ -120,33 +120,44 @@ CONFIG
         download "https://raw.githubusercontent.com/k3s-io/k3s/$K3S_VERSION/install.sh" "$WORK/k3s-install.sh"
         INSTALL_K3S_VERSION="$K3S_VERSION" INSTALL_K3S_EXEC=server sh "$WORK/k3s-install.sh"
     fi
-    /usr/local/bin/k3s kubectl --kubeconfig "$KUBECONFIG_PATH" wait --for=condition=Ready nodes --all --timeout=180s
+    # Explicit multicall names avoid dependence on global tool aliases.
+    ln -sfn /usr/local/bin/k3s "$TOOL_ROOT/kubectl"
+    ln -sfn /usr/local/bin/k3s "$TOOL_ROOT/ctr"
+    local attempt
+    for ((attempt=0; attempt<60; attempt++)); do
+        if "$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" --request-timeout=5s get nodes -o name 2>/dev/null | grep -q '^node/'; then
+            "$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" wait --for=condition=Ready nodes --all --timeout=180s
+            return
+        fi
+        sleep 2
+    done
+    fail 'K3s did not register a node; inspect sudo journalctl -u k3s.'
 }
 install_platform() {
     local key image archive
     for key in PLATFORM_IMAGE DEMO_V1_IMAGE DEMO_V2_IMAGE DEMO_V3_IMAGE; do
         image="${!key}"
         case "$key" in PLATFORM_IMAGE) archive=platform-image.oci.tar ;; DEMO_V1_IMAGE) archive=demo-v1.oci.tar ;; DEMO_V2_IMAGE) archive=demo-v2.oci.tar ;; DEMO_V3_IMAGE) archive=demo-v3.oci.tar ;; esac
-        /usr/local/bin/k3s ctr --namespace k8s.io images import --digests --base-name "${image%@*}" "$WORK/bundle/$archive"
+        "$TOOL_ROOT/ctr" --namespace k8s.io images import --digests --base-name "${image%@*}" "$WORK/bundle/$archive"
     done
-    /usr/local/bin/k3s kubectl --kubeconfig "$KUBECONFIG_PATH" apply -f "$WORK/bundle/namespace.yaml"
+    "$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" apply -f "$WORK/bundle/namespace.yaml"
     "$TOOL_ROOT/helm" --kubeconfig "$KUBECONFIG_PATH" upgrade --install platform "$WORK/bundle/platform-chart.tgz" \
         --namespace platform-system --create-namespace \
         --set-string "image.repository=${PLATFORM_IMAGE%@*}" --set-string "image.digest=${PLATFORM_IMAGE#*@}" \
         --set image.pullPolicy=Never --wait --timeout 180s
     local attempt response
     for ((attempt=0; attempt<30; attempt++)); do
-        response="$(/usr/local/bin/k3s kubectl --kubeconfig "$KUBECONFIG_PATH" --request-timeout=10s get --raw /api/v1/namespaces/platform-system/services/platform:80/proxy/readyz 2>/dev/null)" || response='{}'
+        response="$("$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" --request-timeout=10s get --raw /api/v1/namespaces/platform-system/services/platform:80/proxy/readyz 2>/dev/null)" || response='{}'
         if grep -Eq '"status":[[:space:]]*"ready"' <<< "$response" && grep -Eq '"cluster":[[:space:]]*"available"' <<< "$response"; then
             install -m 0600 "$WORK/bundle/release.env" "$STATE_ROOT/release.env"
             printf 'Installed platform v%s. Metadata is retained across same-version reruns.\n' "$PLATFORM_VERSION"
-            printf 'On the Pi: sudo k3s kubectl -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80\n'
+            printf 'On the Pi: sudo %s/kubectl --kubeconfig %s -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80\n' "$TOOL_ROOT" "$KUBECONFIG_PATH"
             printf 'Use an SSH local forward and open http://127.0.0.1:8080/setup. Retrieve the token from current broker logs.\n'
             return
         fi
         sleep 2
     done
-    fail 'Platform readiness was not established. Inspect: sudo k3s kubectl -n platform-system logs deployment/platform'
+    fail 'Platform readiness was not established. Inspect broker logs with the installer-owned kubectl documented in INSTALL.md.'
 }
 main() {
     REQUESTED_VERSION=; local bundle= checksum= check=false

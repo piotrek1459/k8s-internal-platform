@@ -1,4 +1,5 @@
 """Full build/install/API/browser workflows on an owned real K3s cluster."""
+import base64
 import contextlib
 import json
 import secrets
@@ -35,7 +36,19 @@ class Workflows(unittest.TestCase):
                 yield page
             except Exception:
                 # Traces/cookies/network bodies are deliberately not exported.
-                page.screenshot(path=str(self.e.artifacts / (name + ".png")), full_page=True, mask=[page.locator("input, textarea")])
+                # A closed browser must not replace the original failure with a
+                # screenshot error. Keep only redacted application/operation state.
+                with contextlib.suppress(Exception):
+                    page.screenshot(path=str(self.e.artifacts / (name + ".png")), full_page=True, mask=[page.locator("input, textarea")])
+                with contextlib.suppress(Exception):
+                    applications = self.e.client.get("/apps")["items"]
+                    diagnostics = []
+                    for app in applications:
+                        item = {key: app.get(key) for key in ("id", "name", "activeOperationId", "lastSuccessfulRevision")}
+                        if item["activeOperationId"]:
+                            item["operation"] = self.e.client.get("/operations/" + item["activeOperationId"])
+                        diagnostics.append(item)
+                    (self.e.artifacts / (name + ".json")).write_text(self.e.redact(json.dumps(diagnostics, indent=2)))
                 raise
             finally:
                 context.close(); browser.close()
@@ -43,8 +56,26 @@ class Workflows(unittest.TestCase):
     def browser_login(self, page):
         page.goto(self.e.url + "/login")
         page.get_by_label("Password", exact=True).fill(self.e.password)
-        page.get_by_role("button", name="Sign in", exact=True).click()
+        with page.expect_response(lambda r: r.url.endswith("/api/v1/auth/session") and r.request.method == "POST") as response:
+            page.get_by_role("button", name="Sign in", exact=True).click()
+        self.assertEqual(response.value.status, 204)
         page.wait_for_url("**/apps")
+
+    def click_mutation(self, page, button, method, path):
+        with page.expect_response(lambda r: r.url.endswith("/api/v1" + path) and r.request.method == method) as response:
+            button.click()
+        self.assertEqual(response.value.status, 202)
+        return response.value.json()
+
+    def browser_success(self, page, accepted, navigates=True):
+        from playwright.sync_api import expect
+        if navigates:
+            page.wait_for_url("**/operation?op=" + accepted["operationId"])
+        # History badges also contain "succeeded". Only the new operation's
+        # state indicator can establish that the submitted mutation completed.
+        state = page.get_by_text("State:", exact=True).locator("..")
+        expect(state.get_by_text("succeeded", exact=True)).to_be_visible(timeout=180000)
+        self.assertEqual(self.e.client.get("/operations/" + accepted["operationId"])["state"], "succeeded")
 
     def test_00_browser_bootstrap(self):
         with self.page("bootstrap") as page:
@@ -57,7 +88,9 @@ class Workflows(unittest.TestCase):
             self.assertEqual(response.value.status, 401)
             self.assertTrue(self.e.client.get("/setup/status")["setupAvailable"])
             page.get_by_label("Bootstrap token").fill(self.e.token)
-            page.get_by_role("button", name="Create account").click()
+            with page.expect_response(lambda r: r.url.endswith("/api/v1/setup") and r.request.method == "POST") as response:
+                page.get_by_role("button", name="Create account").click()
+            self.assertEqual(response.value.status, 201)
             page.wait_for_url("**/login")
             self.browser_login(page)
             self.assertFalse(self.e.client.get("/setup/status")["setupAvailable"])
@@ -132,35 +165,34 @@ class Workflows(unittest.TestCase):
             page.get_by_label("Name", exact=True).fill(name)
             page.get_by_label("Readiness path").fill("/readyz")
             for _ in range(3): page.get_by_role("button", name="Next").click()
-            page.get_by_role("button", name="Deploy", exact=True).click()
-            from playwright.sync_api import expect
-            expect(page.get_by_text("succeeded", exact=True).first).to_be_visible(timeout=180000)
-            app = next(a["id"] for a in self.e.client.get("/apps")["items"] if a["name"] == name)
-            original = self.e.client.get("/apps/" + app)["lastSuccessfulRevision"]
+            accepted = self.click_mutation(page, page.get_by_role("button", name="Deploy", exact=True), "POST", "/apps")
+            app = accepted["applicationId"]
             try:
+                self.browser_success(page, accepted, navigates=False)
                 self.e.http_version(app, "v1")
                 page.goto(self.e.url + "/apps/" + app + "/update")
                 page.get_by_label("Image reference").fill(self.e.image("v2"))
-                page.get_by_role("button", name="Apply update").click()
-                expect(page.get_by_text("succeeded", exact=True).first).to_be_visible(timeout=180000)
+                accepted = self.click_mutation(page, page.get_by_role("button", name="Apply update"), "PATCH", "/apps/" + app)
+                self.browser_success(page, accepted)
                 self.e.http_version(app, "v2")
                 page.reload()
-                expect(page.get_by_text("succeeded", exact=True).first).to_be_visible()
+                self.browser_success(page, accepted)
                 page.goto(self.e.url + "/apps/" + app)
                 page.get_by_role("button", name="History", exact=True).click()
                 row = page.get_by_role("row").filter(has_text=self.e.image("v1"))
                 page.on("dialog", lambda dialog: dialog.accept())
-                row.get_by_role("button", name="Roll back").click()
-                expect(page.get_by_text("succeeded", exact=True).first).to_be_visible(timeout=180000)
+                accepted = self.click_mutation(page, row.get_by_role("button", name="Roll back"), "POST", "/apps/" + app + "/rollback")
+                self.browser_success(page, accepted)
                 self.e.http_version(app, "v1")
                 page.goto(self.e.url + "/apps/" + app)
-                page.get_by_role("button", name="Delete", exact=True).click()
-                expect(page.get_by_text("succeeded", exact=True).first).to_be_visible(timeout=180000)
+                accepted = self.click_mutation(page, page.get_by_role("button", name="Delete", exact=True), "DELETE", "/apps/" + app)
+                self.browser_success(page, accepted)
                 self.assertNotIn(app, [a["id"] for a in self.e.client.get("/apps")["items"]])
                 self.assertEqual(self.e.resource("deployments,services", app), [])
                 page.screenshot(path=str(self.e.artifacts / "browser-complete.png"), mask=[page.locator("input, textarea")])
             finally:
-                if app in [a["id"] for a in self.e.client.get("/apps")["items"]]: self.e.delete(app)
+                current = next((a for a in self.e.client.get("/apps")["items"] if a["id"] == app), None)
+                if current and not current.get("activeOperationId"): self.e.delete(app)
         self.e.record("Browser image inspection, deployment, update, progress refresh, history rollback and deletion")
 
     def test_20_configuration_secrets_and_snapshot_rollback(self):
@@ -184,6 +216,7 @@ class Workflows(unittest.TestCase):
             self.assertTrue(secret_name.endswith("-v1"))
             actual = json.loads(self.e.kubectl("-n", "platform-apps", "get", "secret", secret_name, "-o", "json").stdout)
             self.assertTrue(actual["immutable"])
+            self.assertTrue(base64.b64decode(actual["data"]["value"]).decode() == value, "Rollback selected incorrect Secret contents")
             self.assertEqual(self.e.client.request("DELETE", "/secrets/" + secret["id"])[0], 409)
             self.assertNotIn(value, json.dumps(self.e.client.get("/secrets")))
         finally: self.e.delete(app)
@@ -266,6 +299,21 @@ class Workflows(unittest.TestCase):
 
 
 class Result(unittest.TextTestResult):
+    def _exc_info_to_string(self, error, test):
+        return ENVIRONMENT.redact(super()._exc_info_to_string(error, test))
+
+    def addError(self, test, error):
+        super().addError(test, error)
+        self.report_failure(test, self.errors[-1][1])
+
+    def addFailure(self, test, error):
+        super().addFailure(test, error)
+        self.report_failure(test, self.failures[-1][1])
+
+    def report_failure(self, test, message):
+        (ENVIRONMENT.artifacts / (test._testMethodName + ".txt")).write_text(message)
+        self.stream.writeln(message)
+
     def startTest(self, test):
         super().startTest(test)
         self.started = time.monotonic()

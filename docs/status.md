@@ -73,7 +73,7 @@ establish acceptance for the affected paths.
   SQLite, fake Kubernetes clients, in-memory Helm storage and an in-process
   registry. One additional real-cluster test is gated by the `integration` build
   tag and `PLATFORM_INTEGRATION=1`.
-- The demo has five top-level Go tests. 27 Python release/installer and helper regression tests cover rollback evidence,
+- The demo has five top-level Go tests. 28 Python release/installer and helper regression tests cover rollback evidence,
   transcript completion, command validation, digest selection, metadata/checksum
   integrity and bootstrap-log redaction. Table-driven subcases are additional to these counts.
 - Every pull request runs broker/demo Go regression suites, UI type-check/lint/

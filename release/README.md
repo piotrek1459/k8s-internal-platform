@@ -27,7 +27,9 @@ merge; scheduled E2E becomes active only after merging the workflow into `main`.
 Each `platform-vVERSION-linux-ARCH.tar.gz` contains a platform chart, namespace
 manifest, platform/demo OCI archives, and `release.env`/`release.json`. Packaging
 validates native architecture, immutable manifest/config checksums and version
-labels. `release/manifest.py` requires both architecture bundles and records the
+labels. Archives are normalized to the recorded native manifest root, with
+reachable config/layer content verified, so containerd imports the exact digest
+used by workloads. `release/manifest.py` requires both architecture bundles and records the
 source commit and compatibility pins. `SHA256SUMS` covers bundles, installer,
 installation guide and top-level metadata.
 

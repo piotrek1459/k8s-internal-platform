@@ -73,7 +73,7 @@ Important locations:
 | --- | --- |
 | `/etc/k8s-internal-platform/owner` | Installer ownership marker. |
 | `/etc/k8s-internal-platform/release.env` | Installed version, pins and demo digest references; mode `0600`. |
-| `/usr/local/lib/k8s-internal-platform/helm` | Installer-owned pinned Helm binary. |
+| `/usr/local/lib/k8s-internal-platform/` | Pinned Helm and installer-owned K3s kubectl/ctr aliases. |
 | `/etc/rancher/k3s/config.yaml` | K3s configuration. |
 | `/etc/rancher/k3s/k3s.yaml` | Root-readable cluster credentials. |
 | Platform PVC | SQLite metadata, accounts, sessions and operation history. |
@@ -95,10 +95,19 @@ it is not an air-gapped installer.
 
 ## 4. Open the UI over SSH
 
+Define the installer-owned Kubernetes command in each Pi/server shell:
+
+```bash
+pkubectl() {
+  sudo /usr/local/lib/k8s-internal-platform/kubectl \
+    --kubeconfig /etc/rancher/k3s/k3s.yaml "$@"
+}
+```
+
 Keep this command running on the Pi/server:
 
 ```bash
-sudo k3s kubectl -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80
+pkubectl -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80
 ```
 
 In another terminal on the workstation, substitute the actual SSH destination:
@@ -111,7 +120,7 @@ Open **http://127.0.0.1:8080/setup** locally. Retrieve the bootstrap token priva
 on the Pi/server:
 
 ```bash
-sudo k3s kubectl -n platform-system logs deployment/platform | grep -A 3 'Bootstrap token'
+pkubectl -n platform-system logs deployment/platform | grep -A 3 'Bootstrap token'
 ```
 
 The bootstrap token is used once to create the administrator. Subsequent sign-in
@@ -152,8 +161,8 @@ actual HTTP response must both be verified.
 Find the application's Service and forward it on the server:
 
 ```bash
-sudo k3s kubectl -n platform-apps get services
-sudo k3s kubectl -n platform-apps port-forward --address 127.0.0.1 service/APP_SERVICE 8081:8080
+pkubectl -n platform-apps get services
+pkubectl -n platform-apps port-forward --address 127.0.0.1 service/APP_SERVICE 8081:8080
 ```
 
 Add a second workstation tunnel, then open the application:
@@ -187,10 +196,10 @@ For diagnosis:
 
 ```bash
 sudo systemctl status k3s --no-pager
-sudo k3s kubectl get nodes
-sudo k3s kubectl -n platform-system get pods,pvc
-sudo k3s kubectl -n platform-system logs deployment/platform
-sudo k3s kubectl -n platform-apps get deployments,pods,services
+pkubectl get nodes
+pkubectl -n platform-system get pods,pvc
+pkubectl -n platform-system logs deployment/platform
+pkubectl -n platform-apps get deployments,pods,services
 ```
 
 Logs can contain a setup token before administrator creation. Review and redact

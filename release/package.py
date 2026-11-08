@@ -59,6 +59,49 @@ def versions():
     return dict(line.split("=", 1) for line in (ROOT / "dev/versions.env").read_text().splitlines() if line and not line.startswith("#"))
 
 
+def native_archive(source, destination, digest, architecture, reference):
+    """Make the imported root and recorded native manifest digest identical.
+
+    Buildx can wrap one native manifest in another index. containerd's --digests
+    aliases the imported root, so retaining that wrapper would leave the recorded
+    native digest unavailable to imagePullPolicy=Never workloads.
+    """
+    with tarfile.open(source) as original, tarfile.open(destination, "w") as result:
+        def content(name, raw):
+            entry = tarfile.TarInfo(name)
+            entry.size = len(raw)
+            entry.mode = 0o644
+            result.addfile(entry, io.BytesIO(raw))
+
+        def blob(identity):
+            if not re.fullmatch(r"sha256:[0-9a-f]{64}", identity):
+                raise ValueError("Unsupported OCI content digest")
+            name = "blobs/sha256/" + identity.split(":")[1]
+            member = original.getmember(name)
+            if not member.isfile():
+                raise ValueError("OCI content must be a regular file")
+            raw = original.extractfile(member).read()
+            if "sha256:" + hashlib.sha256(raw).hexdigest() != identity:
+                raise ValueError("OCI content checksum mismatch")
+            content(name, raw)
+            return raw
+
+        raw = blob(digest)
+        manifest = json.loads(raw)
+        identities = {manifest["config"]["digest"]}
+        identities.update(layer["digest"] for layer in manifest["layers"])
+        for identity in sorted(identities):
+            blob(identity)
+        content("oci-layout", b'{"imageLayoutVersion":"1.0.0"}\n')
+        index = {"schemaVersion": 2, "manifests": [{
+            "mediaType": manifest.get("mediaType", "application/vnd.oci.image.manifest.v1+json"),
+            "digest": digest, "size": len(raw),
+            "platform": {"os": "linux", "architecture": architecture},
+            "annotations": {"org.opencontainers.image.ref.name": reference},
+        }]}
+        content("index.json", json.dumps(index).encode())
+
+
 def package(version, architecture, images, output, helm):
     version = version.removeprefix("v")
     if not re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", version):
@@ -78,6 +121,11 @@ def package(version, architecture, images, output, helm):
     environment = {"PLATFORM_VERSION": version, "PLATFORM_ARCH": architecture, "K3S_VERSION": pins["K3S_VERSION"], "HELM_VERSION": pins["HELM_VERSION"], "PLATFORM_IMAGE": references["platform"], **{f"DEMO_{key.upper()}_IMAGE": references[key] for key in ("v1", "v2", "v3")}}
     with tempfile.TemporaryDirectory(prefix="platform-package-") as directory:
         staging = Path(directory)
+        normalized = {}
+        for key, source in images.items():
+            normalized[key] = staging / (key + ".oci.tar")
+            native_archive(source, normalized[key], references[key].split("@")[1], architecture,
+                           REPOSITORIES[key] + ":" + (version if key == "platform" else key))
         subprocess.run([str(helm), "package", str(ROOT / "deploy/helm/platform"), "--version", version, "--app-version", version, "--destination", str(staging)], check=True, stdout=subprocess.DEVNULL)
         with tarfile.open(destination, "w:gz") as archive:
             def content(name, raw):
@@ -88,9 +136,9 @@ def package(version, architecture, images, output, helm):
             content("release.json", (json.dumps(manifest, indent=2) + "\n").encode())
             archive.add(staging / f"platform-{version}.tgz", arcname="platform-chart.tgz")
             archive.add(ROOT / "dev/namespace.yaml", arcname="namespace.yaml")
-            archive.add(images["platform"], arcname="platform-image.oci.tar")
+            archive.add(normalized["platform"], arcname="platform-image.oci.tar")
             for key in ("v1", "v2", "v3"):
-                archive.add(images[key], arcname=f"demo-{key}.oci.tar")
+                archive.add(normalized[key], arcname=f"demo-{key}.oci.tar")
     digest = file_hash(destination)
     destination.with_suffix(destination.suffix + ".sha256").write_text(f"{digest}  {destination.name}\n")
     return destination
