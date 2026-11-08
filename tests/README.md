@@ -7,7 +7,10 @@ entrypoint selection. Demonstration unit tests reside alongside the Go source in
 
 The helper regressions in [test_local_helpers.py](test_local_helpers.py) reject
 incomplete rollback states and verify transcript completion and exit-status
-preservation with a deliberately delayed logger. They run without a cluster:
+preservation with a deliberately delayed logger. The command regressions in
+[test_platform_cli.py](test_platform_cli.py) check configuration validation and
+selection of the correct registry-specific image digest. These tests run without
+a cluster or Docker daemon:
 
 ```sh
 python3 -B -m unittest discover -s tests -p 'test_*.py' -v

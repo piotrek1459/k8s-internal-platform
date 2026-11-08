@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Historical M0/M1 baseline cluster. Current platform development uses platform.sh.
 set -euo pipefail
 source "$(dirname "$0")/lib/dev-common.sh"
 

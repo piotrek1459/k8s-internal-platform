@@ -16,6 +16,12 @@ jobs:
           python-version: '3.12'
       - name: Install Python dependencies
         run: pip install pyyaml
+      - name: Shell syntax and local workflow helpers
+        run: |
+          for script in scripts/*.sh scripts/lib/*.sh; do
+            bash -n "$script"
+          done
+          python3 -B -m unittest discover -s tests -p 'test_*.py' -v
       - name: Validate OpenAPI spec
         run: python3 scripts/lib/validate_openapi.py api/openapi.yaml
 

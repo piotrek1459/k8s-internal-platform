@@ -51,7 +51,7 @@ git -C "$PLATFORM_ROOT" diff --binary > "$results/tracked-changes.patch"
 # or unrelated credentials. The archive makes an uncommitted run reproducible.
 tar -czf "$results/implementation.tar.gz" -C "$PLATFORM_ROOT" \
     examples/http-demo deploy/helm/application dev scripts/lib tests/test_local_helpers.py \
-    scripts/setup-dev-tools.sh scripts/dev-cluster.sh scripts/build-demo.sh \
+    scripts/platform.sh scripts/setup-dev-tools.sh scripts/dev-cluster.sh scripts/build-demo.sh \
     scripts/check-chart.sh scripts/test-local.sh
 platform_kubectl version -o json > "$results/kubernetes-version.json"
 platform_kubectl get nodes -o json > "$results/nodes.json"
