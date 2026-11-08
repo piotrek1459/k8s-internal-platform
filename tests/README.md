@@ -22,6 +22,28 @@ python3 -B -m unittest discover -s tests -p 'test_*.py' -v
 additional. Broker tests are alongside their packages; demo tests are under
 [examples/http-demo](../examples/http-demo/).
 
+## Regression tests on every pull request
+
+Regression tests are part of the ordinary suites rather than a separate test
+framework or directory. They preserve expected behavior and previously fixed
+failure cases. The workflows trigger on every `pull_request` without path or
+branch filters, and on pushes to `main`.
+
+| Suite and location | Example protected behavior | PR workflow |
+| --- | --- | --- |
+| `broker/internal/**/*_test.go` | Frozen image reuse, transaction rollback, secret deletion guards, stale observations and registry timeouts. | `broker.yml`, broker job. |
+| `examples/http-demo/*_test.go` | Health/readiness separation, configuration validation and request-log sanitization. | `broker.yml`, demo job. |
+| `tests/test_local_helpers.py` | Incomplete rollback evidence is rejected; transcript/logging failures preserve exit status. | `api-chart.yml`, Python regression step. |
+| `tests/test_platform_cli.py` | Invalid CLI input is rejected and the selected registry's digest is used. | `api-chart.yml`, Python regression step. |
+| `scripts/check-chart.sh` | Invalid values/probe configurations are rejected; both charts render and the embedded chart stays synchronized. | `api-chart.yml`, chart job. |
+
+Both Go jobs use `go test -count=1 ./...`, ensuring tests execute instead of
+reusing cached results. Compiled broker dependencies can still be cached. The
+chart job installs Helm through `platform.sh tools`, using the same version pin
+as local checks. UI type-check/lint/build also runs on every PR, but is not a
+browser regression suite. Known gaps listed in [status](../docs/status.md) still
+require new tests and fixes; executing existing suites does not cover them all.
+
 ## Real-cluster verification
 
 - `broker/integration/` contains one test behind the `integration` build tag and
@@ -33,9 +55,9 @@ additional. Broker tests are alongside their packages; demo tests are under
   its driver was temporary local tooling, not a committed automated suite.
 
 Execution procedures are in the [local development guide](../docs/local-development.md).
-GitHub Actions runs broker, UI, structural API, shell/Python and chart checks.
-It currently does not run a browser suite, real K3s acceptance, the separate demo
-Go module or the full local negative chart matrix.
+GitHub Actions runs broker/demo Go suites, UI checks, structural API validation,
+shell/Python regressions and the full local chart matrix. Browser and real K3s
+acceptance remain separate from the default PR workflows.
 
 ## Historical reports
 

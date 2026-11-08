@@ -76,11 +76,12 @@ establish acceptance for the affected paths.
 - The demo has five top-level Go tests. Fifteen Python test methods cover
   rollback evidence, transcript completion, command validation and digest
   selection. Table-driven subcases are additional to these counts.
-- GitHub Actions runs broker formatting/vet/tests, UI type-check/lint/build,
-  structural OpenAPI validation, shell/Python checks, and chart lint/render/sync.
-  The default CI does not run the real-cluster test or an automated browser suite.
-  The standalone demo Go suite and the full negative chart matrix are currently
-  local checks rather than complete CI jobs.
+- Every pull request runs broker/demo Go regression suites, UI type-check/lint/
+  build, structural OpenAPI validation, shell/Python checks, and the full local
+  chart lint/render/negative/synchronization matrix. Go tests use `-count=1`;
+  local and CI chart checks share the Helm version pin. The default CI does not
+  run the real-cluster test or an automated browser suite. Suite locations and
+  workflow mapping are in the [test guide](../tests/README.md#regression-tests-on-every-pull-request).
 - The [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)
   records the latest full healthy API lifecycle and stop/rebuild test. Earlier
   [reports](../tests/README.md#historical-reports) cover the manual chart baseline

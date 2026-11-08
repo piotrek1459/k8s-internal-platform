@@ -120,11 +120,12 @@ and deletion of stored data requires an explicit action.
 
 ## CI/CD and release artifacts
 
-GitHub Actions is configured for broker formatting/vet/tests, UI type-checking,
-lint/build, structural API validation, shell/Python checks, and chart
-lint/render/synchronization. The real-cluster integration test, browser
-acceptance, demo Go module and full local negative chart matrix are not included
-in the default workflows. CI currently does not publish release images.
+GitHub Actions runs on every pull request and push to `main`: broker/demo Go
+formatting/vet/regression tests, UI type-check/lint/build, structural API
+validation, shell/Python regressions and the full local chart validation matrix.
+Go tests execute with `-count=1`, and CI chart checks use the local Helm version
+pin. Real-cluster integration and browser acceptance remain separate. CI
+currently does not publish release images.
 
 The release target requires images for ARM64 and AMD64. Demo cross-build
 packaging is recorded historically; native Pi/AMD64 execution and published

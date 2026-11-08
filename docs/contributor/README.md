@@ -94,9 +94,12 @@ python3 -m venv .local/checks-venv
 PATH="$PWD/.local/checks-venv/bin:$PATH" ./scripts/check-api.sh
 ```
 
-GitHub Actions currently runs the broker, UI and API/chart workflows. Python CLI
-regressions additionally check command validation and registry-specific digest
-selection without requiring a Docker daemon. Real-cluster integration remains a
+Every PR runs broker/demo Go regressions, UI checks, structural API validation,
+shell/Python tests and the full local chart matrix. Go jobs use `-count=1` to
+execute tests on each run. The [test inventory](../../tests/README.md#regression-tests-on-every-pull-request)
+maps regression cases to their locations and workflows. Python CLI regressions
+check command validation and registry-specific digest selection without a Docker
+daemon. Real-cluster integration remains a
 separate acceptance step; fake adapters do not verify actual Pod replacement.
 
 ## Development structure

@@ -33,5 +33,35 @@ jobs:
       - name: Vet
         run: GOTOOLCHAIN=local go vet ./...
 
-      - name: Test
-        run: GOTOOLCHAIN=local go test ./...
+      - name: Broker regression tests
+        run: GOTOOLCHAIN=local go test -count=1 ./...
+
+  demo:
+    name: HTTP demo regression tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/http-demo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: examples/http-demo/go.mod
+          cache: false
+
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [[ -n "$unformatted" ]]; then
+            echo "Files not gofmt-clean:" >&2
+            echo "$unformatted" >&2
+            exit 1
+          fi
+
+      - name: Vet
+        run: GOTOOLCHAIN=local go vet ./...
+
+      - name: Demo regression tests
+        run: GOTOOLCHAIN=local go test -count=1 ./...

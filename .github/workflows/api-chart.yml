@@ -16,12 +16,13 @@ jobs:
           python-version: '3.12'
       - name: Install Python dependencies
         run: pip install pyyaml
-      - name: Shell syntax and local workflow helpers
+      - name: Shell syntax
         run: |
           for script in scripts/*.sh scripts/lib/*.sh; do
             bash -n "$script"
           done
-          python3 -B -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Python regression tests
+        run: python3 -B -m unittest discover -s tests -p 'test_*.py' -v
       - name: Validate OpenAPI spec
         run: python3 scripts/lib/validate_openapi.py api/openapi.yaml
 
@@ -31,41 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: azure/setup-helm@v4
-        with:
-          version: '3.17.0'
+      - name: Install the pinned Helm CLI
+        run: ./scripts/platform.sh tools
 
-      - name: Lint application chart
-        run: |
-          helm lint --strict deploy/helm/application \
-            --values deploy/helm/application/examples/local.yaml
-
-      - name: Render application chart (smoke)
-        run: |
-          helm template demo deploy/helm/application \
-            --namespace platform-apps \
-            --values deploy/helm/application/examples/local.yaml > /dev/null
-
-      - name: Lint platform chart
-        run: |
-          helm lint --strict deploy/helm/platform \
-            --set image.tag=dev
-
-      - name: Render platform chart (smoke)
-        run: |
-          helm template platform deploy/helm/platform \
-            --namespace platform-system \
-            --set image.tag=dev > /dev/null
-
-      - name: Embedded chart in sync with canonical
-        run: |
-          for rel in Chart.yaml values.yaml values.schema.json .helmignore \
-              templates/_helpers.tpl templates/deployment.yaml \
-              templates/ingress.yaml templates/service.yaml; do
-            if ! diff -q "deploy/helm/application/$rel" \
-                        "broker/internal/helm/chart/$rel" >/dev/null 2>&1; then
-              echo "Embedded broker chart out of sync: $rel" >&2
-              exit 1
-            fi
-          done
-          echo "Embedded chart matches canonical chart."
+      - name: Chart regression tests
+        run: ./scripts/check-chart.sh

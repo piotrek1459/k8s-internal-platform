@@ -420,7 +420,7 @@ do not prevent the first implementation increment.
 | Domain and DNS provider | M6. | Selection follows the public access mode; purchase is not required for M0–M4. |
 | LAN resolver and private certificate trust | Initial configuration in M0; normal administration in M3; repeatable setup in M7. | Explicit host mapping is acceptable initially; private DNS and HTTPS trust procedures are documented before LAN administration. |
 | SSD upgrade | Before sustained Pi operation with valuable data. | The decision uses measured microSD capacity and reliability requirements, with off-device backups retained. |
-| Library and component versions | Partly recorded. | Go/JS dependencies and local versions are pinned in module/lock/version files. A release compatibility manifest and alignment of local/CI Helm versions remain outstanding. |
+| Library and component versions | Partly recorded. | Go/JS dependencies and local versions are pinned in module/lock/version files. Local and CI chart checks share the Helm version pin. A release compatibility manifest remains outstanding. |
 | UI stack | Decided and implemented. | Svelte 5/SvelteKit static SPA, TypeScript and Tailwind; see the accepted [decision](decisions/m3-ui-stack.md). |
 | Terraform scope | Before infrastructure evaluation. | Rented VPS and DNS provisioning is the candidate use case; an alternative boundary with the host installer requires a recorded rationale. |
 
