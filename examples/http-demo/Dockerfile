@@ -14,6 +14,8 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     -o /out/http-demo .
 
 FROM scratch
+ARG VERSION=dev
+LABEL org.opencontainers.image.version=$VERSION
 COPY --from=build /out/http-demo /http-demo
 USER 65532:65532
 EXPOSE 8080

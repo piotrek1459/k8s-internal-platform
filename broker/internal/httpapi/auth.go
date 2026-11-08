@@ -27,9 +27,9 @@ type Authenticator interface {
 
 func (r *Router) registerAuth() {
 	r.mux.HandleFunc("GET /api/v1/setup/status", r.handleSetupStatus)
-	r.mux.HandleFunc("POST /api/v1/setup", r.handleSetup)
-	r.mux.HandleFunc("POST /api/v1/auth/session", r.handleLogin)
-	r.mux.HandleFunc("DELETE /api/v1/auth/session", r.handleLogout)
+	r.mux.HandleFunc("POST /api/v1/setup", r.requireCSRF(r.handleSetup))
+	r.mux.HandleFunc("POST /api/v1/auth/session", r.requireCSRF(r.handleLogin))
+	r.mux.HandleFunc("DELETE /api/v1/auth/session", r.requireCSRF(r.handleLogout))
 	r.mux.HandleFunc("GET /api/v1/auth/me", r.protect(r.handleMe))
 }
 

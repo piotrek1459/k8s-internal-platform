@@ -9,9 +9,9 @@ import tempfile
 import unittest
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 module_spec = importlib.util.spec_from_file_location(
-    "assert_rollback", ROOT / "scripts/lib/assert_rollback.py"
+    "assert_rollback", ROOT / "tests/integration/lib/assert_rollback.py"
 )
 rollback = importlib.util.module_from_spec(module_spec)
 module_spec.loader.exec_module(rollback)
@@ -119,7 +119,7 @@ finish_transcript "$status" || status=$?
 # still be alive if finish_transcript did not wait for them.
 [[ "$(cat "$2")" == $'stdout\\nstderr' ]] || exit 99
 exit "$status"
-''', "transcript-test", str(ROOT / "scripts/lib/transcript.sh"), str(path / "transcript.log"), str(command_status)],
+''', "transcript-test", str(ROOT / "tests/integration/lib/transcript.sh"), str(path / "transcript.log"), str(command_status)],
                     env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
                     timeout=5, text=True,
                 )

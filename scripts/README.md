@@ -1,40 +1,27 @@
-# Script inventory
+# Operational scripts
 
-## Build and run
-
-`scripts/platform.sh` is the local build and execution entry point. The former
-compatibility wrappers have been removed; commands use this script directly.
+`scripts/platform.sh` is the local build and execution entry point. It builds the
+UI, broker and demos, manages the selected k3d installation and provides
+foreground forwards. `stop` retains installation data. No compatibility aliases
+or reset wrappers are provided.
 
 | Command | Purpose |
 | --- | --- |
-| `./scripts/platform.sh up` | Build, publish locally, install/upgrade, check readiness and forward the UI. |
-| `./scripts/platform.sh build` | Build the embedded UI, broker and native demos without a cluster. |
+| `./scripts/platform.sh up` | Build, publish locally, install/upgrade and forward the UI. |
+| `./scripts/platform.sh build` | Build UI, broker and native demos without a cluster. |
 | `./scripts/platform.sh build-ui` | Build and embed only the UI. |
-| `./scripts/platform.sh build-demo native` | Build native demo images without publishing. |
-| `./scripts/platform.sh build-demo multi` | Create ARM64/AMD64 OCI archives and metadata under `.local/images/`. |
-| `./scripts/platform.sh tools` | Install the pinned Helm CLI under `.local/bin/`. |
-| `./scripts/platform.sh --help` | List forwarding, image, token, diagnostics and stop commands. |
+| `./scripts/platform.sh build-demo native` | Build native demo images. |
+| `./scripts/platform.sh build-demo multi` | Create ARM64/AMD64 demo OCI archives under `.local/images/`. |
+| `./scripts/platform.sh tools` | Install pinned Helm under `.local/bin/`. |
+| `./scripts/platform.sh --help` | List all local operational commands. |
 
-Foreground forwarding stops with Ctrl+C. `stop` retains cluster and registry data;
-there is no automatic reset or broad process-name termination.
+`scripts/build-book.sh` builds the separate LaTeX thesis with Docker.
+`scripts/lib/dev-common.sh` provides shared repository paths and pinned versions.
 
-## Verification and separate deliverables
-
-| Script | Distinct responsibility |
-| --- | --- |
-| `check-broker.sh` | Broker formatting, vet and ordinary Go tests. |
-| `check-ui.sh` | UI dependency installation, type checking, lint and production build. |
-| `check-api.sh` | Structural API validation and optional full specification validation. |
-| `check-chart.sh` | Chart lint/render, negative configuration cases and embedded chart synchronization. |
-| `build-book.sh` | Thesis LaTeX/Docker build. |
-| `dev-cluster.sh` | Disposable `platform-dev` cluster for the manual Helm baseline. |
-| `test-local.sh` | Manual Helm lifecycle, diagnosed readiness failure, rollback and route-isolation experiment. |
-
-The baseline scripts remain executable acceptance tooling; they do not build or
-start the administrator platform. Their procedure is in
-[local-development.md](../docs/local-development.md#manual-helm-baseline).
-
-`lib/` contains shared paths, OpenAPI validation, transcript handling and experiment
-assertions. The Python files are called by checks/tests and are not extra startup
-entry points. The [contributor guide](../docs/contributor/README.md) describes the
-current workflow; [implementation status](../docs/status.md) records its limits.
+Verification is grouped under `tests/` and selected through
+`python3 -B tests/run.py`; the [test guide](../tests/README.md) describes suites,
+prerequisites and CI. The direct Helm baseline lives in `tests/integration/`.
+Native host installation lives in `installer/install.sh`; OCI packaging and
+release assembly live in `release/`. The [installation guide](../docs/installation.md)
+describes release installation and the [contributor guide](../docs/contributor/README.md)
+describes source development.

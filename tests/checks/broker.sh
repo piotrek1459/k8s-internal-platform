@@ -4,7 +4,7 @@
 # broker/integration and docs/local-development.md). Pins the Go toolchain to the
 # module's go directive so dependency version skew is caught early.
 set -euo pipefail
-source "$(dirname "$0")/lib/dev-common.sh"
+source "$(dirname "$0")/../../scripts/lib/dev-common.sh"
 require_command go
 
 cd "$PLATFORM_ROOT/broker"
@@ -17,5 +17,5 @@ if [[ -n "$unformatted" ]]; then
 fi
 
 GOTOOLCHAIN=local go vet ./...
-GOTOOLCHAIN=local go test ./...
+GOTOOLCHAIN=local go test -count=1 ./...
 printf 'Broker formatting, vet, and tests passed.\n'

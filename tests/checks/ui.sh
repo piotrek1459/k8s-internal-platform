@@ -3,9 +3,9 @@
 # Suitable for CI. Does not start a browser or require a running broker.
 #
 # Usage:
-#   ./scripts/check-ui.sh
+#   ./tests/checks/ui.sh
 set -euo pipefail
-source "$(dirname "$0")/lib/dev-common.sh"
+source "$(dirname "$0")/../../scripts/lib/dev-common.sh"
 require_command node
 require_command npm
 

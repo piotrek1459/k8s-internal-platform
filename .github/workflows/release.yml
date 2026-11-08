@@ -1,0 +1,170 @@
+name: Release
+on:
+  push:
+    tags: ['v[0-9]*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Existing release tag to build (for example v0.0.1)
+        required: true
+        default: v0.0.1
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.event.inputs.version || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.identity.outputs.version }}
+      sha: ${{ steps.identity.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate immutable release identity
+        id: identity
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version="${INPUT_VERSION:-$GITHUB_REF_NAME}"
+          [[ "$version" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo 'Invalid release tag'; exit 1; }
+          sha="$(git rev-parse "$version^{commit}")"
+          [[ "$(git show "$sha:release/version.txt")" == "${version#v}" ]] || { echo 'Tag and source version differ'; exit 1; }
+          if gh release view "$version" --json isDraft > existing-release.json 2>/dev/null; then
+            [[ "$(python3 -c 'import json; print(json.load(open("existing-release.json"))["isDraft"])')" == True ]] || { echo 'Published releases are immutable; choose a new version'; exit 1; }
+          fi
+          printf 'version=%s\nsha=%s\n' "$version" "$sha" >> "$GITHUB_OUTPUT"
+  verify:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: broker/go.mod
+          cache-dependency-path: broker/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r tests/requirements.txt
+      - run: python3 -B tests/run.py unit
+  e2e:
+    needs: [prepare, verify]
+    uses: ./.github/workflows/e2e.yml
+    with:
+      source_ref: ${{ needs.prepare.outputs.sha }}
+  bundles:
+    needs: [prepare, verify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, amd64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: docker/setup-buildx-action@v3
+      - name: Prepare UI and packaging tools
+        run: |
+          ./scripts/platform.sh build-ui
+          ./scripts/platform.sh tools
+          mkdir -p dist/images dist/bundles
+      - name: Read application version
+        id: app_version
+        run: printf 'version=%s\n' "$(cat release/version.txt)" >> "$GITHUB_OUTPUT"
+      - name: Build native broker OCI archive
+        uses: docker/build-push-action@v6
+        with:
+          context: broker
+          platforms: linux/${{ matrix.arch }}
+          tags: platform.local/platform-broker:${{ needs.prepare.outputs.version }}
+          build-args: VERSION=${{ steps.app_version.outputs.version }}
+          provenance: false
+          outputs: type=oci,dest=dist/images/platform.oci.tar
+          cache-from: type=gha,scope=release-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=release-${{ matrix.arch }}
+      - name: Build demo OCI archives
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          for version in v1 v2 v3; do
+            unhealthy=false
+            [[ "$version" != v3 ]] || unhealthy=true
+            docker buildx build --platform "linux/$ARCH" --provenance=false \
+              --build-arg "VERSION=$version" --build-arg "UNHEALTHY=$unhealthy" \
+              --tag "platform.local/http-demo:$version" \
+              --output "type=oci,dest=dist/images/$version.oci.tar" examples/http-demo
+          done
+      - name: Package checked native bundle
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          python3 release/package.py --version "$VERSION" --arch "$ARCH" \
+            --platform dist/images/platform.oci.tar \
+            --v1 dist/images/v1.oci.tar --v2 dist/images/v2.oci.tar --v3 dist/images/v3.oci.tar \
+            --output dist/bundles
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-${{ matrix.arch }}
+          path: dist/bundles/*
+          retention-days: 7
+          if-no-files-found: error
+  publish:
+    needs: [prepare, verify, e2e, bundles]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-linux-*
+          path: dist
+          merge-multiple: true
+      - name: Assemble installer, compatibility manifest and checksums
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+        run: |
+          cp installer/install.sh dist/install.sh
+          cp docs/installation.md dist/INSTALL.md
+          python3 release/manifest.py --directory dist --version "$VERSION" --commit "$SOURCE_SHA"
+          (cd dist && sha256sum -c SHA256SUMS)
+      - name: Publish complete preview release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "$VERSION" --json isDraft > existing-release.json 2>/dev/null; then
+            [[ "$(python3 -c 'import json; print(json.load(open("existing-release.json"))["isDraft"])')" == True ]] || { echo 'Refusing to overwrite a published release'; exit 1; }
+          else
+            gh release create "$VERSION" --verify-tag --draft --prerelease --title "$VERSION — initial preview" --notes-file release/NOTES.md
+          fi
+          gh release upload "$VERSION" dist/platform-*.tar.gz dist/install.sh dist/INSTALL.md dist/release.json dist/SHA256SUMS --clobber
+          gh release edit "$VERSION" --draft=false --prerelease --latest=false

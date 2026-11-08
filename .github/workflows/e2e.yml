@@ -1,0 +1,86 @@
+name: End-to-end workflows
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      source_ref:
+        type: string
+        required: false
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  workflows:
+    name: Build / API / Browser / Bundle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned k3d
+        shell: bash
+        run: |
+          set -euo pipefail
+          source dev/versions.env
+          work="$(mktemp -d)"
+          curl --proto '=https' --tlsv1.2 -fsSL "https://github.com/k3d-io/k3d/releases/download/$K3D_TESTED_VERSION/k3d-linux-amd64" -o "$work/k3d-linux-amd64"
+          curl --proto '=https' --tlsv1.2 -fsSL "https://github.com/k3d-io/k3d/releases/download/$K3D_TESTED_VERSION/checksums.txt" -o "$work/checksums.txt"
+          (cd "$work" && awk '$2 == "_dist/k3d-linux-amd64" {print $1 "  k3d-linux-amd64"}' checksums.txt > native.sha256 && test -s native.sha256 && sha256sum -c native.sha256)
+          sudo install -m 0755 "$work/k3d-linux-amd64" /usr/local/bin/k3d
+      - name: Install matching kubectl
+        shell: bash
+        run: |
+          set -euo pipefail
+          source dev/versions.env
+          version="${K3S_VERSION%%+*}"
+          work="$(mktemp -d)"
+          curl --proto '=https' --tlsv1.2 -fsSL "https://dl.k8s.io/release/$version/bin/linux/amd64/kubectl" -o "$work/kubectl"
+          curl --proto '=https' --tlsv1.2 -fsSL "https://dl.k8s.io/release/$version/bin/linux/amd64/kubectl.sha256" -o "$work/kubectl.sha256"
+          (cd "$work" && printf '%s  kubectl\n' "$(cat kubectl.sha256)" | sha256sum -c -)
+          sudo install -m 0755 "$work/kubectl" /usr/local/bin/kubectl
+      - name: Install browser tooling
+        run: |
+          python -m pip install -r tests/e2e/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Build and validate full workflows
+        run: python3 -B tests/run.py e2e --artifacts .local/e2e/run
+      - name: Publish sanitized results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            .local/e2e/run/*.xml
+            .local/e2e/run/*.json
+            .local/e2e/run/*.png
+            .local/e2e/run/*.txt
+            .local/e2e/run/*.log
+      - name: Summarize acceptance and known gaps
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, xml.etree.ElementTree as E
+          path = pathlib.Path('.local/e2e/run/junit.xml')
+          if path.exists():
+              suite = E.parse(path).getroot()
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+                  out.write(f"Tests: {suite.get('tests')}; failures: {suite.get('failures')}; known-gap skips: {suite.get('skipped')}\n\n")
+                  for skip in suite.findall('.//skipped'):
+                      out.write('- ' + skip.get('message', '') + '\n')
+          PY

@@ -1,10 +1,8 @@
 name: API & Chart
-
 on:
   pull_request:
   push:
     branches: [main]
-
 jobs:
   api:
     name: OpenAPI spec
@@ -14,26 +12,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install Python dependencies
-        run: pip install pyyaml
-      - name: Shell syntax
-        run: |
-          for script in scripts/*.sh scripts/lib/*.sh; do
-            bash -n "$script"
-          done
-      - name: Python regression tests
-        run: python3 -B -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Validate OpenAPI spec
-        run: python3 scripts/lib/validate_openapi.py api/openapi.yaml
-
+      - run: python -m pip install -r tests/requirements.txt
+      - name: Syntax, Python regressions and full API validation
+        run: python3 -B tests/run.py unit --suite syntax --suite python --suite api
   chart:
     name: Helm chart
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install the pinned Helm CLI
-        run: ./scripts/platform.sh tools
-
-      - name: Chart regression tests
-        run: ./scripts/check-chart.sh
+      - run: python3 -B tests/run.py unit --suite chart

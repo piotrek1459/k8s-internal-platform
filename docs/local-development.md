@@ -28,22 +28,18 @@ perform a reset.
 ## Checks without a cluster
 
 ```bash
-./scripts/platform.sh tools
-./scripts/check-broker.sh
-./scripts/check-ui.sh
-./scripts/check-chart.sh
-python3 -B -m unittest discover -s tests -p 'test_*.py' -v
-(cd examples/http-demo && GOTOOLCHAIN=local go test -race ./... && GOTOOLCHAIN=local go vet ./...)
+python3 -m venv .local/checks-venv
+.local/checks-venv/bin/python -m pip install -r tests/requirements.txt
+PATH="$PWD/.local/checks-venv/bin:$PATH" python3 -B tests/run.py unit
 ```
 
-API validation requires PyYAML. Full OpenAPI validation additionally uses the
-optional `openapi-spec-validator` dependency. The contributor guide documents an
-isolated environment for those checks.
-
-The broker suite uses temporary SQLite, fake Kubernetes clients, in-memory Helm
-storage and an in-process registry. UI checks type-check, lint and build; they do
-not drive a browser. The default CI does not run real-cluster integration. The
-[test guide](../tests/README.md) records these distinctions.
+All checks are selected through `tests/run.py`. The [test guide](../tests/README.md)
+explains suite locations, prerequisites and the optional `--suite` selector. Fast
+checks run on every PR. The separate E2E workflow builds a fresh platform, drives
+Chromium and the API, verifies real resources and HTTP responses, and exercises
+OCI release bundles on another fresh cluster. It runs nightly at 02:00 UTC,
+manually and as a release gate once its workflow is available on the default
+branch. Native Raspberry Pi installation remains a separate acceptance step.
 
 ## Real-cluster broker integration
 
@@ -66,7 +62,7 @@ export PLATFORM_APP_PORT=18081
 KUBECONFIG="$PWD/.local/platform-integration.kubeconfig" \
   PLATFORM_INTEGRATION=1 \
   PLATFORM_DEMO_IMAGE="$(./scripts/platform.sh image v1)" \
-  go -C broker test -tags integration ./integration/... -v
+  python3 -B tests/run.py integration --suite broker
 ```
 
 The test uses a digest reference published by the selected local registry. An
@@ -86,7 +82,8 @@ unset PLATFORM_CLUSTER_NAME PLATFORM_REGISTRY_PORT PLATFORM_API_PORT PLATFORM_UI
 
 This procedure is separate from the latest healthy API lifecycle experiment,
 which is described in its [historical report](../tests/experiments/2026-11-08-local-workflow.md).
-That experiment is not yet a committed, automatically executed end-to-end suite.
+The committed E2E suite now automates the healthy workflow and additional cases;
+the historical report remains a dated observation.
 
 ## Manual Helm baseline
 
@@ -97,11 +94,11 @@ disposable `platform-dev` cluster, the fixed demonstration release `demo`, and
 ```bash
 ./scripts/platform.sh tools
 ./scripts/platform.sh build-demo native
-./scripts/dev-cluster.sh up
-./scripts/test-local.sh
+./tests/integration/cluster.sh up
+./tests/integration/helm-lifecycle.sh
 ```
 
-Native images are built locally, then imported by the experiment. `test-local.sh`
+Native images are built locally, then imported by the experiment. `tests/integration/helm-lifecycle.sh`
 resets only the demonstration release in the owned baseline cluster. It verifies
 healthy v1 installation, v2 replacement, deliberately unhealthy v3 readiness,
 continued v2 traffic, explicit Helm rollback, a non-default application port and
@@ -122,7 +119,7 @@ or IPv6 isolation.
 
 ```bash
 curl --noproxy '*' --resolve demo.localhost:8082:127.0.0.1   http://demo.localhost:8082/version
-./scripts/dev-cluster.sh status
+./tests/integration/cluster.sh status
 ```
 
 Successful completion leaves the baseline demo at v2 on container port 9090,
@@ -132,7 +129,7 @@ with the same external URL. The chart reference documents why both
 Baseline cleanup deletes its cluster and data:
 
 ```bash
-./scripts/dev-cluster.sh down
+./tests/integration/cluster.sh down
 ```
 
 ## Multi-architecture artifacts and evidence

@@ -252,14 +252,14 @@ maintain other workloads, so starting the platform does not depend on the
 platform API already being available. The implemented platform chart provides the Deployment, Service, metadata PVC,
 service account and scoped RBAC. Local deployment and stop/rebuild persistence
 are recorded in the [test reports](../tests/README.md#historical-reports). Those
-results do not establish safe recovery at every interruption point. Production
-installation and release packaging remain planned.
+results do not establish safe recovery at every interruption point. Initial preview installation and OCI release packaging are implemented; native
+host acceptance and production upgrade/recovery remain pending.
 
 ## Meaning of a managed platform on administrator-owned hardware
 
 The table defines target product responsibilities. The current development
-launcher implements local build/install/access; production host installation,
-backup/restore and public networking are not yet available.
+launcher implements local build/install/access; the preview installer adds dedicated Linux host setup. Native host acceptance,
+backup/restore and public networking remain pending.
 
 | Responsibility | Target product responsibility | Administrator responsibility |
 | --- | --- | --- |
@@ -347,8 +347,8 @@ database must remain separate from hosted application databases.
 ### Kubernetes ownership and permissions
 
 Current local startup creates `platform-apps` from the development manifest and
-creates `platform-system` during chart installation. A production installer is
-planned to perform the equivalent setup.
+creates `platform-system` during chart installation. The preview Linux installer
+performs the equivalent setup using bundled images and the same chart.
 These are in the same cluster as `kube-system`. The first contains platform
 components; the second contains managed applications. Optional add-ons use the
 namespaces shown above. Resource names and labels must contain stable application IDs.

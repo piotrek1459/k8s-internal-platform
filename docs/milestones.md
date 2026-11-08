@@ -256,7 +256,7 @@ host and networking mode differ from M6.
 - [ ] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh host reaches the setup wizard using the installer from a checkout.
 - [ ] A clean installation is performed on a rented AMD64 server. **Acceptance:** the platform operates using only the documented installation procedure.
 - [ ] Platform upgrade includes backup, compatibility validation, chart upgrade, and failure recovery. **Acceptance:** both a successful upgrade and recovery through rollback with state restoration are exercised.
-- [ ] Tagged releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** GHCR contains both image variants with recorded digests and published checksums.
+- [ ] Tagged releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** both native OCI image bundles, installer assets, recorded digests and published checksums are available on GitHub Releases. The initial preview uses direct containerd import; registry publishing is optional.
 - [ ] Machine-token endpoints provide hashed storage, application/action scopes, expiry, and revocation. **Acceptance:** a token scoped to one application cannot access another.
 - [ ] A sample CI deployment invokes the API over a private path and polls the operation. **Acceptance:** an image publication followed by an authorized API call completes deployment without public exposure of administration.
 
@@ -420,7 +420,7 @@ do not prevent the first implementation increment.
 | Domain and DNS provider | M6. | Selection follows the public access mode; purchase is not required for M0–M4. |
 | LAN resolver and private certificate trust | Initial configuration in M0; normal administration in M3; repeatable setup in M7. | Explicit host mapping is acceptable initially; private DNS and HTTPS trust procedures are documented before LAN administration. |
 | SSD upgrade | Before sustained Pi operation with valuable data. | The decision uses measured microSD capacity and reliability requirements, with off-device backups retained. |
-| Library and component versions | Partly recorded. | Go/JS dependencies and local versions are pinned in module/lock/version files. Local and CI chart checks share the Helm version pin. A release compatibility manifest remains outstanding. |
+| Library and component versions | Partly recorded. | Go/JS dependencies and local versions are pinned in module/lock/version files. Local and CI chart checks share the Helm version pin. The preview release compatibility manifest records source, K3s/Helm pins and native image digests. Native host acceptance remains pending. |
 | UI stack | Decided and implemented. | Svelte 5/SvelteKit static SPA, TypeScript and Tailwind; see the accepted [decision](decisions/m3-ui-stack.md). |
 | Terraform scope | Before infrastructure evaluation. | Rented VPS and DNS provisioning is the candidate use case; an alternative boundary with the host installer requires a recorded rationale. |
 
@@ -454,12 +454,16 @@ web/
 deploy/helm/
   platform/                   broker/UI, RBAC, database volume
   application/                managed application workload chart
-installer/                    planned production installer; local tooling is scripts/platform.sh
+installer/                    preview dedicated Linux/K3s installer
+release/                      OCI bundles, source identity, pins and release notes
 observability/                placeholder; monitoring profiles remain planned
 examples/                     healthy/unhealthy demonstration versions
 tests/
-  integration/                planned broader acceptance; current gated test is broker/integration
-  e2e/                        planned automated browser workflows
+  run.py                      shared suite selector
+  checks/                     fast checks and OpenAPI helper
+  regression/                 CLI, evidence and release integrity regressions
+  integration/                direct Helm baseline; gated Go test is broker/integration
+  e2e/                        isolated build/API/browser/OCI-bundle workflows
   experiments/                repeatable measurement procedures/results
 docs/
   project-outline.md          thesis context and original scope

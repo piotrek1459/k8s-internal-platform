@@ -32,7 +32,7 @@ require_helm() {
 require_local_cluster() {
     require_command kubectl
     if [[ ! -f "$PLATFORM_LOCAL/cluster-owned" || ! -f "$PLATFORM_KUBECONFIG" ]]; then
-        printf 'The managed local cluster is unavailable. Run ./scripts/dev-cluster.sh up.\n' >&2
+        printf 'The managed local cluster is unavailable. Run ./tests/integration/cluster.sh up.\n' >&2
         exit 1
     fi
     local server

@@ -59,11 +59,18 @@ using the same measurement procedure.
 
 ## Installer workflow
 
-No production release package or Linux installer is currently published by this
-repository. The planned package shall contain an installer, pinned component
-versions, platform chart, checksums and installation documentation. The local
-`platform.sh` launcher is a development tool and requires Docker/k3d, Node/npm and
-other documented host tools.
+The `v0.0.1` preview implements `installer/install.sh` and GitHub-hosted native
+OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
+its exact supported behavior: dedicated Linux/systemd host, read-only checks,
+pinned K3s/Helm, image import, chart installation and SSH/loopback access.
+Same-version reruns retain metadata; cross-version upgrades and unrelated
+clusters are refused. Native Pi and rented-server installation acceptance remain
+pending. `platform.sh` remains the Docker/k3d development launcher.
+
+The preview checks architecture, systemd, memory cgroups, RAM, free space and
+installation ownership. Time synchronization, comprehensive network/CIDR and
+firewall validation, normal private HTTPS management and stage-by-stage recovery
+remain target requirements in the following sequence.
 
 The production installer shall support execution from a source checkout before
 release packaging. Its target sequence is:
@@ -113,33 +120,42 @@ and then upgrades the platform chart. Database migrations must have a documented
 compatibility or restore strategy; a Helm rollback alone cannot undo a database
 migration. K3s upgrades follow a separate documented maintenance procedure.
 
-The first release requires a documented upgrade path and failure recovery;
+A stable release requires a documented upgrade path and failure recovery;
+the initial preview refuses cross-version upgrades.
 automatic upgrades through the UI are deferred. Platform uninstallation is
 separate from application, volume, and K3s removal. Retained resources are reported,
 and deletion of stored data requires an explicit action.
 
 ## CI/CD and release artifacts
 
-GitHub Actions runs on every pull request and push to `main`: broker/demo Go
-formatting/vet/regression tests, UI type-check/lint/build, structural API
-validation, shell/Python regressions and the full local chart validation matrix.
-Go tests execute with `-count=1`, and CI chart checks use the local Helm version
-pin. Real-cluster integration and browser acceptance remain separate. CI
-currently does not publish release images.
+GitHub Actions runs fast checks on every pull request and push to `main`:
+uncached broker/demo Go regressions, UI type-check/lint/build, full OpenAPI
+validation, shell/Python regressions and the chart matrix. `tests/run.py` is the
+shared local/CI selector. The [test guide](../tests/README.md) documents exact
+commands and boundaries.
 
-The release target requires images for ARM64 and AMD64. Demo cross-build
-packaging is recorded historically; native Pi/AMD64 execution and published
-platform images require separate acceptance. Untrusted pull-request code must not execute on a host
-serving deployed applications.
+The isolated E2E workflow builds the platform and verifies API/browser lifecycles,
+actual workload/HTTP state, failed-rollout locks, persistence through broker Pod
+replacement, and installation of packaged OCI/chart artifacts on a second node.
+It is scheduled at 02:00 UTC nightly, supports manual execution and gates release
+publication. Scheduled/manual execution requires the workflow on the default
+branch. Known status/restart defects are explicit conditional acceptance skips.
+Untrusted PR code never runs on a host serving deployed applications.
 
-The planned tagged-release workflow shall publish:
+The tagged-release workflow validates source/tag identity, runs fast checks and
+E2E, cross-builds both native architectures and publishes a complete preview:
 
-- The platform image to GHCR with version tags and recorded immutable digests.
-- The application/platform charts and a compatibility manifest pinning their
-  versions alongside K3s and other installed dependencies.
-- Installer assets for the supported hosts, checksums, upgrade notes, and the
-  clean-install procedure. Signed provenance may be added as release automation matures.
-- Demonstration image versions used in smoke and recovery tests.
+- ARM64 and AMD64 bundles with the broker, all demo OCI images and platform chart.
+- An installer, installation guide, source/compatibility manifest and SHA-256 sums.
+- Per-image native manifest digests and pinned K3s/Helm versions.
+
+The initial distribution imports OCI archives directly into K3s; GHCR is not a
+prerequisite. This keeps first installation independent of registry credentials
+and package visibility. Registry publishing and signed provenance can be added
+separately. Published releases are immutable; draft uploads can be retried before
+publication. Native Pi/AMD64 host acceptance is separate from cross-build and
+containerized K3s evidence. The initial preview does not claim upgrade/recovery
+acceptance.
 
 The separate application's pipeline builds, tests, and pushes its image. Initially
 the administrator selects that version in the UI. The automation phase includes

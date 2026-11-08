@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$(dirname "$0")/lib/dev-common.sh"
-source "$PLATFORM_ROOT/scripts/lib/transcript.sh"
+source "$(dirname "$0")/../../scripts/lib/dev-common.sh"
+source "$PLATFORM_ROOT/tests/integration/lib/transcript.sh"
 require_helm
 require_local_cluster
 require_command docker
@@ -50,9 +50,9 @@ git -C "$PLATFORM_ROOT" diff --binary > "$results/tracked-changes.patch"
 # Capture implementation sources, including untracked files, without kubeconfig
 # or unrelated credentials. The archive makes an uncommitted run reproducible.
 tar -czf "$results/implementation.tar.gz" -C "$PLATFORM_ROOT" \
-    examples/http-demo deploy/helm/application dev scripts/lib tests/test_local_helpers.py \
-    scripts/platform.sh scripts/dev-cluster.sh \
-    scripts/check-chart.sh scripts/test-local.sh
+    examples/http-demo deploy/helm/application dev scripts/lib tests/integration/lib tests/regression/test_local_helpers.py \
+    scripts/platform.sh tests/integration/cluster.sh \
+    tests/checks/chart.sh tests/integration/helm-lifecycle.sh
 platform_kubectl version -o json > "$results/kubernetes-version.json"
 platform_kubectl get nodes -o json > "$results/nodes.json"
 docker version > "$results/docker-version.txt"
@@ -62,7 +62,7 @@ k3d version > "$results/k3d-version.txt"
 df -h "$PLATFORM_ROOT" > "$results/host-disk.txt"
 printf 'scenario,duration_seconds\n' > "$results/timings.csv"
 
-run "$PLATFORM_ROOT/scripts/check-chart.sh"
+run "$PLATFORM_ROOT/tests/checks/chart.sh"
 for version in v1 v2 v3; do
     docker image inspect "platform-demo:$version" --format '{{.Id}} {{.Os}}/{{.Architecture}}' > "$results/image-$version.txt"
 done
@@ -141,7 +141,7 @@ for ((attempt=0; attempt<30; attempt++)); do
     platform_kubectl -n "$PLATFORM_NAMESPACE" get deployment demo -o json > "$results/rollback-deployment.json"
     platform_kubectl -n "$PLATFORM_NAMESPACE" get replicasets -l app.kubernetes.io/instance=demo -o json > "$results/rollback-replicasets.json"
     platform_kubectl -n "$PLATFORM_NAMESPACE" get pods -l app.kubernetes.io/instance=demo -o json > "$results/rollback-pods.json"
-    if python3 "$PLATFORM_ROOT/scripts/lib/assert_rollback.py" "$results"; then
+    if python3 "$PLATFORM_ROOT/tests/integration/lib/assert_rollback.py" "$results"; then
         rollback_verified=true
         break
     fi

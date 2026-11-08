@@ -24,7 +24,7 @@ import (
 )
 
 // chartFS embeds the first-party application chart so the broker ships as a
-// single artifact. It is a copy of deploy/helm/application; scripts/check-chart.sh
+// single artifact. It is a copy of deploy/helm/application; tests/checks/chart.sh
 // verifies the two stay in sync.
 //
 //go:embed all:chart

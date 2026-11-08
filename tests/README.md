@@ -1,79 +1,137 @@
-# Tests and experiments
+# Verification guide
 
-## Automated checks
+All repository checks are selected through `python3 -B tests/run.py` from the
+repository root. Test tooling and fixtures are grouped under `tests/`. Go tests
+remain beside their packages so that unexported behavior can be tested without
+changing production interfaces solely for test placement.
 
-| Entry point | Coverage | External runtime |
+| Location | Responsibility | Execution |
 | --- | --- | --- |
-| `scripts/check-broker.sh` | Broker formatting, vet and ordinary Go tests: validation, auth, store, handlers, worker, adapters and recovery classifications. | Temporary SQLite and fake/in-process dependencies; no cluster. |
-| `scripts/check-ui.sh` | Svelte/TypeScript checks, ESLint and production build. | Node/npm; no browser acceptance. |
-| `scripts/check-api.sh` | YAML structure and local references; optional full OpenAPI validation. | Python with PyYAML; optional full validator. |
-| `scripts/check-chart.sh` | Both charts, positive/negative values and embedded copy synchronization. | Pinned local Helm CLI; no cluster. |
-| Demo Go tests | Configuration, version/health responses and sanitized request logs. | Go; no cluster. |
-| Python helper tests | Rollback evidence, transcript completion, CLI validation and registry-specific digest selection. | Python and Bash; no cluster or Docker daemon. |
+| `broker/internal/**/*_test.go` | Domain, SQLite, worker, HTTP/auth, registry, Kubernetes and Helm adapter regressions. | Every PR. |
+| `examples/http-demo/*_test.go` | Demo configuration, HTTP and logging regressions. | Every PR. |
+| `tests/regression/` | CLI, rollback evidence, transcript, OCI packaging and installer guards. | Every PR. |
+| `tests/checks/` | Broker/UI/API/chart checks and OpenAPI helper. | Every PR. |
+| `broker/integration/` | Gated store/worker/Helm test using a prepared real cluster. | Explicit local invocation. |
+| `tests/integration/` | Owned baseline cluster and direct Helm lifecycle experiment. | Explicit local invocation. |
+| `tests/e2e/` | Fresh platform build, API/browser workflows and release-bundle installation. | Nightly, manual and release gate. |
+| `tests/experiments/` | Dated curated evidence and historical reports. | Documentation. |
 
-The Python checks run from the repository root:
+## Fast regression checks on every pull request
+
+Prerequisites: Go matching the module files, Node.js 22/npm, Python 3.10+, Bash,
+curl and tar. Docker and a cluster are not required. Helm is installed under
+`.local/bin/` using `dev/versions.env`.
 
 ```bash
-python3 -B -m unittest discover -s tests -p 'test_*.py' -v
+python3 -m venv .local/checks-venv
+.local/checks-venv/bin/python -m pip install -r tests/requirements.txt
+PATH="$PWD/.local/checks-venv/bin:$PATH" python3 -B tests/run.py unit
 ```
 
-[test_local_helpers.py](test_local_helpers.py) contains nine test methods;
-[test_platform_cli.py](test_platform_cli.py) contains six. Table-driven cases are
-additional. Broker tests are alongside their packages; demo tests are under
-[examples/http-demo](../examples/http-demo/).
+Individual suites use `--suite broker`, `demo`, `python`, `ui`, `api`, `chart` or
+`syntax`; the option may be repeated. For example:
 
-## Regression tests on every pull request
+```bash
+python3 -B tests/run.py unit --suite python --suite syntax
+```
 
-Regression tests are part of the ordinary suites rather than a separate test
-framework or directory. They preserve expected behavior and previously fixed
-failure cases. The workflows trigger on every `pull_request` without path or
-branch filters, and on pushes to `main`.
+| Workflow | Required checks |
+| --- | --- |
+| `broker.yml` | Broker/demo formatting, vet and uncached Go regression tests. |
+| `api-chart.yml` | Python regression tests, shell syntax, full OpenAPI validation, chart lint/render/negative cases and embedded chart synchronization. |
+| `ui.yml` | Dependency installation, Svelte/TypeScript checks, ESLint and production build. |
 
-| Suite and location | Example protected behavior | PR workflow |
-| --- | --- | --- |
-| `broker/internal/**/*_test.go` | Frozen image reuse, transaction rollback, secret deletion guards, stale observations and registry timeouts. | `broker.yml`, broker job. |
-| `examples/http-demo/*_test.go` | Health/readiness separation, configuration validation and request-log sanitization. | `broker.yml`, demo job. |
-| `tests/test_local_helpers.py` | Incomplete rollback evidence is rejected; transcript/logging failures preserve exit status. | `api-chart.yml`, Python regression step. |
-| `tests/test_platform_cli.py` | Invalid CLI input is rejected and the selected registry's digest is used. | `api-chart.yml`, Python regression step. |
-| `scripts/check-chart.sh` | Invalid values/probe configurations are rejected; both charts render and the embedded chart stays synchronized. | `api-chart.yml`, chart job. |
+These workflows trigger on every PR without path filters and on pushes to
+`main`. Existing regression coverage includes transaction rollback, immutable
+image reuse, stale versions/observations, Secret deletion guards, registry
+timeouts and mutation-header enforcement. Python cases cover CLI validation,
+registry-specific digest selection, evidence integrity and safe release inputs.
+UI lint/build is distinguished from browser acceptance.
 
-Both Go jobs use `go test -count=1 ./...`, ensuring tests execute instead of
-reusing cached results. Compiled broker dependencies can still be cached. The
-chart job installs Helm through `platform.sh tools`, using the same version pin
-as local checks. UI type-check/lint/build also runs on every PR, but is not a
-browser regression suite. Known gaps listed in [status](../docs/status.md) still
-require new tests and fixes; executing existing suites does not cover them all.
+## End-to-end workflows
 
-## Real-cluster verification
+The E2E suite requires a running Linux Docker engine (Docker Desktop on macOS),
+k3d matching `dev/versions.env`, kubectl, Node.js 22/npm and Python 3.10+. Host Go
+is not required: platform compilation runs in Docker. Native OCI packaging uses
+an owned Buildx builder and additional temporary disk space. Linux CI installs
+Chromium system dependencies with `--with-deps`.
 
-- `broker/integration/` contains one test behind the `integration` build tag and
-  `PLATFORM_INTEGRATION=1`. It deploys through the store/worker/Helm path and
-  reopens the database after completed work. It is not a crash-injection test.
-- [scripts/test-local.sh](../scripts/test-local.sh) exercises the separate manual
-  Helm baseline, including failed readiness, explicit rollback and route isolation.
-- The 2026-11-08 healthy API lifecycle was executed against an isolated cluster;
-  its driver was temporary local tooling, not a committed automated suite.
+```bash
+python3 -m venv .local/e2e-venv
+.local/e2e-venv/bin/python -m pip install -r tests/e2e/requirements.txt
+.local/e2e-venv/bin/python -m playwright install chromium
+PATH="$PWD/.local/e2e-venv/bin:$PATH" python3 -B tests/run.py e2e \
+  --artifacts .local/e2e/run
+```
 
-Execution procedures are in the [local development guide](../docs/local-development.md).
-GitHub Actions runs broker/demo Go suites, UI checks, structural API validation,
-shell/Python regressions and the full local chart matrix. Browser and real K3s
-acceptance remain separate from the default PR workflows.
+The suite builds the actual UI, broker and demos; installs an isolated K3s
+platform; and drives the running UI/API. Each run selects a random cluster name,
+loopback ports, administrator password and dedicated kubeconfig. Tests verify
+actual Kubernetes resources, Pod identities and application HTTP responses.
+Owned forwards, clusters, registry data and the temporary builder are cleaned
+in `finally` blocks. Existing installations and the default kubeconfig are not
+selected. A forced machine shutdown or SIGKILL can bypass cleanup; artifact logs
+identify the owned `platform-e2e-*` resources for inspection.
+
+Coverage includes:
+
+- Invalid/valid browser bootstrap, login, logout, CSRF and consumed-token rejection.
+- Invalid and unsupported requests without unintended application creation.
+- API deployment, idempotent replay/conflict, update, stale versions, scale 2/0/1,
+  rollback, deletion and retained history.
+- Browser image inspection, wizard deployment, update, operation refresh, history
+  rollback and deletion.
+- Immutable configuration Secret versions, write-only responses, deletion guards
+  and configuration rollback.
+- Missing images, explicit reapply after Service deletion, session/history survival
+  and continued application traffic through broker Pod replacement.
+- Unhealthy rollout with preserved previous traffic, durable `needs_attention`
+  state and rejection of conflicting mutations.
+- Native OCI/chart packaging and startup on a second fresh node without a registry.
+
+Two explicit known-gap probes cover status serialization (`STATUS-1`) and
+application restart (`RESTART-1`). Only their precise currently documented defect
+signatures produce skips; unrelated failures still fail the run. A skip does not
+establish acceptance. Once fixed, these probes become ordinary passing tests.
+Automatic failed-rollout restoration, interruption during Helm mutation, private
+registries, native host bootstrap and public HTTPS remain outside current E2E
+acceptance.
+
+`.github/workflows/e2e.yml` runs at **02:00 UTC daily**, through
+`workflow_dispatch`, and as a reusable release gate. Fast checks continue on
+every PR. Scheduled/manual workflows become available after the workflow file
+is merged into the default branch. GitHub scheduling may run later than the
+requested time. Release publication waits for E2E success and both architectures.
+
+Results include JUnit XML, step summaries, sanitized logs and masked browser
+screenshots. CI retains them for seven days. Cookies, kubeconfigs, Secret
+resources, raw bootstrap output and browser network traces are not uploaded.
+Reports distinguish accepted workflows from known gaps; green fast checks alone
+do not establish whole-platform correctness.
+
+## Prepared-cluster integration
+
+```bash
+PLATFORM_INTEGRATION=1 PLATFORM_DEMO_IMAGE=REGISTRY/IMAGE@sha256:DIGEST \
+  KUBECONFIG=PATH python3 -B tests/run.py integration --suite broker
+python3 -B tests/run.py integration --suite helm
+```
+
+These commands require explicit preparation described in the
+[local development guide](../docs/local-development.md). The Helm baseline
+compares direct chart behavior with platform behavior; it does not establish
+broker crash recovery.
 
 ## Historical reports
 
 | Report | Scope |
 | --- | --- |
-| [2026-10-14 local baseline](experiments/2026-10-14-local-m0-m1.md) | Manual Helm lifecycle, timing snapshots and cross-build packaging. |
-| [2026-10-26 review verification](experiments/2026-10-26-pr6-review-fixes.md) | Stronger rollback assertions and transcript handling. |
-| [2026-10-26 backend snapshot](experiments/2026-10-26-m2-broker-install.md) | M2 implementation and installation/test procedure boundaries. |
-| [2026-10-31 UI verification plan](experiments/2026-10-31-m3-admin-ui.md) | UI implementation snapshot and manual acceptance checklist. |
-| [2026-11-08 local workflow](experiments/2026-11-08-local-workflow.md) | Fresh setup, healthy API lifecycle and preserved state through stop/rebuild. |
+| [2026-10-14 local baseline](experiments/2026-10-14-local-m0-m1.md) | Manual Helm lifecycle, timing and cross-build packaging. |
+| [2026-10-26 review verification](experiments/2026-10-26-pr6-review-fixes.md) | Rollback evidence and transcript handling. |
+| [2026-10-26 backend snapshot](experiments/2026-10-26-m2-broker-install.md) | M2 implementation boundaries. |
+| [2026-10-31 UI verification plan](experiments/2026-10-31-m3-admin-ui.md) | UI snapshot and manual checklist. |
+| [2026-11-08 local workflow](experiments/2026-11-08-local-workflow.md) | Healthy lifecycle and stop/rebuild. |
 
-The reports describe dated observations or procedures, not blanket milestone
-acceptance. Earlier ignored raw output and temporary test environments were
-removed during cleanup. New baseline runs create evidence under
-`experiments/runs/`; source code and curated reports remain tracked.
-
-The [current status](../docs/status.md) records known gaps. The
-[evaluation plan](../docs/milestones.md#tests-and-thesis-evaluation) defines the
-remaining functional, failure, hardware and measurement requirements.
+These reports preserve dated observations. New thesis measurements require
+retained evidence, predefined repetitions and reference-host conditions from the
+[evaluation plan](../docs/milestones.md#tests-and-thesis-evaluation).
