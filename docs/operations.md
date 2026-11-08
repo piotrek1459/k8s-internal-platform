@@ -142,8 +142,12 @@ publication. Scheduled/manual execution requires the workflow on the default
 branch. Known status/restart defects are explicit conditional acceptance skips.
 Untrusted PR code never runs on a host serving deployed applications.
 
-The tagged-release workflow validates source/tag identity, runs fast checks and
-E2E, cross-builds both native architectures and publishes a complete preview:
+The manually dispatched Release workflow takes a source branch (default `main`)
+and version, captures that branch's HEAD, runs fast checks and E2E, and builds both
+native architectures. After all gates succeed, it creates a tag at the tested
+SHA and publishes a complete preview. PR, branch and tag pushes do not publish
+releases. The [release guide](../release/README.md) describes the form and retry
+rules. The preview assets comprise:
 
 - ARM64 and AMD64 bundles with the broker, all demo OCI images and platform chart.
 - An installer, installation guide, source/compatibility manifest and SHA-256 sums.

@@ -1,5 +1,9 @@
 # Linux installation — v0.0.1 preview
 
+The examples below use `v0.0.1`. Select a version available through the
+[manual release workflow](../release/README.md). The downloaded guide contains
+commands rendered for its selected release version.
+
 The initial release targets a dedicated, single-node Linux host: Raspberry Pi 5
 with 8 GB RAM and 64-bit Raspberry Pi OS, or an AMD64 Linux server with systemd.
 The platform and its managed applications run in the same K3s cluster. The

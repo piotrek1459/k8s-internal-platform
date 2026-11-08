@@ -19,7 +19,7 @@ def verify_bundle_installation(environment):
     packaging = importlib.util.module_from_spec(module); module.loader.exec_module(packaging)
     architecture = e.run("docker", "info", "--format", "{{.Architecture}}", private=True).stdout.strip()
     architecture = {"aarch64": "arm64", "x86_64": "amd64"}.get(architecture, architecture)
-    version = (ROOT / "release/version.txt").read_text().strip()
+    version = e.version
     with tempfile.TemporaryDirectory(prefix="platform-e2e-bundle-") as directory:
         folder = Path(directory); images = {}
         builder = e.name + "-builder"

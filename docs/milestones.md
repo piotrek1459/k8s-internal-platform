@@ -256,7 +256,7 @@ host and networking mode differ from M6.
 - [ ] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh host reaches the setup wizard using the installer from a checkout.
 - [ ] A clean installation is performed on a rented AMD64 server. **Acceptance:** the platform operates using only the documented installation procedure.
 - [ ] Platform upgrade includes backup, compatibility validation, chart upgrade, and failure recovery. **Acceptance:** both a successful upgrade and recovery through rollback with state restoration are exercised.
-- [x] Tagged releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** both native OCI image bundles, installer assets, recorded digests and published checksums are available on GitHub Releases. The initial preview uses direct containerd import; registry publishing is optional.
+- [ ] Manually dispatched releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** both native OCI image bundles, installer assets, recorded digests and published checksums are available on GitHub Releases. The initial preview uses direct containerd import; registry publishing is optional.
 - [ ] Machine-token endpoints provide hashed storage, application/action scopes, expiry, and revocation. **Acceptance:** a token scoped to one application cannot access another.
 - [ ] A sample CI deployment invokes the API over a private path and polls the operation. **Acceptance:** an image publication followed by an authorized API call completes deployment without public exposure of administration.
 

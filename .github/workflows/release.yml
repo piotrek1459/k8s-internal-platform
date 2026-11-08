@@ -1,17 +1,20 @@
 name: Release
 on:
-  push:
-    tags: ['v[0-9]*']
   workflow_dispatch:
     inputs:
-      version:
-        description: Existing release tag to build (for example v0.0.1)
+      branch:
+        description: Source branch whose HEAD will be released
         required: true
-        default: v0.0.1
+        type: string
+        default: main
+      version:
+        description: Version to publish (for example v0.0.2); no existing tag required
+        required: true
+        type: string
 permissions:
   contents: read
 concurrency:
-  group: release-${{ github.event.inputs.version || github.ref_name }}
+  group: release-${{ startsWith(inputs.version, 'v') && inputs.version || format('v{0}', inputs.version) }}
   cancel-in-progress: false
 jobs:
   prepare:
@@ -19,26 +22,20 @@ jobs:
     outputs:
       version: ${{ steps.identity.outputs.version }}
       sha: ${{ steps.identity.outputs.sha }}
+      app_version: ${{ steps.identity.outputs.app_version }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
-      - name: Validate immutable release identity
+      - name: Validate dispatched branch and release identity
         id: identity
         env:
           INPUT_VERSION: ${{ inputs.version }}
+          SOURCE_BRANCH: ${{ inputs.branch }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          version="${INPUT_VERSION:-$GITHUB_REF_NAME}"
-          [[ "$version" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo 'Invalid release tag'; exit 1; }
-          sha="$(git rev-parse "$version^{commit}")"
-          [[ "$(git show "$sha:release/version.txt")" == "${version#v}" ]] || { echo 'Tag and source version differ'; exit 1; }
-          if gh release view "$version" --json isDraft > existing-release.json 2>/dev/null; then
-            [[ "$(python3 -c 'import json; print(json.load(open("existing-release.json"))["isDraft"])')" == True ]] || { echo 'Published releases are immutable; choose a new version'; exit 1; }
-          fi
-          printf 'version=%s\nsha=%s\n' "$version" "$sha" >> "$GITHUB_OUTPUT"
+        run: python3 release/workflow.py prepare --version "$INPUT_VERSION" --branch "$SOURCE_BRANCH"
   verify:
     needs: prepare
     runs-on: ubuntu-24.04
@@ -66,6 +63,7 @@ jobs:
     uses: ./.github/workflows/e2e.yml
     with:
       source_ref: ${{ needs.prepare.outputs.sha }}
+      release_version: ${{ needs.prepare.outputs.app_version }}
   bundles:
     needs: [prepare, verify]
     runs-on: ubuntu-24.04
@@ -89,16 +87,13 @@ jobs:
           ./scripts/platform.sh build-ui
           ./scripts/platform.sh tools
           mkdir -p dist/images dist/bundles
-      - name: Read application version
-        id: app_version
-        run: printf 'version=%s\n' "$(cat release/version.txt)" >> "$GITHUB_OUTPUT"
       - name: Build native broker OCI archive
         uses: docker/build-push-action@v6
         with:
           context: broker
           platforms: linux/${{ matrix.arch }}
           tags: platform.local/platform-broker:${{ needs.prepare.outputs.version }}
-          build-args: VERSION=${{ steps.app_version.outputs.version }}
+          build-args: VERSION=${{ needs.prepare.outputs.app_version }}
           provenance: false
           outputs: type=oci,dest=dist/images/platform.oci.tar
           cache-from: type=gha,scope=release-${{ matrix.arch }}
@@ -154,17 +149,10 @@ jobs:
           cp docs/installation.md dist/INSTALL.md
           python3 release/manifest.py --directory dist --version "$VERSION" --commit "$SOURCE_SHA"
           (cd dist && sha256sum -c SHA256SUMS)
-      - name: Publish complete preview release
+      - name: Create tested tag and publish complete preview release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          set -euo pipefail
-          if gh release view "$VERSION" --json isDraft > existing-release.json 2>/dev/null; then
-            [[ "$(python3 -c 'import json; print(json.load(open("existing-release.json"))["isDraft"])')" == True ]] || { echo 'Refusing to overwrite a published release'; exit 1; }
-          else
-            gh release create "$VERSION" --verify-tag --draft --prerelease --title "$VERSION — initial preview" --notes-file release/NOTES.md
-          fi
-          gh release upload "$VERSION" dist/platform-*.tar.gz dist/install.sh dist/INSTALL.md dist/release.json dist/SHA256SUMS --clobber
-          gh release edit "$VERSION" --draft=false --prerelease --latest=false
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+        run: python3 release/workflow.py publish --directory dist --version "$VERSION" --sha "$SOURCE_SHA"

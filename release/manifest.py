@@ -22,6 +22,10 @@ def assemble(directory, version, commit):
         targets[architecture] = metadata
     # The downloaded guide has no adjacent docs/ tree. Pin its relative source
     # links to this release rather than leaving them broken outside a checkout.
+    source_version = (Path(__file__).resolve().parent / "version.txt").read_text().strip()
+    for filename in ("INSTALL.md", "install.sh"):
+        asset = directory / filename
+        asset.write_text(asset.read_text().replace("v" + source_version, "v" + version))
     guide = directory / "INSTALL.md"
     prefix = "https://github.com/piotrek1459/k8s-internal-platform/blob/v" + version + "/docs/"
     guide.write_text(re.sub(r"\]\((?!https?://|#)([^)]+)\)",

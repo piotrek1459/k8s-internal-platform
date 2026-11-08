@@ -9,6 +9,10 @@ on:
         type: string
         required: false
         default: ''
+      release_version:
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -57,6 +61,8 @@ jobs:
           python -m pip install -r tests/e2e/requirements.txt
           python -m playwright install --with-deps chromium
       - name: Build and validate full workflows
+        env:
+          PLATFORM_RELEASE_VERSION: ${{ inputs.release_version }}
         run: python3 -B tests/run.py e2e --artifacts .local/e2e/run
       - name: Publish sanitized results
         if: always()

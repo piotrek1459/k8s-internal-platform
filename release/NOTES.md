@@ -1,4 +1,4 @@
-Initial installable preview of the Kubernetes internal application platform.
+Installable preview of the Kubernetes internal application platform.
 
 The platform and managed applications run together in one single-node K3s
 cluster. The release includes a Go broker with an embedded Svelte UI, a durable

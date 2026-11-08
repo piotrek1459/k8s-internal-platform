@@ -46,7 +46,10 @@ These workflows trigger on every PR without path filters and on pushes to
 image reuse, stale versions/observations, Secret deletion guards, registry
 timeouts and mutation-header enforcement. Python cases cover CLI validation,
 registry-specific digest selection, evidence integrity and safe release inputs.
-UI lint/build is distinguished from browser acceptance.
+Release-controller regressions check source-branch HEAD selection, version input,
+existing tag/release conflicts, draft retries, checksum failures and the order of
+remote publication steps without creating a release. UI lint/build is
+distinguished from browser acceptance.
 
 ## End-to-end workflows
 

@@ -1,6 +1,11 @@
 # v0.0.1 preview release verification
 
-Date: 2026-11-08. Tagged source:
+The original `v0.0.1` preview and tag were subsequently withdrawn to establish
+manual publication from an explicitly selected branch. The results below remain
+historical evidence; no current published release is claimed. The replacement
+manual publisher has not been dispatched.
+
+Date: 2026-11-08. Original tagged source:
 `090e3bf789ad6c6969df4ee1b52077569bb0f5ef` (`v0.0.1`).
 
 This report separates automated containerized-cluster evidence from native host
@@ -57,13 +62,32 @@ The release run completed successfully. Its E2E JUnit report contains 13 cases:
 11 passed, zero failed, and two explicit known-gap skips (`STATUS-1`, `RESTART-1`).
 Both native architecture packaging jobs and the publication job passed.
 
-The [published preview](https://github.com/piotrek1459/k8s-internal-platform/releases/tag/v0.0.1)
-contains six assets: two native bundles, `install.sh`, `INSTALL.md`, `release.json`
+The original preview contained six assets: two native bundles, `install.sh`, `INSTALL.md`, `release.json`
 and `SHA256SUMS`. All six were downloaded publicly after publication. Asset hashes
 and every `SHA256SUMS` record matched; both bundles' native OCI identities matched
 their metadata, the source commit matched the tag, and downloaded installer syntax
 and `--help` passed. The standalone guide's links resolve to version-pinned source
 documentation. Publication did not require GHCR credentials.
+
+## Manual branch-release revision
+
+The replacement Release workflow has only `workflow_dispatch`, with `branch`
+(default `main`) and `version` inputs. Preparation reads the specified remote
+branch HEAD once, then all validation/build/publication jobs use that SHA. There
+is no version-bump requirement and no PR, branch-push or tag-push publication.
+
+The revised tooling passed 45 Python regressions, shell syntax and actionlint.
+A read-only preparation run with the official checksum-verified GitHub CLI
+resolved the actual `main` HEAD and authenticated release API successfully,
+without creating tags. A separate local package run supplied version `0.0.2`
+while the development fallback remained `0.0.1`; it built and imported the native
+bundle, verified broker version/architecture, deployed/updated a demo, served HTTP,
+deleted the application and cleaned owned resources. Installer/guide version
+rendering and publication ordering/failure guards have focused regression tests.
+
+The complete revised publication workflow has not been dispatched. The initial
+manual publication is reserved for the repository administrator after the
+workflow is available on `main`.
 
 ## Remaining acceptance boundaries
 

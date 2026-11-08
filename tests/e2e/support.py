@@ -3,6 +3,7 @@ import contextlib
 import http.cookiejar
 import json
 import os
+import re
 from pathlib import Path
 import secrets
 import signal
@@ -76,7 +77,10 @@ class Environment:
         artifacts.mkdir(parents=True, exist_ok=True)
         self.name = "platform-e2e-" + secrets.token_hex(4)
         registry, api, ui, app = free_ports(4)
-        self.env = dict(os.environ, PLATFORM_CLUSTER_NAME=self.name, PLATFORM_REGISTRY_PORT=str(registry), PLATFORM_API_PORT=str(api), PLATFORM_UI_PORT=str(ui), PLATFORM_APP_PORT=str(app), PLATFORM_BUILD_VERSION=(ROOT / "release/version.txt").read_text().strip())
+        self.version = os.environ.get("PLATFORM_RELEASE_VERSION") or (ROOT / "release/version.txt").read_text().strip()
+        if not re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", self.version):
+            raise ValueError("Invalid E2E release version")
+        self.env = dict(os.environ, PLATFORM_CLUSTER_NAME=self.name, PLATFORM_REGISTRY_PORT=str(registry), PLATFORM_API_PORT=str(api), PLATFORM_UI_PORT=str(ui), PLATFORM_APP_PORT=str(app), PLATFORM_BUILD_VERSION=self.version)
         self.config = ROOT / ".local" / (self.name + ".kubeconfig")
         self.url = "http://127.0.0.1:" + str(ui)
         self.app_port = app
@@ -92,7 +96,6 @@ class Environment:
     def redact(self, text):
         for value in self.secret_values:
             if value: text = text.replace(value, "[REDACTED]")
-        import re
         return re.sub(r"(?m)^  [A-Za-z0-9_-]{32}[ \t]*$", "  [REDACTED]", text)
 
     def record(self, message, **details):
@@ -209,7 +212,8 @@ class Environment:
             self.run("docker", "buildx", "rm", builder, check=False)
         for name, config in reversed([(self.name, self.config)] + self.additional):
             if name == self.name and not self.owns_cluster: continue
-            self.run("k3d", "registry", "delete", "k3d-" + name + "-registry", check=False)
+            if name == self.name:
+                self.run("k3d", "registry", "delete", "k3d-" + name + "-registry", check=False)
             # Select the owned kubeconfig so deletion cannot edit the user's default.
             result = subprocess.run(["k3d", "cluster", "delete", name], env=dict(self.env, KUBECONFIG=str(config)), capture_output=True, text=True, timeout=120)
             if result.returncode: raise RuntimeError(self.redact(result.stderr))

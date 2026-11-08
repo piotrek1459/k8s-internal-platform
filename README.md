@@ -9,11 +9,17 @@ from known defects and planned capabilities.
 
 ## Install a release on Linux
 
-The [v0.0.1 preview](https://github.com/piotrek1459/k8s-internal-platform/releases/tag/v0.0.1) provides native ARM64/AMD64 OCI bundles and an
-installer for a dedicated Raspberry Pi or Linux server. The
-[installation guide](docs/installation.md) covers host checks, download verification,
-installation and SSH access. Native Pi acceptance is pending; public HTTPS,
-application data volumes and cross-version upgrades remain outside this preview.
+Release assets are created through **Actions → Release → Run workflow**. Select
+`branch` (default `main`) and a version; the selected branch's HEAD is captured,
+validated and built before its tag and GitHub preview are published. The
+[release guide](release/README.md) describes manual publication. The initial
+automated `v0.0.1` preview and tag were withdrawn; the first manual release is pending.
+
+The [installation guide](docs/installation.md) describes the resulting native
+ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.0.1`
+commands are examples until that version is published manually. Native Pi
+acceptance, public HTTPS, application volumes and cross-version upgrades remain
+outside current acceptance.
 
 ## Local startup
 

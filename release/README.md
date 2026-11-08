@@ -1,41 +1,73 @@
-# Release maintenance
+# Manual releases
 
-The initial distribution is a preview. The source version is stored in
-`release/version.txt`; the platform chart and broker OCI version label match it.
-The release notes state supported behavior and known limitations.
+Release publication starts only through `workflow_dispatch`. The Release workflow
+has no PR, branch-push or tag-push trigger. PR workflows run fast validation checks;
+they do not create release tags, release bundles or GitHub Releases.
 
-## Publish
+## Publish from a branch
 
-1. Update the version file, platform chart version/appVersion, installation
-   examples and release notes in a reviewed change.
-2. Run `python3 -B tests/run.py unit` and the E2E suite described in
-   [tests/README.md](../tests/README.md).
-3. Create and push an immutable `vMAJOR.MINOR.PATCH` tag at the intended source
-   commit. `.github/workflows/release.yml` validates the tag against the version
-   file, runs all fast checks and E2E, and builds both native bundles.
-4. Publication creates a draft, uploads complete assets and checksums, then
-   publishes the prerelease. A published version is never overwritten. A failed
-   draft can be repaired by rerunning its workflow before publication.
+The workflow definition must first be present on the default branch (`main`) for
+GitHub to expose manual execution. After that, a release requires no version-bump
+PR or pre-existing tag.
 
-`workflow_dispatch` can rebuild an existing unpublished tag after the workflow
-is merged into the default branch. Reusable E2E executes the same source commit.
-A tag-triggered release can be produced from a reviewed feature commit before
-merge; scheduled E2E becomes active only after merging the workflow into `main`.
+1. Open the repository's **Actions → Release → Run workflow**.
+2. Keep **Use workflow from** set to `main` to use the installed workflow definition.
+3. Set **branch** to the source branch to release; the default is `main`.
+4. Enter **version**, for example `v0.0.1`, then select **Run workflow**.
+5. Inspect the captured source commit and validation jobs. On success, the workflow
+   creates the version tag at that commit and publishes the complete preview.
+
+The source branch's HEAD is resolved once during preparation. Every validation,
+E2E, build and publication job uses that exact SHA. Later commits on the branch
+do not change the release already in progress. Tags cannot substitute for a
+source branch.
+
+The same operation through GitHub CLI is:
+
+```bash
+gh workflow run release.yml --ref main -f branch=main -f version=v0.0.1
+```
+
+`--ref` selects the workflow definition; `branch` selects the application source.
+GitHub's [manual workflow guide](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)
+describes the UI and required repository access.
+
+## Validation and publication
+
+The workflow performs the following sequence:
+
+1. Validate the version and source branch. Reject a published release, an existing
+   tag at another commit, or a draft belonging to another commit.
+2. Run all fast regression checks through `tests/run.py unit`.
+3. Run the real-cluster API/browser/bundle E2E suite and build ARM64/AMD64 bundles.
+4. Assemble and validate installer assets, compatibility/source metadata and checksums.
+5. Create the tag at the tested SHA, create a draft, upload all six assets and
+   publish the preview. Failed tests/builds never reach tag creation or publication.
+
+A failed upload can leave an unpublished draft and its tested tag. Rerun the
+original workflow to retry that same commit. A fresh dispatch from a branch that
+has since moved must use a new version. Existing published releases are refused.
+
+`release/version.txt` is the development/test fallback version. The form input
+supplies the released broker version, packaged chart version/appVersion, E2E
+version, metadata and downloaded installation examples. Changing that fallback
+file is not a prerequisite for publication. Release notes describe current
+capabilities and limitations in `release/NOTES.md`. Releases remain previews.
 
 ## Artifacts
 
 Each `platform-vVERSION-linux-ARCH.tar.gz` contains a platform chart, namespace
 manifest, platform/demo OCI archives, and `release.env`/`release.json`. Packaging
-validates native architecture, immutable manifest/config checksums and version
-labels. Archives are normalized to the recorded native manifest root, with
-reachable config/layer content verified, so containerd imports the exact digest
-used by workloads. The pinned containerd import uses `--local` to avoid the
-transfer API introducing a new wrapper digest. `release/manifest.py` requires both architecture bundles and records the
-source commit and compatibility pins. `SHA256SUMS` covers bundles, installer,
-installation guide and top-level metadata.
+validates architecture, checksums and version labels. Normalized OCI archives and
+containerd's `--local` import retain the exact recorded native digest references.
 
-GitHub hosts the OCI bundles; GHCR visibility or credentials are not required.
-The installer imports image digests into containerd. This distribution is not an
-air-gapped package: initial K3s/Helm/system images still need outbound downloads.
-The [installation guide](../docs/installation.md) describes the dedicated-host
-boundary, same-version reruns and deferred native-host validation.
+The six published assets are both native bundles, `install.sh`, `INSTALL.md`,
+`release.json` and `SHA256SUMS`. The downloaded guide uses the selected version
+and links to documentation at its release tag. `release.json` records the source
+SHA and component pins; checksums cover the bundles, installer, guide and metadata.
+
+GitHub hosts the OCI bundles; GHCR credentials are not required. Initial K3s,
+Helm and system-image downloads still require network access. The
+[installation guide](../docs/installation.md) describes host requirements and
+remaining native-host acceptance. The original automated `v0.0.1` preview and tag
+were withdrawn; the first manual release has not yet been published.

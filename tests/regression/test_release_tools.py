@@ -60,6 +60,25 @@ class ReleaseIntegrityTests(unittest.TestCase):
                 digest, name = record.split()
                 self.assertEqual(digest, hashlib.sha256((folder / name).read_bytes()).hexdigest())
 
+    def test_dispatch_version_updates_assets_without_a_source_version_bump(self):
+        fallback = (ROOT / "release/version.txt").read_text()
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "install.sh").write_text("Usage: --version v0.0.1")
+            (folder / "INSTALL.md").write_text("Install v0.0.1: [API](user/api-reference.md)")
+            for arch in ("amd64", "arm64"):
+                raw = json.dumps({"version": "0.0.2", "architecture": arch}).encode()
+                with tarfile.open(folder / ("platform-v0.0.2-linux-" + arch + ".tar.gz"), "w:gz") as archive:
+                    entry = tarfile.TarInfo("release.json"); entry.size = len(raw)
+                    archive.addfile(entry, io.BytesIO(raw))
+            manifest.assemble(folder, "v0.0.2", "a" * 40)
+            self.assertIn("--version v0.0.2", (folder / "install.sh").read_text())
+            guide = (folder / "INSTALL.md").read_text()
+            self.assertIn("Install v0.0.2", guide)
+            self.assertIn("/blob/v0.0.2/docs/", guide)
+            self.assertNotIn("v0.0.1", guide)
+        self.assertEqual((ROOT / "release/version.txt").read_text(), fallback)
+
     def test_native_digest_and_image_version_are_verified(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "image.tar"
@@ -117,6 +136,15 @@ class ReleaseIntegrityTests(unittest.TestCase):
 
 
 class DiagnosticRedactionTests(unittest.TestCase):
+    def test_e2e_build_version_uses_the_release_input(self):
+        from unittest.mock import patch
+        sys.path.insert(0, str(ROOT / "tests/e2e"))
+        from support import Environment
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, PLATFORM_RELEASE_VERSION="0.0.2"):
+            environment = Environment(Path(folder))
+            self.assertEqual(environment.version, "0.0.2")
+            self.assertEqual(environment.env["PLATFORM_BUILD_VERSION"], "0.0.2")
+
     def test_interleaved_bootstrap_output_is_redacted_before_token_is_known(self):
         sys.path.insert(0, str(ROOT / "tests/e2e"))
         from support import Environment

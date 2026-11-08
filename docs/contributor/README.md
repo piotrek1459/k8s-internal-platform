@@ -97,12 +97,20 @@ the workflow to be merged into the default branch.
 
 ## Release distribution
 
-`release/version.txt` identifies the source version. `release/package.py`
-validates native OCI architecture/version metadata and creates the chart/image
-bundle. `release/manifest.py` assembles source identity, compatibility metadata
-and checksums. `.github/workflows/release.yml` gates publication on fast checks,
-E2E and ARM64/AMD64 bundles, then publishes a preview from an immutable tag.
-Published assets are not replaced; a new version is required for corrections.
+Releases are started through **Actions → Release → Run workflow**, with an explicit
+source `branch` (default `main`) and `version`. The branch's HEAD is captured once;
+all checks, E2E, native builds and publication use that SHA. The workflow creates
+the tag only after validation and packaging succeed. PR, branch and tag pushes
+do not start release publication. The workflow definition must first be merged
+into `main` to expose manual dispatch.
+
+`release/version.txt` supplies a development fallback. The dispatch input supplies
+the broker/chart/E2E release version and generated installation examples, so a
+version-bump PR is not required for each release. `release/package.py` validates
+native OCI identity and creates bundles; `release/manifest.py` assembles metadata
+and checksums. `release/workflow.py` validates branch/tag/release identity and
+publishes only the tested commit. The [release guide](../../release/README.md)
+records exact UI/CLI steps and retry behavior.
 
 The [native installation guide](../installation.md) describes `installer/install.sh`.
 The initial release uses GitHub-hosted OCI bundles instead of requiring a public
