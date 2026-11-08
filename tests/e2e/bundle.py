@@ -90,7 +90,7 @@ def verify_bundle_installation(environment):
             resources = json.loads(e.run("kubectl", "--kubeconfig", config, "-n", "platform-apps", "get", "service", "-l", "platform.local/app-id=" + app, "-o", "json", private=True).stdout)
             service = resources["items"][0]["metadata"]["name"]
             app_port = free_ports(1)[0]
-            forward = subprocess.Popen(["kubectl", "--kubeconfig", str(config), "-n", "platform-apps", "port-forward", "--address", "127.0.0.1", "service/" + service, str(app_port) + ":8080"], stdout=log, stderr=log, start_new_session=True)
+            forward = subprocess.Popen(["kubectl", "--kubeconfig", str(config), "-n", "platform-apps", "port-forward", "--address", "127.0.0.1", "service/" + service, str(app_port) + ":80"], stdout=log, stderr=log, start_new_session=True)
             e.forwards.append(forward)
             try:
                 for _ in range(60):

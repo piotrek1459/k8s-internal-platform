@@ -162,7 +162,7 @@ Find the application's Service and forward it on the server:
 
 ```bash
 pkubectl -n platform-apps get services
-pkubectl -n platform-apps port-forward --address 127.0.0.1 service/APP_SERVICE 8081:8080
+pkubectl -n platform-apps port-forward --address 127.0.0.1 service/APP_SERVICE 8081:80
 ```
 
 Add a second workstation tunnel, then open the application:
