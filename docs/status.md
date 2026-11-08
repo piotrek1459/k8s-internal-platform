@@ -1,6 +1,6 @@
 # Implementation status and next work
 
-Updated: 2026-11-08. Source baseline: merged PR #11 (`da23d67`), with v0.0.1 release/test additions.
+Updated: 2026-11-08. Source baseline: merged PR #11 (`da23d67`), with manual-release and verification additions.
 This document records implementation and verification boundaries. The detailed
 plans describe target requirements; a planned requirement is not evidence of
 completion. Runtime installations and generated files are not part of the source
@@ -15,7 +15,7 @@ embedded first-party chart through the Helm SDK.
 
 | Area | Implemented and recorded evidence | Remaining boundary |
 | --- | --- | --- |
-| Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | A preview Linux installer and native OCI release workflow are implemented; native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
+| Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | Native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
 | Preview distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub preview. | The initial automated `v0.0.1` release/tag were withdrawn. First manual publication, native Pi/systemd installation and cross-version backup/upgrade/recovery remain pending. |
 | Application chart | Deployment, Service, probes, resource settings, ownership labels, Secret references and optional private ingress. Local manual lifecycle and route-isolation reports are retained. | Resource defaults are provisional; reference-Pi and second-device LAN acceptance remain outstanding. |
 | Durable backend | SQLite migrations, transactional acceptance, idempotency, application version checks, a serial worker, status observer, operation history and audit records. | Interrupted-operation target verification and complete execution snapshots require further work. |
@@ -27,9 +27,9 @@ embedded first-party chart through the Helm SDK.
 | Diagnostics | Structured broker logs, operation events and cached workload observations. | Application log/event endpoints, audit browsing, metrics, capacity reporting and retention automation remain planned. |
 | Persistence | The platform has a metadata PVC. | Application volumes, retained-volume operations and verified backup/restore belong to M5. |
 | Networking | Current development access uses loopback forwarding and Internal application exposure. | LAN HTTPS, public routing/TLS and direct-ingress/tunnel acceptance remain outstanding. |
-| Portability | The demo Dockerfile supports ARM64/AMD64 cross-builds; earlier local OCI packaging is recorded. | ARM64/AMD64 native OCI packaging is implemented; native Raspberry Pi/AMD64 host acceptance remains outstanding. |
+| Portability | Broker and demo native OCI packaging supports ARM64/AMD64. Packaging, containerized runtime and public-download evidence is recorded in the historical report. | Native Raspberry Pi/AMD64 host acceptance remains outstanding. |
 
-The current supported walkthrough uses an anonymous local registry, the stateless
+The local source walkthrough uses an anonymous local registry, the stateless
 HTTP profile, port 8080 and readiness path `/readyz`. A public image registry and
 public application exposure are separate concepts. Replica changes are manual;
 several replicas on one host do not provide host-level availability.
@@ -74,19 +74,24 @@ establish acceptance for the affected paths.
   SQLite, fake Kubernetes clients, in-memory Helm storage and an in-process
   registry. One additional real-cluster test is gated by the `integration` build
   tag and `PLATFORM_INTEGRATION=1`.
-- The demo has five top-level Go tests. 45 Python release/installer and helper regression tests cover rollback evidence,
-  transcript completion, command validation, digest selection, metadata/checksum
-  integrity and bootstrap-log redaction. Table-driven subcases are additional to these counts.
+- The demo has five top-level Go tests. The 45 Python release/installer and helper
+  regressions cover rollback evidence, transcript completion, command validation,
+  digest selection, metadata/checksum integrity, manual publication guards and
+  bootstrap-log redaction. Table-driven subcases are additional to these counts.
 - Every pull request runs broker/demo Go regression suites, UI type-check/lint/
   build, full OpenAPI validation, shell/Python checks, and the full local
   chart lint/render/negative/synchronization matrix. Go tests use `-count=1`;
-  local and CI chart checks share the Helm version pin. The fast PR jobs do not run a cluster. A separate nightly/manual/release E2E
+  local and CI chart checks share the Helm version pin. The fast PR jobs do not
+  run a cluster. A separate nightly/manual/release E2E
   workflow builds isolated K3s platforms and drives the API/browser; known status
   and restart signatures remain explicit acceptance skips. Schedule: 02:00 UTC.
   Suite locations and workflow mapping are in the [test guide](../tests/README.md).
 - The [historical preview verification report](../tests/experiments/2026-11-08-release-preview.md)
   records the tagged-source release gate: 11 E2E passes, zero failures and two
-  explicit known-gap skips. Both architecture jobs and public asset checks passed before the original preview/tag were withdrawn. The revised manual publisher has separate identity/ordering regressions; it has not been dispatched to create a new release.
+  explicit known-gap skips. Both architecture jobs and public asset checks passed
+  before the original preview/tag were withdrawn. The revised manual publisher
+  has separate identity/ordering regressions; it has not been dispatched to create
+  a new release.
   This establishes containerized K3s workflows and packaging, not native Pi boot
   or systemd installer acceptance.
 - The [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)

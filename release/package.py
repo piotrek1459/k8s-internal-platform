@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a checksummed native installation bundle from built OCI images."""
+"""Create a native installation bundle from validated OCI images."""
 import argparse
 import hashlib
 import io
@@ -139,17 +139,7 @@ def package(version, architecture, images, output, helm):
             archive.add(normalized["platform"], arcname="platform-image.oci.tar")
             for key in ("v1", "v2", "v3"):
                 archive.add(normalized[key], arcname=f"demo-{key}.oci.tar")
-    digest = file_hash(destination)
-    destination.with_suffix(destination.suffix + ".sha256").write_text(f"{digest}  {destination.name}\n")
     return destination
-
-
-def file_hash(path):
-    digest = hashlib.sha256()
-    with path.open("rb") as file:
-        for chunk in iter(lambda: file.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def main():

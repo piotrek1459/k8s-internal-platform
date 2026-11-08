@@ -30,8 +30,9 @@ The single-node K3s design is host-agnostic. The practical differences between
 the reference Pi installation on a home network and a rented server are:
 
 - **Architecture:** ARM64 on the Pi, usually AMD64 on a rented server. Platform
-  and demonstration release images shall support both. Current startup builds
-  native images, and the demo supports cross-build packaging (see
+  and demonstration release images support both through native OCI bundles.
+  Local startup builds images for the development host; the manual release
+  workflow builds both target architectures (see
   [application contract](api-and-data.md#application-contract) and
   [operations.md](operations.md#cicd-and-release-artifacts)).
 - **Capacity:** available CPU, memory, and storage depend on the selected server
@@ -56,7 +57,7 @@ requires recorded acceptance evidence for its included capabilities.
 | --- | --- | --- |
 | Baseline and application chart (M0–M1) | A reference application runs on the host using documented Kubernetes and Helm commands. | Validated host configuration, manual K3s bootstrap, public multi-architecture demonstration image, LAN access, application chart, and recorded update and recovery scenarios. |
 | Core prototype (M0–M4) | An administrator can operate supported applications through the platform UI/API without routine Kubernetes or Helm commands. | In-cluster platform installation with persistent metadata, authentication, public/private images, durable operations, status and logs, history, versioned secrets, update/rollback, manual replica changes, recovery, and the required minimum evaluation. |
-| Extended platform and initial release (M0–M8) | A separate installation can reproduce the complete applicable product scenarios. | Application data volumes, one tested public HTTPS mode, a separate demonstration application, release artifacts, installation and upgrade procedures, backup/restore, and extended observability and evaluation. |
+| Extended platform and stable distribution (M0–M8) | A separate installation can reproduce the complete applicable product scenarios. | Application data volumes, one tested public HTTPS mode, a separate demonstration application, release artifacts, installation and upgrade procedures, backup/restore, and extended observability and evaluation. |
 
 The core prototype includes functional and failure tests, comparison with the
 manual baseline, and measured deployment time and resource consumption. A full
@@ -80,8 +81,10 @@ The following features are excluded from the initial implementation scope:
 - A plugin marketplace, service mesh, canary deployments, and distributed tracing.
 - CPU-based application autoscaling; manual replica changes come first.
 
-Tests are required from the first working lifecycle operation. Release automation
-and an extended test matrix are introduced in later milestones.
+Tests are required from the first working lifecycle operation. Fast PR checks,
+nightly/manual E2E and manual branch-HEAD release automation are implemented.
+Native host acceptance, reliable upgrades and extended evaluation remain part of
+the later milestone criteria.
 
 ## One cluster hosting the platform and its applications
 
@@ -307,7 +310,8 @@ The browser communicates only with this service, never directly with Kubernetes.
 
 | Component | Responsibility | Where it runs |
 | --- | --- | --- |
-| Installer (planned) | Production host checks, K3s configuration, installation and recovery; the current launcher handles local k3d only. | Host-side tooling. |
+| Preview installer | Dedicated Linux host checks, pinned K3s/Helm, verified OCI import and platform chart installation. Native host and upgrade/recovery acceptance remain pending. | Host-side `installer/install.sh`. |
+| Release controller | Resolve a manually selected branch HEAD, validate/build the pinned SHA and publish versioned assets after successful gates. | GitHub Actions and `release/` tooling. |
 | K3s | Kubernetes control plane and node services, scheduling, image pulling, networking, restarting containers. | Host service. |
 | Web UI | Implemented setup, forms, progress and lifecycle/history screens; response alignment, Secret submission and log browsing remain incomplete. | Static assets served by the Go service. |
 | Go API | Authentication, validation, application model, operation submission, API responses. | One platform pod. |
@@ -319,7 +323,7 @@ The browser communicates only with this service, never directly with Kubernetes.
 | Traefik | Route HTTP traffic to the correct application. | K3s-provided ingress controller. |
 | Certificate component | Issue and renew certificates for the selected direct HTTPS mode. | cert-manager when that mode is implemented. |
 | Local storage provisioner | Supply node-local persistent volumes. | K3s storage component. |
-| Registry | Current local anonymous registry; public-image inspection exists; private authentication and release publication remain incomplete. | Local Docker registry in development; external registry in the target product. |
+| Registry | Local anonymous registry and public-image inspection. Private authentication and public container-image publishing remain incomplete; release bundles use direct OCI import. | Local Docker registry in development; reachable registry for external application images. |
 | Observability profile | Historical metrics/logs, dashboards, and selected alerts. | Optional services sized to the host. |
 
 K3s supplies Traefik and ServiceLB; its default ingress setup uses host ports

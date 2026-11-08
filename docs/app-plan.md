@@ -62,6 +62,7 @@ target-specific validation remains required. See the
 | Initial networking | Current development uses loopback forwarding. LAN/HTTPS is the next deployment target; domain acquisition remains deferred. |
 | Final networking | Public application access on the host through a connection method selected after network validation: direct ingress or an outbound tunnel. |
 | Distribution | Installable GitHub releases for both ARM64 and AMD64. |
+| Release initiation | Manual dispatch with a source branch (default `main`) and version. The selected branch HEAD is pinned for validation/builds; successful gates create the tag and release. PR, branch and tag pushes do not publish. |
 | Working language | English for project documentation, code, and UI. |
 
 The implemented choices are K3s/k3d, a Go modular monolith, SQLite metadata,
@@ -92,7 +93,8 @@ volumes are introduced in M5. Academic sufficiency must be assessed against the
 agreed thesis requirements and cannot be inferred from a milestone label.
 
 The next implementation work aligns UI/API contracts, corrects restart and
-recovery semantics, completes private image support, and automates core acceptance.
+recovery semantics, completes private image support, and extends core failure
+acceptance. Manual releases and nightly/API/browser acceptance are already implemented.
 The [status report](status.md#next-implementation-order) defines that order.
 [Milestone acceptance](milestones.md#implementation-readiness-and-entry-criteria)
 continues to require evidence for hardware, networking, failure recovery and

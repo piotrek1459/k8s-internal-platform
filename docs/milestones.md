@@ -45,7 +45,7 @@ local prototype; remaining acceptance work is summarized below.
 | M2 | Transactional store, operation queue, in-cluster chart/adapters, Secret backend, observer and completed-state persistence. | Exact interrupted-target verification, full snapshots and real-cluster acceptance of all durable invariants. |
 | M3 | Svelte setup/login, application and progress screens, update/history and configuration screens. | UI/API alignment, Secret submission, private images, application logs and normal LAN HTTPS. |
 | M4 | Healthy update/scale/rollback/delete and local API lifecycle evidence. | Restart, verified failed-rollout recovery, interruption/drift acceptance and core evaluation. |
-| M5–M8 | Planned persistence, networking, distribution and monitoring requirements; some local development automation already exists. | Separate implementation and evidence for each extension. |
+| M5–M8 | Persistence, public networking, native host/upgrade acceptance and monitoring remain planned; preview installation, native OCI packaging and manual releases are implemented. | Separate implementation and evidence for each extension. |
 
 The immediate order is UI/API contract alignment, restart correctness, recovery
 and snapshot completion, private images, then repeatable core acceptance and
@@ -133,8 +133,9 @@ and drift handling are completed in M4.
 
 **Completion evidence:** an in-cluster broker deploys an application, retains
 state after pod replacement, preserves secret references, and handles duplicate
-requests and disconnected clients without losing accepted work. Installer
-automation remains part of M7.
+requests and disconnected clients without losing accepted work. Complete native
+installer/upgrade acceptance remains part of M7; the preview installer and manual
+release controller are already implemented.
 
 ## M3 — Administrator UI (core)
 
@@ -455,7 +456,7 @@ deploy/helm/
   platform/                   broker/UI, RBAC, database volume
   application/                managed application workload chart
 installer/                    preview dedicated Linux/K3s installer
-release/                      OCI bundles, source identity, pins and release notes
+release/                      manual branch-HEAD publisher, OCI bundles, source identity and pins
 observability/                placeholder; monitoring profiles remain planned
 examples/                     healthy/unhealthy demonstration versions
 tests/

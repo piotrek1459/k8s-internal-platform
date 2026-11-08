@@ -14,9 +14,12 @@ installs the platform chart. The broker uses SQLite, a serial worker and a statu
 observer. [Local procedures](local-development.md) and the [status report](status.md)
 record current commands, evidence and known gaps.
 
-Production installation, backup/restore upgrades, release publication, metrics
-and full failed-rollout recovery below are target requirements. They are not
-capabilities established by local startup or a successful healthy update.
+A dedicated Linux installer, native OCI packaging and manually dispatched release
+workflow are implemented. Their procedures are documented in the
+[installation guide](installation.md) and [release guide](../release/README.md).
+Native host installation, backup/restore upgrades, metrics and complete failed-rollout
+recovery remain acceptance requirements; local startup or a healthy update does
+not establish those results.
 
 ## Reference hardware and operating limits
 
@@ -59,7 +62,7 @@ using the same measurement procedure.
 
 ## Installer workflow
 
-The `v0.0.1` preview implements `installer/install.sh` and GitHub-hosted native
+The preview implementation provides `installer/install.sh` and GitHub-hosted native
 OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
 its exact supported behavior: dedicated Linux/systemd host, read-only checks,
 pinned K3s/Helm, image import, chart installation and SSH/loopback access.
@@ -120,9 +123,9 @@ and then upgrades the platform chart. Database migrations must have a documented
 compatibility or restore strategy; a Helm rollback alone cannot undo a database
 migration. K3s upgrades follow a separate documented maintenance procedure.
 
-A stable release requires a documented upgrade path and failure recovery;
-the initial preview refuses cross-version upgrades.
-automatic upgrades through the UI are deferred. Platform uninstallation is
+A stable release requires a documented upgrade path and failure recovery.
+The preview refuses cross-version upgrades. Automatic upgrades through the UI
+remain deferred. Platform uninstallation is
 separate from application, volume, and K3s removal. Retained resources are reported,
 and deletion of stored data requires an explicit action.
 

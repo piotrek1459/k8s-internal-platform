@@ -21,5 +21,5 @@ an explicit `needs_attention` lock; automatic recovery is not claimed.
 Release publication requires fast regression checks, real-cluster API/browser
 workflows and both architecture packages. The E2E report explicitly identifies
 the two known status/restart gaps instead of counting them as accepted behavior.
-The same E2E workflow is configured for 02:00 UTC nightly and manual execution
-once the workflow is merged into the default branch.
+The E2E workflow is also configured for nightly execution at 02:00 UTC and manual
+dispatch. Release publication is initiated manually from a specified branch HEAD.

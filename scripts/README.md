@@ -22,6 +22,7 @@ Verification is grouped under `tests/` and selected through
 `python3 -B tests/run.py`; the [test guide](../tests/README.md) describes suites,
 prerequisites and CI. The direct Helm baseline lives in `tests/integration/`.
 Native host installation lives in `installer/install.sh`; OCI packaging and
-release assembly live in `release/`. The [installation guide](../docs/installation.md)
+manual release validation, packaging and publication live in `release/`. The
+[release guide](../release/README.md) is the publication procedure. The [installation guide](../docs/installation.md)
 describes release installation and the [contributor guide](../docs/contributor/README.md)
 describes source development.

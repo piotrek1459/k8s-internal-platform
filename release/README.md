@@ -64,10 +64,12 @@ containerd's `--local` import retain the exact recorded native digest references
 The six published assets are both native bundles, `install.sh`, `INSTALL.md`,
 `release.json` and `SHA256SUMS`. The downloaded guide uses the selected version
 and links to documentation at its release tag. `release.json` records the source
-SHA and component pins; checksums cover the bundles, installer, guide and metadata.
+SHA and component pins. One final `SHA256SUMS` is assembled after both native
+bundles are available and covers the bundles, installer, guide and metadata.
 
 GitHub hosts the OCI bundles; GHCR credentials are not required. Initial K3s,
 Helm and system-image downloads still require network access. The
 [installation guide](../docs/installation.md) describes host requirements and
-remaining native-host acceptance. The original automated `v0.0.1` preview and tag
-were withdrawn; the first manual release has not yet been published.
+remaining native-host acceptance. Published versions are listed on the
+[GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases);
+[implementation status](../docs/status.md) records current acceptance and availability.

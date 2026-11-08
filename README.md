@@ -12,13 +12,13 @@ from known defects and planned capabilities.
 Release assets are created through **Actions → Release → Run workflow**. Select
 `branch` (default `main`) and a version; the selected branch's HEAD is captured,
 validated and built before its tag and GitHub preview are published. The
-[release guide](release/README.md) describes manual publication. The initial
-automated `v0.0.1` preview and tag were withdrawn; the first manual release is pending.
+[release guide](release/README.md) describes manual publication. Published assets
+are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes the resulting native
 ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.0.1`
-commands are examples until that version is published manually. Native Pi
-acceptance, public HTTPS, application volumes and cross-version upgrades remain
+commands are version examples; the downloaded guide matches the selected release.
+Native Pi acceptance, public HTTPS, application volumes and cross-version upgrades remain
 outside current acceptance.
 
 ## Local startup

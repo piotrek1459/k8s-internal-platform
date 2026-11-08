@@ -117,7 +117,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "checksum"):
                 packaging.image_digest(path, "arm64", "0.0.1")
 
-    def test_bundle_contains_pins_images_chart_and_verifiable_checksum(self):
+    def test_bundle_contains_pins_images_and_chart(self):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory); images = {}
             for key in ("platform", "v1", "v2", "v3"):
@@ -126,8 +126,6 @@ class ReleaseIntegrityTests(unittest.TestCase):
             helm.write_text('#!/usr/bin/env python3\nimport pathlib,sys\na=sys.argv\np=pathlib.Path(a[a.index("--destination")+1])/ ("platform-"+a[a.index("--version")+1]+".tgz")\np.write_bytes(b"chart-fixture")\n')
             helm.chmod(0o755)
             bundle = packaging.package("0.0.1", "arm64", images, folder / "out", helm)
-            checksum = bundle.with_suffix(bundle.suffix + ".sha256").read_text().split()[0]
-            self.assertEqual(checksum, hashlib.sha256(bundle.read_bytes()).hexdigest())
             with tarfile.open(bundle) as archive:
                 self.assertEqual(set(archive.getnames()), {"release.env", "release.json", "namespace.yaml", "platform-chart.tgz", "platform-image.oci.tar", "demo-v1.oci.tar", "demo-v2.oci.tar", "demo-v3.oci.tar"})
                 metadata = archive.extractfile("release.env").read().decode()

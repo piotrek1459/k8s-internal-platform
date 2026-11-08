@@ -2,8 +2,10 @@
 
 Updated: 2026-11-08. The Go broker, Svelte administrator UI and healthy local
 application lifecycle are implemented. The [status report](status.md) distinguishes
-verified behavior from recovery, UI integration, hardware and release work that
-remains outstanding.
+verified behavior from outstanding recovery, UI integration and native hardware
+acceptance. [Manual releases](../release/README.md) and the
+[native installation procedure](installation.md) are separate from the local k3d
+workflow below.
 
 ## Current platform workflow
 
