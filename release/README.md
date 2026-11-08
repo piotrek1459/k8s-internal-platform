@@ -13,9 +13,10 @@ PR or pre-existing tag.
 1. Open the repository's **Actions → Release → Run workflow**.
 2. Keep **Use workflow from** set to `main` to use the installed workflow definition.
 3. Set **branch** to the source branch to release; the default is `main`.
-4. Enter **version**, for example `v0.0.1`, then select **Run workflow**.
-5. Inspect the captured source commit and validation jobs. On success, the workflow
-   creates the version tag at that commit and publishes the complete preview.
+4. Enter **version**, for example `v0.1.1`.
+5. Leave **prerelease** unchecked for a normal release, or check it for a prerelease.
+6. Select **Run workflow**. On success, the workflow creates the version tag at the
+   tested commit and publishes the complete release.
 
 The source branch's HEAD is resolved once during preparation. Every validation,
 E2E, build and publication job uses that exact SHA. Later commits on the branch
@@ -25,7 +26,7 @@ source branch.
 The same operation through GitHub CLI is:
 
 ```bash
-gh workflow run release.yml --ref main -f branch=main -f version=v0.0.1
+gh workflow run release.yml --ref main -f branch=main -f version=v0.1.1 -f prerelease=false
 ```
 
 `--ref` selects the workflow definition; `branch` selects the application source.
@@ -42,7 +43,7 @@ The workflow performs the following sequence:
 3. Run the real-cluster API/browser/bundle E2E suite and build ARM64/AMD64 bundles.
 4. Assemble and validate installer assets, compatibility/source metadata and checksums.
 5. Create the tag at the tested SHA, create a draft, upload all six assets and
-   publish the preview. Failed tests/builds never reach tag creation or publication.
+   publish the release. Failed tests/builds never reach tag creation or publication.
 
 A failed upload can leave an unpublished draft and its tested tag. Rerun the
 original workflow to retry that same commit. A fresh dispatch from a branch that
@@ -52,7 +53,13 @@ has since moved must use a new version. Existing published releases are refused.
 supplies the released broker version, packaged chart version/appVersion, E2E
 version, metadata and downloaded installation examples. Changing that fallback
 file is not a prerequisite for publication. Release notes describe current
-capabilities and limitations in `release/NOTES.md`. Releases remain previews.
+capabilities and limitations in `release/NOTES.md`.
+
+Normal releases are the default and are marked Latest. Selecting `prerelease`
+applies the prerelease label and does not mark that version Latest. This choice
+is also recorded in `release.json` as the boolean `preview` field. The selection
+controls publication labels; feature and native-host acceptance remains recorded
+in [implementation status](../docs/status.md).
 
 ## Artifacts
 

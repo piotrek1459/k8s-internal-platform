@@ -12,16 +12,20 @@ and `version` inputs. Preparation resolves the specified remote branch HEAD once
 Validation, E2E, builds and publication use that SHA. Successful gates permit tag
 creation and preview publication. PR, branch and tag pushes do not publish releases.
 
-The full publication workflow has not been dispatched. Manual publication is an
-administrator action after the workflow is available on the default branch.
+[Manual publication run #42523805079](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/42523805079)
+completed successfully and published `v0.1.0`. Release publication remains an
+administrator-initiated action through manual dispatch.
 
 ## Verification performed
 
-- All 45 Python regression tests, shell syntax checks and actionlint v1.7.12
+- All 51 Python regression tests, shell syntax checks and actionlint v1.7.12
   passed. Actionlint ran with external shellcheck/pyflakes disabled.
 - Release-controller regressions cover branch HEAD selection, input validation,
-  published-version/tag conflicts, draft retries, checksum failures, incomplete
-  assets and publication ordering without remote writes.
+  normal/prerelease selection and metadata consistency, published-version/tag
+  conflicts, draft retries, checksum failures, incomplete assets and publication
+  ordering without remote writes.
+- Progress regressions verify command-start messages, periodic heartbeats,
+  private-command silence and preservation of redacted partial output on timeout.
 - A read-only preparation run with the official checksum-verified GitHub CLI
   resolved the actual `main` HEAD and authenticated release API responses. It
   created no tags or releases.

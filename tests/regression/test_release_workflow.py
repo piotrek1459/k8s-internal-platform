@@ -83,12 +83,12 @@ class ReleasePreparationTests(unittest.TestCase):
 
 
 class ReleasePublicationTests(unittest.TestCase):
-    def assets(self, folder, commit=SHA):
+    def assets(self, folder, commit=SHA, prerelease=False):
         for name in ("platform-v0.0.2-linux-arm64.tar.gz", "platform-v0.0.2-linux-amd64.tar.gz", "install.sh", "INSTALL.md", "SHA256SUMS"):
             (folder / name).write_text("fixture")
-        (folder / "release.json").write_text(json.dumps({"version": "0.0.2", "commit": commit}))
+        (folder / "release.json").write_text(json.dumps({"version": "0.0.2", "commit": commit, "preview": prerelease}))
 
-    def simulate(self, folder, fail_upload=False):
+    def simulate(self, folder, fail_upload=False, prerelease=False):
         state = {"tag": None, "release": None, "events": []}
         def api(path, method="GET", fields=None):
             state["events"].append(("tag", fields["sha"]))
@@ -108,9 +108,9 @@ class ReleasePublicationTests(unittest.TestCase):
                 patch.object(workflow, "command", side_effect=command):
             if fail_upload:
                 with self.assertRaisesRegex(RuntimeError, "upload failed"):
-                    workflow.publish(folder, "v0.0.2", SHA)
+                    workflow.publish(folder, "v0.0.2", SHA, prerelease)
             else:
-                workflow.publish(folder, "v0.0.2", SHA)
+                workflow.publish(folder, "v0.0.2", SHA, prerelease)
         return state
 
     def test_publication_creates_the_tested_tag_and_uploads_before_publishing(self):
@@ -124,6 +124,25 @@ class ReleasePublicationTests(unittest.TestCase):
         self.assertEqual(state["events"][3][:3], ("gh", "release", "upload"))
         self.assertEqual(state["events"][-1][:3], ("gh", "release", "edit"))
         self.assertFalse(state["release"]["draft"])
+        self.assertNotIn("--prerelease", create)
+        self.assertEqual(create[create.index("--title") + 1], "v0.0.2")
+        self.assertIn("--prerelease=false", state["events"][-1])
+        self.assertIn("--latest=true", state["events"][-1])
+
+    def test_prerelease_is_explicit_and_not_marked_latest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory); self.assets(folder, prerelease=True)
+            state = self.simulate(folder, prerelease=True)
+        self.assertIn("--prerelease", state["events"][2])
+        self.assertIn("--prerelease=true", state["events"][-1])
+        self.assertIn("--latest=false", state["events"][-1])
+
+    def test_metadata_kind_mismatch_prevents_remote_writes(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(workflow, "api") as api:
+            folder = Path(directory); self.assets(folder, prerelease=True)
+            with self.assertRaisesRegex(ValueError, "prerelease setting"):
+                workflow.publish(folder, "v0.0.2", SHA)
+        api.assert_not_called()
 
     def test_failed_upload_leaves_an_unpublished_draft(self):
         with tempfile.TemporaryDirectory() as directory:

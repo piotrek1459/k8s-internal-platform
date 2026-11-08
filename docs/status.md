@@ -16,7 +16,7 @@ embedded first-party chart through the Helm SDK.
 | Area | Implemented and recorded evidence | Remaining boundary |
 | --- | --- | --- |
 | Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | Native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
-| Preview distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub preview. | Manual publication, native Pi/systemd installation and cross-version backup/upgrade/recovery acceptance remain pending. |
+| Release distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub release. Normal releases are the default, with an optional prerelease setting. | Native Pi/systemd installation and cross-version backup/upgrade/recovery acceptance remain pending. |
 | Application chart | Deployment, Service, probes, resource settings, ownership labels, Secret references and optional private ingress. Local manual lifecycle and route-isolation reports are retained. | Resource defaults are provisional; reference-Pi and second-device LAN acceptance remain outstanding. |
 | Durable backend | SQLite migrations, transactional acceptance, idempotency, application version checks, a serial worker, status observer, operation history and audit records. | Interrupted-operation target verification and complete execution snapshots require further work. |
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashes, hashed sessions, logout and mutation-header checks. | Login throttling, password recovery and normal private HTTPS administration remain outstanding. |
@@ -74,10 +74,10 @@ establish acceptance for the affected paths.
   SQLite, fake Kubernetes clients, in-memory Helm storage and an in-process
   registry. One additional real-cluster test is gated by the `integration` build
   tag and `PLATFORM_INTEGRATION=1`.
-- The demo has five top-level Go tests. The 45 Python release/installer and helper
+- The demo has five top-level Go tests. The 51 Python release/installer and helper
   regressions cover rollback evidence, transcript completion, command validation,
-  digest selection, metadata/checksum integrity, manual publication guards and
-  bootstrap-log redaction. Table-driven subcases are additional to these counts.
+  digest selection, metadata/checksum integrity, manual publication guards, release-kind selection, E2E progress/timeout handling
+  and bootstrap-log redaction. Table-driven subcases are additional to these counts.
 - Every pull request runs broker/demo Go regression suites, UI type-check/lint/
   build, full OpenAPI validation, shell/Python checks, and the full local
   chart lint/render/negative/synchronization matrix. Go tests use `-count=1`;
@@ -111,7 +111,7 @@ measurements require new retained evidence.
 | 3 | Verify interrupted recovery and failed-rollout restoration; complete execution snapshots. | Interruption before/during/after Helm execution never produces false success. Restored state is verified before a lock is released; unresolved state remains blocked. |
 | 4 | Complete private registry authentication and pull credentials. | A private image deploys; invalid credentials produce an actionable error without leaking values. |
 | 5 | Extend real-cluster failure acceptance and perform reference-host evaluation. | Isolated runs verify resources and HTTP responses, clean their own resources, and retain evidence. Pi/LAN measurements use predefined targets and repetitions. |
-| 6 | Implement M5–M8 capabilities. | Application data/backup, public HTTPS, stable upgrades and monitoring satisfy their separate acceptance criteria; preview distribution does not complete M7. |
+| 6 | Implement M5–M8 capabilities. | Application data/backup, public HTTPS, stable upgrades and monitoring satisfy their separate acceptance criteria; distribution automation alone does not complete M7. |
 
 The [milestone checklists](milestones.md) retain the full project scope. Local
 implementation progress does not establish completion of reference-hardware,

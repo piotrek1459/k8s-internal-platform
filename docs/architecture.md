@@ -255,13 +255,13 @@ maintain other workloads, so starting the platform does not depend on the
 platform API already being available. The implemented platform chart provides the Deployment, Service, metadata PVC,
 service account and scoped RBAC. Local deployment and stop/rebuild persistence
 are recorded in the [test reports](../tests/README.md#historical-reports). Those
-results do not establish safe recovery at every interruption point. Initial preview installation and OCI release packaging are implemented; native
+results do not establish safe recovery at every interruption point. Linux installation and OCI release packaging are implemented; native
 host acceptance and production upgrade/recovery remain pending.
 
 ## Meaning of a managed platform on administrator-owned hardware
 
 The table defines target product responsibilities. The current development
-launcher implements local build/install/access; the preview installer adds dedicated Linux host setup. Native host acceptance,
+launcher implements local build/install/access; the Linux installer adds dedicated Linux host setup. Native host acceptance,
 backup/restore and public networking remain pending.
 
 | Responsibility | Target product responsibility | Administrator responsibility |
@@ -310,7 +310,7 @@ The browser communicates only with this service, never directly with Kubernetes.
 
 | Component | Responsibility | Where it runs |
 | --- | --- | --- |
-| Preview installer | Dedicated Linux host checks, pinned K3s/Helm, verified OCI import and platform chart installation. Native host and upgrade/recovery acceptance remain pending. | Host-side `installer/install.sh`. |
+| Host installer | Dedicated Linux host checks, pinned K3s/Helm, verified OCI import and platform chart installation. Native host and upgrade/recovery acceptance remain pending. | Host-side `installer/install.sh`. |
 | Release controller | Resolve a manually selected branch HEAD, validate/build the pinned SHA and publish versioned assets after successful gates. | GitHub Actions and `release/` tooling. |
 | K3s | Kubernetes control plane and node services, scheduling, image pulling, networking, restarting containers. | Host service. |
 | Web UI | Implemented setup, forms, progress and lifecycle/history screens; response alignment, Secret submission and log browsing remain incomplete. | Static assets served by the Go service. |
@@ -351,7 +351,7 @@ database must remain separate from hosted application databases.
 ### Kubernetes ownership and permissions
 
 Current local startup creates `platform-apps` from the development manifest and
-creates `platform-system` during chart installation. The preview Linux installer
+creates `platform-system` during chart installation. The Linux installer
 performs the equivalent setup using bundled images and the same chart.
 These are in the same cluster as `kube-system`. The first contains platform
 components; the second contains managed applications. Optional add-ons use the

@@ -52,6 +52,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
             manifest.assemble(folder, "v0.0.1", "a" * 40)
             self.assertIn("/blob/v0.0.1/docs/user/api-reference.md", (folder / "INSTALL.md").read_text())
             metadata = json.loads((folder / "release.json").read_text())
+            self.assertFalse(metadata["preview"])
             self.assertEqual(metadata["commit"], "a" * 40)
             self.assertEqual(set(metadata["targets"]), {"amd64", "arm64"})
             records = (folder / "SHA256SUMS").read_text().splitlines()
@@ -59,6 +60,8 @@ class ReleaseIntegrityTests(unittest.TestCase):
             for record in records:
                 digest, name = record.split()
                 self.assertEqual(digest, hashlib.sha256((folder / name).read_bytes()).hexdigest())
+            manifest.assemble(folder, "v0.0.1", "a" * 40, prerelease=True)
+            self.assertTrue(json.loads((folder / "release.json").read_text())["preview"])
 
     def test_dispatch_version_updates_assets_without_a_source_version_bump(self):
         fallback = (ROOT / "release/version.txt").read_text()

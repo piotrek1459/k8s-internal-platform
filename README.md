@@ -11,8 +11,9 @@ from known defects and planned capabilities.
 
 Release assets are created through **Actions → Release → Run workflow**. Select
 `branch` (default `main`) and a version; the selected branch's HEAD is captured,
-validated and built before its tag and GitHub preview are published. The
-[release guide](release/README.md) describes manual publication. Published assets
+validated and built before its tag and GitHub release are published. The
+[release guide](release/README.md) describes manual publication and the optional
+prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes the resulting native
@@ -105,7 +106,7 @@ prerequisites, reports and known acceptance gaps.
 The current implementation provides a local HTTP application workflow, immutable
 image references, operation tracking and revision history. Public HTTPS,
 application data volumes and reference-hardware acceptance remain planned.
-Release automation and the preview installer are implemented with explicit
+Release automation and the Linux installer are implemented with explicit
 validation boundaries. The UI defaults to Internal exposure for the documented workflow.
 The [user guide](docs/user/README.md#current-limitations) records lifecycle
 limitations. UI/API contract alignment, restart, interrupted recovery, private

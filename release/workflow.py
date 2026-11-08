@@ -95,7 +95,7 @@ def prepare(version, branch):
     return {"version": version, "app_version": version[1:], "sha": sha, "branch": branch}
 
 
-def publish(directory, version, sha):
+def publish(directory, version, sha, prerelease=False):
     version = normalize_version(version)
     sha = validate_sha(sha)
     assets = [directory / f"platform-{version}-linux-{arch}.tar.gz" for arch in ("arm64", "amd64")]
@@ -105,6 +105,8 @@ def publish(directory, version, sha):
     metadata = json.loads((directory / "release.json").read_text())
     if metadata["version"] != version[1:] or metadata["commit"] != sha:
         raise ValueError("Release assets differ from the tested version/source commit.")
+    if metadata.get("preview") is not prerelease:
+        raise ValueError("Release metadata does not match the selected prerelease setting.")
     command("sha256sum", "--check", "SHA256SUMS", cwd=directory)
     existing = check_remote_identity(version, sha)
     if remote_tag(version) is None:
@@ -117,16 +119,19 @@ def publish(directory, version, sha):
                 raise
     if remote_tag(version) != sha:
         raise ValueError("The release tag does not match the tested source commit.")
+    title = version + " — preview" if prerelease else version
     if existing is None:
+        kind = ["--prerelease"] if prerelease else []
         command("gh", "release", "create", version, "--verify-tag", "--target", sha,
-                "--draft", "--prerelease", "--title", version + " — preview",
-                "--notes-file", "release/NOTES.md")
+                "--draft", *kind, "--title", title, "--notes-file", "release/NOTES.md")
     # Recheck a created/reused draft before replacing any assets.
     check_remote_identity(version, sha)
     command("gh", "release", "upload", version, *map(str, assets), "--clobber")
     if remote_tag(version) != sha:
         raise ValueError("The release tag changed before publication.")
-    command("gh", "release", "edit", version, "--draft=false", "--prerelease", "--latest=false")
+    command("gh", "release", "edit", version, "--draft=false",
+            "--prerelease=" + str(prerelease).lower(), "--latest=" + str(not prerelease).lower(),
+            "--title", title)
 
 
 def main():
@@ -136,6 +141,7 @@ def main():
     parser.add_argument("--sha")
     parser.add_argument("--branch", default="main")
     parser.add_argument("--directory", type=Path, default=Path("dist"))
+    parser.add_argument("--prerelease", action="store_true")
     args = parser.parse_args()
     if args.command == "prepare":
         outputs = prepare(args.version, args.branch)
@@ -146,7 +152,7 @@ def main():
     else:
         if not args.sha:
             parser.error("--sha is required for publication")
-        publish(args.directory, args.version, args.sha)
+        publish(args.directory, args.version, args.sha, args.prerelease)
         print("Published " + normalize_version(args.version) + " at " + args.sha)
 
 
