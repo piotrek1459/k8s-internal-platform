@@ -1,4 +1,4 @@
-# Linux installation — v0.0.1 preview
+# Linux installation
 
 The examples below use `v0.0.1`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
@@ -10,7 +10,7 @@ The platform and its managed applications run in the same K3s cluster. The
 installer provisions K3s, imports native OCI images and installs the platform
 chart. Docker, Go and Node.js are not required on the target host.
 
-This release is a preview. Native Raspberry Pi installation and reboot acceptance
+Native Raspberry Pi installation and reboot acceptance
 remain pending. Public HTTPS, application volumes, private-registry credentials,
 verified failed-rollout restoration and cross-version upgrades are incomplete.
 The [implementation status](status.md) records the remaining boundaries. Existing
@@ -208,4 +208,4 @@ pkubectl -n platform-apps get deployments,pods,services
 
 Logs can contain a setup token before administrator creation. Review and redact
 locally before sharing. Recovery, backup and removal procedures must be reviewed
-before retaining valuable application data on this preview.
+before retaining valuable application data on this platform.

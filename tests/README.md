@@ -47,8 +47,10 @@ image reuse, stale versions/observations, Secret deletion guards, registry
 timeouts and mutation-header enforcement. Python cases cover CLI validation,
 registry-specific digest selection, evidence integrity and safe release inputs.
 Release-controller regressions check source-branch HEAD selection, version input,
-existing tag/release conflicts, draft retries, checksum failures and the order of
-remote publication steps without creating a release. UI lint/build is
+existing tag/release conflicts, normal/prerelease selection, draft retries,
+checksum failures and the order of remote publication steps without creating a
+release. Progress regressions verify visible heartbeats, private-command silence
+and redacted partial output on timeout. UI lint/build is
 distinguished from browser acceptance.
 
 ## End-to-end workflows
@@ -105,6 +107,14 @@ acceptance.
 every PR. Scheduled/manual workflows become available after the workflow file
 is merged into the default branch. GitHub scheduling may run later than the
 requested time. Release publication waits for E2E success and both architectures.
+
+Long non-private commands print their start, a heartbeat every 30 seconds and
+their exit code. Raw command output remains captured in sanitized artifacts;
+private commands remain silent. Initial UI/image builds and cluster installation
+can therefore take several minutes without streaming compiler output. The
+unhealthy-rollout case intentionally waits for Helm's failure timeout. A heartbeat
+indicates that the command is still running; command and job timeout limits remain
+enforced. On command timeout, partial non-private output is retained and redacted.
 
 Results include JUnit XML, step summaries, sanitized logs and masked browser
 screenshots. CI retains them for seven days. Cookies, kubeconfigs, Secret

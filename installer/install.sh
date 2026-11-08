@@ -17,7 +17,7 @@ Installs the pinned K3s release and imports the platform/demo OCI images.
 Requires 64-bit Linux, systemd, memory cgroups, 2 GiB RAM and 6 GiB free disk.
 --check performs read-only host checks without downloading or installing.
 An unrelated K3s installation is never replaced. Same-version reruns retain data;
-upgrading a different installed platform version is not supported by this preview.
+upgrading a different installed platform version is not supported by this installer.
 HELP
 }
 cleanup() {
@@ -44,7 +44,7 @@ preflight() {
     local memory disk
     memory="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
     disk="$(df -Pk /var/lib | awk 'END {print $4}')"
-    (( memory >= 2097152 )) || fail 'This preview requires at least 2 GiB RAM.'
+    (( memory >= 2097152 )) || fail 'Installation requires at least 2 GiB RAM.'
     (( disk >= 6291456 )) || fail 'At least 6 GiB free space under /var/lib is required.'
     if [[ -e "$STATE_ROOT/owner" ]]; then
         [[ "$(cat "$STATE_ROOT/owner")" == "$REPOSITORY" ]] || fail 'The installation marker belongs to another installation.'

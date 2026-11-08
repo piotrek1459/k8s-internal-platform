@@ -9,11 +9,13 @@ import secrets
 import signal
 import socket
 import subprocess
+import threading
 import time
 import urllib.error
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
+PROGRESS_INTERVAL = 30
 
 
 def free_ports(count):
@@ -103,13 +105,48 @@ class Environment:
         (self.artifacts / "steps.json").write_text(self.redact(json.dumps(self.steps, indent=2)))
         print(message, flush=True)
 
+    @contextlib.contextmanager
+    def progress(self, label, timeout, enabled):
+        if not enabled:
+            yield
+            return
+        started = time.monotonic()
+        stopped = threading.Event()
+        print(f"[E2E] Starting (timeout {timeout}s): {label}", flush=True)
+
+        def heartbeat():
+            while not stopped.wait(PROGRESS_INTERVAL):
+                elapsed = int(time.monotonic() - started)
+                print(f"[E2E] Still running after {elapsed}s: {label}", flush=True)
+
+        reporter = threading.Thread(target=heartbeat, daemon=True)
+        reporter.start()
+        try:
+            yield
+        finally:
+            stopped.set()
+            reporter.join()
+
+    def save_output(self, command, stdout, stderr):
+        with (self.artifacts / "commands.log").open("a") as log:
+            log.write(self.redact("+ " + " ".join(map(str, command)) + "\n" + stdout + stderr))
+
     def run(self, *command, private=False, timeout=900, check=True):
-        result = subprocess.run(list(map(str, command)), cwd=ROOT, env=self.env, capture_output=True, text=True, timeout=timeout)
+        label = "[private command]" if private else self.redact(" ".join(map(str, command)))
+        try:
+            with self.progress(label, timeout, enabled=not private):
+                result = subprocess.run(list(map(str, command)), cwd=ROOT, env=self.env, capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired as error:
+            if not private:
+                def decoded(value):
+                    return value.decode(errors="replace") if isinstance(value, bytes) else (value or "")
+                self.save_output(command, decoded(error.stdout), decoded(error.stderr))
+            raise RuntimeError(f"Command exceeded its {timeout}s timeout: {label}") from None
         if not private:
-            with (self.artifacts / "commands.log").open("a") as log:
-                log.write(self.redact("+ " + " ".join(map(str, command)) + "\n" + result.stdout + result.stderr))
+            self.save_output(command, result.stdout, result.stderr)
+            print(f"[E2E] Exit {result.returncode}: {label}", flush=True)
         if check and result.returncode:
-            raise RuntimeError(self.redact("Command failed: " + " ".join(map(str, command)) + "\n" + result.stderr[-3000:]))
+            raise RuntimeError(self.redact("Command failed: " + label + "\n" + result.stderr[-3000:]))
         return result
 
     def cli(self, *args, **kwargs):

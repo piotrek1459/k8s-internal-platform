@@ -8,7 +8,7 @@ import re
 import tarfile
 
 
-def assemble(directory, version, commit):
+def assemble(directory, version, commit, prerelease=False):
     version = version.removeprefix("v")
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version) or not re.fullmatch(r"[0-9a-f]{40}", commit):
         raise ValueError("Invalid release identity")
@@ -30,7 +30,7 @@ def assemble(directory, version, commit):
     prefix = "https://github.com/piotrek1459/k8s-internal-platform/blob/v" + version + "/docs/"
     guide.write_text(re.sub(r"\]\((?!https?://|#)([^)]+)\)",
                            lambda match: "](" + prefix + match.group(1) + ")", guide.read_text()))
-    (directory / "release.json").write_text(json.dumps({"version": version, "commit": commit, "preview": True, "targets": targets}, indent=2) + "\n")
+    (directory / "release.json").write_text(json.dumps({"version": version, "commit": commit, "preview": prerelease, "targets": targets}, indent=2) + "\n")
     files = [directory / f"platform-v{version}-linux-{arch}.tar.gz" for arch in targets]
     files += [directory / name for name in ("install.sh", "INSTALL.md", "release.json")]
     records = []
@@ -47,5 +47,6 @@ if __name__ == "__main__":
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--version", required=True)
     parser.add_argument("--commit", required=True)
+    parser.add_argument("--prerelease", action="store_true")
     args = parser.parse_args()
-    assemble(args.directory, args.version, args.commit)
+    assemble(args.directory, args.version, args.commit, args.prerelease)

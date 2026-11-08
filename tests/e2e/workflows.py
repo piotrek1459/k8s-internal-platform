@@ -254,6 +254,7 @@ class Workflows(unittest.TestCase):
         self.e.record("Broker Pod replacement preserved sessions/history and application traffic")
 
     def test_70_unhealthy_update_retains_a_durable_lock(self):
+        self.e.record("Testing unhealthy rollout: the intentional Helm timeout can take five minutes")
         app = self.e.create("failed", "v2")
         before = self.e.client.get("/apps/" + app)
         self.e.client.mutate("PATCH", "/apps/" + app, {"version": before["version"], "image": self.e.image("v3")}, terminal="needs_attention")

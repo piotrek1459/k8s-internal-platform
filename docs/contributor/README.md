@@ -101,7 +101,9 @@ Releases are started through **Actions → Release → Run workflow**, with an e
 source `branch` (default `main`) and `version`. The branch's HEAD is captured once;
 all checks, E2E, native builds and publication use that SHA. The workflow creates
 the tag only after validation and packaging succeed. PR, branch and tag pushes
-do not start release publication. The workflow definition must first be merged
+do not start release publication. Normal releases are the default; an optional
+`prerelease` checkbox selects the prerelease label and excludes Latest. The
+workflow definition must first be merged
 into `main` to expose manual dispatch.
 
 `release/version.txt` supplies a development fallback. The dispatch input supplies

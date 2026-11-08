@@ -62,7 +62,7 @@ using the same measurement procedure.
 
 ## Installer workflow
 
-The preview implementation provides `installer/install.sh` and GitHub-hosted native
+The implementation provides `installer/install.sh` and GitHub-hosted native
 OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
 its exact supported behavior: dedicated Linux/systemd host, read-only checks,
 pinned K3s/Helm, image import, chart installation and SSH/loopback access.
@@ -70,7 +70,7 @@ Same-version reruns retain metadata; cross-version upgrades and unrelated
 clusters are refused. Native Pi and rented-server installation acceptance remain
 pending. `platform.sh` remains the Docker/k3d development launcher.
 
-The preview checks architecture, systemd, memory cgroups, RAM, free space and
+The installer checks architecture, systemd, memory cgroups, RAM, free space and
 installation ownership. Time synchronization, comprehensive network/CIDR and
 firewall validation, normal private HTTPS management and stage-by-stage recovery
 remain target requirements in the following sequence.
@@ -124,7 +124,7 @@ compatibility or restore strategy; a Helm rollback alone cannot undo a database
 migration. K3s upgrades follow a separate documented maintenance procedure.
 
 A stable release requires a documented upgrade path and failure recovery.
-The preview refuses cross-version upgrades. Automatic upgrades through the UI
+The installer refuses cross-version upgrades. Automatic upgrades through the UI
 remain deferred. Platform uninstallation is
 separate from application, volume, and K3s removal. Retained resources are reported,
 and deletion of stored data requires an explicit action.
@@ -148,9 +148,10 @@ Untrusted PR code never runs on a host serving deployed applications.
 The manually dispatched Release workflow takes a source branch (default `main`)
 and version, captures that branch's HEAD, runs fast checks and E2E, and builds both
 native architectures. After all gates succeed, it creates a tag at the tested
-SHA and publishes a complete preview. PR, branch and tag pushes do not publish
+SHA and publishes a complete release. Normal publication is the default; the
+optional `prerelease` input selects preview labeling without Latest. PR, branch and tag pushes do not publish
 releases. The [release guide](../release/README.md) describes the form and retry
-rules. The preview assets comprise:
+rules. The release assets comprise:
 
 - ARM64 and AMD64 bundles with the broker, all demo OCI images and platform chart.
 - An installer, installation guide, source/compatibility manifest and SHA-256 sums.
@@ -161,8 +162,7 @@ prerequisite. This keeps first installation independent of registry credentials
 and package visibility. Registry publishing and signed provenance can be added
 separately. Published releases are immutable; draft uploads can be retried before
 publication. Native Pi/AMD64 host acceptance is separate from cross-build and
-containerized K3s evidence. The initial preview does not claim upgrade/recovery
-acceptance.
+containerized K3s evidence. Upgrade/recovery acceptance remains pending.
 
 The separate application's pipeline builds, tests, and pushes its image. Initially
 the administrator selects that version in the UI. The automation phase includes
