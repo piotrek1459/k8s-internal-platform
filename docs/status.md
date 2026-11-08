@@ -16,7 +16,7 @@ embedded first-party chart through the Helm SDK.
 | Area | Implemented and recorded evidence | Remaining boundary |
 | --- | --- | --- |
 | Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | Native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
-| Preview distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub preview. | The initial automated `v0.0.1` release/tag were withdrawn. First manual publication, native Pi/systemd installation and cross-version backup/upgrade/recovery remain pending. |
+| Preview distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub preview. | Manual publication, native Pi/systemd installation and cross-version backup/upgrade/recovery acceptance remain pending. |
 | Application chart | Deployment, Service, probes, resource settings, ownership labels, Secret references and optional private ingress. Local manual lifecycle and route-isolation reports are retained. | Resource defaults are provisional; reference-Pi and second-device LAN acceptance remain outstanding. |
 | Durable backend | SQLite migrations, transactional acceptance, idempotency, application version checks, a serial worker, status observer, operation history and audit records. | Interrupted-operation target verification and complete execution snapshots require further work. |
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashes, hashed sessions, logout and mutation-header checks. | Login throttling, password recovery and normal private HTTPS administration remain outstanding. |
@@ -27,7 +27,7 @@ embedded first-party chart through the Helm SDK.
 | Diagnostics | Structured broker logs, operation events and cached workload observations. | Application log/event endpoints, audit browsing, metrics, capacity reporting and retention automation remain planned. |
 | Persistence | The platform has a metadata PVC. | Application volumes, retained-volume operations and verified backup/restore belong to M5. |
 | Networking | Current development access uses loopback forwarding and Internal application exposure. | LAN HTTPS, public routing/TLS and direct-ingress/tunnel acceptance remain outstanding. |
-| Portability | Broker and demo native OCI packaging supports ARM64/AMD64. Packaging, containerized runtime and public-download evidence is recorded in the historical report. | Native Raspberry Pi/AMD64 host acceptance remains outstanding. |
+| Portability | Broker and demo native OCI packaging supports ARM64/AMD64. Native OCI identity, version propagation and containerized runtime checks are recorded in the verification report. | Native Raspberry Pi/AMD64 host acceptance remains outstanding. |
 
 The local source walkthrough uses an anonymous local registry, the stateless
 HTTP profile, port 8080 and readiness path `/readyz`. A public image registry and
@@ -86,14 +86,11 @@ establish acceptance for the affected paths.
   workflow builds isolated K3s platforms and drives the API/browser; known status
   and restart signatures remain explicit acceptance skips. Schedule: 02:00 UTC.
   Suite locations and workflow mapping are in the [test guide](../tests/README.md).
-- The [historical preview verification report](../tests/experiments/2026-11-08-release-preview.md)
-  records the tagged-source release gate: 11 E2E passes, zero failures and two
-  explicit known-gap skips. Both architecture jobs and public asset checks passed
-  before the original preview/tag were withdrawn. The revised manual publisher
-  has separate identity/ordering regressions; it has not been dispatched to create
-  a new release.
-  This establishes containerized K3s workflows and packaging, not native Pi boot
-  or systemd installer acceptance.
+- The [manual release verification report](../tests/experiments/2026-11-08-manual-release.md)
+  records publication-controller regressions, read-only branch HEAD resolution and
+  a native ARM64 bundle run with an explicitly supplied release version. The full
+  publication workflow has not been dispatched. These checks establish packaging
+  and containerized runtime behavior, not native Pi boot or systemd installation.
 - The [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)
   records the earlier healthy API lifecycle and stop/rebuild test. Earlier
   [reports](../tests/README.md#historical-reports) cover the manual chart baseline

@@ -134,7 +134,7 @@ broker crash recovery.
 | [2026-10-26 backend snapshot](experiments/2026-10-26-m2-broker-install.md) | M2 implementation boundaries. |
 | [2026-10-31 UI verification plan](experiments/2026-10-31-m3-admin-ui.md) | UI snapshot and manual checklist. |
 | [2026-11-08 local workflow](experiments/2026-11-08-local-workflow.md) | Healthy lifecycle and stop/rebuild. |
-| [2026-11-08 preview release](experiments/2026-11-08-release-preview.md) | Release gates, package/public-download checks, E2E outcomes and native-host boundaries. |
+| [2026-11-08 manual release tooling](experiments/2026-11-08-manual-release.md) | Branch HEAD resolution, publication guards, versioned package checks and native-host boundaries. |
 
 These reports preserve dated observations. New thesis measurements require
 retained evidence, predefined repetitions and reference-host conditions from the
