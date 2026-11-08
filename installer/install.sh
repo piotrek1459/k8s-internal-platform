@@ -138,7 +138,7 @@ install_platform() {
     for key in PLATFORM_IMAGE DEMO_V1_IMAGE DEMO_V2_IMAGE DEMO_V3_IMAGE; do
         image="${!key}"
         case "$key" in PLATFORM_IMAGE) archive=platform-image.oci.tar ;; DEMO_V1_IMAGE) archive=demo-v1.oci.tar ;; DEMO_V2_IMAGE) archive=demo-v2.oci.tar ;; DEMO_V3_IMAGE) archive=demo-v3.oci.tar ;; esac
-        "$TOOL_ROOT/ctr" --namespace k8s.io images import --digests --base-name "${image%@*}" "$WORK/bundle/$archive"
+        "$TOOL_ROOT/ctr" --namespace k8s.io images import --local --digests --base-name "${image%@*}" "$WORK/bundle/$archive"
     done
     "$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" apply -f "$WORK/bundle/namespace.yaml"
     "$TOOL_ROOT/helm" --kubeconfig "$KUBECONFIG_PATH" upgrade --install platform "$WORK/bundle/platform-chart.tgz" \

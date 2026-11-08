@@ -54,7 +54,10 @@ def verify_bundle_installation(environment):
             filename = "platform-image.oci.tar" if key == "platform" else "demo-" + key + ".oci.tar"
             e.run("docker", "cp", extracted / filename, secondary_node + ":/tmp/" + filename)
             reference = metadata["PLATFORM_IMAGE" if key == "platform" else "DEMO_" + key.upper() + "_IMAGE"]
-            e.run("docker", "exec", secondary_node, "ctr", "--namespace", "k8s.io", "images", "import", "--digests", "--base-name", reference.split("@")[0], "/tmp/" + filename)
+            e.run("docker", "exec", secondary_node, "ctr", "--namespace", "k8s.io", "images", "import", "--local", "--digests", "--base-name", reference.split("@")[0], "/tmp/" + filename)
+            imported = e.run("docker", "exec", secondary_node, "ctr", "--namespace", "k8s.io", "images", "ls", "--quiet", private=True).stdout.splitlines()
+            if reference not in imported:
+                raise AssertionError("Imported OCI content is missing its recorded native digest reference")
         e.run("kubectl", "--kubeconfig", config, "apply", "-f", extracted / "namespace.yaml")
         repository, digest = metadata["PLATFORM_IMAGE"].split("@")
         e.run(ROOT / ".local/bin/helm", "--kubeconfig", config, "upgrade", "--install", "platform", extracted / "platform-chart.tgz", "--namespace", "platform-system", "--create-namespace", "--set-string", "image.repository=" + repository, "--set-string", "image.digest=" + digest, "--set", "image.pullPolicy=Never", "--wait", "--timeout", "180s", timeout=240)

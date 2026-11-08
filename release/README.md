@@ -29,7 +29,8 @@ manifest, platform/demo OCI archives, and `release.env`/`release.json`. Packagin
 validates native architecture, immutable manifest/config checksums and version
 labels. Archives are normalized to the recorded native manifest root, with
 reachable config/layer content verified, so containerd imports the exact digest
-used by workloads. `release/manifest.py` requires both architecture bundles and records the
+used by workloads. The pinned containerd import uses `--local` to avoid the
+transfer API introducing a new wrapper digest. `release/manifest.py` requires both architecture bundles and records the
 source commit and compatibility pins. `SHA256SUMS` covers bundles, installer,
 installation guide and top-level metadata.
 
