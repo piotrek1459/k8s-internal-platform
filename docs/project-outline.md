@@ -3,7 +3,8 @@
 Title provided by the author: **Design and implementation of kubernetes platform for containerized application deployment**.
 
 The current product and implementation plan is defined in [app-plan.md](app-plan.md).
-It records the refined requirements: a Raspberry Pi reference installation, an
+The [status report](status.md) records implemented behavior and known gaps.
+The plan records the refined requirements: a Raspberry Pi reference installation, an
 administrator web UI, public/private images, persistent deployment history, and
 LAN-first development followed by public application hosting. This outline
 preserves the original thesis context and distinguishes source-document
@@ -49,17 +50,19 @@ a single administrator and a single managed cluster.
 | --- | --- |
 | `book/` | Existing LaTeX template and thesis content written by the author. |
 | `docs/` | The plan, followed by design decisions, diagrams, and instructions. |
-| `broker/` | Future Go module containing the API and deployment operation logic. |
+| `broker/` | Implemented Go API, authentication, store, worker, observer and adapters. |
 | `deploy/helm/` | Platform charts and a template for deployed applications. |
 | `infra/terraform/` | Space for IaC if Terraform is ultimately selected. |
 | `observability/` | Metrics and log collection configuration, dashboards, and alerts. |
 | `examples/` | Small demonstration applications and their configuration. |
 | `tests/` | Integration scenarios, experiments, and measurement results. |
 
-The directories define implementation responsibilities. The initial HTTP
-demonstration application, application chart, and local verification workflow are
-implemented; the broker and full platform remain subsequent work. Current
-execution instructions are provided in [local-development.md](local-development.md).
+The initial HTTP demonstration application, both Helm charts, Go broker, Svelte
+administrator UI and local build/verification workflow are implemented. Reliable
+recovery, some UI/API paths, private images and later product extensions remain
+incomplete. Current execution instructions are in
+[local-development.md](local-development.md); historical observations are indexed
+in the [test guide](../tests/README.md#historical-reports).
 
 ## Original work sequence
 

@@ -178,7 +178,8 @@ type SecretVersion struct {
 }
 
 // RegistryCredential stores the metadata for a private registry credential.
-// The plaintext password is stored only in Kubernetes as an image pull secret.
+// Credential persistence and image-pull Secret provisioning remain incomplete;
+// the current HTTP handler records metadata without storing the password.
 type RegistryCredential struct {
 	ID                 string
 	Label              string

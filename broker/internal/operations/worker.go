@@ -146,9 +146,9 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 		// example a timed-out rollout). The cluster state is therefore unresolved,
 		// so the failed candidate is recorded but the operation enters
 		// NeedsAttention and retains the application lock rather than terminating.
-		// Verified restoration to the previous revision is M4; until then a
-		// documented recovery must resolve the block. (See the M2 completion
-		// boundary in docs/milestones.md.)
+		// Verified restoration and a supported administrator recovery action remain
+		// outstanding; the block must not be cleared by assuming the release is
+		// safe. See the current gaps in docs/status.md.
 		_ = w.store.MarkRevisionResult(ctx, rev.ID, platform.RevisionFailed)
 		w.needsAttention(ctx, op, "apply", err)
 		return
@@ -276,7 +276,7 @@ func (w *Worker) fail(ctx context.Context, op platform.Operation, stage string, 
 // application lock. It is used when a failure may have left the cluster partially
 // changed and the broker has not verified or restored a known-good state, so
 // conflicting mutations must keep returning 409 until a documented recovery
-// resolves it. Automatic restoration is M4.
+// resolves it. Verified automatic restoration remains outstanding.
 func (w *Worker) needsAttention(ctx context.Context, op platform.Operation, stage string, cause error) {
 	w.logger.Warn("operation_needs_attention", "operation", op.ID, "app", op.AppID, "stage", stage, "error", cause.Error())
 	w.event(ctx, op.ID, "needs_attention", sanitize(cause))

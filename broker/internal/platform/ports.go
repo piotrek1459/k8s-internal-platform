@@ -120,7 +120,8 @@ type Store interface {
 	// transaction, closing the window that existed when these were two separate calls.
 	TransitionDeleteOperation(ctx context.Context, operationID string) error
 
-	// Registry credentials. The plaintext password is stored only in Kubernetes.
+	// Registry credential metadata. Password persistence and pull Secret
+	// provisioning are not yet wired into the current HTTP workflow.
 	CreateRegistryCredential(ctx context.Context, cred RegistryCredential) error
 	ListRegistryCredentials(ctx context.Context) ([]RegistryCredential, error)
 	DeleteRegistryCredential(ctx context.Context, id string) error
@@ -168,8 +169,8 @@ type ClusterObserver interface {
 	Observe(ctx context.Context, appID string) (ObservedStatus, error)
 }
 
-// SecretManager creates immutable Kubernetes Secrets for configuration values and
-// registry credentials. The plaintext is written only to Kubernetes.
+// SecretManager creates immutable Kubernetes Secrets for configuration values.
+// The plaintext is written only to Kubernetes.
 type SecretManager interface {
 	// CreateImmutableSecret creates an immutable Secret with a deterministic
 	// versioned name and returns its name and UID for metadata storage.

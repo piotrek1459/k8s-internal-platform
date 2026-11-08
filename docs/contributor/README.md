@@ -1,5 +1,9 @@
 # Contributor guide
 
+Current capabilities and open correctness work are recorded in
+[implementation status](../status.md). The detailed plans include requirements
+that are not implemented; the user guides document the supported local path.
+
 ## One local entry point
 
 `scripts/platform.sh` contains the shared build and local execution workflow.
@@ -115,8 +119,12 @@ request must be polled to completion before its workload result is evaluated.
 
 ## Supporting scripts
 
-The former `dev-env.sh`, `build-ui.sh`, `build-demo.sh` and `setup-dev-tools.sh`
-are compatibility wrappers around the single implementation. `dev-env.sh down`
-now maps to `platform.sh stop` and retains data. The [script inventory](../../scripts/README.md)
-identifies CI checks, the thesis build and the retained M0/M1 baseline tooling.
-Historical experiment reports describe their original commands and environments.
+Compatibility wrappers have been removed. Build, startup, forwarding and tool
+installation use `platform.sh` directly. The
+[script inventory](../../scripts/README.md) identifies the focused checks, thesis
+build and manual Helm baseline, each of which performs separate work.
+
+The [local development guide](../local-development.md) documents the gated broker
+integration test and baseline commands. Historical reports identify their dated
+scope; old raw output was removed during cleanup. New evaluation runs must retain
+their own evidence.

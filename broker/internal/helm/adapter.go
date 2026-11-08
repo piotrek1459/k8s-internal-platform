@@ -56,7 +56,8 @@ func NewAdapter(namespace string, actionConfigFor func(string) (*action.Configur
 	return &Adapter{chart: ch, namespace: namespace, actionConfigFor: actionConfigFor}, nil
 }
 
-// ChartVersion reports the loaded chart's version, recorded in frozen revisions.
+// ChartVersion reports the loaded chart's version. Recording chart identity on
+// frozen revisions remains an outstanding execution-snapshot requirement.
 func (a *Adapter) ChartVersion() string { return a.chart.Metadata.Version }
 
 // InstallOrUpgrade renders the chart from the revision's frozen spec and installs

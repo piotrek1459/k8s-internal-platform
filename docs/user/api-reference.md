@@ -3,6 +3,8 @@
 The API uses JSON under `/api/v1`. Management requests require a session cookie;
 mutations additionally require `X-Requested-With`. Application mutations return
 202 and an operation ID. Completion must be checked through the operation API.
+[Implementation status](../status.md) records known contract, recovery and
+credential gaps; this walkthrough uses the verified healthy Internal path.
 
 The examples use the default local environment and a separate application with a unique
 `api-demo-<timestamp>` name. Commands are executed from the repository root in **Bash**. The UI
@@ -264,8 +266,10 @@ The app disappears from the active list; stored revision history remains.
 
 All application mutations require `Idempotency-Key`; mutations of existing apps
 also require the current `version` in the JSON body. The implementation currently
-uses that body field for its optimistic check. Complete request schemas are in
-[`api/openapi.yaml`](../../api/openapi.yaml).
+uses that body field for its optimistic check. Request schemas are in [`api/openapi.yaml`](../../api/openapi.yaml). The
+application status schema specifies camelCase, but the current server serializes
+status fields such as `Phase` and `ReadyReplicas`; response alignment remains an
+open defect. Schema validation alone does not validate actual responses.
 
 ## Errors and operating limits
 
@@ -286,7 +290,8 @@ Errors use the nested envelope:
 | 503 | A required dependency is unavailable. |
 
 `needs_attention` retains the mutation lock. The current backend does not yet
-perform complete automatic restoration after unhealthy updates; a new rollback
+perform complete automatic restoration after unhealthy updates or verify exact
+target identity in every interrupted-recovery path; a new rollback
 cannot bypass that lock. Restart can report success without replacing Pods until
 the recorded restart-token issue is corrected. Private registry authentication is
 not complete end to end. Public exposure and application data volumes remain

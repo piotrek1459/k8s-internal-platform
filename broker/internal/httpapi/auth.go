@@ -98,9 +98,9 @@ func (r *Router) handleMe(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
-// sessionCookie builds the session cookie. Secure is set when the request chain
-// is HTTPS; plain HTTP is for local development or the loopback bootstrap only,
-// per docs/api-and-data.md.
+// sessionCookie builds the session cookie. Secure follows the installation flag;
+// HTTPS deployments must enable it explicitly. Plain HTTP is for local
+// development or loopback bootstrap only, per docs/api-and-data.md.
 func (r *Router) sessionCookie(value string, expires time.Time) *http.Cookie {
 	c := &http.Cookie{
 		Name:     sessionCookieName,

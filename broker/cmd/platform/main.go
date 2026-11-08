@@ -1,7 +1,7 @@
 // Command platform is the broker's single executable: it serves the management
 // API and UI assets and runs the background operation worker and status observer.
-// Step 1 wires only the HTTP server and health probes; later steps add the store,
-// worker, observer, and startup recovery (which runs before serving).
+// Startup wires persistence, authentication, the adapters, and recovery before
+// serving requests and starting the worker and observer.
 package main
 
 import (

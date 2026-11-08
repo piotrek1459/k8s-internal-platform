@@ -43,8 +43,14 @@ private registry authentication were not acceptance claims of this run.
 
 ## Local evidence
 
-Ignored evidence is retained under `.local/script-check/`: `build.log`,
-`resume.log`, `verification.log`, `results.json` and forwarding logs. The test
-client did not write its administrator password, bootstrap token or session
-cookies to those result files. Docker build and broker logs should still be
-reviewed before sharing raw output.
+During the run, ignored evidence was written under `.local/script-check/`:
+`build.log`, `resume.log`, `verification.log`, `results.json` and forwarding logs.
+The temporary driver, raw files, clusters and registry were subsequently removed
+during cleanup. This tracked report preserves the observations; the historical
+raw directory is no longer available locally. The driver was not committed as an
+automated acceptance suite.
+
+The client kept the administrator password, bootstrap token and session cookies
+out of result files. New runs must retain their own sanitized evidence before it
+is cited as reproducible thesis material. Current commands and gaps are in the
+[local guide](../../docs/local-development.md) and [status report](../../docs/status.md).

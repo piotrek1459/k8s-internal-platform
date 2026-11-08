@@ -1,3 +1,3 @@
-This directory is populated by scripts/build-ui.sh before building the Go binary.
-It is gitignored except for this placeholder.
-Do not commit built assets here — run scripts/build-ui.sh first.
+This directory is populated by scripts/platform.sh build-ui from web/build/.
+Generated assets are ignored by Git; this source placeholder remains tracked.
+The platform build/up commands prepare these assets before the broker image.

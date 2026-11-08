@@ -1,154 +1,49 @@
-# M2 — Manual platform installation and local verification
+# M2 backend implementation and installation snapshot — 2026-10-26
 
-This note records the documented procedure for installing the broker on the local
-K3s development cluster and exercising it, satisfying the M2 acceptance item for a
-recorded manual platform installation and access procedure. It is a local
-development procedure; reference-host (Raspberry Pi) and rented-server acceptance
-remain M7 activities.
+## Historical scope
 
-## Components built in M2
+This document records the M2 implementation snapshot and the installation/test
+procedure documented at that stage. It is not evidence that every M2 acceptance
+criterion, private-image deployment or interrupted recovery passed. The current
+[status report](../../docs/status.md) identifies remaining work.
 
-- `broker/` — the Go broker: management API, durable SQLite operation queue,
-  single worker with freeze-before-mutation, startup recovery with
-  `NeedsAttention` blocking, in-process Helm adapter, cluster observer, image
-  inspection, and versioned immutable Kubernetes Secrets.
-- `deploy/helm/platform/` — the platform chart: a single-replica `Recreate`
-  Deployment with a metadata PVC, a private ClusterIP Service, a service account,
-  and scoped RBAC (full workload CRUD in `platform-apps`, read-only cluster reads
-  for capacity and volumes; no cluster-admin, no `kube-system` access).
-- `broker/Dockerfile` — a multi-stage, non-root, distroless image built for
-  `linux/arm64` and `linux/amd64`.
+The original standalone installation commands have been superseded by the
+[local development guide](../../docs/local-development.md) and
+[platform chart reference](../../deploy/helm/platform/README.md). Those documents
+use the current single entry point and registry identity. No historical cluster
+is required to remain installed.
 
-## Prerequisites
+## Components introduced
 
-Docker running; k3d, kubectl, Go 1.25; the local toolchain from
-[local-development.md](../../docs/local-development.md). Helm is used in-process by
-the broker, so the Helm CLI is only needed for chart linting.
+- The Go broker: JSON API, SQLite metadata and operation queue, serial worker,
+  image digest freezing, startup recovery classifications, workload observer,
+  image inspector and versioned immutable configuration Secrets.
+- The platform chart: one broker replica with `Recreate`, metadata PVC, ClusterIP
+  Service, service account and scoped application-namespace permissions.
+- A non-root, distroless broker Dockerfile. Current release publication and native
+  ARM64/AMD64 host acceptance remain separate requirements.
 
-## Hermetic verification (no cluster)
+## Verification method
 
-```bash
-./scripts/check-broker.sh      # gofmt, go vet, and the broker unit/handler tests
-./scripts/check-api.sh         # OpenAPI contract validation
-./scripts/check-chart.sh       # application + platform chart lint/render (needs the local Helm)
-```
+The ordinary broker suite uses temporary SQLite, in-memory Helm storage, fake
+Kubernetes clients and an in-process registry. Chart lint/render and API
+validation are separate checks. This does not require a running cluster.
 
-The broker test suite is fully hermetic: the store runs on temporary SQLite, the
-Helm adapter installs against in-memory release storage with a fake Kubernetes
-client, the cluster observer uses the client-go fake clientset, and image
-inspection runs against an in-process OCI registry. No cluster is required.
+The gated integration test accepts an operation through the real store, executes
+it through the worker/Helm adapter against K3s, observes readiness, then closes
+and reopens the temporary database. It verifies that the completed operation and
+application records survive. It does not inject a crash during an upgrade or
+exercise browser authentication. The current command is documented under
+[real-cluster integration](../../docs/local-development.md#real-cluster-broker-integration).
 
-## Manual broker installation on the local cluster
+## Current follow-up and dependency sources
 
-1. Start the local cluster with its local registry and build the demonstration image:
+The UI and healthy lifecycle operations were subsequently implemented. Restart,
+exact interrupted-target verification, automatic failed-rollout restoration and
+private credential use remain incomplete. Application data, public HTTPS,
+production installation/releases and monitoring remain planned.
 
-   ```bash
-   ./scripts/setup-dev-tools.sh
-   ./scripts/dev-cluster.sh up
-   ./scripts/build-demo.sh native   # builds and pushes all three demo versions to localhost:5001
-   ```
-
-2. Build and push the broker image to the local registry:
-
-   ```bash
-   docker build -t localhost:5001/platform-broker:dev broker
-   docker push localhost:5001/platform-broker:dev
-   ```
-
-3. Create the platform namespace and install the chart using the digest-pinned
-   registry reference. The broker deploys applications into `platform-apps`
-   (created by `dev/namespace.yaml`) using its own service account; no
-   administrator kubeconfig is mounted.
-
-   ```bash
-   kubectl --kubeconfig .local/kubeconfig create namespace platform-system
-   RAW=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-broker:dev)
-   DIGEST="${RAW/localhost:5001/k3d-platform-registry:5001}"
-   .local/bin/helm --kubeconfig .local/kubeconfig install platform deploy/helm/platform \
-     --namespace platform-system \
-     --set "image.repository=${DIGEST%%@*}" \
-     --set "image.digest=${DIGEST##*@}" \
-     --wait --timeout 120s
-   ```
-
-4. Read the single-use bootstrap token from the broker logs, then reach the
-   private API over an authenticated port-forward (management stays private; there
-   is no LAN or public route before M3):
-
-   ```bash
-   kubectl --kubeconfig .local/kubeconfig -n platform-system logs deploy/platform | grep -A1 'Bootstrap token'
-   kubectl --kubeconfig .local/kubeconfig -n platform-system port-forward svc/platform 8080:80 &
-   curl -fsS http://127.0.0.1:8080/readyz
-   ```
-
-5. Set up the admin account and deploy the demo app:
-
-   ```bash
-   TOKEN=<token-from-logs>
-   curl -fsS -X POST http://127.0.0.1:8080/api/v1/setup \
-     -H "Content-Type: application/json" \
-     -H "X-Requested-With: XMLHttpRequest" \
-     -H "Authorization: Bearer $TOKEN" \
-     -d '{"password":"changeme123456"}' -c /tmp/platform-cookies.txt
-
-   curl -fsS -X POST http://127.0.0.1:8080/api/v1/auth/session \
-     -H "Content-Type: application/json" \
-     -H "X-Requested-With: XMLHttpRequest" \
-     -d '{"password":"changeme123456"}' \
-     -c /tmp/platform-cookies.txt -b /tmp/platform-cookies.txt
-
-   DEMO=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-demo:v1 | sed 's|localhost:5001|k3d-platform-registry:5001|')
-   curl -fsS -X POST http://127.0.0.1:8080/api/v1/apps \
-     -H "Content-Type: application/json" \
-     -H "X-Requested-With: XMLHttpRequest" \
-     -H "Idempotency-Key: deploy-demo-001" \
-     -b /tmp/platform-cookies.txt \
-     -d "{\"name\":\"demo\",\"image\":\"$DEMO\",\"containerPort\":8080,\"profile\":\"http\",\"exposure\":{\"mode\":\"internal\"}}"
-   ```
-
-> **Shortcut:** `./scripts/dev-env.sh up` performs steps 1–4 automatically and
-> prints the bootstrap token and ready-to-run curl commands.
-
-## Gated integration test
-
-The real-cluster integration test drives the broker's durable store and worker
-(not just the Helm adapter) against k3d, then simulates a broker restart. It is
-gated so the default `go test` stays hermetic:
-
-```bash
-./scripts/dev-cluster.sh up
-./scripts/build-demo.sh native   # builds and pushes to the local registry via localhost:5001
-# The broker deploys by digest. build-demo.sh pushes to the local registry so the
-# image gets a real RepoDigest that containerd inside the cluster can resolve.
-# Docker records the digest under the push address (localhost:5001); swap it for
-# the cluster-visible registry name (k3d-platform-registry:5001):
-RAW=$(docker image inspect --format '{{index .RepoDigests 0}}' localhost:5001/platform-demo:v1)
-DIGEST="${RAW/localhost:5001/k3d-platform-registry:5001}"
-KUBECONFIG="$(pwd)/.local/kubeconfig" PLATFORM_INTEGRATION=1 \
-  PLATFORM_DEMO_IMAGE="$DIGEST" \
-  go -C broker test -tags integration ./integration/... -v
-```
-
-The test accepts a create operation through the durable store exactly as the API
-handler does, drains it with a real worker into a Helm release in
-`platform-apps`, polls the cluster observer until the workload is Ready, then
-closes and reopens the database and runs startup recovery to confirm the
-operation stays terminal and the application's records survive a restart. It
-finally uninstalls the release. `PLATFORM_DEMO_IMAGE` must be a digest-pinned
-reference; the test fails fast otherwise.
-
-## Recorded component versions
-
-| Component | Version | Source |
-| --- | --- | --- |
-| Go toolchain | 1.25 | `broker/go.mod` |
-| Helm SDK | v3.21.0 | `broker/go.mod` (Helm 3 storage format, same as the v3.22 CLI in `dev/versions.env`) |
-| client-go / api / apimachinery | v0.33.4+ | `broker/go.mod` |
-| go-containerregistry | v0.20.6 | `broker/go.mod` |
-| modernc.org/sqlite | v1.39.0 | `broker/go.mod` (pure Go, no CGO) |
-
-## Outstanding (not part of M2)
-
-Administrator web UI (M3), failed-rollout restoration and explicit rollback (M4),
-application persistence and backup (M5), public HTTPS (M6), installer automation
-and release artifacts (M7), and the full observability profile (M8).
+Current dependency versions are recorded in `broker/go.mod`/`go.sum`, local tool
+versions in `dev/versions.env`, and image builders in the Dockerfiles. They
+supersede the early version table in this historical procedure. Later local
+acceptance evidence is indexed in the [test guide](../README.md#historical-reports).

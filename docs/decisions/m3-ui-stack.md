@@ -1,78 +1,50 @@
 # Decision: M3 UI stack
 
-**Date:** 2026-10-31
-**Milestone:** M3 — Administrator UI
-**Status:** Accepted
+Date: 2026-10-31. Reviewed: 2026-11-08. Status: accepted and implemented.
 
 ## Context
 
-`docs/milestones.md` lists "UI stack" as an open decision required before M3, noting
-React + TypeScript as the proposed approach subject to a recorded decision. The
-architecture specifies "built static assets served by the Go service" with no separate
-Node.js runtime in production.
-
-The user's top priority for the UI is: **easy to extend with new features** as the
-platform grows through M4–M8, and minimalistic with low ceremony.
+The original plan considered React/TypeScript. The selected interface requires
+application forms, image inspection, polled operation progress and history, with
+static assets served by the Go broker. A separate production Node.js server is
+not required. Screen-level extension and a small deployment footprint informed
+the choice.
 
 ## Decision
 
-**Svelte 5 + SvelteKit (SPA / adapter-static mode) + Tailwind CSS + TypeScript.**
+The implementation uses Svelte 5, SvelteKit in static SPA mode, TypeScript and
+Tailwind CSS. No general component library is required. The packages and lockfile
+under `web/` record the build dependencies.
 
-No component library is included as a hard dependency. Web components (SAP UI5,
-Flowbite, etc.) can be added per-screen in later milestones without framework conflict.
+## Rationale and alternatives
 
-## Rationale
+File-based routes and reactive components support the form/progress workflow.
+Static output can be embedded into the existing Go executable. These are design
+reasons for the selected implementation, not measured performance comparisons.
 
-| Criterion | React | Svelte 5 | Decision weight |
-|---|---|---|---|
-| Runtime bundle size | ~45 KB (React + ReactDOM) | ~10–15 KB | Low — bandwidth not the concern |
-| Boilerplate per component | High (hooks, providers, context wiring) | Low (one `.svelte` file, reactive by default) | **High** — every new M4–M8 screen is cheaper |
-| Adding a new screen/route | New file + manual route registration | New file in `src/routes/` — auto-picked up by SvelteKit | **High** — directly addresses extensibility goal |
-| TypeScript support | First-class | First-class | Equal |
-| Web component interop | Works | Works (Svelte compiles to standard custom elements) | Equal |
-| Tailwind CSS | Works well | Works well | Equal |
-| Node.js in production | Not required (static build) | Not required (adapter-static) | Equal |
-| Learning curve | Moderate — requires understanding hooks, closure traps, re-render model | Lower — template syntax, explicit reactivity runes | Moderate |
+React/TypeScript and Vue were considered viable alternatives. Plain HTML or
+server-rendered forms would require a different approach to the current client
+workflow. A large component framework was deferred until concrete screens require
+it. No bundle-size or framework-performance claim is used as acceptance evidence.
 
-### Why not UI5 / SAP Web Components as the base framework
+## Build and runtime
 
-UI5 is an enterprise design system (~300 KB CSS/JS) with an opinionated layout shell.
-At M3 scope (6–8 screens, single admin) the overhead is disproportionate. The
-extensibility benefit of UI5 — consistent wide table layouts, complex form fields, a
-design language familiar to SAP enterprise users — is not relevant for this tool.
-Keeping the base layer bare (Svelte + Tailwind) allows a specific UI5 widget to be
-imported where it genuinely fits later, without the whole design system as a constraint.
+- `./scripts/platform.sh build-ui` installs dependencies, builds `web/build/` and
+  copies assets into `broker/internal/httpapi/ui_dist/`.
+- `platform.sh build` and `platform.sh up` include that preparation before the
+  broker image build. Generated assets are ignored by Git.
+- `broker/internal/httpapi/ui.go` embeds those copied assets and serves the SPA.
+  Specific API routes take precedence; non-API client routes fall back to
+  `index.html`.
+- Node.js 22/npm are build/development prerequisites. No Node.js runtime is needed
+  by the deployed broker container.
+- The Vite development server uses port 5173 and proxies `/api/` to the running
+  broker forward on 8080. It is a development path, not the production server.
 
-### Why not plain HTML + HTMX
+## Verification boundary
 
-HTMX would work for the simple read/list screens, but the 6-step New Application form
-with inline image inspection, polled operation progress, and conditional step
-visibility is complex enough that a reactive framework pays for itself. Svelte 5's
-reactivity runes keep that complexity local to the component.
-
-## Constraints
-
-- No SSR. The Go binary embeds `web/dist/` and serves it as static assets under `/`.
-  Requests to unknown paths fall back to `index.html` (SPA history-mode routing).
-- No Node.js runtime in the broker container. `npm run build` runs at build time only.
-- Vite dev server (port 5173) proxies `/api/` to the broker at `:8080` for local
-  iteration without a Go rebuild.
-
-## Alternatives considered
-
-| Option | Reason not chosen |
-|---|---|
-| React + TypeScript | More boilerplate per component; larger bundle; same capability for this scope |
-| Vue 3 | Comparable to Svelte but less ergonomic for server-embedded static builds |
-| Plain HTML + vanilla JS | No type safety; form-heavy flows become hard to maintain |
-| HTMX | Insufficient for complex multi-step form with reactive validation |
-| SAP UI5 as base | Oversized for M3 scope; adds ~300 KB; constrains layout choices for M4–M8 |
-
-## Consequences
-
-- `web/` directory added at repo root following the layout in `docs/milestones.md`.
-- `scripts/build-ui.sh` builds the UI; `scripts/check-ui.sh` type-checks and lints.
-- `broker/internal/httpapi/ui.go` embeds `web/dist/` and registers the SPA handler.
-- The platform Helm chart requires no changes — static assets ship inside the binary.
-- Introducing a component library (e.g., a specific UI5 table) in a later milestone is
-  straightforward: add the package, import the component, no framework migration needed.
+`./scripts/check-ui.sh` runs Svelte/TypeScript checks, ESLint and a production
+build. These checks do not validate live response shapes or browser workflows.
+Manual frontend types and Go responses currently disagree in several places;
+[implementation status](../status.md#known-correctness-and-integration-gaps)
+records those issues and the need for contract/browser acceptance tests.

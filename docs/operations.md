@@ -6,6 +6,18 @@ observability profiles. System architecture is described in [architecture.md](ar
 the application contract and data model are in [api-and-data.md](api-and-data.md);
 networking and secrets are in [networking-and-security.md](networking-and-security.md).
 
+## Current implementation boundary
+
+`scripts/platform.sh` is the implemented local build/install/access workflow.
+It creates or reuses a k3d cluster and local registry, builds native images and
+installs the platform chart. The broker uses SQLite, a serial worker and a status
+observer. [Local procedures](local-development.md) and the [status report](status.md)
+record current commands, evidence and known gaps.
+
+Production installation, backup/restore upgrades, release publication, metrics
+and full failed-rollout recovery below are target requirements. They are not
+capabilities established by local startup or a successful healthy update.
+
 ## Reference hardware and operating limits
 
 The platform runs on an administrator's own Linux host. Two targets are in scope:
@@ -13,18 +25,19 @@ The platform runs on an administrator's own Linux host. Two targets are in scope
 - **Raspberry Pi 5** — the initial reference host: 8 GB RAM, 32 GB microSD,
   64-bit Raspberry Pi OS, ARM64. Initial development requires neither a domain
   nor additional hardware purchases.
-- **Rented internet server (VPS/dedicated)** — a supported later target, typically
+- **Rented internet server (VPS/dedicated)** — a planned later target, typically
   AMD64, usually with more capacity and a public IP. The platform is portable to
   it; see the [deployment-targets note in architecture.md](architecture.md#deployment-targets-host-agnostic-by-design).
 
-K3s documents a 2-core/2-GB server baseline excluding application workloads and
-recommends SSD storage on Raspberry Pi. An SSD is therefore a recommended later
-improvement for sustained Pi use, subject to measured requirements. A rented
-server with SSD-backed storage provides an alternative deployment target.
+Reference-host resource requirements remain unmeasured. The selected K3s
+release requirements, free storage and measured workload overhead must be
+recorded before host sizing is accepted. Storage upgrade decisions remain
+subject to those measurements.
 [K3s requirements](https://docs.k3s.io/installation/requirements)
 
 The Pi's nominal 32 GB storage capacity is shared by the operating system,
-platform, and applications. The following controls apply:
+platform, and applications. Disk admission, retention and capacity reporting are
+not implemented. The following controls are requirements for the target product:
 
 - Free disk capacity is measured after installation of the OS, K3s, and initial images.
 - The full monitoring profile is optional, with bounded retention for images,
@@ -46,9 +59,14 @@ using the same measurement procedure.
 
 ## Installer workflow
 
-The release package contains an installer, pinned component versions, the platform
-chart, a checksums file, and installation documentation.
-Initially the same installer can be run from a source checkout.
+No production release package or Linux installer is currently published by this
+repository. The planned package shall contain an installer, pinned component
+versions, platform chart, checksums and installation documentation. The local
+`platform.sh` launcher is a development tool and requires Docker/k3d, Node/npm and
+other documented host tools.
+
+The production installer shall support execution from a source checkout before
+release packaging. Its target sequence is:
 
 1. A read-only preflight checks OS and architecture, cgroups, disk/RAM, time sync,
    outbound registry access, occupied ports, and network CIDR conflicts.
@@ -72,8 +90,9 @@ Initially the same installer can be run from a source checkout.
 10. Installation version and progress are persisted so subsequent installer runs
     can resume safely or report the failed stage.
 
-Linux ARM64 on the Pi is the first validated target; Linux AMD64 is the second
-validated target for rented-server deployment. Docker Engine is not required on
+Linux ARM64 on the Pi is the first reference target for validation; Linux AMD64
+is the second target. Neither native-host acceptance is established by the
+current local Docker-based evidence. Docker Engine is not required on
 the installed host because K3s provides the container runtime. Images are built
 with Docker/Buildx on a development machine or in CI.
 
@@ -85,7 +104,10 @@ replacement. Application-volume support in M5 is independent of this requirement
 
 ## Upgrade and uninstall
 
-Platform upgrades are separate from application updates. A host-side upgrade
+The current local launcher can rebuild and upgrade the platform while retaining
+its volume. A verified production backup/upgrade/restore workflow is still
+planned. Platform upgrades are separate from application updates. A target
+host-side upgrade
 command first backs up platform state, validates supported version transitions,
 and then upgrades the platform chart. Database migrations must have a documented
 compatibility or restore strategy; a Helm rollback alone cannot undo a database
@@ -98,14 +120,18 @@ and deletion of stored data requires an explicit action.
 
 ## CI/CD and release artifacts
 
-GitHub Actions is the proposed CI provider, consistent with planned GitHub
-distribution. Initial checks cover formatting/static analysis, meaningful Go
-tests, frontend type/build checks, chart validation, and a small integration smoke
-test. Images are built for both supported architectures: ARM64 for the Pi and
-AMD64 for rented servers. Untrusted pull-request code must not execute on a host
+GitHub Actions is configured for broker formatting/vet/tests, UI type-checking,
+lint/build, structural API validation, shell/Python checks, and chart
+lint/render/synchronization. The real-cluster integration test, browser
+acceptance, demo Go module and full local negative chart matrix are not included
+in the default workflows. CI currently does not publish release images.
+
+The release target requires images for ARM64 and AMD64. Demo cross-build
+packaging is recorded historically; native Pi/AMD64 execution and published
+platform images require separate acceptance. Untrusted pull-request code must not execute on a host
 serving deployed applications.
 
-A tagged release publishes:
+The planned tagged-release workflow shall publish:
 
 - The platform image to GHCR with version tags and recorded immutable digests.
 - The application/platform charts and a compatibility manifest pinning their
@@ -129,6 +155,24 @@ limited to the selected application's read/update/operation actions.
 [GitHub private runner networking](https://docs.github.com/en/enterprise-cloud%40latest/actions/concepts/runners/private-networking)
 
 ## Deployment execution, recovery, and reconciliation
+
+### Implemented execution and outstanding recovery
+
+Transactional acceptance, frozen image/secret references, serial execution,
+bounded image inspection and Helm calls, best-effort observation, revision
+history and durable mutation locks are implemented. Configuration-only changes
+preserve the recorded image digest.
+
+The worker currently enters `needs_attention` after an unresolved Helm failure
+without attempting verified restoration. No supported recovery/unlock endpoint
+exists. Startup can mistake an old deployed release for a frozen target; restart
+can reuse a snapshot before assigning a new token. Chart identity and values hash
+fields are not populated. These defects are detailed in
+[implementation status](status.md#known-correctness-and-integration-gaps).
+
+The state diagram and normal/failure/recovery procedures below are the required
+execution contract. They must not be interpreted as a currently available manual
+recovery procedure or evidence that all transitions are implemented.
 
 ### Durable operation acceptance
 
@@ -194,8 +238,9 @@ workloads are absent, with retained data still recorded. Deployment/update requi
 the selected profile's readiness and managed exposure conditions; an independent
 external reachability result remains a separate status.
 
-Release/resource metadata contains operation and revision IDs and a configuration
-hash so recovery can associate cluster changes with persisted intent.
+Release/resource metadata must contain operation and revision identity and a
+configuration hash so recovery can associate cluster changes with persisted
+intent. That complete correlation is not yet implemented.
 
 ### Failed update and rollback
 
@@ -259,7 +304,7 @@ from accessing the same SQLite file. Startup examines every nonterminal operatio
 - Unverified recovery enters **NeedsAttention**, with diagnostics and a documented
   recovery action. Conflicting mutations remain blocked.
 
-The documented recovery procedure for **NeedsAttention** requires an explicit
+The required future recovery procedure for **NeedsAttention** requires an explicit
 administrator action, records the recovery attempt, and transitions the same
 operation to **Recovering**. The procedure inspects the persisted specification,
 Helm history, and owned resources before applying a supported restoration or
@@ -282,6 +327,10 @@ made during troubleshooting are not overwritten automatically.
 ## Observability profiles
 
 ### Lightweight profile: initial implementation
+
+Structured broker logs, operation history, audit rows and cached observations
+exist. Application log/event browsing, resource reporting, metrics endpoints,
+disk reporting and retention automation below remain planned requirements.
 
 - Structured broker logs with request, application, and operation IDs.
 - Durable operation history and audit events in SQLite.
