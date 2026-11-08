@@ -20,6 +20,12 @@ def assemble(directory, version, commit):
         if metadata["version"] != version or metadata["architecture"] != architecture:
             raise ValueError("Bundle identity differs from release identity")
         targets[architecture] = metadata
+    # The downloaded guide has no adjacent docs/ tree. Pin its relative source
+    # links to this release rather than leaving them broken outside a checkout.
+    guide = directory / "INSTALL.md"
+    prefix = "https://github.com/piotrek1459/k8s-internal-platform/blob/v" + version + "/docs/"
+    guide.write_text(re.sub(r"\]\((?!https?://|#)([^)]+)\)",
+                           lambda match: "](" + prefix + match.group(1) + ")", guide.read_text()))
     (directory / "release.json").write_text(json.dumps({"version": version, "commit": commit, "preview": True, "targets": targets}, indent=2) + "\n")
     files = [directory / f"platform-v{version}-linux-{arch}.tar.gz" for arch in targets]
     files += [directory / name for name in ("install.sh", "INSTALL.md", "release.json")]

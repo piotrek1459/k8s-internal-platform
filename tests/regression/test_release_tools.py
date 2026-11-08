@@ -39,7 +39,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
             for name in ("install.sh", "INSTALL.md"):
-                (folder / name).write_text("fixture")
+                (folder / name).write_text("[API guide](user/api-reference.md)" if name == "INSTALL.md" else "fixture")
             for arch in ("amd64", "arm64"):
                 path = folder / ("platform-v0.0.1-linux-" + arch + ".tar.gz")
                 raw = json.dumps({"version": "0.0.1", "architecture": arch}).encode()
@@ -50,6 +50,7 @@ class ReleaseIntegrityTests(unittest.TestCase):
                     with self.assertRaises(FileNotFoundError):
                         manifest.assemble(folder, "0.0.1", "a" * 40)
             manifest.assemble(folder, "v0.0.1", "a" * 40)
+            self.assertIn("/blob/v0.0.1/docs/user/api-reference.md", (folder / "INSTALL.md").read_text())
             metadata = json.loads((folder / "release.json").read_text())
             self.assertEqual(metadata["commit"], "a" * 40)
             self.assertEqual(set(metadata["targets"]), {"amd64", "arm64"})
