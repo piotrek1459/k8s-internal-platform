@@ -3,8 +3,8 @@
 # This schema documents the implemented core/lifecycle API and credential
 # metadata endpoints. Diagnostics, settings, automation tokens, application
 # volumes and observability endpoints remain planned. Current implementation
-# gaps are recorded in docs/status.md; in particular, application detail status
-# currently uses PascalCase instead of the camelCase contract below.
+# remaining boundaries are recorded in docs/status.md; fixed contracts
+# are distinguished from planned features and host-specific acceptance.
 #
 # Management routes use session cookies except setup/login and health probes.
 # State-changing requests require X-Requested-With. Application lifecycle
@@ -19,10 +19,9 @@ info:
     Management API for a single administrator operating one Kubernetes cluster.
     Includes authentication, applications and lifecycle operations, image
     inspection, operations, configuration Secrets and registry credential metadata.
-    State-changing requests require X-Requested-With. Private credential use,
-    restart and complete recovery remain incomplete; see docs/status.md. The
-    ObservedStatus schema is the intended camelCase contract, with a known current
-    PascalCase serialization mismatch.
+    State-changing requests require X-Requested-With. Execution snapshots,
+    restart tokens, private registry credentials and verified restoration are
+    implemented. Ambiguous recovery retains a mutation lock; see docs/status.md.
   license:
     name: See repository LICENSE
 servers:
@@ -321,6 +320,28 @@ paths:
         "409": { $ref: "#/components/responses/Error" }
         "412": { $ref: "#/components/responses/Error" }
 
+  /api/v1/apps/{id}/recover:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    post:
+      tags: [applications]
+      summary: Retry an existing blocked operation after its cause is addressed
+      description: >-
+        Requires the current application version, reuses the blocked operation ID
+        and increments the application version. No new specification is accepted.
+        Idempotency-Key is not required: the version guard prevents duplicate retry.
+        Pending or still ambiguous Helm state remains blocked.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VersionBody" }
+      responses:
+        "202": { $ref: "#/components/responses/Accepted" }
+        "401": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "412": { $ref: "#/components/responses/Error" }
+
   /api/v1/apps/{id}/reapply:
     parameters:
       - $ref: "#/components/parameters/AppID"
@@ -444,7 +465,7 @@ paths:
     get:
       tags: [registry-credentials]
       summary: List registry credential metadata
-      description: Passwords are never returned. Authentication and pull Secret provisioning remain incomplete.
+      description: Passwords are stored only in Kubernetes Docker configuration Secrets and are never returned.
       responses:
         "200":
           description: Credential metadata.
@@ -456,9 +477,9 @@ paths:
       tags: [registry-credentials]
       summary: Create registry credential metadata
       description: >-
-        The current handler requires a password but does not persist it or create
-        an image-pull Secret. A created metadata record does not establish working
-        private registry authentication.
+        Stores authentication in an immutable Kubernetes image-pull Secret and metadata
+        in SQLite. Inspection uses the same credential, scoped to its registry host.
+        Creation does not claim successful verification of the supplied password.
       requestBody:
         required: true
         content:
@@ -627,6 +648,7 @@ components:
       type: object
       additionalProperties: false
       properties:
+        startupPath: { type: string, description: "Optional independent HTTP startup path; omitted uses TCP." }
         readinessPath: { type: string, pattern: "^/.*" }
 
     CreateApplicationRequest:
@@ -801,7 +823,7 @@ components:
           type: string
           minLength: 1
           writeOnly: true
-          description: Accepted input; not persisted by the current metadata-only implementation.
+          description: Write-only input stored in a Kubernetes Docker configuration Secret; absent from SQLite and ordinary responses.
 
     RegistryCredentialMetadata:
       type: object

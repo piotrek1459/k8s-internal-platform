@@ -78,7 +78,7 @@ server target. The Pi deployment requires native ARM64 images.
 
 The model distinguishes the following state categories. Operation/workload
 observations are implemented; detailed exposure/TLS/reachability states are
-planned. UI response alignment remains incomplete:
+planned. Implemented workload status uses camelCase in API responses:
 
 - **Operation:** queued, running, recovering, succeeded, failed, or needs attention
   (`NeedsAttention` in the state model; `needs_attention` in JSON).
@@ -168,7 +168,7 @@ and storage design.
 | Operation | Application/type, source and target revision, durable state/stage, idempotency key and request hash, timestamps/deadline, recovery outcome. |
 | Operation event | Ordered progress entries with sanitized diagnostics and request correlation. |
 | Audit event | Actor, action, target, time, outcome, request/operation ID, safe configuration diff. |
-| Registry credential metadata | Current ID, registry, label, username and unverified metadata. Credential Secret storage, verification and usage protection remain incomplete. |
+| Registry credential metadata | ID, registry, label, username and Kubernetes Secret reference. Passwords remain in Kubernetes; inspection and guarded usage are implemented. Creation does not claim credential verification. |
 | Secret metadata | Owner, name/key metadata, immutable Kubernetes Secret reference/version; no plaintext value. |
 | Volume (planned) | The schema has a placeholder table; application PVC/mount/retention APIs are not implemented. |
 | Settings (planned API) | A placeholder schema table exists; no settings endpoints are registered. |
@@ -221,13 +221,13 @@ explicit; planned rows are not callable interfaces.
 | `GET /api/v1/system` | Version, host architecture, configured capability names and cluster reachability. | Version, architecture, cluster reachability and capability names; capacity planned |
 | `GET /api/v1/settings` | Supported non-secret platform settings. | Planned |
 | `PATCH /api/v1/settings` | Supported preference changes; host-level changes remain in installer tooling. | Planned |
-| `POST /api/v1/images/inspect` | Image/credential inspection, reporting architecture, digest, and suggested ports. | Implemented anonymously; stored private credentials incomplete |
+| `POST /api/v1/images/inspect` | Image/credential inspection, reporting architecture, digest, and suggested ports. | Implemented for anonymous and stored private credentials |
 | `GET /api/v1/apps` | Paginated applications with summarized status. | Implemented |
 | `POST /api/v1/apps` | Persistence of application intent and queued installation. | Implemented for stateless HTTP |
 | `GET /api/v1/apps/{id}` | Configuration, observed status, active operation, and version. | Implemented; status JSON naming defect |
 | `PATCH /api/v1/apps/{id}` | Image/configuration/resources/exposure/replica change. | Implemented for supported fields |
-| `POST /api/v1/apps/{id}/restart` | Queued restart through a chart revision. | Implemented endpoint; restart-token defect |
-| `POST /api/v1/apps/{id}/reapply` | Explicit restoration of managed resources from the recorded specification/digest after drift. | Implemented; real drift acceptance outstanding |
+| `POST /api/v1/apps/{id}/restart` | Queued restart through a chart revision. | Implemented with a stable per-operation restart token |
+| `POST /api/v1/apps/{id}/reapply` | Explicit restoration of managed resources from the recorded specification/digest after drift. | Implemented; Service restoration covered by real-cluster E2E |
 | `GET /api/v1/apps/{id}/revisions` | Revision history and rollback eligibility. | Implemented |
 | `POST /api/v1/apps/{id}/rollback` | Queued restoration of a selected revision. | Implemented; full chart-artifact guarantee incomplete |
 | `DELETE /api/v1/apps/{id}` | Queued workload deletion with data retention by default. | Implemented for stateless workloads |
@@ -236,7 +236,7 @@ explicit; planned rows are not callable interfaces.
 | `GET /api/v1/operations/{id}` | Durable progress, outcome, and recovery details. | Implemented |
 | `GET /api/v1/audit-events` | Paginated administrator action history. | Planned |
 | `GET /api/v1/registry-credentials` | Credential metadata and usage, never passwords/tokens. | Metadata only |
-| `POST /api/v1/registry-credentials` | Credential metadata creation; secure credential provisioning remains planned. | Metadata only; password is not persisted |
+| `POST /api/v1/registry-credentials` | Write-only Kubernetes authentication Secret and metadata creation. | Implemented; password stored only in Kubernetes |
 | `PUT /api/v1/registry-credentials/{id}` | Credential rotation with reference-aware behavior. | Planned |
 | `DELETE /api/v1/registry-credentials/{id}` | Delete stored credential metadata. | Metadata deletion; dependency protection incomplete |
 | `GET /api/v1/secrets` | Secret metadata; values are never returned. | Implemented |
@@ -332,9 +332,9 @@ The example requires an authenticated session and an already-created `sec_01`
 version 1; it is a schema illustration rather than an executable deployment.
 The [API walkthrough](user/api-reference.md) supplies a reproducible local example.
 The worker records the execution image digest and Secret references before a
-mutation. Chart version/artifact/hash recording remains incomplete. Private
-credential IDs must not be treated as working authentication until that path is
-implemented.
+mutation, including chart version, embedded chart digest and canonical values hash.
+Private credentials are resolved from registry-scoped Kubernetes pull Secrets.
+A changed chart artifact is refused rather than substituted during rollback.
 
 Image inspection in the form is an advisory preview unless the client submits the
 resolved `image@sha256:...` reference. The actual execution digest is displayed
@@ -368,8 +368,7 @@ Direct scaling through Kubernetes without updating Helm values is unsupported.
 
 ### Example: observed state during an update
 
-This illustrates the current status wire shape. Its PascalCase keys are a known
-serialization defect relative to the documented camelCase schema and UI. Revision
+This illustrates the current camelCase status wire shape. Revision
 references are opaque IDs, not Helm or software version numbers. TLS and external
 reachability fields are not currently returned.
 
@@ -381,14 +380,14 @@ reachability fields are not currently returned.
   "lastSuccessfulRevision": "rev_03",
   "activeOperationId": "op_02",
   "status": {
-    "Phase": "updating",
-    "DesiredReplicas": 2,
-    "ReadyReplicas": 1,
-    "WorkloadReady": false,
-    "RouteReady": true,
-    "ObservedGeneration": 4,
-    "ObservedAt": "2026-11-08T12:00:00Z",
-    "Stale": false
+    "phase": "updating",
+    "desiredReplicas": 2,
+    "readyReplicas": 1,
+    "workloadReady": false,
+    "routeReady": true,
+    "observedGeneration": 4,
+    "observedAt": "2026-11-08T12:00:00Z",
+    "stale": false
   }
 }
 ```

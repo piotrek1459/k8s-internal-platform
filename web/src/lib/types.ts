@@ -73,7 +73,7 @@ export interface AcceptResult {
 export interface Secret {
 	id: string;
 	name: string;
-	versions: number[];
+	versions: Array<{ version: number; keys: string[]; createdAt: string }>;
 }
 
 export interface RegistryCredential {
@@ -104,7 +104,7 @@ export interface CreateApplicationRequest {
 		memoryRequest?: string;
 		memoryLimit?: string;
 	};
-	health?: { readinessPath?: string };
+	health?: { readinessPath?: string; startupPath?: string };
 	exposure: { mode: string; hostname?: string };
 }
 

@@ -115,7 +115,7 @@
 							<p class="text-sm font-medium text-gray-900">{secret.name}</p>
 							<p class="text-xs text-gray-400 mt-0.5 font-mono">{secret.id}</p>
 							{#if secret.versions?.length}
-								<p class="text-xs text-gray-500 mt-0.5">Versions: {secret.versions.join(', ')}</p>
+								<p class="text-xs text-gray-500 mt-0.5">Versions: {secret.versions.map(v => v.version).join(', ')}</p>
 							{/if}
 						</div>
 						<div class="flex gap-2">

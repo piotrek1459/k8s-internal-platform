@@ -183,27 +183,19 @@ registry used by this walkthrough does not require a credential.
 
 ## Current limitations
 
-Application details currently receive status fields with exported Go names,
-while the UI expects camelCase. A healthy operation can therefore coexist with
-missing or incorrect detail labels. Use the operation result, HTTP response and
-`platform.sh status` to investigate the actual workload. The UI also loses nested
-API error details; generic messages require checking the API response or broker
-logs. These issues are tracked in [implementation status](../status.md).
+Status fields and nested errors follow the API contract. Restart retains the
+recorded image digest and replaces Pods using a stable per-operation token.
+After a failed update, the previous successful snapshot is restored and verified
+before its operation is marked failed and the application is unlocked. An
+unresolved result remains `NeedsAttention`; **Retry recovery** reuses the blocked
+operation after its underlying cause has been addressed. A pending Helm release
+or unavailable historical chart can still require host-side diagnosis.
 
-The restart token is not yet assigned correctly for an already-frozen revision;
-a Restart operation can report success without replacing its Pods. Pod identity
-must be checked when evaluating restart behaviour.
-
-Failed Helm mutations retain `NeedsAttention` when their result is unresolved.
-Automatic restoration after an unhealthy update remains incomplete; another
-rollback request cannot bypass an active operation's lock. Demo v3 deliberately
-fails readiness and should be reserved for a disposable failure experiment.
-
-The initial UI offers a limited update form. A non-empty environment text area
-replaces the complete ordinary environment map. Public HTTPS and application data
-volumes are outside this local walkthrough. The existing creation form's LAN
-mode uses the wrong API value and lacks the required hostname field; Internal
-is the supported guide path. Application log browsing is not implemented.
+The update form remains limited. A non-empty environment text area replaces the
+complete ordinary environment map. Creation supports versioned Secret references.
+LAN selection requires an explicitly configured private ingress controller and
+hostname; the native installer provides Internal access and SSH forwarding.
+Public HTTPS, application volumes and application log browsing remain planned.
 
 ## Stop and resume
 

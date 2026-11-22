@@ -259,3 +259,9 @@ func TestGetOperationRendersEvents(t *testing.T) {
 		t.Fatalf("events = %v, want 1", body["events"])
 	}
 }
+
+func (f *fakeStore) RestoreApplication(context.Context, string, string) error { return nil }
+
+func (f *fakeStore) RetryRecovery(context.Context, string, int64) (platform.AcceptResult, error) {
+	return platform.AcceptResult{}, nil
+}

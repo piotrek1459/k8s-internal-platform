@@ -92,6 +92,7 @@ type resourceBody struct {
 
 type healthBody struct {
 	ReadinessPath string `json:"readinessPath"`
+	StartupPath   string `json:"startupPath"`
 }
 
 type exposureBody struct {
@@ -135,6 +136,10 @@ func (r *Router) handleCreateApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if spec.Exposure.Mode == platform.ExposureLAN && !r.cfg.PrivateIngressEnabled {
+		writeError(w, r.cfg.Logger, reqID, platform.FieldErrorf(platform.CodeUnsupportedSpec, "exposure", "private ingress is not configured on this installation"))
+		return
+	}
 	// The request hash is computed over the canonical decoded body so a byte-level
 	// difference in whitespace does not defeat idempotent replay, while a genuine
 	// content change is detected as an idempotency conflict.
@@ -233,6 +238,7 @@ func toCreateInput(b createAppBody) applications.CreateInput {
 	}
 	if b.Health != nil {
 		in.ReadinessPath = b.Health.ReadinessPath
+		in.StartupPath = b.Health.StartupPath
 	}
 	return in
 }

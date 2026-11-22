@@ -251,7 +251,7 @@ The app disappears from the active list; stored revision history remains.
 | `GET /apps`, `GET /apps/{id}` | Active list or application details; detail response includes an ETag. |
 | `PATCH /apps/{id}` | `{version, image?, replicas?, environment?, ...}`; tracked update. |
 | `DELETE /apps/{id}` | `{version}`; tracked deletion. |
-| `POST /apps/{id}/restart` | `{version}`; current implementation has the restart limitation below. |
+| `POST /apps/{id}/restart` | `{version}`; retain image digest and replace Pods. |
 | `POST /apps/{id}/reapply` | `{version}`; reapply the desired configuration. |
 | `POST /apps/{id}/rollback` | `{version, revisionId}`; target must be a successful revision of this app. |
 | `GET /apps/{id}/revisions` | Revision history, newest first. |
@@ -261,15 +261,20 @@ The app disappears from the active list; stored revision history remains.
 | `POST /secrets/{id}/versions` | `{data:{value:...}}`; create a new immutable version. |
 | `DELETE /secrets/{id}` | Rejected when protected revisions reference the secret. |
 | `GET /registry-credentials` | Credential metadata. |
-| `POST /registry-credentials` | `{label, registry, username, password}`; current storage is metadata only. |
-| `DELETE /registry-credentials/{id}` | Delete metadata. |
+| `POST /registry-credentials` | `{label, registry, username, password}`; password stored in a Kubernetes Docker configuration Secret. |
+| `DELETE /registry-credentials/{id}` | Delete credential and its Kubernetes Secret; reject protected references. |
 
 All application mutations require `Idempotency-Key`; mutations of existing apps
-also require the current `version` in the JSON body. The implementation currently
-uses that body field for its optimistic check. Request schemas are in [`api/openapi.yaml`](../../api/openapi.yaml). The
-application status schema specifies camelCase, but the current server serializes
-status fields such as `Phase` and `ReadyReplicas`; response alignment remains an
-open defect. Schema validation alone does not validate actual responses.
+also require the current `version` in the JSON body. The implementation uses that body field for its optimistic check; If-Match is
+not enforced. Request and camelCase response schemas are in
+[`api/openapi.yaml`](../../api/openapi.yaml).
+
+`POST /apps/{id}/recover` is a recovery retry, not a new mutation specification.
+It accepts `{version}`, reuses the existing blocked operation ID and increments
+the application version. It does not require a new Idempotency-Key. A repeated
+submission with the old version is rejected. Pending or ambiguous cluster state
+remains blocked. Failed updates with a prior complete successful snapshot attempt
+verified restoration automatically and expose the outcome in operation events.
 
 ## Errors and operating limits
 
@@ -289,13 +294,13 @@ Errors use the nested envelope:
 | 422 | Unsupported application/image specification. |
 | 503 | A required dependency is unavailable. |
 
-`needs_attention` retains the mutation lock. The current backend does not yet
-perform complete automatic restoration after unhealthy updates or verify exact
-target identity in every interrupted-recovery path; a new rollback
-cannot bypass that lock. Restart can report success without replacing Pods until
-the recorded restart-token issue is corrected. Private registry authentication is
-not complete end to end. Public exposure and application data volumes remain
-outside the supported local walkthrough. Demo v3 is intentionally unhealthy.
+`needs_attention` retains the mutation lock when restoration or target identity
+cannot be verified. A new rollback cannot bypass it. Recovery retry reuses the
+blocked operation after diagnosis; a still-pending Helm transaction remains
+blocked. Failed updates with a complete prior snapshot attempt verified automatic
+restoration. Restart requires a changed Pod identity and retains the image digest.
+Public exposure and application data volumes remain outside this walkthrough.
+Demo v3 deliberately fails readiness and should be used only for failure testing.
 
 Logout after the walkthrough:
 

@@ -79,13 +79,15 @@ class Workflows(unittest.TestCase):
 
     def test_00_browser_bootstrap(self):
         with self.page("bootstrap") as page:
-            page.goto(self.e.url + "/setup")
+            page.goto(self.e.url + "/")
+            page.wait_for_url("**/setup")
             page.get_by_label("Bootstrap token").fill("invalid-bootstrap-token")
             page.get_by_label("Administrator password", exact=True).fill(self.e.password)
             page.get_by_label("Confirm password").fill(self.e.password)
             with page.expect_response(lambda r: r.url.endswith("/api/v1/setup") and r.request.method == "POST") as response:
                 page.get_by_role("button", name="Create account").click()
             self.assertEqual(response.value.status, 401)
+            page.get_by_text(response.value.json()["error"]["message"], exact=True).wait_for()
             self.assertTrue(self.e.client.get("/setup/status")["setupAvailable"])
             page.get_by_label("Bootstrap token").fill(self.e.token)
             with page.expect_response(lambda r: r.url.endswith("/api/v1/setup") and r.request.method == "POST") as response:
@@ -155,6 +157,9 @@ class Workflows(unittest.TestCase):
         self.e.record("Deletion removed workload and Service while retaining revision history")
 
     def test_10_browser_application_lifecycle(self):
+        value = secrets.token_urlsafe(24); self.e.secret_values.append(value)
+        code, secret = self.e.client.request("POST", "/secrets", {"name":"browser-secret", "data":{"value":value}})
+        self.assertEqual(code,201)
         with self.page("browser-lifecycle") as page:
             self.browser_login(page)
             page.goto(self.e.url + "/apps/new")
@@ -164,11 +169,18 @@ class Workflows(unittest.TestCase):
             name = "browser-" + secrets.token_hex(4)
             page.get_by_label("Name", exact=True).fill(name)
             page.get_by_label("Readiness path").fill("/readyz")
-            for _ in range(3): page.get_by_role("button", name="Next").click()
+            for _ in range(2): page.get_by_role("button", name="Next").click()
+            page.get_by_label("Secret environment variable").fill("BROWSER_SECRET")
+            page.get_by_label("Secret", exact=True).select_option(secret["id"])
+            page.get_by_label("Secret version", exact=True).select_option("1")
+            page.get_by_role("button", name="Next").click()
             accepted = self.click_mutation(page, page.get_by_role("button", name="Deploy", exact=True), "POST", "/apps")
             app = accepted["applicationId"]
             try:
                 self.browser_success(page, accepted, navigates=False)
+                deployment = self.e.resource("deployments", app)[0]
+                env = deployment["spec"]["template"]["spec"]["containers"][0]["env"]
+                self.assertIn("BROWSER_SECRET", [item["name"] for item in env if "secretKeyRef" in item.get("valueFrom",{})])
                 self.e.http_version(app, "v1")
                 page.goto(self.e.url + "/apps/" + app + "/update")
                 page.get_by_label("Image reference").fill(self.e.image("v2"))
@@ -194,6 +206,26 @@ class Workflows(unittest.TestCase):
                 current = next((a for a in self.e.client.get("/apps")["items"] if a["id"] == app), None)
                 if current and not current.get("activeOperationId"): self.e.delete(app)
         self.e.record("Browser image inspection, deployment, update, progress refresh, history rollback and deletion")
+
+    def test_15_private_registry_inspection_and_pull(self):
+        from private_registry import authenticated_registry
+        with authenticated_registry(self.e) as private:
+            self.assertEqual(self.e.client.request("POST", "/images/inspect", {"image":private["image"]})[0],503)
+            code, credential = self.e.client.request("POST", "/registry-credentials", {"label":"private acceptance", **{k:private[k] for k in ("registry","username","password")}})
+            self.assertEqual(code,201)
+            self.assertNotIn(private["password"], json.dumps(credential))
+            report = self.e.client.request("POST", "/images/inspect", {"image":private["image"],"registryCredentialId":credential["id"]})
+            self.assertEqual(report[0],200)
+            accepted,_=self.e.client.mutate("POST","/apps",{"name":"private-"+secrets.token_hex(3),"image":private["image"],"registryCredentialId":credential["id"],"containerPort":8080,"profile":"http","health":{"readinessPath":"/readyz"},"exposure":{"mode":"internal"}})
+            app=accepted["applicationId"]
+            try:
+                self.e.http_version(app,"v1")
+                deployment=self.e.resource("deployments",app)[0]
+                self.assertTrue(deployment["spec"]["template"]["spec"]["imagePullSecrets"])
+                self.assertEqual(self.e.client.request("DELETE","/registry-credentials/"+credential["id"])[0],409)
+            finally: self.e.delete(app)
+            self.assertEqual(self.e.client.request("DELETE","/registry-credentials/"+credential["id"])[0],204)
+        self.e.record("Private registry rejects anonymous inspection; stored credentials support inspection and real kubelet pull")
 
     def test_20_configuration_secrets_and_snapshot_rollback(self):
         value = secrets.token_urlsafe(24); self.e.secret_values.append(value)
@@ -253,36 +285,34 @@ class Workflows(unittest.TestCase):
         finally: self.e.delete(app)
         self.e.record("Broker Pod replacement preserved sessions/history and application traffic")
 
-    def test_70_unhealthy_update_retains_a_durable_lock(self):
+    def test_70_unhealthy_update_restores_previous_snapshot(self):
         self.e.record("Testing unhealthy rollout: the intentional Helm timeout can take five minutes")
         app = self.e.create("failed", "v2")
         before = self.e.client.get("/apps/" + app)
-        self.e.client.mutate("PATCH", "/apps/" + app, {"version": before["version"], "image": self.e.image("v3")}, terminal="needs_attention")
+        self.e.client.mutate("PATCH", "/apps/" + app, {"version": before["version"], "image": self.e.image("v3")}, terminal="failed")
         self.e.http_version(app, "v2")
         current = self.e.client.get("/apps/" + app)
         self.assertEqual(current["lastSuccessfulRevision"], before["lastSuccessfulRevision"])
-        self.assertTrue(current["activeOperationId"])
-        self.assertEqual(self.e.client.request("POST", "/apps/" + app + "/rollback", {"version": current["version"], "revisionId": before["lastSuccessfulRevision"]}, {"Idempotency-Key": secrets.token_hex(16)})[0], 409)
+        self.assertEqual(current["desiredRevision"], before["lastSuccessfulRevision"])
+        self.assertFalse(current["activeOperationId"])
         self.e.restart_broker()
-        self.assertEqual(self.e.client.get("/apps/" + app)["activeOperationId"], current["activeOperationId"])
-        self.e.record("Unhealthy rollout remains NeedsAttention across broker replacement; conflicting rollback is blocked")
+        self.assertFalse(self.e.client.get("/apps/" + app)["activeOperationId"])
+        self.e.delete(app)
+        self.e.record("Unhealthy candidate failed; previous snapshot restored and verified, mutation lock released")
 
     def test_80_release_bundle_deploys_on_a_fresh_cluster(self):
         from bundle import verify_bundle_installation
         verify_bundle_installation(self.e)
 
-    def test_90_documented_status_contract_gap(self):
+    def test_90_status_contract(self):
         app = self.e.create("contract")
         try:
             status = self.e.client.get("/apps/" + app)["status"]
-            if "Phase" in status and "phase" not in status:
-                self.e.record("KNOWN GAP STATUS-1: PascalCase workload status; camelCase acceptance remains open")
-                self.skipTest("KNOWN STATUS-1: server status naming differs from the API/UI contract")
             self.assertEqual(status["phase"], "ready")
             self.assertEqual(status["readyReplicas"], 1)
         finally: self.e.delete(app)
 
-    def test_91_documented_application_restart_gap(self):
+    def test_91_application_restart(self):
         app = self.e.create("restart")
         try:
             before = self.e.wait_replicas(app, 1)[0]["metadata"]["uid"]
@@ -291,9 +321,6 @@ class Workflows(unittest.TestCase):
             pod = self.e.wait_replicas(app, 1)[0]
             deployment = self.e.resource("deployments", app)[0]
             token = deployment["spec"]["template"]["metadata"].get("annotations", {}).get("platform.k8s.io/restart-token")
-            if pod["metadata"]["uid"] == before and not token:
-                self.e.record("KNOWN GAP RESTART-1: restart completes without a new Pod or annotation")
-                self.skipTest("KNOWN RESTART-1: restart token is not assigned to an already-frozen revision")
             self.assertEqual(token, accepted["operationId"])
             self.assertNotEqual(pod["metadata"]["uid"], before)
         finally: self.e.delete(app)

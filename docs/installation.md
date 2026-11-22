@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.0.1`. Select a version available through the
+The examples below use `v0.1.2`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -10,9 +10,10 @@ The platform and its managed applications run in the same K3s cluster. The
 installer provisions K3s, imports native OCI images and installs the platform
 chart. Docker, Go and Node.js are not required on the target host.
 
-Native Raspberry Pi installation and reboot acceptance
-remain pending. Public HTTPS, application volumes, private-registry credentials,
-verified failed-rollout restoration and cross-version upgrades are incomplete.
+Reference Raspberry Pi installation has been exercised; the current native
+acceptance record is linked from [implementation status](status.md). Public HTTPS, application volumes and cross-version upgrades remain outside
+this installer. Private credentials and verified failed-rollout restoration are
+implemented; their acceptance boundaries are recorded separately.
 The [implementation status](status.md) records the remaining boundaries. Existing
 unrelated K3s installations are refused; this installer is for a dedicated host.
 
@@ -33,24 +34,37 @@ free -h
 df -h /var/lib
 ```
 
-If the installer reports missing memory cgroups, follow the
-[K3s Raspberry Pi requirements](https://docs.k3s.io/installation/requirements?os=pi).
-Add `cgroup_memory=1 cgroup_enable=memory` to the existing single line in
-`/boot/firmware/cmdline.txt` (older OS: `/boot/cmdline.txt`), then reboot manually.
-The installer does not edit boot files or reboot the host.
+If the installer reports missing memory cgroups, an explicit preparation step is
+available after the installer has been downloaded and verified:
+
+```bash
+sudo bash install.sh --version v0.1.2 --prepare-host
+# Exit status 20 means that the boot file was prepared and a reboot is required.
+sudo reboot
+# Reconnect over SSH, then rerun --check and the normal installation.
+```
+
+On Raspberry Pi OS, this backs up the existing boot command line, removes an
+explicit `cgroup_disable=memory` argument if present, and appends
+`cgroup_memory=1 cgroup_enable=memory` on the existing single line. A malformed
+multiline file is refused. The active controller is checked after reboot; a
+firmware-injected disable argument in `/proc/cmdline` alone is not the acceptance
+signal. The [K3s Raspberry Pi requirements](https://docs.k3s.io/installation/requirements?os=pi)
+describe these kernel settings. `--check` is always read-only and cannot be
+combined with `--prepare-host`. The installer never reboots automatically.
 
 ## 2. Download and inspect the installer
 
 Run on the Pi/server as the normal SSH user:
 
 ```bash
-mkdir -p ~/platform-v0.0.1
-cd ~/platform-v0.0.1
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.0.1/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.0.1/SHA256SUMS
+mkdir -p ~/platform-v0.1.2
+cd ~/platform-v0.1.2
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.2/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.2/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.0.1 --check
+sudo bash install.sh --version v0.1.2 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -60,7 +74,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.0.1
+sudo bash install.sh --version v0.1.2
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -90,8 +104,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.0.1 \
-  --bundle platform-v0.0.1-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.2 \
+  --bundle platform-v0.1.2-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;
@@ -177,10 +191,10 @@ curl -fsS http://127.0.0.1:8081/version
 ```
 
 Use `DEMO_V2_IMAGE` for a healthy update. The v3 image deliberately fails readiness
-and can leave a durable `needs_attention` lock; it is reserved for disposable
-failure tests. The UI's status casing and application restart defects are
-recorded limitations. Successful operation polling and an actual HTTP response
-are stronger evidence than the current status badge.
+and is reserved for failure tests. A failed update attempts to restore the
+previous successful snapshot. Its operation remains failed; the mutation lock is
+released only after release identity and live resources have been verified.
+Unresolved restoration remains `needs_attention`.
 
 Public applications require a reachable registry and an image built for the
 host architecture. Public domain routing is a separate planned capability.
@@ -193,8 +207,8 @@ rather than native host installation.
 Record the host model, OS, architecture, free space and installed pins. Confirm
 setup, a v1 deployment, v2 update, scale 2/0/1, rollback, deletion and retained
 history. Reboot the host and confirm that K3s, the broker, login and a retained
-application recover. Native host results remain pending until this procedure is
-executed; the disposable k3d acceptance suite does not establish Pi acceptance.
+application recover. Results must identify the release and host; the disposable k3d suite does not
+substitute for native installation or reboot evidence.
 
 For diagnosis:
 

@@ -123,13 +123,15 @@ func resourceValues(r platform.ResourceRequirements) map[string]any {
 
 // probeValues maps the requested readiness to the chart's probe block. When a
 // readiness HTTP path is given it is used; otherwise the documented TCP fallback
-// applies. Startup uses HTTP /healthz when readiness is HTTP, else TCP.
+// applies. Startup uses its independent HTTP path, or TCP when omitted.
 func probeValues(h platform.Health) map[string]any {
 	readiness := httpProbe(h.ReadinessPath, "/readyz", 5, 3)
-	startup := httpProbe(h.ReadinessPath, "/healthz", 2, 30)
+	startup := tcpProbe(2, 30)
+	if h.StartupPath != "" {
+		startup = httpProbe(h.StartupPath, "/healthz", 2, 30)
+	}
 	if h.ReadinessPath == "" {
 		readiness = tcpProbe(5, 3)
-		startup = tcpProbe(2, 30)
 	}
 	liveness := map[string]any{
 		"enabled": false, "type": "http", "path": "/healthz",

@@ -82,8 +82,13 @@ func (r *Recovery) recoverInterrupted(ctx context.Context, op platform.Operation
 
 	switch {
 	case exists && status.Status == "deployed" && rev.Frozen != nil:
-		// The target release is applied and healthy; finish the operation.
-		r.finish(ctx, op, rev)
+		// A deployed status alone may belong to the old release.
+		verifier, ok := r.helm.(platform.ReleaseVerifier)
+		if ok && verifier.VerifyTarget(ctx, op.AppID, rev) == nil {
+			r.finish(ctx, op, rev)
+		} else if !r.restore(ctx, op) {
+			r.block(ctx, op, "deployed release does not establish target identity; manual recovery required")
+		}
 	case !exists && op.Type == platform.OperationCreate:
 		// An interrupted initial install left no release at all, so re-executing is
 		// safe: the frozen spec (if any) is reused, and there is no pending Helm
@@ -95,6 +100,9 @@ func (r *Recovery) recoverInterrupted(ctx context.Context, op platform.Operation
 		// be resumed automatically; block for a documented recovery instead.
 		r.block(ctx, op, "a pending Helm release is in progress; manual recovery required before retry")
 	default:
+		if exists && status.Status == "failed" && r.restore(ctx, op) {
+			return
+		}
 		// Anything else (failed release, ambiguous status) is not safe to resume
 		// automatically.
 		r.block(ctx, op, "release state is ambiguous; manual recovery required")
@@ -141,4 +149,9 @@ func (r *Recovery) event(ctx context.Context, opID, stage, message string) {
 	_ = r.store.AppendOperationEvent(ctx, platform.OperationEvent{
 		OperationID: opID, Stage: stage, Message: message,
 	})
+}
+
+func (r *Recovery) restore(ctx context.Context, op platform.Operation) bool {
+	w := NewWorker(r.store, r.helm, nil, nil, platform.SystemClock{}, r.logger)
+	return w.restore(ctx, op)
 }

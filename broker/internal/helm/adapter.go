@@ -36,8 +36,9 @@ const installTimeout = 5 * time.Minute
 
 // Adapter installs and upgrades the application chart in a target namespace.
 type Adapter struct {
-	chart     *chart.Chart
-	namespace string
+	verifyManifest func(context.Context, string) error
+	chart          *chart.Chart
+	namespace      string
 	// actionConfigFor builds a Helm action configuration bound to a release
 	// namespace. It is a field so tests can inject an in-memory configuration.
 	actionConfigFor func(namespace string) (*action.Configuration, error)
@@ -56,8 +57,8 @@ func NewAdapter(namespace string, actionConfigFor func(string) (*action.Configur
 	return &Adapter{chart: ch, namespace: namespace, actionConfigFor: actionConfigFor}, nil
 }
 
-// ChartVersion reports the loaded chart's version. Recording chart identity on
-// frozen revisions remains an outstanding execution-snapshot requirement.
+// ChartVersion reports the loaded chart's version. Execution snapshots record
+// this version together with the embedded chart digest and values hash.
 func (a *Adapter) ChartVersion() string { return a.chart.Metadata.Version }
 
 // InstallOrUpgrade renders the chart from the revision's frozen spec and installs
@@ -67,6 +68,9 @@ func (a *Adapter) InstallOrUpgrade(ctx context.Context, appID string, rev platfo
 	if rev.Frozen == nil {
 		return platform.ReleaseStatus{}, platform.Errorf(platform.CodeInternal,
 			"revision %s is not frozen; cannot install", rev.ID)
+	}
+	if _, err := a.PrepareExecution(appID, rev); err != nil {
+		return platform.ReleaseStatus{}, err
 	}
 	values, err := BuildValues(appID, rev)
 	if err != nil {
@@ -86,17 +90,18 @@ func (a *Adapter) InstallOrUpgrade(ctx context.Context, appID string, rev platfo
 	}
 
 	if exists {
-		return a.upgrade(ctx, cfg, releaseName, values)
+		return a.upgrade(ctx, cfg, releaseName, rev.ID, values)
 	}
-	return a.install(ctx, cfg, releaseName, values)
+	return a.install(ctx, cfg, releaseName, rev.ID, values)
 }
 
-func (a *Adapter) install(ctx context.Context, cfg *action.Configuration, name string, values map[string]any) (platform.ReleaseStatus, error) {
+func (a *Adapter) install(ctx context.Context, cfg *action.Configuration, name, revisionID string, values map[string]any) (platform.ReleaseStatus, error) {
 	client := action.NewInstall(cfg)
 	client.ReleaseName = name
 	client.Namespace = a.namespace
 	client.Timeout = installTimeout
 	client.Wait = true
+	client.Description = "platform revision " + revisionID
 	rel, err := client.RunWithContext(ctx, a.chart, values)
 	if err != nil {
 		return platform.ReleaseStatus{}, classifyHelmError(err)
@@ -104,11 +109,12 @@ func (a *Adapter) install(ctx context.Context, cfg *action.Configuration, name s
 	return platform.ReleaseStatus{Revision: rel.Version, Status: rel.Info.Status.String()}, nil
 }
 
-func (a *Adapter) upgrade(ctx context.Context, cfg *action.Configuration, name string, values map[string]any) (platform.ReleaseStatus, error) {
+func (a *Adapter) upgrade(ctx context.Context, cfg *action.Configuration, name, revisionID string, values map[string]any) (platform.ReleaseStatus, error) {
 	client := action.NewUpgrade(cfg)
 	client.Namespace = a.namespace
 	client.Timeout = installTimeout
 	client.Wait = true
+	client.Description = "platform revision " + revisionID
 	// No automatic rollback: the broker owns recovery and must observe the failure
 	// to reach Failed/NeedsAttention per the execution rules.
 	client.Atomic = false

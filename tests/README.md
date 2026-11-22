@@ -90,17 +90,15 @@ Coverage includes:
   and configuration rollback.
 - Missing images, explicit reapply after Service deletion, session/history survival
   and continued application traffic through broker Pod replacement.
-- Unhealthy rollout with preserved previous traffic, durable `needs_attention`
-  state and rejection of conflicting mutations.
+- Unhealthy rollout with verified restoration of the prior snapshot before
+  mutation unlock, plus preserved previous application traffic.
 - Native OCI/chart packaging and startup on a second fresh node without a registry.
 
-Two explicit known-gap probes cover status serialization (`STATUS-1`) and
-application restart (`RESTART-1`). Only their precise currently documented defect
-signatures produce skips; unrelated failures still fail the run. A skip does not
-establish acceptance. Once fixed, these probes become ordinary passing tests.
-Automatic failed-rollout restoration, interruption during Helm mutation, private
-registries, native host bootstrap and public HTTPS remain outside current E2E
-acceptance.
+Status serialization and application restart are required assertions; no known-gap
+skips remain. Authenticated registry inspection and real kubelet pulls use only
+the suite's owned registry and test credentials. Pending/unknown recovery and
+failed restoration retain durable locks in focused regression tests. Public HTTPS
+and native AMD64 installation remain separate acceptance boundaries.
 
 `.github/workflows/e2e.yml` runs at **02:00 UTC daily**, through
 `workflow_dispatch`, and as a reusable release gate. Fast checks continue on
@@ -149,3 +147,38 @@ broker crash recovery.
 These reports preserve dated observations. New thesis measurements require
 retained evidence, predefined repetitions and reference-host conditions from the
 [evaluation plan](../docs/milestones.md#tests-and-thesis-evaluation).
+
+## Native release acceptance
+
+This is an explicit, stateful test against a dedicated installed ARM64 release;
+it is not part of scheduled disposable CI. Management and Kubernetes proxy URLs
+must use loopback SSH forwards. On the Pi, start the documented management
+port-forward and an additional temporary root-readable Kubernetes proxy:
+
+```bash
+pkubectl proxy --address=127.0.0.1 --port=18001
+```
+
+Forward that proxy over SSH as well. The proxy grants Kubernetes administrative
+access: keep both listeners on loopback and stop the temporary proxy after testing.
+Download the release's `release.json`, then run from the checkout with the pinned
+E2E dependencies and Chromium installed:
+
+```bash
+python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.2 \
+  --release-manifest .local/pi/release.json --state .local/pi/access.json \
+  --artifacts .local/pi/acceptance --setup
+```
+
+`--setup` explicitly authorizes first administrator creation on this test
+installation. An existing account without the matching private state file is
+refused. The state file has mode `0600` and contains the generated administrator
+password and owned retained application ID; never commit or publish it. Reports
+contain check descriptions and release identity, not credentials. The command
+retains one healthy owned application for same-version reinstall and reboot checks.
+After reboot, restart the forwards and run the same command with `--resume`
+instead of `--setup`. Cleanup of an installation requires separate explicit
+operator action; the test never uninstalls K3s or deletes unrelated applications.
+
+The [Pi report](experiments/2026-11-22-raspberry-pi.md) records executed results.

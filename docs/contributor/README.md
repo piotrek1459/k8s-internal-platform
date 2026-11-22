@@ -91,8 +91,8 @@ records dependencies, exact commands, workflow triggers and acceptance limits.
 The full E2E suite builds an isolated platform and drives its API and browser,
 checks real Pods and HTTP responses, tests release bundles on a second node,
 and cleans owned resources. It runs at 02:00 UTC nightly, manually, and before
-release publication. Documented status/restart gaps remain explicit acceptance
-skips rather than silently passing checks. Scheduled/manual execution requires
+release publication. Status contracts, Pod replacement, private image pulls and
+verified restoration are required assertions. Scheduled/manual execution requires
 the workflow to be merged into the default branch.
 
 ## Release distribution
@@ -117,7 +117,8 @@ records exact UI/CLI steps and retry behavior.
 The [native installation guide](../installation.md) describes `installer/install.sh`.
 The initial release uses GitHub-hosted OCI bundles instead of requiring a public
 container registry. Image digests remain immutable and are imported directly
-into K3s. Native Pi acceptance and cross-version upgrade/recovery remain pending.
+into K3s. Native Pi evidence is recorded in the reference-host report; native AMD64 and
+cross-version upgrade/recovery remain separate acceptance boundaries.
 
 ## Development structure
 

@@ -63,6 +63,7 @@ type Exposure struct {
 // selects the documented TCP readiness fallback.
 type Health struct {
 	ReadinessPath string
+	StartupPath   string
 }
 
 // RevisionSpec is the requested, mutable intent for a revision before it is
@@ -178,8 +179,7 @@ type SecretVersion struct {
 }
 
 // RegistryCredential stores the metadata for a private registry credential.
-// Credential persistence and image-pull Secret provisioning remain incomplete;
-// the current HTTP handler records metadata without storing the password.
+// Password material lives only in the referenced Kubernetes pull Secret.
 type RegistryCredential struct {
 	ID                 string
 	Label              string
@@ -194,12 +194,12 @@ type RegistryCredential struct {
 // observation the broker could not refresh because the cluster was unreachable;
 // ObservedAt then refers to the last successful read.
 type ObservedStatus struct {
-	Phase              WorkloadPhase
-	DesiredReplicas    int
-	ReadyReplicas      int
-	WorkloadReady      bool
-	RouteReady         bool
-	ObservedGeneration int64
-	ObservedAt         time.Time
-	Stale              bool
+	Phase              WorkloadPhase `json:"phase"`
+	DesiredReplicas    int           `json:"desiredReplicas"`
+	ReadyReplicas      int           `json:"readyReplicas"`
+	WorkloadReady      bool          `json:"workloadReady"`
+	RouteReady         bool          `json:"routeReady"`
+	ObservedGeneration int64         `json:"observedGeneration"`
+	ObservedAt         time.Time     `json:"observedAt"`
+	Stale              bool          `json:"stale"`
 }

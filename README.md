@@ -17,10 +17,10 @@ prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes the resulting native
-ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.0.1`
+ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.2`
 commands are version examples; the downloaded guide matches the selected release.
-Native Pi acceptance, public HTTPS, application volumes and cross-version upgrades remain
-outside current acceptance.
+Reference Pi results are recorded in [status](docs/status.md). Public HTTPS,
+application volumes and cross-version upgrades remain separate acceptance boundaries.
 
 ## Local startup
 
@@ -103,16 +103,15 @@ prerequisites, reports and known acceptance gaps.
 
 ## Current scope
 
-The current implementation provides a local HTTP application workflow, immutable
-image references, operation tracking and revision history. Public HTTPS,
-application data volumes and reference-hardware acceptance remain planned.
-Release automation and the Linux installer are implemented with explicit
-validation boundaries. The UI defaults to Internal exposure for the documented workflow.
-The [user guide](docs/user/README.md#current-limitations) records lifecycle
-limitations. UI/API contract alignment, restart, interrupted recovery, private
-registry authentication and failed-rollout restoration remain incomplete.
-Milestone completion is determined by the acceptance evidence in
-[the implementation plan](docs/milestones.md).
+The implementation provides a local HTTP application workflow, immutable image
+references, operation tracking, revision history, restart and verified restoration.
+Private registry passwords are stored in Kubernetes Secrets. The UI defaults to
+Internal exposure; the Linux installer provides SSH/loopback management access.
+[Implementation status](docs/status.md) records reference-host results and the
+remaining recovery boundaries. Public HTTPS, application data volumes, verified
+backup/restore and cross-version platform upgrades remain separate work.
+Milestone completion depends on the evidence defined in the
+[implementation plan](docs/milestones.md).
 
 ## Repository
 

@@ -19,6 +19,7 @@ type UpdateInput struct {
 	SecretRefs           []platform.SecretRef
 	Resources            *platform.ResourceRequirements
 	ReadinessPath        *string
+	StartupPath          *string
 	Exposure             *platform.Exposure
 }
 
@@ -66,6 +67,12 @@ func ValidateUpdate(current platform.RevisionSpec, in UpdateInput) (platform.Rev
 				"readiness path must start with '/'")
 		}
 		next.Health.ReadinessPath = *in.ReadinessPath
+	}
+	if in.StartupPath != nil {
+		if *in.StartupPath != "" && !strings.HasPrefix(*in.StartupPath, "/") {
+			return platform.RevisionSpec{}, platform.FieldErrorf(platform.CodeInvalidInput, "health.startupPath", "startup path must start with /")
+		}
+		next.Health.StartupPath = *in.StartupPath
 	}
 	if in.Exposure != nil {
 		if err := validateExposure(*in.Exposure); err != nil {

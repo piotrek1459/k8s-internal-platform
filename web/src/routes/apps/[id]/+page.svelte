@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import {
 		getApp, listRevisions,
-		restartApp, reapplyApp, rollbackApp, deleteApp,
+		restartApp, reapplyApp, rollbackApp, deleteApp, recoverApp,
 		ApiError
 	} from '$lib/api.js';
 	import StatusBadge from '$components/StatusBadge.svelte';
@@ -44,6 +44,14 @@
 			loading = false;
 		}
 	});
+
+	async function handleRecover() {
+		if (!app || actionPending) return;
+		actionPending = true;
+		try { const res = await recoverApp(id, app.version); await goto(`/apps/${id}/operation?op=${res.operationId}`); }
+		catch (e) { actionError = e instanceof Error ? e.message : 'Recovery retry failed'; }
+		finally { actionPending = false; }
+	}
 
 	async function handleRestart() {
 		if (!app || actionPending) return;
@@ -119,6 +127,10 @@
 		<a href="/apps" class="text-sm text-gray-500 hover:text-gray-700">← Applications</a>
 	</div>
 
+	{#if app.activeOperationId}
+		<p class="text-sm mb-3">An operation is active or awaiting recovery. Retry is available only for a blocked operation after its cause has been addressed.</p>
+		<button onclick={handleRecover} disabled={actionPending} class="px-3 py-2 border rounded mb-3">Retry recovery</button>
+	{/if}
 	<!-- Action bar -->
 	<div class="flex flex-wrap gap-2 mb-6">
 		<button

@@ -32,6 +32,7 @@ type CreateInput struct {
 	SecretRefs           []platform.SecretRef
 	Resources            platform.ResourceRequirements
 	ReadinessPath        string
+	StartupPath          string
 	Exposure             platform.Exposure
 }
 
@@ -84,6 +85,9 @@ func ValidateCreate(in CreateInput) (platform.RevisionSpec, error) {
 			"readiness path must start with '/'")
 	}
 
+	if in.StartupPath != "" && !strings.HasPrefix(in.StartupPath, "/") {
+		return platform.RevisionSpec{}, platform.FieldErrorf(platform.CodeInvalidInput, "health.startupPath", "startup path must start with /")
+	}
 	return platform.RevisionSpec{
 		Image:                in.Image,
 		Profile:              platform.ProfileHTTP,
@@ -92,7 +96,7 @@ func ValidateCreate(in CreateInput) (platform.RevisionSpec, error) {
 		Environment:          in.Environment,
 		SecretRefs:           in.SecretRefs,
 		Resources:            in.Resources,
-		Health:               platform.Health{ReadinessPath: in.ReadinessPath},
+		Health:               platform.Health{ReadinessPath: in.ReadinessPath, StartupPath: in.StartupPath},
 		Exposure:             in.Exposure,
 		RegistryCredentialID: in.RegistryCredentialID,
 	}, nil

@@ -119,9 +119,10 @@ type Store interface {
 	// OperationSucceeded and sets deleted=1 on the application in the same
 	// transaction, closing the window that existed when these were two separate calls.
 	TransitionDeleteOperation(ctx context.Context, operationID string) error
+	RestoreApplication(ctx context.Context, operationID, revisionID string) error
+	RetryRecovery(ctx context.Context, appID string, version int64) (AcceptResult, error)
 
-	// Registry credential metadata. Password persistence and pull Secret
-	// provisioning are not yet wired into the current HTTP workflow.
+	// Registry credential metadata. Passwords are stored only in Kubernetes.
 	CreateRegistryCredential(ctx context.Context, cred RegistryCredential) error
 	ListRegistryCredentials(ctx context.Context) ([]RegistryCredential, error)
 	DeleteRegistryCredential(ctx context.Context, id string) error
@@ -175,4 +176,27 @@ type SecretManager interface {
 	// CreateImmutableSecret creates an immutable Secret with a deterministic
 	// versioned name and returns its name and UID for metadata storage.
 	CreateImmutableSecret(ctx context.Context, secretID string, version int, data map[string][]byte) (name, uid string, err error)
+}
+
+// ExecutionPlanner completes the immutable chart/values identity before apply.
+type ExecutionPlanner interface {
+	PrepareExecution(appID string, rev Revision) (FrozenSpec, error)
+}
+
+// ReleaseVerifier establishes that persisted intent matches healthy live state.
+type ReleaseVerifier interface {
+	VerifyTarget(ctx context.Context, appID string, rev Revision) error
+}
+
+// RegistrySecretManager stores write-only Docker authentication for kubelet and inspection.
+type RegistrySecretManager interface {
+	CreateRegistrySecret(ctx context.Context, name string, data []byte) error
+	ReadRegistrySecret(ctx context.Context, name string) ([]byte, error)
+	DeleteRegistrySecret(ctx context.Context, name string) error
+}
+
+// RegistryCredentials coordinates secret storage and guarded metadata deletion.
+type RegistryCredentials interface {
+	Create(ctx context.Context, cred RegistryCredential, password string) error
+	Delete(ctx context.Context, id string) error
 }

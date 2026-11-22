@@ -66,6 +66,15 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 		}
 	}
 
+	if id := req.Revision.Spec.RegistryCredentialID; id != "" {
+		var exists int
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM registry_credentials WHERE id = ? AND k8s_secret_name <> ''`, id).Scan(&exists); err != nil {
+			return platform.AcceptResult{}, err
+		}
+		if exists != 1 {
+			return platform.AcceptResult{}, platform.FieldErrorf(platform.CodeInvalidInput, "registryCredentialId", "registry credential is unavailable")
+		}
+	}
 	if err := insertRevision(ctx, tx, req.Revision, now); err != nil {
 		return platform.AcceptResult{}, err
 	}
