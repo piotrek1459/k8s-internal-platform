@@ -25,15 +25,23 @@ func (w *Worker) restore(ctx context.Context, op platform.Operation) bool {
 	}
 	w.event(ctx, op.ID, "restoring", "restoring the previous successful revision")
 	if _, err := w.helm.InstallOrUpgrade(ctx, op.AppID, previous); err != nil {
+		w.restorationFailure(ctx, op, "apply", err)
 		return false
 	}
 	if err := verifier.VerifyTarget(ctx, op.AppID, previous); err != nil {
+		w.restorationFailure(ctx, op, "verify", err)
 		return false
 	}
 	if err := w.store.RestoreApplication(ctx, op.ID, previous.ID); err != nil {
+		w.restorationFailure(ctx, op, "record", err)
 		return false
 	}
 	w.observeBestEffort(ctx, op.AppID)
 	w.event(ctx, op.ID, "restored", "candidate failed; previous successful revision restored and verified")
 	return true
+}
+
+func (w *Worker) restorationFailure(ctx context.Context, op platform.Operation, stage string, cause error) {
+	w.logger.Warn("restoration_failed", "operation", op.ID, "stage", stage, "error", cause.Error())
+	w.event(ctx, op.ID, "restoration_failed", sanitize(cause))
 }

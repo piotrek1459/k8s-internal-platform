@@ -21,8 +21,8 @@ import (
 func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 	decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(manifest), 4096)
 	deployments, services := 0, 0
-	mismatch := func() error {
-		return platform.Errorf(platform.CodeConflict, "live resources do not match the recorded healthy release")
+	mismatch := func(reason string) error {
+		return platform.Errorf(platform.CodeConflict, "live release verification failed: %s", reason)
 	}
 	for {
 		var raw map[string]any
@@ -46,7 +46,7 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 				return err
 			}
 			if want.Namespace != c.namespace {
-				return mismatch()
+				return mismatch("resource identity or count differs")
 			}
 			got, err := c.cs.AppsV1().Deployments(c.namespace).Get(ctx, want.Name, metav1.GetOptions{})
 			if err != nil {
@@ -56,8 +56,21 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			if want.Spec.Replicas != nil {
 				n = *want.Spec.Replicas
 			}
-			if got.Spec.Replicas == nil || *got.Spec.Replicas != n || !equality.Semantic.DeepDerivative(want.Spec.Template, got.Spec.Template) || !equality.Semantic.DeepDerivative(want.Spec.Selector, got.Spec.Selector) || got.Status.ObservedGeneration < got.Generation || got.Status.UpdatedReplicas != n || got.Status.ReadyReplicas != n || got.Status.Replicas != n {
-				return mismatch()
+			if got.Spec.Replicas == nil || *got.Spec.Replicas != n {
+				return mismatch("desired replica count differs")
+			}
+			defaultProbeThresholds(&want.Spec.Template)
+			if !equality.Semantic.DeepDerivative(want.Spec.Template, got.Spec.Template) {
+				return mismatch("Pod template differs")
+			}
+			if !equality.Semantic.DeepDerivative(want.Spec.Selector, got.Spec.Selector) {
+				return mismatch("Deployment selector differs")
+			}
+			if got.Status.ObservedGeneration < got.Generation {
+				return mismatch("Deployment generation is not observed")
+			}
+			if got.Status.UpdatedReplicas != n || got.Status.ReadyReplicas != n || got.Status.Replicas != n {
+				return mismatch("Deployment replicas are not fully ready")
 			}
 			deployments++
 		case "Service":
@@ -66,14 +79,14 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 				return err
 			}
 			if want.Namespace != c.namespace {
-				return mismatch()
+				return mismatch("resource identity or count differs")
 			}
 			got, err := c.cs.CoreV1().Services(c.namespace).Get(ctx, want.Name, metav1.GetOptions{})
 			if err != nil {
 				return err
 			}
 			if !equality.Semantic.DeepEqual(want.Spec.Selector, got.Spec.Selector) || !equality.Semantic.DeepDerivative(want.Spec.Ports, got.Spec.Ports) || got.Spec.Type != corev1.ServiceTypeClusterIP {
-				return mismatch()
+				return mismatch("Service selector, ports or type differs")
 			}
 			services++
 		case "Ingress":
@@ -82,21 +95,35 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 				return err
 			}
 			if want.Namespace != c.namespace {
-				return mismatch()
+				return mismatch("resource identity or count differs")
 			}
 			got, err := c.cs.NetworkingV1().Ingresses(c.namespace).Get(ctx, want.Name, metav1.GetOptions{})
 			if err != nil {
 				return err
 			}
 			if !equality.Semantic.DeepDerivative(want.Spec, got.Spec) {
-				return mismatch()
+				return mismatch("resource identity or count differs")
 			}
 		default:
-			return mismatch()
+			return mismatch("resource identity or count differs")
 		}
 	}
 	if deployments != 1 || services != 1 {
-		return mismatch()
+		return mismatch("resource identity or count differs")
 	}
 	return nil
+}
+
+// The API defaults an omitted probe successThreshold to 1. Helm's stored
+// manifest is not defaulted, so normalize this server-owned default before
+// comparing typed Pod templates; readiness, startup and image fields remain checked.
+func defaultProbeThresholds(template *corev1.PodTemplateSpec) {
+	for i := range template.Spec.Containers {
+		container := &template.Spec.Containers[i]
+		for _, probe := range []*corev1.Probe{container.StartupProbe, container.ReadinessProbe, container.LivenessProbe} {
+			if probe != nil && probe.SuccessThreshold == 0 {
+				probe.SuccessThreshold = 1
+			}
+		}
+	}
 }
