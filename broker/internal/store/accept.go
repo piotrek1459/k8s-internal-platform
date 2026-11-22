@@ -68,7 +68,7 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 
 	if id := req.Revision.Spec.RegistryCredentialID; id != "" {
 		var exists int
-		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM registry_credentials WHERE id = ? AND k8s_secret_name <> ''`, id).Scan(&exists); err != nil {
+		if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM registry_credentials WHERE id = ? AND k8s_secret_name <> '' AND verification_status <> 'deleting'`, id).Scan(&exists); err != nil {
 			return platform.AcceptResult{}, err
 		}
 		if exists != 1 {

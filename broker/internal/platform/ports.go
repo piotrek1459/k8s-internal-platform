@@ -126,6 +126,7 @@ type Store interface {
 	CreateRegistryCredential(ctx context.Context, cred RegistryCredential) error
 	ListRegistryCredentials(ctx context.Context) ([]RegistryCredential, error)
 	DeleteRegistryCredential(ctx context.Context, id string) error
+	BeginRegistryCredentialDeletion(ctx context.Context, id string) error
 }
 
 // ImageReport is the result of inspecting a registry image reference.

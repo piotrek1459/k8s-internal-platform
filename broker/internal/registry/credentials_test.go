@@ -110,3 +110,49 @@ func TestPrivateInspectorUsesStoredPassword(t *testing.T) {
 		t.Fatal("anonymous private inspection succeeded")
 	}
 }
+
+type failingDeletion struct {
+	memorySecrets
+	fail bool
+}
+
+func (s *failingDeletion) DeleteRegistrySecret(ctx context.Context, name string) error {
+	if s.fail {
+		return errors.New("cluster unavailable")
+	}
+	return s.memorySecrets.DeleteRegistrySecret(ctx, name)
+}
+func TestCredentialDeletionRemainsRetryableAfterClusterFailure(t *testing.T) {
+	ctx := context.Background()
+	db, err := store.Open(ctx, t.TempDir()+"/platform.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	st := store.New(db)
+	secrets := &failingDeletion{memorySecrets: memorySecrets{map[string][]byte{}}}
+	service := &CredentialService{Store: st, Secrets: secrets}
+	c := platform.RegistryCredential{ID: "cred_cleanup", Registry: "registry.example.com", Username: "operator"}
+	if err := service.Create(ctx, c, "password"); err != nil {
+		t.Fatal(err)
+	}
+	secrets.fail = true
+	if err := service.Delete(ctx, c.ID); err == nil {
+		t.Fatal("failed Kubernetes deletion accepted")
+	}
+	metadata, _ := st.ListRegistryCredentials(ctx)
+	if len(metadata) != 1 || metadata[0].VerificationStatus != "deleting" {
+		t.Fatal("retryable cleanup reference lost")
+	}
+	if _, err := service.ResolveForRegistry(ctx, c.ID, c.Registry); err == nil {
+		t.Fatal("retiring credential remained usable")
+	}
+	secrets.fail = false
+	if err := service.Delete(ctx, c.ID); err != nil {
+		t.Fatal(err)
+	}
+	metadata, _ = st.ListRegistryCredentials(ctx)
+	if len(metadata) != 0 || len(secrets.values) != 0 {
+		t.Fatal("credential cleanup did not converge")
+	}
+}

@@ -42,6 +42,16 @@ func (s *Store) ListRegistryCredentials(ctx context.Context) ([]platform.Registr
 }
 
 func (s *Store) DeleteRegistryCredential(ctx context.Context, id string) error {
+	return s.changeRegistryCredentialDeletion(ctx, id, false)
+}
+
+// BeginRegistryCredentialDeletion reserves the credential before secret removal.
+// Accepted mutations and resolution reject the tombstone; cleanup is retryable.
+func (s *Store) BeginRegistryCredentialDeletion(ctx context.Context, id string) error {
+	return s.changeRegistryCredentialDeletion(ctx, id, true)
+}
+
+func (s *Store) changeRegistryCredentialDeletion(ctx context.Context, id string, reserve bool) error {
 	tx, err := s.db.sql.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -54,7 +64,11 @@ func (s *Store) DeleteRegistryCredential(ctx context.Context, id string) error {
 	if refs > 0 {
 		return platform.Errorf(platform.CodeConflict, "registry credential is referenced by an active or rollback-eligible revision")
 	}
-	res, err := tx.ExecContext(ctx, `DELETE FROM registry_credentials WHERE id = ?`, id)
+	query := `DELETE FROM registry_credentials WHERE id = ?`
+	if reserve {
+		query = `UPDATE registry_credentials SET verification_status = 'deleting' WHERE id = ?`
+	}
+	res, err := tx.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("delete registry credential: %w", err)
 	}

@@ -265,3 +265,5 @@ func (f *fakeStore) RestoreApplication(context.Context, string, string) error { 
 func (f *fakeStore) RetryRecovery(context.Context, string, int64) (platform.AcceptResult, error) {
 	return platform.AcceptResult{}, nil
 }
+
+func (f *fakeStore) BeginRegistryCredentialDeletion(context.Context, string) error { return nil }

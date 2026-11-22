@@ -84,6 +84,9 @@ func (s *CredentialService) ResolveForRegistry(ctx context.Context, id, host str
 	if c.Registry != host {
 		return nil, platform.FieldErrorf(platform.CodeInvalidInput, "registryCredentialId", "credential belongs to another registry")
 	}
+	if c.VerificationStatus == "deleting" {
+		return nil, platform.Errorf(platform.CodeConflict, "registry credential is being deleted")
+	}
 	if c.K8sSecretName == "" {
 		return nil, platform.Errorf(platform.CodeDependencyUnavailable, "credential has no stored authentication material; recreate it")
 	}
@@ -113,11 +116,13 @@ func (s *CredentialService) Delete(ctx context.Context, id string) error {
 		return err
 	}
 	// The store transaction refuses references from active and historical revisions.
-	if err := s.Store.DeleteRegistryCredential(ctx, id); err != nil {
+	if err := s.Store.BeginRegistryCredentialDeletion(ctx, id); err != nil {
 		return err
 	}
 	if c.K8sSecretName != "" {
-		return s.Secrets.DeleteRegistrySecret(ctx, c.K8sSecretName)
+		if err := s.Secrets.DeleteRegistrySecret(ctx, c.K8sSecretName); err != nil {
+			return err
+		}
 	}
-	return nil
+	return s.Store.DeleteRegistryCredential(ctx, id)
 }
