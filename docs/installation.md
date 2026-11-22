@@ -135,6 +135,16 @@ In another terminal on the workstation, substitute the actual SSH destination:
 ssh -N -L 8080:127.0.0.1:8080 USER@PI_HOST
 ```
 
+The two foreground commands can alternatively be combined from the workstation:
+
+```bash
+ssh -t -L 127.0.0.1:8080:127.0.0.1:8080 USER@PI_HOST \
+  'sudo /usr/local/lib/k8s-internal-platform/kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80'
+```
+
+Keep the SSH command running while using the UI. This one-command access path
+was verified against the reference Pi after its reboot.
+
 Open **http://127.0.0.1:8080/setup** locally. Retrieve the bootstrap token privately
 on the Pi/server:
 
