@@ -144,3 +144,25 @@ settings and a rendered-manifest regression. The fix requires a subsequent
 published platform release and a fresh native compatibility check. The published
 `v0.1.2` assets remain unchanged. Native AMD64, public HTTPS, application data
 volumes, backup restoration and cross-version upgrades are outside this run.
+
+## Compatibility-fix source verification
+
+The complete disposable API/browser/private-pull/bundle suite passed with the
+updated chart: **14 tests, 0 failures, 0 skips**, 540.346 seconds of test
+execution, using candidate build version `0.1.3`. The run installed a native
+ARM64 OCI bundle on a second fresh K3s node and verified restoration, status
+contracts and Pod replacement with the temporary-storage settings present.
+This candidate version was not published by the verification session.
+
+Broker formatting/vet/tests, chart lint/render/negative/synchronization checks,
+57 Python regressions and shell syntax passed. Regressions cover the temporary
+volume/security contract, bounded native Pod-deletion waits and release-guide
+rendering that preserves historical verification version numbers. The five
+GitHub PR checks passed. The [follow-up PR](https://github.com/piotrek1459/k8s-internal-platform/pull/15)
+contains the fix and its reviewable validation record.
+
+Disposable clusters, registry and Buildx builder were removed. Temporary native
+proxies/SSH forwards were stopped; the dedicated session-survival cookie was
+revoked and its local copy removed after the successful checks. The `v0.1.2`
+installation and one healthy v1 demo remain on the Pi. The documented single-SSH
+management access command returned readiness and the login page after reboot.
