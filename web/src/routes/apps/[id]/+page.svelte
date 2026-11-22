@@ -3,8 +3,8 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import {
-		getApp, listRevisions,
-		restartApp, reapplyApp, rollbackApp, deleteApp,
+		getApp, getOperation, listRevisions,
+		restartApp, reapplyApp, rollbackApp, deleteApp, recoverApp,
 		ApiError
 	} from '$lib/api.js';
 	import StatusBadge from '$components/StatusBadge.svelte';
@@ -18,6 +18,7 @@
 	let activeTab = $state<'overview' | 'events' | 'history'>('overview');
 	let actionError = $state('');
 	let actionPending = $state(false);
+	let canRecover = $state(false);
 
 	function newKey() {
 		return crypto.randomUUID();
@@ -36,6 +37,7 @@
 	onMount(async () => {
 		try {
 			app = await getApp(id);
+			if (app.activeOperationId) canRecover = (await getOperation(app.activeOperationId)).state === 'needs_attention';
 		} catch (e) {
 			if (e instanceof ApiError && e.status === 401) goto('/login');
 			else if (e instanceof ApiError && e.status === 404) error = 'Application not found.';
@@ -44,6 +46,14 @@
 			loading = false;
 		}
 	});
+
+	async function handleRecover() {
+		if (!app || actionPending) return;
+		actionPending = true;
+		try { const res = await recoverApp(id, app.version); await goto(`/apps/${id}/operation?op=${res.operationId}`); }
+		catch (e) { actionError = e instanceof Error ? e.message : 'Recovery retry failed'; }
+		finally { actionPending = false; }
+	}
 
 	async function handleRestart() {
 		if (!app || actionPending) return;
@@ -119,6 +129,10 @@
 		<a href="/apps" class="text-sm text-gray-500 hover:text-gray-700">← Applications</a>
 	</div>
 
+	{#if canRecover}
+		<p class="text-sm mb-3">The application is awaiting recovery. Address the underlying cause before retrying.</p>
+		<button onclick={handleRecover} disabled={actionPending} class="px-3 py-2 border rounded mb-3">Retry recovery</button>
+	{/if}
 	<!-- Action bar -->
 	<div class="flex flex-wrap gap-2 mb-6">
 		<button

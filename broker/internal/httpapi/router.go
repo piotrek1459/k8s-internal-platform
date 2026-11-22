@@ -26,16 +26,18 @@ type Enqueuer interface {
 // Config wires the HTTP layer to application policy, persistence, authentication
 // and optional cluster/image/Secret capabilities.
 type Config struct {
-	Logger        *slog.Logger
-	Cluster       ClusterPinger // optional; nil means cluster connectivity is reported unknown
-	Store         platform.Store
-	Factory       applications.Factory
-	Enqueuer      Enqueuer                // optional
-	Auth          Authenticator           // required for authenticated routes
-	SecureCookies bool                    // set Secure on session cookies (true behind HTTPS)
-	Inspector     platform.ImageInspector // optional; enables POST /images/inspect
-	Secrets       platform.SecretManager  // optional; enables the secret endpoints
-	Version       string                  // reported by GET /api/v1/system
+	PrivateIngressEnabled bool
+	Logger                *slog.Logger
+	Cluster               ClusterPinger // optional; nil means cluster connectivity is reported unknown
+	Store                 platform.Store
+	Factory               applications.Factory
+	Enqueuer              Enqueuer                // optional
+	Auth                  Authenticator           // required for authenticated routes
+	SecureCookies         bool                    // set Secure on session cookies (true behind HTTPS)
+	Inspector             platform.ImageInspector // optional; enables POST /images/inspect
+	Secrets               platform.SecretManager  // optional; enables the secret endpoints
+	Credentials           platform.RegistryCredentials
+	Version               string // reported by GET /api/v1/system
 }
 
 // Router builds the HTTP handler with all registered routes.

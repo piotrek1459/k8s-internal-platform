@@ -1,118 +1,77 @@
 # Implementation status and next work
 
-Updated: 2026-11-08. Source baseline: merged PR #11 (`da23d67`), with manual-release and verification additions.
-This document records implementation and verification boundaries. The detailed
-plans describe target requirements; a planned requirement is not evidence of
-completion. Runtime installations and generated files are not part of the source
-checkout.
+Updated: 2026-11-22. This document distinguishes implemented behavior, executed
+verification and remaining scope. Plans and passing unit tests are not evidence
+of acceptance on every deployment target.
 
 ## Current implementation
 
-The local prototype runs the platform and managed applications in one K3s
-cluster. A single Go process serves a static Svelte UI and JSON API, executes a
-SQLite-backed operation queue, observes Kubernetes workloads, and applies an
-embedded first-party chart through the Helm SDK.
+The platform and its applications run in one single-node K3s cluster. A Go
+process serves the static Svelte UI and JSON API, stores metadata in SQLite,
+executes a durable serial operation queue and manages applications through its
+embedded first-party Helm chart.
 
-| Area | Implemented and recorded evidence | Remaining boundary |
+| Area | Implemented behavior | Acceptance boundary |
 | --- | --- | --- |
-| Local workflow | `scripts/platform.sh` builds the UI, broker and demos, creates/reuses a k3d cluster and registry, installs the platform and provides foreground forwards. Fresh installation and stop/rebuild were verified locally. | Native Pi/AMD64 host acceptance and cross-version upgrades remain pending. |
-| Release distribution | Manual dispatch selects a source branch (default `main`) and version. The branch HEAD is pinned for tests/builds; only successful gates create its tag and GitHub release. Normal releases are the default, with an optional prerelease setting. | Native Pi/systemd installation and cross-version backup/upgrade/recovery acceptance remain pending. |
-| Application chart | Deployment, Service, probes, resource settings, ownership labels, Secret references and optional private ingress. Local manual lifecycle and route-isolation reports are retained. | Resource defaults are provisional; reference-Pi and second-device LAN acceptance remain outstanding. |
-| Durable backend | SQLite migrations, transactional acceptance, idempotency, application version checks, a serial worker, status observer, operation history and audit records. | Interrupted-operation target verification and complete execution snapshots require further work. |
-| Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashes, hashed sessions, logout and mutation-header checks. | Login throttling, password recovery and normal private HTTPS administration remain outstanding. |
-| Administrator UI | Setup/login, application creation, operation polling, update/scale, history, rollback, deletion, Secret and credential screens. | Automated browser setup and healthy lifecycle workflows exist; UI/API contract mismatches remain and are not blanket acceptance. |
-| Healthy lifecycle | Local API deployment of v1, update to v2, scaling to 2/0/1, rollback to v1 and deletion with retained history were verified. | Restart, unhealthy-rollout restoration and crash recovery are not accepted as complete. |
-| Configuration Secrets | Immutable Kubernetes Secret creation/versioning, metadata-only SQLite records, explicit version references and deletion guards. | Real-cluster configuration rollback is covered by E2E; UI application-reference submission remains incomplete. |
-| Private images | Credential metadata endpoints and image-inspector authentication interfaces exist. | Password persistence, credential resolution and image-pull Secret provisioning are incomplete. |
-| Diagnostics | Structured broker logs, operation events and cached workload observations. | Application log/event endpoints, audit browsing, metrics, capacity reporting and retention automation remain planned. |
-| Persistence | The platform has a metadata PVC. | Application volumes, retained-volume operations and verified backup/restore belong to M5. |
-| Networking | Current development access uses loopback forwarding and Internal application exposure. | LAN HTTPS, public routing/TLS and direct-ingress/tunnel acceptance remain outstanding. |
-| Portability | Broker and demo native OCI packaging supports ARM64/AMD64. Native OCI identity, version propagation and containerized runtime checks are recorded in the verification report. | Native Raspberry Pi/AMD64 host acceptance remains outstanding. |
-
-The local source walkthrough uses an anonymous local registry, the stateless
-HTTP profile, port 8080 and readiness path `/readyz`. A public image registry and
-public application exposure are separate concepts. Replica changes are manual;
-several replicas on one host do not provide host-level availability.
+| Distribution | Manually dispatched releases pin a selected branch HEAD, run regression/E2E gates and publish ARM64/AMD64 OCI bundles, installer, guide and checksums. Normal publication is the default. | Native Raspberry Pi results are recorded separately; native AMD64 host acceptance and cross-version upgrades remain outstanding. |
+| Installation | Dedicated Linux/systemd installer provisions pinned K3s/Helm, imports native OCI digests and installs the platform. Same-version reruns retain state. Optional Pi boot preparation backs up the command line and requires a manual reboot. | Unrelated clusters and cross-version upgrades are refused. The boot-preparation transformation has regressions; physical-host evidence must identify the tested installer release. |
+| Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Login throttling, password recovery and normal LAN HTTPS administration remain outstanding. |
+| UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Application log browsing and the complete configuration editor remain planned. LAN selection is enabled only when private ingress is explicitly configured. |
+| Application lifecycle | Digest-pinned deployment, update, scale 2/0/1, restart, reapply, rollback and deletion with retained history. | Replicas on one node do not provide host availability. Application data volumes remain M5 scope. |
+| Execution snapshots | Image digest, exact Secret references, chart version, embedded chart content digest, canonical values hash and stable restart token are recorded before apply. | A different chart artifact is refused; old chart retrieval and rollback across chart changes are not implemented. |
+| Recovery | Interrupted success requires target release identity, matching chart/values and healthy matching live resources. Failed updates attempt verified restoration of the last successful revision. | Pending Helm state, an unavailable cluster, missing snapshots or failed restoration remain blocked. Recovery retry reuses the existing operation; it does not blindly clear a lock. |
+| Configuration Secrets | Immutable Kubernetes Secret versions, metadata-only SQLite storage, explicit version references and deletion guards. | Ordinary API responses never return values. |
+| Registry credentials | Immutable Kubernetes Docker configuration Secrets support inspection and kubelet pulls. SQLite contains metadata only. Credentials are registry-scoped and deletion is guarded by active/rollback references. | Password creation does not itself verify registry access. Credential rotation and external registry-provider variations require separate acceptance. |
+| Diagnostics | Structured broker logs, operation events and observed workload state. | Application log/event APIs, audit browsing, capacity reporting and metrics remain planned. |
+| Networking | ClusterIP management and applications with SSH loopback forwarding. Private ingress is an explicit optional capability. | The native installer disables Traefik/ServiceLB. LAN DNS/HTTPS and public routing/tunnels remain separate work. |
+| Persistence | A platform PVC retains SQLite, accounts, sessions, revisions and history. | Application volumes, off-device backups and verified data restoration remain M5 scope. |
 
 ## Known correctness and integration gaps
 
-These findings are based on source inspection. Existing passing checks do not
-establish acceptance for the affected paths.
+The previous status/restart acceptance skips have been removed. Recovery no
+longer accepts an arbitrary deployed Helm release as proof that a target was
+applied. Ambiguous state deliberately retains `needs_attention` and the mutation
+lock; a new rollback cannot bypass that lock. After addressing the underlying
+cause, `POST /apps/{id}/recover` or **Retry recovery** requeues the existing
+blocked operation under the application-version guard.
 
-1. **UI/API response shapes:** application detail status serializes exported Go
-   names such as `Phase`, while the schema and UI expect `phase`. The UI reads
-   errors at the top level although the server returns an `error` envelope.
-   Secret versions are objects in responses but numbers in the UI type.
-2. **Creation form:** LAN uses `private` in the UI instead of backend `lan` and
-   lacks the required hostname input. The optional Secret-reference controls are
-   not included in the submitted application body. Initial root navigation can
-   lead to login before setup; the current guide opens `/setup` explicitly.
-3. **Restart:** a new restart revision carries an existing frozen specification.
-   The worker returns it before assigning the new restart token, allowing success
-   without Pod replacement.
-4. **Interrupted recovery:** a Helm status of `deployed` plus a frozen candidate
-   does not prove that the candidate was applied. An old deployed release can be
-   mistaken for an interrupted target. Target identity and live state must be
-   established before recording recovery success.
-5. **Failed mutations:** Helm failures enter `needs_attention` and retain the
-   application lock. Automatic verified restoration and an administrator recovery
-   operation are not implemented. A new rollback cannot bypass the lock.
-6. **Private credentials:** the current handler accepts a password but stores
-   only metadata; the running inspectors have no credential resolver. The chart
-   can refer to a pull Secret that the credential workflow has not provisioned.
-7. **Execution snapshots:** chart version, chart artifact digest and values hash
-   have model fields but are not populated by the worker. Rollback across chart
-   upgrades therefore lacks the complete artifact guarantee in the design.
-8. **Probe mapping:** the broker currently reuses a supplied readiness path for
-   startup. The chart can express separate probes, but that distinction is not
-   exposed correctly by the application API mapping. Unhealthy-rollout acceptance
-   must verify startup and readiness independently.
+Remaining boundaries are explicit: cross-version platform upgrades, unavailable
+historical chart artifacts, first-install failure without a previous successful
+revision, pending Helm transactions and failed restoration require diagnosis.
+A retry does not promise that these conditions can be resolved automatically.
+Public HTTPS, application persistence, backup/recovery, private registry rotation,
+login throttling and application log browsing are not established by this increment.
 
 ## Verification available
 
-- The ordinary broker suite has 98 top-level test functions using temporary
-  SQLite, fake Kubernetes clients, in-memory Helm storage and an in-process
-  registry. One additional real-cluster test is gated by the `integration` build
-  tag and `PLATFORM_INTEGRATION=1`.
-- The demo has five top-level Go tests. The 51 Python release/installer and helper
-  regressions cover rollback evidence, transcript completion, command validation,
-  digest selection, metadata/checksum integrity, manual publication guards, release-kind selection, E2E progress/timeout handling
-  and bootstrap-log redaction. Table-driven subcases are additional to these counts.
-- Every pull request runs broker/demo Go regression suites, UI type-check/lint/
-  build, full OpenAPI validation, shell/Python checks, and the full local
-  chart lint/render/negative/synchronization matrix. Go tests use `-count=1`;
-  local and CI chart checks share the Helm version pin. The fast PR jobs do not
-  run a cluster. A separate nightly/manual/release E2E
-  workflow builds isolated K3s platforms and drives the API/browser; known status
-  and restart signatures remain explicit acceptance skips. Schedule: 02:00 UTC.
-  Suite locations and workflow mapping are in the [test guide](../tests/README.md).
-- The [manual release verification report](../tests/experiments/2026-11-08-manual-release.md)
-  records publication-controller regressions, read-only branch HEAD resolution and
-  a native ARM64 bundle run with an explicitly supplied release version. The full
-  publication workflow has not been dispatched. These checks establish packaging
-  and containerized runtime behavior, not native Pi boot or systemd installation.
-- The [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)
-  records the earlier healthy API lifecycle and stop/rebuild test. Earlier
-  [reports](../tests/README.md#historical-reports) cover the manual chart baseline
-  and implementation snapshots. A procedure or unit test is distinguished from
-  a real-cluster or browser acceptance result.
+- Pull requests run uncached Go regressions, UI type checking/lint/build, OpenAPI
+  validation, Python/shell checks and the chart lint/render/negative/synchronization
+  matrix through `tests/run.py`. The fast jobs do not create a cluster.
+- The real-cluster API/browser/bundle suite runs nightly at **02:00 UTC**, manually,
+  and as a release gate. Status serialization and Pod replacement are required
+  assertions. Unhealthy updates must restore the previous snapshot before unlock.
+  Authenticated registry inspection and actual kubelet image pulls are covered.
+- `tests/e2e/native.py` exercises a published ARM64 release on an explicitly
+  selected installation through loopback SSH forwards. It creates an administrator
+  only with `--setup`, retains private local credentials and one owned test app,
+  and supports post-reboot verification with `--resume`.
+- The [reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
+  records installation attempts, host prerequisites and executed release acceptance.
+  The [manual-release report](../tests/experiments/2026-11-08-manual-release.md)
+  and earlier [local lifecycle report](../tests/experiments/2026-11-08-local-workflow.md)
+  remain historical evidence for their recorded source versions.
 
-The earlier local clusters, registry data, review worktrees and ignored raw test
-output were removed during cleanup. Curated tracked reports remain historical
-records; their original raw paths are no longer available locally. New thesis
-measurements require new retained evidence.
+Exact suite commands and locations are in the [test guide](../tests/README.md).
+Evidence from containers does not establish systemd, native Pi boot or storage
+reliability. Measurements must record release/source, host, pins and conditions.
 
 ## Next implementation order
 
-| Order | Scope | Acceptance |
-| --- | --- | --- |
-| 1 | Align API schemas, response serialization, UI errors, setup navigation, exposure fields and Secret submission. | Handler contract tests and browser workflows use the actual request/response shapes; unsupported paths are identified clearly. |
-| 2 | Correct restart semantics. | Pod identity changes, the image digest remains fixed, and retries retain the same restart token. |
-| 3 | Verify interrupted recovery and failed-rollout restoration; complete execution snapshots. | Interruption before/during/after Helm execution never produces false success. Restored state is verified before a lock is released; unresolved state remains blocked. |
-| 4 | Complete private registry authentication and pull credentials. | A private image deploys; invalid credentials produce an actionable error without leaking values. |
-| 5 | Extend real-cluster failure acceptance and perform reference-host evaluation. | Isolated runs verify resources and HTTP responses, clean their own resources, and retain evidence. Pi/LAN measurements use predefined targets and repetitions. |
-| 6 | Implement M5–M8 capabilities. | Application data/backup, public HTTPS, stable upgrades and monitoring satisfy their separate acceptance criteria; distribution automation alone does not complete M7. |
+1. Complete and retain release-based native Pi installation, same-version rerun
+   and reboot evidence; resolve failures before extending milestone scope.
+2. Proceed to M5 application storage and verified backup/restore after the current
+   defect and native-acceptance work is complete.
+3. Address public HTTPS, supported platform upgrades and extended observability
+   under their separate acceptance criteria.
 
-The [milestone checklists](milestones.md) retain the full project scope. Local
-implementation progress does not establish completion of reference-hardware,
-public-hosting, release, or thesis-evaluation requirements.
+The [milestone checklists](milestones.md) retain the complete project plan.

@@ -33,11 +33,17 @@ func (r *Router) handleSystem(w http.ResponseWriter, req *http.Request) {
 // client can adapt (for example, hide image inspection when it is unavailable).
 func capabilities(cfg Config) []string {
 	caps := []string{}
+	if cfg.PrivateIngressEnabled {
+		caps = append(caps, "private-ingress")
+	}
 	if cfg.Inspector != nil {
 		caps = append(caps, "image-inspection")
 	}
 	if cfg.Secrets != nil {
 		caps = append(caps, "configuration-secrets")
+	}
+	if cfg.Credentials != nil {
+		caps = append(caps, "registry-credentials")
 	}
 	if cfg.Cluster != nil {
 		caps = append(caps, "cluster-observation")

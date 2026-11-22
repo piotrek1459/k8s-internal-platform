@@ -259,3 +259,39 @@ func TestGetOperationRendersEvents(t *testing.T) {
 		t.Fatalf("events = %v, want 1", body["events"])
 	}
 }
+
+func (f *fakeStore) RestoreApplication(context.Context, string, string) error { return nil }
+
+func (f *fakeStore) RetryRecovery(context.Context, string, int64) (platform.AcceptResult, error) {
+	return platform.AcceptResult{}, nil
+}
+
+func (f *fakeStore) BeginRegistryCredentialDeletion(context.Context, string) error { return nil }
+
+func TestStatusContractIncludesCamelCaseAndAnExplicitMissingObservation(t *testing.T) {
+	st := newFakeStore()
+	st.apps["app_1"] = platform.Application{ID: "app_1", Name: "notes", Version: 1}
+	handler := newTestRouter(st, nil)
+	for _, phase := range []platform.WorkloadPhase{platform.WorkloadUnknown, platform.WorkloadReady} {
+		if phase == platform.WorkloadReady {
+			st.observed["app_1"] = platform.ObservedStatus{Phase: phase, ReadyReplicas: 1}
+		}
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/v1/apps/app_1", nil))
+		var body struct {
+			Status map[string]any `json:"status"`
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+			t.Fatal(err)
+		}
+		if body.Status["phase"] != string(phase) {
+			t.Fatalf("invalid status shape: %+v", body.Status)
+		}
+		if _, exists := body.Status["Phase"]; exists {
+			t.Fatal("exported Go name leaked into response contract")
+		}
+		if phase == platform.WorkloadUnknown && body.Status["stale"] != true {
+			t.Fatal("missing status must be stale")
+		}
+	}
+}

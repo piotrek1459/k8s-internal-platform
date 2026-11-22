@@ -42,7 +42,33 @@ func (s *Store) ListRegistryCredentials(ctx context.Context) ([]platform.Registr
 }
 
 func (s *Store) DeleteRegistryCredential(ctx context.Context, id string) error {
-	res, err := s.db.sql.ExecContext(ctx, `DELETE FROM registry_credentials WHERE id = ?`, id)
+	return s.changeRegistryCredentialDeletion(ctx, id, false)
+}
+
+// BeginRegistryCredentialDeletion reserves the credential before secret removal.
+// Accepted mutations and resolution reject the tombstone; cleanup is retryable.
+func (s *Store) BeginRegistryCredentialDeletion(ctx context.Context, id string) error {
+	return s.changeRegistryCredentialDeletion(ctx, id, true)
+}
+
+func (s *Store) changeRegistryCredentialDeletion(ctx context.Context, id string, reserve bool) error {
+	tx, err := s.db.sql.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var refs int
+	if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM revisions r JOIN applications a ON a.id = r.app_id WHERE a.deleted = 0 AND json_extract(r.spec_json, '$.RegistryCredentialID') = ? AND (r.result IN ('pending','succeeded') OR EXISTS (SELECT 1 FROM operations o WHERE o.target_revision = r.id AND o.state NOT IN ('succeeded','failed')))`, id).Scan(&refs); err != nil {
+		return err
+	}
+	if refs > 0 {
+		return platform.Errorf(platform.CodeConflict, "registry credential is referenced by an active or rollback-eligible revision")
+	}
+	query := `DELETE FROM registry_credentials WHERE id = ?`
+	if reserve {
+		query = `UPDATE registry_credentials SET verification_status = 'deleting' WHERE id = ?`
+	}
+	res, err := tx.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("delete registry credential: %w", err)
 	}
@@ -50,5 +76,5 @@ func (s *Store) DeleteRegistryCredential(ctx context.Context, id string) error {
 	if n == 0 {
 		return platform.Errorf(platform.CodeNotFound, "registry credential %q not found", id)
 	}
-	return nil
+	return tx.Commit()
 }

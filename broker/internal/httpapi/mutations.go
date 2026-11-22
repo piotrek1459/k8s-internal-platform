@@ -11,6 +11,7 @@ import (
 )
 
 func (r *Router) registerApplicationMutations() {
+	r.mux.HandleFunc("POST /api/v1/apps/{id}/recover", r.protect(r.handleRecover))
 	r.mux.HandleFunc("PATCH /api/v1/apps/{id}", r.protect(r.handleUpdateApp))
 	r.mux.HandleFunc("DELETE /api/v1/apps/{id}", r.protect(r.handleDeleteApp))
 	r.mux.HandleFunc("POST /api/v1/apps/{id}/restart", r.protect(r.handleRestartApp))
@@ -64,6 +65,10 @@ func (r *Router) handleUpdateApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if newSpec.Exposure.Mode == platform.ExposureLAN && !r.cfg.PrivateIngressEnabled {
+		writeError(w, r.cfg.Logger, reqID, platform.FieldErrorf(platform.CodeUnsupportedSpec, "exposure", "private ingress is not configured on this installation"))
+		return
+	}
 	// When the caller did not supply a new image reference, substitute the currently
 	// deployed digest. This prevents the worker from re-resolving the tag on a
 	// config-only PATCH, which would silently upgrade to a newer image if the tag
@@ -118,6 +123,7 @@ func toUpdateInput(b updateAppBody, cur platform.RevisionSpec) applications.Upda
 	}
 	if b.Health != nil {
 		in.ReadinessPath = &b.Health.ReadinessPath
+		in.StartupPath = &b.Health.StartupPath
 	}
 	if b.Exposure != nil {
 		exp := platform.Exposure{Mode: platform.ExposureMode(b.Exposure.Mode), Hostname: b.Exposure.Hostname}

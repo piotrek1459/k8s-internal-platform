@@ -95,13 +95,14 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	}
 
 	cfg := httpapi.Config{
-		Logger:        logger,
-		Store:         st,
-		Factory:       applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
-		Auth:          authSvc,
-		SecureCookies: os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
-		Inspector:     registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases),
-		Version:       buildVersion,
+		Logger:                logger,
+		Store:                 st,
+		Factory:               applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}},
+		Auth:                  authSvc,
+		PrivateIngressEnabled: os.Getenv("PLATFORM_PRIVATE_INGRESS_ENABLED") == "true",
+		SecureCookies:         os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
+		Inspector:             registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases),
+		Version:               buildVersion,
 	}
 
 	// The Helm adapter and the operation worker require in-cluster access. When it
@@ -113,12 +114,16 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	if clusterClient != nil {
 		cfg.Cluster = clusterClient
 		cfg.Secrets = clusterClient
+		credentials := &registry.CredentialService{Store: st, Secrets: clusterClient}
+		cfg.Credentials = credentials
+		cfg.Inspector = registry.NewInspector(credentials).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases)
 
 		helmAdapter, herr := helm.NewAdapter(appsNamespace, cluster.HelmActionConfig(appsNamespace, logger))
 		if herr != nil {
 			return fmt.Errorf("init helm adapter: %w", herr)
 		}
-		inspector := registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases)
+		inspector := registry.NewInspector(credentials).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases)
+		helmAdapter.WithManifestVerifier(clusterClient.VerifyManifest)
 		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)
 		observer = operations.NewObserver(st, clusterClient, platform.SystemClock{}, logger)
 

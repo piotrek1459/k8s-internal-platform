@@ -10,12 +10,14 @@ WORK=
 fail() { printf 'Error: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'HELP'
-Usage: sudo bash install.sh --version v0.0.1 [--check]
-       sudo bash install.sh --version v0.0.1 --bundle FILE --checksum FILE
+Usage: sudo bash install.sh --version v0.1.2 [--check] [--prepare-host]
+       sudo bash install.sh --version v0.1.2 --bundle FILE --checksum FILE
 
 Installs the pinned K3s release and imports the platform/demo OCI images.
 Requires 64-bit Linux, systemd, memory cgroups, 2 GiB RAM and 6 GiB free disk.
 --check performs read-only host checks without downloading or installing.
+--prepare-host may enable Raspberry Pi memory cgroups in the boot command line;
+a manual reboot is required (exit status 20). No reboot is performed automatically.
 An unrelated K3s installation is never replaced. Same-version reruns retain data;
 upgrading a different installed platform version is not supported by this installer.
 HELP
@@ -28,6 +30,31 @@ cleanup() {
 architecture() {
     case "$1" in aarch64|arm64) printf 'arm64\n' ;; x86_64|amd64) printf 'amd64\n' ;; *) fail 'Only 64-bit ARM64 and AMD64 are supported; 32-bit Raspberry Pi OS is unsupported.' ;; esac
 }
+# Pure transformation, also exercised by regression tests. Keep the required
+# kernel arguments on the existing single command line.
+memory_cgroup_cmdline() {
+    awk '
+        NF { lines++; for (i=1; i<=NF; i++) {
+            if ($i != "cgroup_disable=memory" && $i != "cgroup_memory=0" && $i != "cgroup_memory=1" && $i != "cgroup_enable=memory") {
+                printf "%s%s", separator, $i; separator=" "
+            }
+        }}
+        END { if (lines != 1) exit 1; printf "%scgroup_memory=1 cgroup_enable=memory\n", separator }
+    ' "$1"
+}
+prepare_memory_cgroup() {
+    [[ "$PREPARE_HOST" == true ]] || fail 'Memory cgroups are unavailable. On Raspberry Pi OS, rerun with --prepare-host to back up and update the boot command line, then reboot manually. See INSTALL.md.'
+    [[ -r /proc/device-tree/model ]] && grep -q 'Raspberry Pi' /proc/device-tree/model || fail '--prepare-host only supports Raspberry Pi boot configuration.'
+    local path=/boot/firmware/cmdline.txt updated backup
+    [[ -f "$path" ]] || path=/boot/cmdline.txt
+    [[ -f "$path" && ! -L "$path" ]] || fail 'A regular Raspberry Pi boot command-line file was not found.'
+    updated="$(memory_cgroup_cmdline "$path")" || fail 'The boot command line must contain exactly one non-empty line; no files were changed.'
+    backup="$path.platform-backup-$(date -u +%Y%m%dT%H%M%S)-$$"
+    cp -p "$path" "$backup"
+    printf '%s\n' "$updated" > "$path"
+    printf 'Memory cgroup boot settings saved. Backup: %s\nReboot the host, then rerun the installer without --prepare-host.\n' "$backup"
+    exit 20
+}
 preflight() {
     [[ "$(uname -s)" == Linux ]] || fail 'The host installer requires Linux.'
     [[ "$(id -u)" == 0 ]] || fail 'Run the installer with sudo.'
@@ -36,11 +63,6 @@ preflight() {
     done
     [[ "$(cat /proc/1/comm)" == systemd ]] || fail 'A systemd-based host is required.'
     ARCH="$(architecture "$(uname -m)")"
-    if [[ -f /sys/fs/cgroup/cgroup.controllers ]]; then
-        grep -qw memory /sys/fs/cgroup/cgroup.controllers || fail 'Memory cgroups are unavailable. On Raspberry Pi OS, enable cgroup_memory=1 cgroup_enable=memory in the single-line /boot/firmware/cmdline.txt (older OS: /boot/cmdline.txt), reboot manually, then rerun.'
-    else
-        awk '$1=="memory" && $4==1 {found=1} END {exit !found}' /proc/cgroups || fail 'The memory cgroup controller must be enabled before installing K3s.'
-    fi
     local memory disk
     memory="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
     disk="$(df -Pk /var/lib | awk 'END {print $4}')"
@@ -55,6 +77,11 @@ preflight() {
         fi
     elif [[ -e /usr/local/bin/k3s || -e /etc/rancher/k3s || -e /var/lib/rancher/k3s || -e /etc/systemd/system/k3s.service || -e "$STATE_ROOT" || -e "$TOOL_ROOT" ]]; then
         fail 'Existing K3s/platform state is not owned by this installer; no files were changed.'
+    fi
+    if [[ -f /sys/fs/cgroup/cgroup.controllers ]]; then
+        grep -qw memory /sys/fs/cgroup/cgroup.controllers || prepare_memory_cgroup
+    else
+        awk '$1=="memory" && $4==1 {found=1} END {exit !found}' /proc/cgroups || prepare_memory_cgroup
     fi
     printf 'Host checks passed: linux/%s.\n' "$ARCH"
 }
@@ -160,11 +187,12 @@ install_platform() {
     fail 'Platform readiness was not established. Inspect broker logs with the installer-owned kubectl documented in INSTALL.md.'
 }
 main() {
-    REQUESTED_VERSION=; local bundle= checksum= check=false
+    REQUESTED_VERSION=; PREPARE_HOST=false; local bundle= checksum= check=false
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -h|--help) usage; return ;;
             --check) check=true; shift ;;
+            --prepare-host) PREPARE_HOST=true; shift ;;
             --version|--bundle|--checksum)
                 [[ $# -ge 2 ]] || fail "Missing value for $1"
                 case "$1" in --version) REQUESTED_VERSION="${2#v}" ;; --bundle) bundle="$2" ;; --checksum) checksum="$2" ;; esac
@@ -174,6 +202,7 @@ main() {
     done
     [[ "$REQUESTED_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || fail 'Supply --version vMAJOR.MINOR.PATCH.'
     [[ ( -z "$bundle" && -z "$checksum" ) || ( -n "$bundle" && -n "$checksum" ) ]] || fail '--bundle and --checksum must be supplied together.'
+    [[ "$check" != true || "$PREPARE_HOST" != true ]] || fail '--check is read-only and cannot be combined with --prepare-host.'
     preflight
     [[ "$check" != true ]] || return
     WORK="$(mktemp -d /tmp/platform-install.XXXXXX)"

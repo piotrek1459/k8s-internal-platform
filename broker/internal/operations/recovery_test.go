@@ -13,9 +13,10 @@ import (
 // statusHelm is a fake HelmInstaller whose Status is configurable, for driving
 // the recovery classifier.
 type statusHelm struct {
-	status platform.ReleaseStatus
-	exists bool
-	err    error
+	status    platform.ReleaseStatus
+	exists    bool
+	err       error
+	verifyErr error
 }
 
 func (s statusHelm) InstallOrUpgrade(context.Context, string, platform.Revision) (platform.ReleaseStatus, error) {
@@ -159,5 +160,22 @@ func TestRecoveryLeavesQueuedAndNeedsAttentionUntouched(t *testing.T) {
 	op, _ := st.GetOperation(context.Background(), queuedOp)
 	if op.State != platform.OperationQueued {
 		t.Fatalf("queued operation changed to %s", op.State)
+	}
+}
+
+func (s statusHelm) VerifyTarget(context.Context, string, platform.Revision) error {
+	return s.verifyErr
+}
+
+func TestRecoveryDoesNotMistakeOldDeployedReleaseForTarget(t *testing.T) {
+	st := newStore(t)
+	id, _ := seedInterrupted(t, st, "app1", true)
+	rec := NewRecovery(st, statusHelm{status: platform.ReleaseStatus{Status: "deployed"}, exists: true, verifyErr: errors.New("target identity differs")}, discard())
+	if err := rec.Scan(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	op, _ := st.GetOperation(context.Background(), id)
+	if op.State != platform.OperationNeedsAttention {
+		t.Fatalf("unverified recovery became %s", op.State)
 	}
 }

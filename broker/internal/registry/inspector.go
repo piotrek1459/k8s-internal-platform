@@ -91,7 +91,19 @@ func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID 
 	if i.transport != nil {
 		opts = append(opts, i.transport)
 	}
-	auth, err := i.authFor(ctx, registryCredentialID)
+	var auth authn.Authenticator
+	scoped, scopesCredentials := i.resolver.(interface {
+		ResolveForRegistry(context.Context, string, string) (authn.Authenticator, error)
+	})
+	if registryCredentialID != "" && scopesCredentials {
+		original, parseErr := name.ParseReference(imageRef)
+		if parseErr != nil {
+			return platform.ImageReport{}, platform.FieldErrorf(platform.CodeInvalidInput, "image", "invalid image reference")
+		}
+		auth, err = scoped.ResolveForRegistry(ctx, registryCredentialID, original.Context().RegistryStr())
+	} else {
+		auth, err = i.authFor(ctx, registryCredentialID)
+	}
 	if err != nil {
 		return platform.ImageReport{}, err
 	}
@@ -141,8 +153,11 @@ func (i *Inspector) Inspect(ctx context.Context, imageRef, registryCredentialID 
 }
 
 func (i *Inspector) authFor(ctx context.Context, credentialID string) (authn.Authenticator, error) {
-	if credentialID == "" || i.resolver == nil {
+	if credentialID == "" {
 		return authn.Anonymous, nil
+	}
+	if i.resolver == nil {
+		return nil, platform.Errorf(platform.CodeDependencyUnavailable, "registry credential resolution is unavailable")
 	}
 	auth, err := i.resolver.Resolve(ctx, credentialID)
 	if err != nil {

@@ -43,8 +43,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 	let message = res.statusText;
 	try {
 		const err = await res.json();
-		code = err.code ?? code;
-		message = err.message ?? message;
+		code = err.error?.code ?? code;
+		message = err.error?.message ?? message;
 	} catch {
 		// non-JSON error body
 	}
@@ -225,11 +225,15 @@ function requestWithHeaders<T>(
 		let message = res.statusText;
 		try {
 			const err = await res.json();
-			code = err.code ?? code;
-			message = err.message ?? message;
+			code = err.error?.code ?? code;
+			message = err.error?.message ?? message;
 		} catch {
 			// non-JSON error body
 		}
 		throw new ApiError(res.status, code, message);
 	});
+}
+
+export function recoverApp(id: string, version: number): Promise<AcceptResult> {
+	return request('POST', `/api/v1/apps/${id}/recover`, { version });
 }

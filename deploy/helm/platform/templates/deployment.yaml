@@ -77,6 +77,8 @@ spec:
               value: /var/lib/platform/platform.db
             - name: PLATFORM_APPS_NAMESPACE
               value: {{ .Values.appsNamespace | quote }}
+            - name: PLATFORM_PRIVATE_INGRESS_ENABLED
+              value: {{ .Values.privateIngressEnabled | quote }}
             - name: PLATFORM_SECURE_COOKIES
               value: {{ .Values.secureCookies | quote }}
             {{- if .Values.insecureRegistries }}

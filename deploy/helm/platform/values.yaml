@@ -44,3 +44,6 @@ insecureRegistries: ""
 # before inspection. Used when the image tag port differs from the in-cluster
 # port (k3d maps host :5001 → container :5000).
 registryAliases: ""
+
+# Enable only after a private ingress controller and DNS have been configured.
+privateIngressEnabled: false

@@ -138,11 +138,11 @@ shared local/CI selector. The [test guide](../tests/README.md) documents exact
 commands and boundaries.
 
 The isolated E2E workflow builds the platform and verifies API/browser lifecycles,
-actual workload/HTTP state, failed-rollout locks, persistence through broker Pod
+actual workload/HTTP state, verified failed-rollout restoration, persistence through broker Pod
 replacement, and installation of packaged OCI/chart artifacts on a second node.
 It is scheduled at 02:00 UTC nightly, supports manual execution and gates release
 publication. Scheduled/manual execution requires the workflow on the default
-branch. Known status/restart defects are explicit conditional acceptance skips.
+branch. Status contracts, Pod replacement and authenticated image pulls are required assertions.
 Untrusted PR code never runs on a host serving deployed applications.
 
 The manually dispatched Release workflow takes a source branch (default `main`)
@@ -180,19 +180,21 @@ limited to the selected application's read/update/operation actions.
 
 ## Deployment execution, recovery, and reconciliation
 
-### Implemented execution and outstanding recovery
+### Implemented execution and recovery
 
 Transactional acceptance, frozen image/secret references, serial execution,
 bounded image inspection and Helm calls, best-effort observation, revision
 history and durable mutation locks are implemented. Configuration-only changes
 preserve the recorded image digest.
 
-The worker currently enters `needs_attention` after an unresolved Helm failure
-without attempting verified restoration. No supported recovery/unlock endpoint
-exists. Startup can mistake an old deployed release for a frozen target; restart
-can reuse a snapshot before assigning a new token. Chart identity and values hash
-fields are not populated. These defects are detailed in
-[implementation status](status.md#known-correctness-and-integration-gaps).
+Failed updates attempt restoration of the last successful execution snapshot.
+Release identity, chart/values hashes and matching healthy live resources are
+verified before the mutation lock is released. Interrupted operations require
+the same target verification; a deployed status alone is insufficient. A new
+restart snapshot retains the image digest and uses the operation ID as its token.
+Unresolved results remain `needs_attention`. An administrator may retry the
+existing blocked operation through `POST /apps/{id}/recover`; this does not clear
+a lock without execution and verification. See [status](status.md).
 
 The state diagram and normal/failure/recovery procedures below are the required
 execution contract. They must not be interpreted as a currently available manual

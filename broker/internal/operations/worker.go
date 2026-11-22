@@ -142,15 +142,15 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 	w.event(ctx, op.ID, "applying", "applying workload through Helm")
 	status, err := w.helm.InstallOrUpgrade(ctx, op.AppID, rev)
 	if err != nil {
-		// The Helm call may have created or changed resources before failing (for
-		// example a timed-out rollout). The cluster state is therefore unresolved,
-		// so the failed candidate is recorded but the operation enters
-		// NeedsAttention and retains the application lock rather than terminating.
-		// Verified restoration and a supported administrator recovery action remain
-		// outstanding; the block must not be cleared by assuming the release is
-		// safe. See the current gaps in docs/status.md.
+		// A failed Helm call can leave changed resources. Restore and verify a
+		// prior successful snapshot before releasing the mutation lock.
 		_ = w.store.MarkRevisionResult(ctx, rev.ID, platform.RevisionFailed)
-		w.needsAttention(ctx, op, "apply", err)
+		if ctx.Err() != nil {
+			return
+		} // leave the operation for startup reconciliation
+		if !w.restore(ctx, op) {
+			w.needsAttention(ctx, op, "apply", err)
+		}
 		return
 	}
 	w.event(ctx, op.ID, "applied", "helm release "+status.Status)
@@ -158,7 +158,7 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 	w.observeBestEffort(ctx, op.AppID)
 
 	if err := w.store.MarkRevisionResult(ctx, rev.ID, platform.RevisionSucceeded); err != nil {
-		w.fail(ctx, op, "record", err)
+		w.needsAttention(ctx, op, "record", err)
 		return
 	}
 	if err := w.store.TransitionOperation(ctx, op.ID, platform.OperationSucceeded, "succeeded", ""); err != nil {
@@ -231,6 +231,14 @@ func (w *Worker) freeze(ctx context.Context, op platform.Operation, rev platform
 	if len(rev.Spec.SecretRefs) > 0 {
 		frozen.SecretVersions = rev.Spec.SecretRefs
 	}
+	if planner, ok := w.helm.(platform.ExecutionPlanner); ok {
+		rev.Frozen = &frozen
+		var err error
+		frozen, err = planner.PrepareExecution(op.AppID, rev)
+		if err != nil {
+			return platform.FrozenSpec{}, err
+		}
+	}
 	if err := w.store.FreezeExecutionSpec(ctx, rev.ID, frozen); err != nil {
 		return platform.FrozenSpec{}, err
 	}
@@ -275,8 +283,7 @@ func (w *Worker) fail(ctx context.Context, op platform.Operation, stage string, 
 // needsAttention records a nonterminal NeedsAttention outcome and retains the
 // application lock. It is used when a failure may have left the cluster partially
 // changed and the broker has not verified or restored a known-good state, so
-// conflicting mutations must keep returning 409 until a documented recovery
-// resolves it. Verified automatic restoration remains outstanding.
+// conflicting mutations keep returning 409 until a verified recovery resolves it.
 func (w *Worker) needsAttention(ctx context.Context, op platform.Operation, stage string, cause error) {
 	w.logger.Warn("operation_needs_attention", "operation", op.ID, "app", op.AppID, "stage", stage, "error", cause.Error())
 	w.event(ctx, op.ID, "needs_attention", sanitize(cause))

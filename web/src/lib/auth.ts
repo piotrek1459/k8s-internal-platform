@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import { goto } from '$app/navigation';
-import { getMe, logout as apiLogout, ApiError } from './api.js';
+import { getMe, getSetupStatus, logout as apiLogout, ApiError } from './api.js';
 
 export interface SessionState {
 	loading: boolean;
@@ -45,6 +45,6 @@ export const session = createSession();
 export async function requireAuth(): Promise<void> {
 	const authed = await session.check();
 	if (!authed) {
-		goto('/login');
+		await goto((await getSetupStatus()).setupAvailable ? '/setup' : '/login');
 	}
 }

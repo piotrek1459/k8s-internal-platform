@@ -61,7 +61,11 @@ func (r *Router) handleCreateCredential(w http.ResponseWriter, req *http.Request
 		VerificationStatus: "unverified",
 		CreatedAt:          r.cfg.Factory.Clock.Now(),
 	}
-	if err := r.cfg.Store.CreateRegistryCredential(req.Context(), cred); err != nil {
+	if r.cfg.Credentials == nil {
+		writeError(w, r.cfg.Logger, reqID, platform.Errorf(platform.CodeDependencyUnavailable, "registry credential storage is unavailable"))
+		return
+	}
+	if err := r.cfg.Credentials.Create(req.Context(), cred, body.Password); err != nil {
 		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
@@ -77,7 +81,11 @@ func (r *Router) handleCreateCredential(w http.ResponseWriter, req *http.Request
 func (r *Router) handleDeleteCredential(w http.ResponseWriter, req *http.Request) {
 	reqID := requestID(req)
 	id := req.PathValue("id")
-	if err := r.cfg.Store.DeleteRegistryCredential(req.Context(), id); err != nil {
+	if r.cfg.Credentials == nil {
+		writeError(w, r.cfg.Logger, reqID, platform.Errorf(platform.CodeDependencyUnavailable, "registry credential storage is unavailable"))
+		return
+	}
+	if err := r.cfg.Credentials.Delete(req.Context(), id); err != nil {
 		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}

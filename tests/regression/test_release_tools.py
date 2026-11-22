@@ -67,8 +67,8 @@ class ReleaseIntegrityTests(unittest.TestCase):
         fallback = (ROOT / "release/version.txt").read_text()
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
-            (folder / "install.sh").write_text("Usage: --version v0.0.1")
-            (folder / "INSTALL.md").write_text("Install v0.0.1: [API](user/api-reference.md)")
+            (folder / "install.sh").write_text("Usage: --version v" + fallback.strip())
+            (folder / "INSTALL.md").write_text("Install v" + fallback.strip() + ": [API](user/api-reference.md)")
             for arch in ("amd64", "arm64"):
                 raw = json.dumps({"version": "0.0.2", "architecture": arch}).encode()
                 with tarfile.open(folder / ("platform-v0.0.2-linux-" + arch + ".tar.gz"), "w:gz") as archive:

@@ -1,25 +1,30 @@
 Kubernetes internal application platform.
 
-The platform and managed applications run together in one single-node K3s
-cluster. The release includes a Go broker with an embedded Svelte UI, a durable
-SQLite operation queue, immutable image revisions, HTTP application deployment,
-update, manual scaling, rollback, deletion and versioned configuration Secrets.
+The platform and managed applications share one single-node K3s cluster. The
+release includes a Go broker with an embedded Svelte UI, a durable SQLite queue,
+digest-pinned application deployment, update, scaling, restart, rollback,
+configuration Secrets and private registry authentication stored in Kubernetes.
 
-Download `install.sh`, `SHA256SUMS` and `INSTALL.md` to begin. Dedicated 64-bit
-Linux/systemd hosts are supported by the installer design. Native OCI bundles
-are supplied for ARM64 and AMD64; no registry account, Docker, Go or Node.js is
-required on the target. K3s and Helm are pinned, and bundle image references use
-validated native digests. `release.json` records source and compatibility pins.
+Download `install.sh`, `SHA256SUMS` and `INSTALL.md` to begin. Native OCI bundles
+are provided for dedicated ARM64/AMD64 Linux/systemd hosts. Docker, Go, Node.js
+and registry accounts are not required on the target. K3s/Helm are pinned and
+`release.json` records source, architecture and image digests.
 
-Native Raspberry Pi installation is awaiting reference-host
-validation. Administration uses SSH/loopback forwarding. Public HTTPS,
-application volumes, private-registry credentials, verified failed-rollout
-restoration and cross-version upgrades are incomplete. Application status
-serialization and restart behavior have known defects. A failed rollout retains
-an explicit `needs_attention` lock; automatic recovery is not claimed.
+Raspberry Pi memory-cgroup preparation is available through the explicit
+`--prepare-host` option. The boot configuration is backed up and a manual reboot
+is required; normal host checks remain read-only. Reference-host installation
+results and remaining acceptance boundaries are recorded in `docs/status.md`.
 
-Release publication requires fast regression checks, real-cluster API/browser
-workflows and both architecture packages. The E2E report explicitly identifies
-the two known status/restart gaps instead of counting them as accepted behavior.
-The E2E workflow is also configured for nightly execution at 02:00 UTC and manual
-dispatch. Release publication is initiated manually from a specified branch HEAD.
+Status responses use camelCase, setup navigation detects a fresh installation,
+errors preserve the server message and creation submits selected Secret versions.
+Restart replaces Pods while retaining the image digest. Execution snapshots record
+chart and values identity. Failed updates attempt verified restoration before
+unlocking; ambiguous state remains `needs_attention` and permits a recovery retry.
+A different historical chart artifact is refused rather than silently substituted.
+
+Public HTTPS, application data volumes, verified backup/restore and cross-version
+platform upgrades remain separate work. Administration uses SSH/loopback access;
+private LAN ingress requires explicit configuration. Release publication requires
+fast regressions, real-cluster API/browser/private-pull/bundle checks and both
+architecture packages. Publication is manual from a selected branch HEAD.
+Nightly E2E is scheduled at 02:00 UTC and also supports manual dispatch.

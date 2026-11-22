@@ -46,8 +46,8 @@ func (f Factory) NewUpdateRequest(app platform.Application, spec platform.Revisi
 }
 
 // NewRestartRequest builds the AcceptRequest for restarting an application with
-// its current spec unchanged. The current revision's frozen spec (if set) is
-// carried forward so the worker skips re-inspection and keeps the same digest.
+// its current spec unchanged. The recorded image digest is
+// retained, while a new snapshot assigns a stable restart token.
 func (f Factory) NewRestartRequest(app platform.Application, currentRevision platform.Revision, expectVersion int64, idempotencyKey, requestHash, actor, requestID string) platform.AcceptRequest {
 	revID := f.IDs.NewID("rev")
 	opID := f.IDs.NewID("op")
@@ -58,10 +58,13 @@ func (f Factory) NewRestartRequest(app platform.Application, currentRevision pla
 		AppID:   app.ID,
 		Number:  app.Version + 1,
 		Spec:    currentRevision.Spec,
-		Frozen:  currentRevision.Frozen, // carry frozen digest so worker skips re-inspection
+		Frozen:  nil, // a restart creates a new immutable execution snapshot
 		Result:  platform.RevisionPending,
 		Actor:   actor,
 		Created: now,
+	}
+	if currentRevision.Frozen != nil {
+		rev.Spec.Image = currentRevision.Frozen.ImageDigest
 	}
 	op := platform.Operation{
 		ID:             opID,
@@ -131,8 +134,8 @@ func (f Factory) NewRollbackRequest(app platform.Application, targetRevision pla
 }
 
 // NewReapplyRequest builds the AcceptRequest for reapplying the current desired
-// spec verbatim (drift recovery). The current revision's frozen spec (if set) is
-// carried forward so the worker skips re-inspection and keeps the same digest.
+// spec verbatim (drift recovery). The recorded image digest is
+// retained, while a new snapshot assigns a stable restart token.
 func (f Factory) NewReapplyRequest(app platform.Application, currentRevision platform.Revision, expectVersion int64, idempotencyKey, requestHash, actor, requestID string) platform.AcceptRequest {
 	revID := f.IDs.NewID("rev")
 	opID := f.IDs.NewID("op")

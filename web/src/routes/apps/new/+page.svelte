@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { inspectImage, listSecrets, listCredentials, createApp, ApiError } from '$lib/api.js';
+	import { getSystem, inspectImage, listSecrets, listCredentials, createApp, ApiError } from '$lib/api.js';
 	import OperationProgress from '$components/OperationProgress.svelte';
 	import type { Secret, RegistryCredential, ImageInspectResult } from '$lib/types.js';
 
@@ -20,12 +20,15 @@
 	let readinessPath = $state('/healthz');
 
 	// Step 3 – Access
-	let exposureMode = $state<'internal' | 'private' | 'public'>('internal');
+	let hostname = $state('');
+	let lanAvailable = $state(false);
+	$effect(() => { getSystem().then(s => lanAvailable = s.capabilities.includes('private-ingress')).catch(() => {}); });
+	let exposureMode = $state<'internal' | 'lan' | 'public'>('internal');
 
 	// Step 4 – Configuration
 	let envEntries = $state<[string, string][]>([['', '']]);
 	let secrets = $state<Secret[]>([]);
-	let secretRef = $state<{ envVar: string; secretId: string; version: number } | null>(null);
+	let secretRef = $state({ envVar: '', secretId: '', version: 1 });
 
 	// Step 6 – Deploy
 	let operationId = $state('');
@@ -94,7 +97,8 @@
 				profile: 'http',
 				environment: Object.keys(env).length > 0 ? env : undefined,
 				health: readinessPath ? { readinessPath } : undefined,
-				exposure: { mode: exposureMode }
+				secretRefs: secretRef.secretId ? [{ environmentVariable: secretRef.envVar, secretId: secretRef.secretId, version: secretRef.version }] : undefined,
+				exposure: { mode: exposureMode, hostname: exposureMode === 'lan' ? hostname.trim() : undefined }
 			});
 			operationId = res.operationId;
 			step = 6;
@@ -214,10 +218,10 @@
 {:else if step === 3}
 	<h2 class="text-lg font-semibold text-gray-900 mb-4">Access</h2>
 	<div class="space-y-2">
-		{#each [['internal', 'Internal (cluster-only, no ingress route)'], ['private', 'Private LAN (accessible on your local network)']] as [value, label]}
+		{#each [['internal', 'Internal (cluster-only, no ingress route)'], ['lan', 'Private LAN (accessible on your local network)']] as [value, label]}
 			<label class="flex items-start gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors
 				{exposureMode === value ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}">
-				<input type="radio" name="exposure" {value} bind:group={exposureMode} class="mt-0.5" />
+				<input type="radio" name="exposure" {value} disabled={value === 'lan' && !lanAvailable} bind:group={exposureMode} class="mt-0.5" />
 				<span class="text-sm">{label}</span>
 			</label>
 		{/each}
@@ -226,9 +230,14 @@
 			<span class="text-sm">Public (requires networking configuration — available in a future release)</span>
 		</label>
 	</div>
+	{#if exposureMode === 'lan'}
+		<label for="hostname" class="block text-sm mt-3">LAN hostname</label>
+		<input id="hostname" bind:value={hostname} placeholder="app.pi.home.arpa" class="w-full border rounded px-3 py-2" />
+		<p class="text-xs text-gray-500 mt-1">Requires a configured private ingress controller and local DNS.</p>
+	{/if}
 	<div class="flex gap-2 mt-4">
 		<button onclick={() => goToStep(2)} class="px-4 py-2 border border-gray-300 text-sm rounded hover:bg-gray-50 transition-colors">← Back</button>
-		<button onclick={() => goToStep(4)} class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors">Next →</button>
+		<button onclick={() => goToStep(4)} disabled={exposureMode === 'lan' && !hostname.trim()} class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors">Next →</button>
 	</div>
 
 <!-- Step 4: Configuration -->
@@ -255,16 +264,23 @@
 				<p class="text-sm font-medium text-gray-700 mb-2">Secret reference (optional)</p>
 				<p class="text-xs text-gray-500 mb-2">Inject a secret value as an environment variable.</p>
 				<div class="flex gap-2">
-					<input type="text" placeholder="ENV_VAR_NAME"
-						bind:value={secretRef!.envVar}
+					<input type="text" aria-label="Secret environment variable" placeholder="ENV_VAR_NAME"
+						bind:value={secretRef.envVar}
 						class="w-1/3 border border-gray-300 rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" />
-					<select bind:value={secretRef!.secretId}
+					<select aria-label="Secret" bind:value={secretRef.secretId} onchange={() => secretRef.version = secrets.find(s => s.id === secretRef.secretId)?.versions[0]?.version ?? 1}
 						class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
 						<option value="">Select secret…</option>
 						{#each secrets as s}
 							<option value={s.id}>{s.name}</option>
 						{/each}
 					</select>
+					{#if secretRef.secretId}
+						<select aria-label="Secret version" bind:value={secretRef.version}>
+							{#each secrets.find(s => s.id === secretRef.secretId)?.versions ?? [] as v}
+								<option value={v.version}>{v.version}</option>
+							{/each}
+						</select>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -289,7 +305,7 @@
 		<div class="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">{submitError}</div>
 	{/if}
 	<div class="flex gap-2 mt-6">
-		<button onclick={() => goToStep(4)} class="px-4 py-2 border border-gray-300 text-sm rounded hover:bg-gray-50 transition-colors">← Back</button>
+		<button onclick={() => goToStep(4)} disabled={exposureMode === 'lan' && !hostname.trim()} class="px-4 py-2 border border-gray-300 text-sm rounded hover:bg-gray-50 transition-colors">← Back</button>
 		<button onclick={deploy} disabled={submitting}
 			class="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium text-sm rounded transition-colors">
 			{submitting ? 'Deploying…' : 'Deploy'}

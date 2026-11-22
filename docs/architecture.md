@@ -310,10 +310,10 @@ The browser communicates only with this service, never directly with Kubernetes.
 
 | Component | Responsibility | Where it runs |
 | --- | --- | --- |
-| Host installer | Dedicated Linux host checks, pinned K3s/Helm, verified OCI import and platform chart installation. Native host and upgrade/recovery acceptance remain pending. | Host-side `installer/install.sh`. |
+| Host installer | Dedicated Linux host checks, pinned K3s/Helm, verified OCI import and platform chart installation. Native Pi evidence is recorded separately; native AMD64 and cross-version upgrades remain outstanding. | Host-side `installer/install.sh`. |
 | Release controller | Resolve a manually selected branch HEAD, validate/build the pinned SHA and publish versioned assets after successful gates. | GitHub Actions and `release/` tooling. |
 | K3s | Kubernetes control plane and node services, scheduling, image pulling, networking, restarting containers. | Host service. |
-| Web UI | Implemented setup, forms, progress and lifecycle/history screens; response alignment, Secret submission and log browsing remain incomplete. | Static assets served by the Go service. |
+| Web UI | Implemented setup, forms, progress and lifecycle/history screens; response alignment and Secret submission are implemented; log browsing remains planned. | Static assets served by the Go service. |
 | Go API | Authentication, validation, application model, operation submission, API responses. | One platform pod. |
 | Operation worker | Execute persisted work; recovery exists but requires target verification and restoration corrections. | Background worker in the Go service. |
 | Status observer | Read actual workload state and publish timestamped observations. | Background worker in the Go service. |
@@ -323,7 +323,7 @@ The browser communicates only with this service, never directly with Kubernetes.
 | Traefik | Route HTTP traffic to the correct application. | K3s-provided ingress controller. |
 | Certificate component | Issue and renew certificates for the selected direct HTTPS mode. | cert-manager when that mode is implemented. |
 | Local storage provisioner | Supply node-local persistent volumes. | K3s storage component. |
-| Registry | Local anonymous registry and public-image inspection. Private authentication and public container-image publishing remain incomplete; release bundles use direct OCI import. | Local Docker registry in development; reachable registry for external application images. |
+| Registry | Public/private image inspection with registry-scoped Kubernetes credentials and pull Secrets. Release bundles use direct OCI import; registry publishing of platform images is optional. | Local Docker registry in development; reachable registry for external application images. |
 | Observability profile | Historical metrics/logs, dashboards, and selected alerts. | Optional services sized to the host. |
 
 K3s supplies Traefik and ServiceLB; its default ingress setup uses host ports
