@@ -1,7 +1,8 @@
 # Verification guide
 
-All repository checks are selected through `python3 -B tests/run.py` from the
-repository root. Test tooling and fixtures are grouped under `tests/`. Go tests
+Fast, integration and disposable E2E checks are selected through
+`python3 -B tests/run.py` from the repository root. Native release acceptance is
+an explicit opt-in command documented below. Test tooling and fixtures are grouped under `tests/`. Go tests
 remain beside their packages so that unexported behavior can be tested without
 changing production interfaces solely for test placement.
 

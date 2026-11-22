@@ -648,8 +648,8 @@ components:
       type: object
       additionalProperties: false
       properties:
-        startupPath: { type: string, description: "Optional independent HTTP startup path; omitted uses TCP." }
-        readinessPath: { type: string, pattern: "^/.*" }
+        startupPath: { type: string, pattern: "^(/.*)?$", description: "Optional independent HTTP startup path; omitted uses TCP." }
+        readinessPath: { type: string, pattern: "^(/.*)?$" }
 
     CreateApplicationRequest:
       type: object
@@ -690,15 +690,15 @@ components:
 
     ObservedStatus:
       description: >-
-        Intended camelCase response contract. The current server serializes
-        exported Go names such as Phase and ReadyReplicas; alignment is an open
-        implementation defect documented in docs/status.md.
+        CamelCase workload observation. A missing observation reports unknown and
+        stale rather than an empty phase. Operation and workload states are separate.
       type: object
       required: [phase, observedAt, stale]
       properties:
         phase: { type: string, enum: [deploying, updating, ready, degraded, stopped, failed, unknown] }
         desiredReplicas: { type: integer }
         readyReplicas: { type: integer }
+        observedGeneration: { type: integer, format: int64 }
         workloadReady: { type: boolean }
         routeReady: { type: boolean }
         observedAt: { type: string, format: date-time }

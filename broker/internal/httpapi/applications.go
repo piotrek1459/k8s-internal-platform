@@ -35,6 +35,10 @@ func (r *Router) handleListApps(w http.ResponseWriter, req *http.Request) {
 	items := make([]map[string]any, 0, len(apps))
 	for _, app := range apps {
 		status, _ := r.cfg.Store.GetObservedStatus(req.Context(), app.ID)
+		if status.Phase == "" {
+			status.Phase = platform.WorkloadUnknown
+			status.Stale = true
+		}
 		items = append(items, map[string]any{
 			"id":      app.ID,
 			"name":    app.Name,
@@ -171,7 +175,11 @@ func (r *Router) handleGetApp(w http.ResponseWriter, req *http.Request) {
 		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
-	status, _ := r.cfg.Store.GetObservedStatus(req.Context(), app.ID) // zero value when none yet
+	status, _ := r.cfg.Store.GetObservedStatus(req.Context(), app.ID)
+	if status.Phase == "" {
+		status.Phase = platform.WorkloadUnknown
+		status.Stale = true
+	}
 
 	w.Header().Set("ETag", etag(app.Version))
 	writeJSON(w, r.cfg.Logger, http.StatusOK, map[string]any{

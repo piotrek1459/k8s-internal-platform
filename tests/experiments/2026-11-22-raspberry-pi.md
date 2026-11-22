@@ -24,8 +24,9 @@ endpoint reported platform `0.1.1` and `arm64`.
 
 Executed baseline: administrator setup/login, bundled digest-pinned v1 deployment,
 scale 2/0/1 and v2 update. All completed successfully. Application details
-reproduced the PascalCase status defect in this release. The fixes and stricter
-acceptance belong to the subsequent release, not to this baseline.
+reproduced the PascalCase status defect in this release. A same-version installer rerun also exited successfully with the account and
+application retained. The fixes and stricter acceptance belong to the subsequent
+release, not to this baseline.
 
 ## Acceptance procedure
 
@@ -41,6 +42,16 @@ unhealthy-update restoration, explicit rollback, deletion and retained history.
 One owned healthy application is retained for same-version installer rerun and
 host-reboot verification. Raw logs and administrator credentials are ignored local
 artifacts; credentials and Kubernetes logs are not included in this report.
+
+## Candidate verification
+
+A disposable real-cluster run reproduced a false recovery block: Kubernetes
+adds probe `successThreshold: 1`, whereas Helm stores the manifest without that
+explicit default. The live verifier was corrected to normalize this API default
+while retaining image, probe, generation, replica and Service checks. A focused
+regression covers the defaulted object and rejects image/generation drift.
+Direct verification of the restored live resources then succeeded. A complete
+suite rerun is required before the PR is declared ready.
 
 ## Final release result
 
