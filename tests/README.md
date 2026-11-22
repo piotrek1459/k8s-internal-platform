@@ -183,3 +183,7 @@ instead of `--setup`. Cleanup of an installation requires separate explicit
 operator action; the test never uninstalls K3s or deletes unrelated applications.
 
 The [Pi report](experiments/2026-11-22-raspberry-pi.md) records executed results.
+
+The native deletion check allows up to 60 seconds for Pod garbage collection
+after the tracked delete operation completes. Deployment deletion and dependent
+Pod deletion are asynchronous. A remaining Pod after that deadline fails the check.

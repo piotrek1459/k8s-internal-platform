@@ -240,7 +240,7 @@ verified rejection of private and management traffic.
 
 ## M7 — Repeatable distribution (extension)
 
-**Objective:** an installer executable from a checkout, clean-install verification,
+**Objective:** a published-release installer usable without a checkout, clean-install verification,
 platform upgrade and recovery, ARM64/AMD64 release artifacts, and GitHub release
 packaging. Scoped automation tokens and a sample CI deployment use an approved
 private network path.
@@ -254,7 +254,7 @@ host and networking mode differ from M6.
 
 **Tasks:**
 
-- [ ] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh host reaches the setup wizard using the installer from a checkout.
+- [x] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh reference Pi reaches the setup wizard using the published installer. Native `v0.1.2` installation, same-version rerun and reboot evidence is recorded in the [Pi report](../tests/experiments/2026-11-22-raspberry-pi.md).
 - [ ] A clean installation is performed on a rented AMD64 server. **Acceptance:** the platform operates using only the documented installation procedure.
 - [ ] Platform upgrade includes backup, compatibility validation, chart upgrade, and failure recovery. **Acceptance:** both a successful upgrade and recovery through rollback with state restoration are exercised.
 - [x] Manually dispatched releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** both native OCI image bundles, installer assets, recorded digests and published checksums are available on GitHub Releases. Distribution uses direct containerd import; registry publishing is optional.

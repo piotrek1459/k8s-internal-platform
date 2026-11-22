@@ -54,6 +54,15 @@ class Native:
     def pod_uids(self, app):
         return sorted(p['metadata']['uid'] for p in self.pods(app) if not p['metadata'].get('deletionTimestamp'))
 
+    def wait_for_pod_deletion(self, app):
+        # Helm waits for the Deployment to disappear; Kubernetes garbage
+        # collection may still be terminating its Pods after operation success.
+        deadline = time.monotonic() + 60
+        while self.pods(app):
+            if time.monotonic() >= deadline:
+                raise AssertionError('Deleted application Pods remain after 60 seconds')
+            time.sleep(1)
+
     def http(self, app, expected):
         selector = urllib.parse.quote('platform.local/app-id='+app)
         services = self.kube('/api/v1/namespaces/platform-apps/services?labelSelector='+selector)['items']
@@ -146,7 +155,7 @@ class Native:
         deleted,_=self.client.mutate('POST','/apps',{'name':'pi-delete-'+secrets.token_hex(3),'image':images['v1'],'containerPort':8080,'profile':'http','exposure':{'mode':'internal'}})
         self.mutate(deleted['applicationId'],'DELETE')
         assert self.client.get('/apps/'+deleted['applicationId']+'/revisions')['items']
-        assert not self.pods(deleted['applicationId'])
+        self.wait_for_pod_deletion(deleted['applicationId'])
         self.record('Application deletion removed Pods and retained revision history')
         self.state['retainedRevision']=self.client.get('/apps/'+app)['lastSuccessfulRevision'];self.save()
         self.record('One healthy test application retained for same-version reinstall and host-reboot verification')

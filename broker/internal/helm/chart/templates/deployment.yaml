@@ -32,12 +32,18 @@ spec:
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: temporary-files
+          emptyDir:
+            sizeLimit: 64Mi
       containers:
         - name: application
           image: {{ include "application.image" . | quote }}
@@ -46,6 +52,9 @@ spec:
             - name: http
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
+          volumeMounts:
+            - name: temporary-files
+              mountPath: /tmp
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
