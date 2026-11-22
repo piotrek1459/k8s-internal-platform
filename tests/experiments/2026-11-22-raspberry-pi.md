@@ -188,5 +188,24 @@ The audit changes passed 61 Python regressions, shell syntax checks and actionli
 The stricter summary accepted the retained 14/0/0 JUnit evidence and rejected a
 synthetic consistent report containing two skipped cases. These are reporting-policy
 checks, not a claim that the backend was rerun solely for the summary change.
-The fixture Secret-reading command is now private, and diagnostic redaction covers
+Kubernetes commands remain private, and diagnostic redaction additionally covers
 known plaintext and base64 values before artifact retention.
+
+## GitHub E2E helper regression
+
+The [first manual run after PR #15](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45074394204)
+tested commit `3819511f5dcbfd39e49cf1a31ea6caa5a8b48d6c`: 14 tests,
+1 failure and 0 skips. The configuration-Secret rollback check passed an explicit
+`private=True` to `Environment.kubectl`, whose implementation already supplied
+that keyword to `Environment.run`. Python rejected the duplicate keyword before
+executing the Secret read. The wrapper already enforced private output; the
+extra call-site option was redundant.
+
+Commit `b192ec9bfa7f70a00077499dd36b269434129c96` merges the privacy option once
+and continues to force all Kubernetes command output private. The regression
+covers default, explicit-private and attempted non-private calls, checking both
+returned stdout and the absence of console/artifact output. All 62 Python
+regressions passed. A [replacement GitHub run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45076163560)
+completed successfully from the corrected source. Its retained JUnit artifact
+records **14 tests, 0 failures and 0 skips**, including the configuration-Secret
+rollback case. The strict acceptance-summary step also passed.
