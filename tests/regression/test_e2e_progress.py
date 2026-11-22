@@ -64,6 +64,19 @@ class CommandProgressTests(unittest.TestCase):
             self.assertFalse((Path(folder) / "commands.log").exists())
             self.assertEqual(result.stdout, "private result")
 
+    def test_kubectl_forces_private_output_without_duplicate_keyword_arguments(self):
+        for options in ({}, {"private": True}, {"private": False}):
+            with self.subTest(options=options), tempfile.TemporaryDirectory() as folder:
+                environment = support.Environment(Path(folder))
+                console = io.StringIO()
+                secret = '{"data":{"value":"encoded-secret-fixture"}}'
+                with contextlib.redirect_stdout(console), \
+                        patch.object(support.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, secret, "")):
+                    result = environment.kubectl("get", "secret", "fixture", "-o", "json", **options)
+                self.assertEqual(result.stdout, secret)
+                self.assertEqual(console.getvalue(), "")
+                self.assertFalse((Path(folder) / "commands.log").exists())
+
     def test_timeout_preserves_partial_redacted_diagnostics(self):
         with tempfile.TemporaryDirectory() as folder:
             environment = support.Environment(Path(folder))

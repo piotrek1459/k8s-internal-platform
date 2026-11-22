@@ -155,7 +155,10 @@ class Environment:
         return self.run(ROOT / "scripts/platform.sh", *args, **kwargs).stdout.strip()
 
     def kubectl(self, *args, **kwargs):
-        return self.run("kubectl", "--kubeconfig", self.config, "--context", "k3d-" + self.name, *args, private=True, **kwargs)
+        # Kubernetes output can contain credentials. Force privacy once, including
+        # when a caller explicitly supplies the option in kwargs.
+        kwargs["private"] = True
+        return self.run("kubectl", "--kubeconfig", self.config, "--context", "k3d-" + self.name, *args, **kwargs)
 
     def resource(self, kind, app):
         return json.loads(self.kubectl("-n", "platform-apps", "get", kind, "-l", "platform.local/app-id=" + app, "-o", "json").stdout)["items"]
