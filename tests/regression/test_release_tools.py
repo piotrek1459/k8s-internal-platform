@@ -68,7 +68,11 @@ class ReleaseIntegrityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             folder = Path(directory)
             (folder / "install.sh").write_text("Usage: --version v" + fallback.strip())
-            (folder / "INSTALL.md").write_text("Install v" + fallback.strip() + ": [API](user/api-reference.md)")
+            (folder / "INSTALL.md").write_text(
+                "The examples below use `v" + fallback.strip() + "`.\n"
+                "Previously verified v" + fallback.strip() + ".\n"
+                "```bash\nInstall v" + fallback.strip() + "\n```\n"
+                "[API](user/api-reference.md)")
             for arch in ("amd64", "arm64"):
                 raw = json.dumps({"version": "0.0.2", "architecture": arch}).encode()
                 with tarfile.open(folder / ("platform-v0.0.2-linux-" + arch + ".tar.gz"), "w:gz") as archive:
@@ -79,7 +83,9 @@ class ReleaseIntegrityTests(unittest.TestCase):
             guide = (folder / "INSTALL.md").read_text()
             self.assertIn("Install v0.0.2", guide)
             self.assertIn("/blob/v0.0.2/docs/", guide)
-            self.assertNotIn("v0.0.1", guide)
+            self.assertIn("The examples below use `v0.0.2`.", guide)
+            self.assertIn("Previously verified v" + fallback.strip() + ".", guide)
+            self.assertNotIn("Install v" + fallback.strip(), guide)
         self.assertEqual((ROOT / "release/version.txt").read_text(), fallback)
 
     def test_native_digest_and_image_version_are_verified(self):

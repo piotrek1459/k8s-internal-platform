@@ -99,3 +99,12 @@ The [status report](status.md#next-implementation-order) defines that order.
 [Milestone acceptance](milestones.md#implementation-readiness-and-entry-criteria)
 continues to require evidence for hardware, networking, failure recovery and
 evaluation; existing code alone does not satisfy those requirements.
+
+## Core acceptance follow-up
+
+The [M0–M4 audit](milestones.md#implementation-readiness-and-entry-criteria)
+records completed implementation separately from pending acceptance. Remaining
+core work is tracked in [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
+The passing supported lifecycle does not establish normal private LAN HTTPS,
+application diagnostics/drift reporting, every failure scenario or the measured
+core evaluation. Those obligations remain relevant before core completion is claimed.

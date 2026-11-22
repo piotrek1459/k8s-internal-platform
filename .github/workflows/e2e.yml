@@ -77,16 +77,6 @@ jobs:
             .local/e2e/run/*.png
             .local/e2e/run/*.txt
             .local/e2e/run/*.log
-      - name: Summarize acceptance and known gaps
+      - name: Summarize acceptance (zero skips required)
         if: always()
-        run: |
-          python3 - <<'PY'
-          import os, pathlib, xml.etree.ElementTree as E
-          path = pathlib.Path('.local/e2e/run/junit.xml')
-          if path.exists():
-              suite = E.parse(path).getroot()
-              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
-                  out.write(f"Tests: {suite.get('tests')}; failures: {suite.get('failures')}; known-gap skips: {suite.get('skipped')}\n\n")
-                  for skip in suite.findall('.//skipped'):
-                      out.write('- ' + skip.get('message', '') + '\n')
-          PY
+        run: python3 tests/e2e/acceptance.py --junit .local/e2e/run/junit.xml --summary "$GITHUB_STEP_SUMMARY"

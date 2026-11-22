@@ -16,180 +16,150 @@ layout. The design is specified in [architecture.md](architecture.md),
 > Core prototype completion does not establish academic sufficiency; the thesis
 > scope remains subject to the applicable requirements and supervisory agreement.
 
-Implementation proceeds through complete, verifiable workflows. Evidence is
-collected throughout development. Installation begins with a documented manual
-procedure in M0, includes manual platform installation in M2, and is automated
-incrementally. Basic tests, logs, and the minimum evaluation are part of M0–M4.
-Each checklist item specifies an acceptance criterion. Checked items identify
-recorded acceptance for the stated local scope. An unchecked item may be partly
-implemented; its complete acceptance has not been established. No entire M0–M4
-milestone is declared complete on the reference host.
-
-The first implementation uses a local K3s development cluster and locally stored
-images. The [local development guide](local-development.md) defines this workflow.
-Local verification provides implementation evidence but does not satisfy the
-reference Pi, second-device LAN, published-image, or hardware-calibration criteria.
-The milestone checklists retain those outstanding acceptance requirements.
+Implementation proceeds through verifiable workflows. A checked item means the
+stated behavior has evidence at the named scope: unit/handler, disposable real
+cluster, browser or reference Pi. It does not automatically accept a broader
+hardware, security or evaluation requirement. Compound items have been separated
+where implementation is complete but further acceptance remains outstanding.
+No entire M0–M4 milestone is declared complete by this checklist.
 
 ## Implementation readiness and entry criteria
 
-Updated: 2026-11-08. The local broker, Svelte UI, both charts and development
-workflow exist. The [status report](status.md) is the current capability and defect
-record. Historical plans to begin M0/M1 have been superseded by the implemented
-local prototype; remaining acceptance work is summarized below.
+Updated: 2026-11-22. The audit includes merged PR #14, the source changes in
+PR #15, published `v0.1.2`, the [reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
+and the current regression/E2E suites. Remaining work is tracked in
+[issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
+Older dated reports remain evidence only for their recorded source and scope.
 
-| Milestone | Existing implementation/evidence | Remaining acceptance |
+| Milestone | Completed implementation/evidence | Remaining acceptance or implementation |
 | --- | --- | --- |
-| M0 | Demo image contract, local manual deployment, timings and failure diagnosis. | Reference hardware, native-host installation/LAN access, publication and measured capacity. |
-| M1 | Chart validation, local install/update, diagnosed readiness failure and private-entrypoint baseline. | Reference-host resource calibration and network acceptance. |
-| M2 | Transactional store, operation queue, in-cluster chart/adapters, Secret backend, observer and completed-state persistence. | Exact interrupted-target verification, full snapshots and real-cluster acceptance of all durable invariants. |
-| M3 | Svelte setup/login, application and progress screens, update/history and configuration screens. | UI/API alignment, Secret submission, private images, application logs and normal LAN HTTPS. |
-| M4 | Healthy update/scale/rollback/delete and local API lifecycle evidence. | Restart, verified failed-rollout recovery, interruption/drift acceptance and core evaluation. |
-| M5–M8 | Persistence, public networking, native host/upgrade acceptance and monitoring remain planned; Linux installation, native OCI packaging and manual releases are implemented. | Separate implementation and evidence for each extension. |
+| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and a local manual Helm baseline. | Reference-Pi manual/operator baseline, normal access from another LAN device and the measurements supporting M1/M4. |
+| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; source chart 0.1.1 adds temporary files with container hardening retained. | Measured resource presets, reference-LAN acceptance and the temporary-files fix through a new published release. |
+| M2 | Validated API, schema creation/reopen, atomic acceptance, serial worker, frozen snapshots, configuration Secrets, image inspection and persisted completed state across replacement/reboot. | Migration-failure, queued/in-flight crash, moved-tag and disconnected-client acceptance; comprehensive negative-path secret-disclosure checks. |
+| M3 | Setup/login/logout, application forms/status/history, Secret-reference submission, private credential storage/pulls and completed-operation refresh. | Normal private LAN HTTPS/URL, application logs/workload events, full browser credential/Secret management and refresh during in-flight work. |
+| M4 | Healthy update/scale/restart/rollback/delete, verified unhealthy-update restoration, blocked-recovery unit tests and explicit Service reapply. | Real-cluster interruption/failed-compensation acceptance, failed-first-deployment resolution, general drift reporting and the controlled core evaluation. |
+| M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
-The immediate order is UI/API contract alignment, restart correctness, recovery
-and snapshot completion, private images, then repeatable core acceptance and
-reference-host evaluation. Numerical targets and measurement procedures must be
-recorded before evaluation runs. Later extensions require their own storage,
-networking and distribution decisions; implementing a subset does not accept an
-entire milestone.
+The two former status/restart E2E skips are removed: both are required assertions.
+Current E2E acceptance requires a non-empty run with zero failures and zero skips.
+An older workflow summary is not evidence for the current source; the summary
+records the tested commit. Public image distribution through native OCI release
+bundles is accepted; publishing platform images to a registry is optional.
 
 ## M0 — Constraints and baseline (core)
 
-**Objective:** verification that the reference host can deploy the demonstration
-application through Helm, with recorded procedures and resource measurements.
-
-**Risk and completion boundary:** low implementation risk. Hardware,
-architecture, or networking incompatibilities must be identified before backend
-integration. Demonstration application and chart development form part of this
-milestone. Completion requires a successful LAN request and recorded manual
-deployment and recovery procedures.
+**Objective:** a verified reference environment and reproducible manual Helm
+baseline for the later platform comparison. The installer now performs pinned
+K3s provisioning; repeating its installation steps manually is unnecessary.
+Manual application deployment remains relevant to the operator-effort baseline.
 
 **Tasks:**
 
-- [ ] Host characteristics are recorded, including model, architecture, OS, and free disk after installation of the OS, K3s, and images. **Acceptance:** records are stored in `tests/experiments/`.
-- [x] The demonstration application's port and readiness endpoint are specified. **Acceptance:** its deployment contract is documented in `examples/`.
-- [ ] A minimal HTTP demonstration application exposes its version and writes logs to stdout. **Acceptance:** published images include ARM64 and AMD64 variants and healthy v1/v2 and intentionally unhealthy v3 versions.
-- [ ] A pinned K3s release is installed manually on the host. **Acceptance:** the node reports Ready and the version and configuration are recorded.
-- [ ] A minimal application Helm chart is installed manually. **Acceptance:** the application pod becomes Ready and a LAN request succeeds from another device.
-- [ ] Installation, update, failed-update, and recovery commands and outputs are recorded. **Acceptance:** a reproducible transcript is stored in `tests/experiments/`.
-- [x] The minimum image contract specifies the listening address, architecture, and configuration mechanism. **Acceptance:** the contract is recorded in [api-and-data.md](api-and-data.md#application-contract).
+- [x] Reference host model, architecture, OS, RAM, storage and post-install free disk are recorded. **Evidence:** [Pi report](../tests/experiments/2026-11-22-raspberry-pi.md).
+- [x] The demo listening address, port, readiness/version endpoints, configuration and logging contract are documented. **Evidence:** `examples/http-demo/`, its Go tests and [application contract](api-and-data.md#application-contract).
+- [x] Healthy v1/v2 and deliberately unhealthy v3 are distributed as native ARM64/AMD64 OCI images. **Evidence:** both published release bundles and `release.json`; a registry account is not required.
+- [x] Pinned K3s provisioning on the Pi reaches a Ready node and records version/configuration. **Evidence:** the published `v0.1.2` installer and reboot run. This replaces the earlier manual-K3s-install method, not the manual Helm comparison.
+- [x] A local manual Helm install/update/unhealthy-update/explicit-recovery procedure and results are recorded. **Evidence:** [local baseline](../tests/experiments/2026-10-14-local-m0-m1.md) and `tests/integration/helm-lifecycle.sh`. The dated raw local run was removed; its curated report is historical evidence.
+- [ ] Repeat and retain the manual Helm/operator baseline on the reference Pi with current pins/images and raw results. **Acceptance:** the direct Helm steps and platform steps can be compared under the same recorded conditions. Tracked in issue #16.
+- [ ] Verify application access from another LAN device through the intended private route. **Acceptance:** private listener/DNS behavior is demonstrated; SSH/loopback application access alone does not establish normal LAN ingress. Tracked in issue #16.
 
-**Completion evidence:** successful LAN access, measured idle resource use,
-recorded manual steps, and a diagnosed deployment failure with recovery results.
+**Completion boundary:** host installation is verified. Reference-LAN acceptance
+and the controlled baseline/measurements supporting M1/M4 remain outstanding.
 
 ## M1 — Application chart (core)
 
-**Objective:** a versioned application Helm chart that defines the workload,
-service, probes, resource policy, ownership labels, and private route.
-
-**Risk and completion boundary:** moderate risk, primarily associated with probe
-and resource defaults. Defaults require reference-host measurements. Completion
-requires successful installation and update of a healthy image and a diagnosable
-failure for an unhealthy image.
+**Objective:** the first-party stateless HTTP chart, including workload, service,
+probes, resources, ownership and private routes.
 
 **Tasks:**
 
-Local chart evidence is recorded in the [baseline reports](../tests/README.md#historical-reports).
-Private-listener acceptance here is limited to loopback test entrypoints.
+- [x] Deployment and Service render and validate against K3s. **Evidence:** shared chart lint/render/negative matrix, historical server-side dry-run and current real-cluster E2E installation.
+- [x] Readiness, startup and optional liveness probes are configurable; startup/readiness API paths are independent. **Evidence:** chart matrix, probe-mapping regressions and the unhealthy-v3/native restoration workflow.
+- [ ] Replace provisional requests/limits with a measured reference-Pi preset. **Acceptance:** workload, sampling/repetitions and measured values are recorded before the defaults are adopted. Current 25m CPU/32Mi memory requests are not calibrated results. Tracked in issue #16.
+- [x] Managed resources have stable application ownership and release selectors. **Evidence:** rendered/installed Deployment, Service and Ingress label/selector checks.
+- [x] Private routes explicitly select the private entrypoint. **Evidence:** isolated local listener/forged-Host baseline checks. This acceptance is local; reference-LAN setup remains in M0/M3.
+- [x] Healthy install/update and unhealthy failure diagnostics operate on K3s. **Evidence:** disposable real-cluster and published `v0.1.2` Pi workflows.
+- [x] Source chart 0.1.1 supplies a size-limited temporary `/tmp` volume and non-root filesystem-group access while retaining the read-only root filesystem. **Evidence:** rendered-manifest regression, full source E2E and the controlled native Nginx experiment.
+- [ ] Verify that temporary-files fix using a new published installer/release, without patching a Deployment manually. **Acceptance:** the Nginx browser workflow reaches Ready and returns HTTP 200. Published `v0.1.2` lacks the mount. Tracked in issue #16.
 
-- [x] The chart renders a Deployment and Service for the HTTP profile. **Acceptance:** `helm lint` passes and rendered resources pass server-side dry-run validation against the pinned K3s API.
-- [x] Readiness, optional liveness, and startup probes are configurable through chart values. **Acceptance:** the unhealthy image remains unready and diagnostic events identify the failing probe.
-- [ ] Resource requests and limits use a measured preset. **Acceptance:** values and measurement conditions are recorded as versioned defaults.
-- [x] Every managed resource carries ownership labels and a stable application ID. **Acceptance:** rendered manifests and installed resource references identify the application consistently, including resources omitted by `kubectl get all`.
-- [x] Private routes explicitly select the permitted ingress entrypoint. **Acceptance:** the route is reachable through the private listener and unavailable through any public listener.
-- [x] Installation and update are verified on K3s. **Acceptance:** an upgrade to v2 replaces the previous pods and serves the expected version.
-
-**Completion evidence:** successful chart validation, installation, and update
-on K3s, together with diagnostics from an unhealthy image.
+**Completion boundary:** source chart behavior is verified. Resource calibration,
+reference-LAN scope and published acceptance of the new compatibility fix remain.
 
 ## M2 — Durable backend (core)
 
-**Objective:** an in-cluster Go service with a durable operation queue, persistent
-platform state, versioned configuration secrets, Helm integration, and observed
-application status.
-
-**Risk and completion boundary:** high risk due to durable state and external
-mutation handling. The required [execution and recovery rules](operations.md#deployment-execution-recovery-and-reconciliation)
-apply from the first operation. M2 verifies initial deployment, durable acceptance,
-and state preservation after restart. Interrupted mutations that cannot yet be
-recovered enter `NeedsAttention` and remain blocked. Automated lifecycle recovery
-and drift handling are completed in M4.
+**Objective:** in-cluster Go API, transactional queue/state, immutable execution
+snapshots, configuration Secrets, Helm integration and observed status.
 
 **Tasks:**
 
-- [ ] The initial `api/openapi.yaml` defines health, system, image inspection, application creation/retrieval/listing, operations, and versioned secret endpoints. **Acceptance:** the specification validates and generated client types, if used, match it.
-- [ ] SQLite migrations define administrator, application, revision, operation, audit, and secret metadata. **Acceptance:** supported migration and schema recovery paths are exercised in CI.
-- [x] Request, candidate revision, operation, and audit records are persisted transactionally. **Acceptance:** a failure-injection test verifies all-or-nothing persistence.
-- [x] A minimal platform chart installs the broker in `platform-system` with a Service, metadata PVC, service account, and scoped RBAC for `platform-apps`. **Acceptance:** the broker deploys an application in the same cluster using its service account, without an administrator kubeconfig.
-- [ ] Platform replacement permits only one active worker and preserves the SQLite volume. **Acceptance:** pod replacement retains application records, history, and queued work; unresolved interrupted mutations remain durably blocked.
-- [x] The manual platform installation and access procedure is recorded. **Acceptance:** the broker can be reinstalled from the documented chart and configuration; management access before M3 is limited to authenticated loopback forwarding.
-- [ ] Application secret creation and versioning produce immutable Kubernetes Secrets with metadata-only database records and chart references. **Acceptance:** revisions retain exact secret versions; referenced versions cannot be deleted, and secret values are absent from SQLite, Helm values, logs, and ordinary responses.
-- [ ] Image inspection resolves the digest and architecture before workload mutation. **Acceptance:** an incompatible image produces `IMAGE_ARCH_UNSUPPORTED`.
-- [ ] A single worker executes queued operations serially and freezes each execution digest. **Acceptance:** an integration test verifies that a moved tag does not alter a frozen revision.
-- [x] The Helm adapter installs the M1 chart from recorded values. **Acceptance:** the broker creates a real release in `platform-apps` on K3s.
-- [x] The status observer records observation time, desired and ready replicas, and endpoints. **Acceptance:** cluster unavailability produces explicitly stale status.
-- [ ] Accepted requests return `202 Accepted` and an operation URL, with lifecycle idempotency enforced. **Acceptance:** client disconnection does not discard work and duplicate requests return the original operation without creating another application.
+- [x] Health/system/image/application/operation/Secret routes have a validated OpenAPI contract and aligned supported response shapes. **Evidence:** full schema validation, handler contract tests and browser workflows. Frontend types are maintained manually, not generated.
+- [x] SQLite migrations create the metadata schema, reopen idempotently and enforce foreign keys. **Evidence:** `TestMigrateCreatesSchema`, `TestMigrateIsIdempotent`, `TestForeignKeysEnforced` in `broker/internal/store/db_test.go`.
+- [ ] Inject a failing migration and verify that its transaction leaves no partial schema. **Acceptance:** supported failure/retry behavior is recorded in CI. Backup restoration/cross-version upgrade support remains M5/M7. Tracked in issue #16.
+- [x] Application, candidate revision, operation, first event and audit acceptance is atomic. **Evidence:** store atomicity and rollback-on-failure regressions.
+- [x] The platform chart provides Service/PVC/service account and scoped RBAC; the broker deploys into `platform-apps` through in-cluster credentials. **Evidence:** local real-cluster and native release installation.
+- [x] The single-replica/Recreate platform configuration preserves completed application state, history and sessions through broker replacement; Pi reinstall/reboot preserves the PVC identity. **Evidence:** E2E broker replacement and native identity/session comparisons.
+- [ ] Verify replacement with queued/in-flight work and durable unresolved-operation blocking on a real cluster. **Acceptance:** deterministic interruption barriers establish exact target success or retained blocking; no blind Helm-record deletion. Tracked in issue #16.
+- [x] Manual chart/development access and published native installation procedures are recorded. **Evidence:** local development and Linux installation guides.
+- [x] Configuration Secret creation/versioning, immutable Kubernetes values, metadata-only records, exact version references and deletion guards operate. **Evidence:** Secret handler/store tests, browser reference submission and real-cluster configuration rollback.
+- [ ] Complete negative-path disclosure checks across SQLite/WAL, Helm values, ordinary responses, broker logs and sanitized artifacts. **Acceptance:** controlled secret values and encodings remain absent, including error paths. Secret-reading test commands are private and base64 redaction has a regression. Tracked in issue #16.
+- [x] Image inspection resolves digests and Linux architectures; incompatible images map to `IMAGE_ARCH_UNSUPPORTED`. **Evidence:** registry and handler tests, native ARM64 inspection and public/private real-cluster pulls.
+- [x] Serial claiming and one-shot snapshot freezing preserve recorded image, chart/version/content digest, values hash, Secret versions and restart identity. **Evidence:** store/worker/snapshot regressions and lifecycle E2E.
+- [ ] Verify moved-tag and interrupted retry behavior against a real registry. **Acceptance:** the actual Pod specification keeps the committed digest after the tag changes. The moved-tag worker unit regression already passes. Tracked in issue #16.
+- [x] The Helm adapter installs recorded values and the observer caches time/replicas/endpoints with stale status on read failures. **Evidence:** adapter/observer tests and real K3s operations.
+- [x] Acceptance returns `202`/Location and ordinary identical retries preserve the operation/application identity. **Evidence:** handler/store regressions and E2E idempotency assertions.
+- [ ] Drop a client response after durable acceptance and verify retry/completion without another operation/application. **Acceptance:** the committed work survives client disconnection; cancellation before commit is distinguished explicitly. Tracked in issue #16.
 
-**Completion evidence:** an in-cluster broker deploys an application, retains
-state after pod replacement, preserves secret references, and handles duplicate
-requests and disconnected clients without losing accepted work. Complete native
-installer/upgrade acceptance remains part of M7; the Linux installer and manual
-release controller are already implemented.
+**Completion boundary:** the normal durable backend is implemented and tested.
+The remaining crash/disconnection/migration/security failure matrix is acceptance
+work, not a claim that the queue, schema or Secret backend is absent.
 
 ## M3 — Administrator UI (core)
 
-**Objective:** a browser interface for setup, authentication, application
-creation and inspection, logs, history, configuration secrets, and private images.
-
-**Risk and completion boundary:** moderate risk, primarily from interface scope
-expansion. The initial interface is limited to the workflows defined in
-[architecture.md](architecture.md#ui-structure-and-user-experience). Completion
-requires authenticated deployment of public and private images. Interface
-refinement and Server-Sent Events remain subsequent work.
+**Objective:** authenticated administration with clear forms/status/progress,
+configuration/history and diagnostics over a private management path.
 
 **Tasks:**
 
-- [x] The setup wizard consumes an expiring, single-use bootstrap token and creates the administrator account. **Acceptance:** expired tokens and repeated token use are rejected.
-- [x] Session login and logout implement HttpOnly and SameSite cookies, expiry, revocation, and CSRF protection. **Acceptance:** unauthenticated mutations return `401` and CSRF verification passes.
-- [ ] Private management access includes documented DNS and certificate trust configuration. **Acceptance:** normal LAN administration uses HTTPS; initial loopback bootstrap remains available through authenticated forwarding.
-- [ ] The application list and creation form expose image input, measured defaults, and advanced configuration. **Acceptance:** a submitted application reaches Ready and displays its LAN URL.
-- [ ] Configuration input uses the M2 secret endpoints and version references. **Acceptance:** secret values are accepted as write-only input and retained revisions identify the selected versions.
-- [ ] Application details include status, bounded logs, events, and revision history. **Acceptance:** the supporting read endpoints are available and logs are rendered as escaped plain text.
-- [ ] Registry credential creation and verification support private images. **Acceptance:** a private image deploys successfully and an invalid credential produces an actionable error.
-- [ ] Operation progress is restored after refresh or navigation. **Acceptance:** reloading during deployment retrieves the persisted operation state.
+- [x] Single-use expiring bootstrap setup creates the administrator; root navigation selects setup on a fresh installation. **Evidence:** auth service/handler tests, browser setup and native invalid-token/error checks.
+- [x] Login/logout, HttpOnly/SameSite sessions, expiry/revocation and CSRF/mutation checks operate. **Evidence:** auth regressions/E2E; the original native session survived reinstall/reboot.
+- [ ] Provide normal private LAN HTTPS administration with DNS/trust instructions and Secure cookies. **Acceptance:** another LAN device verifies the trusted private management URL; loopback SSH bootstrap remains available. This is distinct from M6 public hosting. Tracked in issue #16.
+- [x] Application list, image inspection, supported creation fields and Ready/status views operate for Internal exposure. **Evidence:** real browser lifecycle and API response contract checks. Resource defaults remain provisional under M1.
+- [ ] Display and verify the configured LAN application URL through a working private route. **Acceptance:** the persisted exposure/hostname is reflected correctly in the UI and reachable from another device. Tracked in issue #16.
+- [x] Secret metadata/version objects and application Secret-reference submission use the API contract. **Evidence:** write-only API tests, browser reference selection/submission and exact-version rollback.
+- [ ] Complete browser Secret creation/version management and credential creation/selection/private-image/invalid-password workflows. **Acceptance:** these browser paths use the real endpoints and show actionable errors. API private inspection/pulls already pass. Tracked in issue #16.
+- [x] Application details include observed status, revision history and operation progress/events. **Evidence:** handler contracts and browser update/history/rollback workflows.
+- [ ] Add bounded, application-scoped workload log and Kubernetes event APIs and escaped plain-text UI rendering. **Acceptance:** ownership/namespace and output limits are enforced. Operation progress events are not workload log/event browsing. Tracked in issue #16.
+- [x] Registry credentials are stored in Kubernetes and support real private inspection/pulls; ordinary responses remain metadata-only and invalid credentials fail. **Evidence:** registry/credential regressions and authenticated-registry E2E. Full private browser flow remains above.
+- [x] A completed operation can be reloaded from its persisted state. **Evidence:** browser operation-page refresh.
+- [ ] Refresh/navigate while an operation is deliberately queued/running. **Acceptance:** persisted progress resumes without resubmitting a mutation. The existing completed-operation refresh does not establish this case. Tracked in issue #16.
 
-**Completion evidence:** authenticated browser deployment of public and private
-images, verified access controls, and persistent operation progress.
+**Completion boundary:** the main UI works; private LAN management, diagnostic
+surfaces and the specified remaining browser acceptance still belong to core M3.
 
 ## M4 — Reliable lifecycle and core evaluation (core)
 
-**Objective:** verified updates, failure recovery, rollback, restart, manual
-replica changes, deletion, crash recovery, drift reporting, and evaluation of the
-implemented core prototype.
-
-**Risk and completion boundary:** high risk, particularly around interrupted
-mutations and failed compensation. Completion requires verified update and
-recovery outcomes, a durable block on unresolved recovery, and the
-[minimum core evaluation](#minimum-core-evaluation-m4). Application volumes are
-excluded from this milestone; their implementation and acceptance tests belong
-to M5.
+**Objective:** tracked lifecycle, verified restoration/rollback, durable blocking,
+crash recovery, drift reporting and measured evaluation of the core prototype.
+Application data volumes remain outside this milestone.
 
 **Tasks:**
 
-- [x] `PATCH /api/v1/apps/{id}` applies image, configuration, resource, available exposure, and replica changes through one revision and Helm workflow. **Acceptance:** scaling and image changes both create tracked revisions; configuration-only changes preserve the recorded image digest.
-- [ ] Failed rollout detection initiates controlled restoration of the previous configuration. **Acceptance:** an unhealthy v3 produces a `Failed` operation only after v2 restoration is verified, with the recovery outcome recorded.
-- [ ] Unverified or failed recovery enters nonterminal `NeedsAttention`. **Acceptance:** the failed candidate remains recorded, conflicting mutations return `409` across broker restarts, and the block is cleared only after documented recovery verifies the resulting state.
-- [ ] Explicit rollback creates a new revision from an eligible successful revision. **Acceptance:** the selected image digest, chart artifact, and immutable secret versions are restored; external data changes are explicitly outside rollback scope.
-- [ ] Restart and manual replica changes support stateless applications, including zero replicas. **Acceptance:** zero replicas produces Stopped; restoration to one and scaling to two produce the expected ready counts. Persistent-profile requests remain unsupported until M5.
-- [x] Stateless application deletion removes owned workload and routing resources while preserving history. **Acceptance:** deletion completes only after those resources are absent; revisions and referenced secret versions remain subject to the documented retention policy.
-- [ ] Startup recovery inspects nonterminal operations. **Acceptance:** interruption during an upgrade results in verified recovery or `NeedsAttention`, without blind deletion of Helm release records.
-- [ ] Drift reporting and `POST /api/v1/apps/{id}/reapply` use the recorded specification. **Acceptance:** a manually deleted resource is reported and explicit reapplication restores it; operator changes are not overwritten automatically.
-- [ ] The required core evaluation is completed against the M0 manual baseline. **Acceptance:** functional and failure outcomes, operator effort, deployment and recovery timings, and resource measurements are stored with raw results and environment metadata.
+- [x] Image/configuration/resource/available exposure/replica changes share the tracked revision/Helm path; configuration-only updates retain the image digest. **Evidence:** mutation/worker tests and API lifecycle E2E.
+- [x] Unhealthy-v3 rollout failure restores and verifies the prior successful v2 snapshot before recording the failed operation and releasing its lock. **Evidence:** real-cluster E2E and the published `v0.1.2` native run.
+- [x] Unverified restoration retains a failed candidate, nonterminal `needs_attention` and conflict guards; version-guarded recovery retry retains operation identity. **Evidence:** store/worker/recovery unit regressions.
+- [ ] Verify failed restoration and its lock/retry resolution across actual broker restarts, including a first deployment without a successful predecessor. **Acceptance:** conflicts remain rejected until state is verified; an unusable first deployment has a supported administrator resolution/removal path. Tracked in issue #16.
+- [x] Supported rollback creates a new revision preserving the selected image, exact Secret versions and available chart/values identity. Unavailable chart artifacts are refused rather than substituted. **Evidence:** native rollback, configuration-version E2E and chart/snapshot regressions. Historical-chart retrieval across platform upgrades remains M7 scope.
+- [x] Restart replaces Pods with a stable operation token and fixed image digest; stateless scale 2/0/1 reaches its expected states. **Evidence:** mandatory status/restart assertions, API E2E and the native workflow. There are no acceptance skips for these paths.
+- [x] Tracked stateless deletion removes Helm-managed workload/routing resources and retains history. **Evidence:** API/browser/native deletion checks. Dependent Pod garbage collection is asynchronous and has a bounded native acceptance check.
+- [x] Startup recovery classifies queued/interrupted/pending/unknown states and verifies target release/chart/values/live identity before success. **Evidence:** positive/negative recovery and live-verifier regressions.
+- [ ] Complete the real-cluster interruption matrix around Helm and terminal SQL recording. **Acceptance:** recovery never mistakes an old deployed release for the target or removes a Helm record to bypass ambiguity. Tracked in issue #16.
+- [x] Explicit reapply recreates a manually deleted Service from recorded state without changing its image. **Evidence:** real-cluster Service-deletion/reapply E2E.
+- [ ] Report general workload/route drift against persisted intent without automatically overwriting operator changes or exposing secret material. **Acceptance:** image/configuration/resource/route differences are identified and explicit reapply resolves supported drift. Tracked in issue #16.
+- [ ] Complete the [minimum core evaluation](#minimum-core-evaluation-m4) against the reference manual baseline. **Acceptance:** predefined targets/repetitions, operator steps/active time, timing/resource measurements and environment/raw results are retained. A functional run and its intentional timeout are not a performance dataset. Tracked in issue #16.
 
-**Completion evidence:** successful v2 deployment, verified recovery from an
-unhealthy v3, preserved secret-version semantics, tested recovery blocking, and
-reproducible evaluation results for the core prototype.
+**Completion boundary:** supported healthy lifecycle and failed-update restoration
+are verified. Full failure/interruption acceptance, drift reporting and the
+required core evaluation remain open. M5–M8 do not replace these core obligations.
 
 ## M5 — Application persistence and backup (extension)
 
@@ -240,7 +210,7 @@ verified rejection of private and management traffic.
 
 ## M7 — Repeatable distribution (extension)
 
-**Objective:** an installer executable from a checkout, clean-install verification,
+**Objective:** a published-release installer usable without a checkout, clean-install verification,
 platform upgrade and recovery, ARM64/AMD64 release artifacts, and GitHub release
 packaging. Scoped automation tokens and a sample CI deployment use an approved
 private network path.
@@ -254,7 +224,7 @@ host and networking mode differ from M6.
 
 **Tasks:**
 
-- [ ] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh host reaches the setup wizard using the installer from a checkout.
+- [x] The installer implements preflight checks, K3s setup, namespaces, RBAC, and platform chart installation. **Acceptance:** a fresh reference Pi reaches the setup wizard using the published installer. Native `v0.1.2` installation, same-version rerun and reboot evidence is recorded in the [Pi report](../tests/experiments/2026-11-22-raspberry-pi.md).
 - [ ] A clean installation is performed on a rented AMD64 server. **Acceptance:** the platform operates using only the documented installation procedure.
 - [ ] Platform upgrade includes backup, compatibility validation, chart upgrade, and failure recovery. **Acceptance:** both a successful upgrade and recovery through rollback with state restoration are exercised.
 - [x] Manually dispatched releases publish ARM64 and AMD64 images and installation assets. **Acceptance:** both native OCI image bundles, installer assets, recorded digests and published checksums are available on GitHub Releases. Distribution uses direct containerd import; registry publishing is optional.
@@ -286,17 +256,20 @@ evaluated against the lightweight core profile.
 **Completion evidence:** reproducible extension results and measured
 observability overhead, supplementing the mandatory core evaluation.
 
-## First implementation increment
+## Core execution and evidence order
 
-1. Host details and available disk are recorded; the demonstration port and readiness endpoint are specified.
-2. A minimal ARM64/AMD64 HTTP demonstration application provides a version response and stdout logs, with healthy and unhealthy image versions.
-3. The pinned K3s installation and minimal application Helm chart establish a manual deployment on the host.
-4. Installation, update, failed-update, and recovery commands and results are recorded.
-5. The initial API and data model are specified for automation of the verified deployment path.
+1. Publish the temporary-files compatibility fix and repeat its normal native
+   browser deployment through the released installer, without manual patching.
+2. Complete the missing core diagnostic/drift/private-LAN surfaces and remaining
+   browser/failure/security acceptance tracked in issue #16.
+3. Record the current reference-Pi manual baseline, calibrate resource defaults
+   and fix the evaluation targets/repetitions before collecting comparison data.
+4. Retain the M4 functional/failure/operator/timing/resource dataset with source,
+   versions and raw evidence. Update each relevant checklist from that evidence.
 
-The initial increment excludes the full monitoring stack, distribution
-automation, and expanded dashboard functionality. Its acceptance boundary is the
-manual workflow and evidence required by M0/M1.
+The demo, charts, API, queue, UI and release tooling already exist. This order
+does not require recreating that foundation. M5–M8 remain separate extensions;
+their implementation must not be used to label unfinished core criteria complete.
 
 ## Example end-to-end workflows
 

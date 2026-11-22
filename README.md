@@ -19,7 +19,9 @@ are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-inte
 The [installation guide](docs/installation.md) describes the resulting native
 ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.2`
 commands are version examples; the downloaded guide matches the selected release.
-Reference Pi results are recorded in [status](docs/status.md). Public HTTPS,
+Native `v0.1.2` core installation/reinstall/reboot passed on the reference Pi.
+A temporary-file compatibility fix awaits its next release; details and evidence
+are recorded in [status](docs/status.md). Public HTTPS,
 application volumes and cross-version upgrades remain separate acceptance boundaries.
 
 ## Local startup
@@ -110,8 +112,10 @@ Internal exposure; the Linux installer provides SSH/loopback management access.
 [Implementation status](docs/status.md) records reference-host results and the
 remaining recovery boundaries. Public HTTPS, application data volumes, verified
 backup/restore and cross-version platform upgrades remain separate work.
-Milestone completion depends on the evidence defined in the
-[implementation plan](docs/milestones.md).
+The [audited implementation plan](docs/milestones.md) marks verified work and
+separates remaining acceptance. Outstanding M0–M4 core work is tracked in
+[issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16); it is
+not replaced by later milestones.
 
 ## Repository
 

@@ -143,6 +143,8 @@ replacement, and installation of packaged OCI/chart artifacts on a second node.
 It is scheduled at 02:00 UTC nightly, supports manual execution and gates release
 publication. Scheduled/manual execution requires the workflow on the default
 branch. Status contracts, Pod replacement and authenticated image pulls are required assertions.
+Acceptance requires a non-empty suite with zero failures and zero skips; the
+summary records the checked-out source commit and rejects absent/inconsistent evidence.
 Untrusted PR code never runs on a host serving deployed applications.
 
 The manually dispatched Release workflow takes a source branch (default `main`)

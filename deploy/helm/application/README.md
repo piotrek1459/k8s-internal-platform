@@ -179,3 +179,19 @@ certificate issuance and trust configuration are installation responsibilities.
 Relevant semantics are documented in the [Kubernetes Deployment reference](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/),
 [Helm values schema reference](https://helm.sh/docs/topics/charts/#schema-files),
 and [Traefik Kubernetes Ingress reference](https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/).
+
+## Temporary files and container permissions
+
+Chart `0.1.1` mounts a Pod-local `emptyDir` at `/tmp` with `sizeLimit: 64Mi`.
+The Pod uses supplementary filesystem group `2000` and `OnRootMismatch` ownership
+handling so an image's non-root user can write temporary files. The container
+root filesystem remains read-only, privilege escalation remains disabled and all
+Linux capabilities remain dropped.
+
+Temporary files are discarded with the Pod and are not backup or application
+data storage. The size limit is a Kubernetes ephemeral-storage setting, not a
+persistent capacity guarantee. Applications requiring writable paths outside
+`/tmp` need a compatible image configuration or a supported volume contract.
+Application data volumes remain part of M5. The chart version/content digest
+changes with this fix; existing execution snapshots from another chart artifact
+remain subject to the documented cross-chart rollback restriction.

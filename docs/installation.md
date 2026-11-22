@@ -10,8 +10,9 @@ The platform and its managed applications run in the same K3s cluster. The
 installer provisions K3s, imports native OCI images and installs the platform
 chart. Docker, Go and Node.js are not required on the target host.
 
-Reference Raspberry Pi installation has been exercised; the current native
-acceptance record is linked from [implementation status](status.md). Public HTTPS, application volumes and cross-version upgrades remain outside
+Published `v0.1.2` has passed reference Raspberry Pi core installation,
+same-version reinstall and reboot checks; [implementation status](status.md)
+links the measured results and remaining compatibility limits. Public HTTPS, application volumes and cross-version upgrades remain outside
 this installer. Private credentials and verified failed-rollout restoration are
 implemented; their acceptance boundaries are recorded separately.
 The [implementation status](status.md) records the remaining boundaries. Existing
@@ -134,6 +135,16 @@ In another terminal on the workstation, substitute the actual SSH destination:
 ssh -N -L 8080:127.0.0.1:8080 USER@PI_HOST
 ```
 
+The two foreground commands can alternatively be combined from the workstation:
+
+```bash
+ssh -t -L 127.0.0.1:8080:127.0.0.1:8080 USER@PI_HOST \
+  'sudo /usr/local/lib/k8s-internal-platform/kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80'
+```
+
+Keep the SSH command running while using the UI. This one-command access path
+was verified against the reference Pi after its reboot.
+
 Open **http://127.0.0.1:8080/setup** locally. Retrieve the bootstrap token privately
 on the Pi/server:
 
@@ -171,7 +182,12 @@ must be created through the [API walkthrough](user/api-reference.md), using the
 registry resolution; the imported image is already available on the node.
 
 For UI deployment, supply an image available in a reachable public registry and
-built for the host architecture. Inspect it, select its actual container port
+built for the host architecture. The `v0.1.2` HTTP profile makes the complete root
+filesystem read-only and does not mount writable `/tmp`. Images such as
+unprivileged Nginx that require temporary files therefore fail startup in this
+release. Application chart `0.1.1` adds a Pod-local temporary volume. Image compatibility
+must be checked against the installed chart; the source fix does not modify
+published `v0.1.2` assets. Inspect it, select its actual container port
 and readiness path, then deploy with Internal exposure. Public image availability
 and public application exposure are separate settings. Operation success and an
 actual HTTP response must both be verified.

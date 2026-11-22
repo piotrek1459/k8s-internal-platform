@@ -90,7 +90,8 @@ the later milestone criteria.
 
 The reference installation targets one Linux host, one K3s cluster, and one
 Kubernetes node. Current local development runs that K3s node in Docker using
-k3d; native Raspberry Pi and AMD64 acceptance remain outstanding. That node performs both server/control-plane duties and workload execution.
+k3d. Published `v0.1.2` has native Raspberry Pi installation and reboot evidence;
+native AMD64 acceptance remains outstanding. That node performs both server/control-plane duties and workload execution.
 The platform is itself deployed as a Kubernetes workload, alongside the
 applications it manages. Deploying another application creates resources inside
 this existing cluster; it does not create another cluster or start containers
@@ -256,12 +257,13 @@ platform API already being available. The implemented platform chart provides th
 service account and scoped RBAC. Local deployment and stop/rebuild persistence
 are recorded in the [test reports](../tests/README.md#historical-reports). Those
 results do not establish safe recovery at every interruption point. Linux installation and OCI release packaging are implemented; native
-host acceptance and production upgrade/recovery remain pending.
+Pi core acceptance is recorded separately; native AMD64 and production
+upgrade/recovery remain pending.
 
 ## Meaning of a managed platform on administrator-owned hardware
 
 The table defines target product responsibilities. The current development
-launcher implements local build/install/access; the Linux installer adds dedicated Linux host setup. Native host acceptance,
+launcher implements local build/install/access; the Linux installer adds dedicated Linux host setup. Native Pi core installation and reboot have been verified. Native AMD64,
 backup/restore and public networking remain pending.
 
 | Responsibility | Target product responsibility | Administrator responsibility |
