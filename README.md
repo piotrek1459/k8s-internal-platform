@@ -112,8 +112,10 @@ Internal exposure; the Linux installer provides SSH/loopback management access.
 [Implementation status](docs/status.md) records reference-host results and the
 remaining recovery boundaries. Public HTTPS, application data volumes, verified
 backup/restore and cross-version platform upgrades remain separate work.
-Milestone completion depends on the evidence defined in the
-[implementation plan](docs/milestones.md).
+The [audited implementation plan](docs/milestones.md) marks verified work and
+separates remaining acceptance. Outstanding M0–M4 core work is tracked in
+[issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16); it is
+not replaced by later milestones.
 
 ## Repository
 

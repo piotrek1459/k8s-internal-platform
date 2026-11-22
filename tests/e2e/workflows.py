@@ -9,6 +9,7 @@ import unittest
 import xml.etree.ElementTree as XML
 
 from support import Client, Environment, ROOT
+from acceptance import acceptance_successful
 
 ENVIRONMENT = None
 
@@ -250,7 +251,7 @@ class Workflows(unittest.TestCase):
             self.assertEqual(variables["APP_MODE"]["value"], "first")
             secret_name = variables["APP_SECRET"]["valueFrom"]["secretKeyRef"]["name"]
             self.assertTrue(secret_name.endswith("-v1"))
-            actual = json.loads(self.e.kubectl("-n", "platform-apps", "get", "secret", secret_name, "-o", "json").stdout)
+            actual = json.loads(self.e.kubectl("-n", "platform-apps", "get", "secret", secret_name, "-o", "json", private=True).stdout)
             self.assertTrue(actual["immutable"])
             self.assertTrue(base64.b64decode(actual["data"]["value"]).decode() == value, "Rollback selected incorrect Secret contents")
             self.assertEqual(self.e.client.request("DELETE", "/secrets/" + secret["id"])[0], 409)
@@ -351,11 +352,13 @@ class Result(unittest.TextTestResult):
         self.started = time.monotonic()
 
     def stopTest(self, test):
-        failures = dict(self.failures + self.errors)
+        failures = dict(self.failures + self.errors + self.expectedFailures)
+        for unexpected in self.unexpectedSuccesses:
+            failures[unexpected] = "An unexpected success is not accepted."
         element = XML.SubElement(self.xml, "testcase", name=test.id(), time=f"{time.monotonic()-self.started:.3f}")
         if test in failures: XML.SubElement(element, "failure").text = ENVIRONMENT.redact(failures[test])
         for skipped, reason in self.skipped:
-            if skipped == test: XML.SubElement(element, "skipped", message=reason)
+            if skipped == test: XML.SubElement(element, "skipped", message=ENVIRONMENT.redact(reason))
         super().stopTest(test)
 
     def __init__(self, *args, **kwargs):
@@ -372,10 +375,10 @@ def main(artifacts):
     try:
         environment.start()
         result = unittest.TextTestRunner(verbosity=2, resultclass=Result).run(unittest.defaultTestLoader.loadTestsFromTestCase(Workflows))
-        result.xml.set("tests", str(result.testsRun)); result.xml.set("failures", str(len(result.failures) + len(result.errors)))
+        result.xml.set("tests", str(result.testsRun)); result.xml.set("failures", str(len(result.failures) + len(result.errors) + len(result.expectedFailures) + len(result.unexpectedSuccesses)))
         result.xml.set("skipped", str(len(result.skipped)))
         XML.ElementTree(result.xml).write(artifacts / "junit.xml", encoding="unicode")
-        return 0 if result.wasSuccessful() else 1
+        return 0 if acceptance_successful(result) else 1
     finally:
         try: environment.diagnostics()
         finally:

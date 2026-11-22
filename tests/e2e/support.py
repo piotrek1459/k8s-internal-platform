@@ -1,4 +1,5 @@
 """Owned disposable environments and sanitized diagnostics for real workflows."""
+import base64
 import contextlib
 import http.cookiejar
 import json
@@ -96,8 +97,9 @@ class Environment:
         self.builders = []
 
     def redact(self, text):
-        for value in self.secret_values:
-            if value: text = text.replace(value, "[REDACTED]")
+        for value in sorted({value for value in self.secret_values if value}, key=len, reverse=True):
+            text = text.replace(value, "[REDACTED]")
+            text = text.replace(base64.b64encode(value.encode()).decode(), "[REDACTED]")
         return re.sub(r"(?m)^  [A-Za-z0-9_-]{32}[ \t]*$", "  [REDACTED]", text)
 
     def record(self, message, **details):

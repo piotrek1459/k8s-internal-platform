@@ -39,6 +39,20 @@ class CommandProgressTests(unittest.TestCase):
             self.assertIn("captured command detail", (Path(folder) / "commands.log").read_text())
             self.assertEqual(result.stdout, "captured command detail\n")
 
+    def test_secret_redaction_covers_plaintext_and_kubernetes_base64_data(self):
+        import base64
+        with tempfile.TemporaryDirectory() as folder:
+            environment = support.Environment(Path(folder))
+            value = 'private-configuration-value'
+            environment.secret_values.extend([value, 'second-' + value])
+            encoded = base64.b64encode(value.encode()).decode()
+            newer_encoded = base64.b64encode(('second-' + value).encode()).decode()
+            redacted = environment.redact(value + ' ' + encoded + ' ' + newer_encoded)
+            self.assertNotIn(value, redacted)
+            self.assertNotIn(encoded, redacted)
+            self.assertNotIn(newer_encoded, redacted)
+            self.assertEqual(redacted.count('[REDACTED]'), 3)
+
     def test_private_command_has_no_console_or_artifact_output(self):
         with tempfile.TemporaryDirectory() as folder:
             environment = support.Environment(Path(folder))

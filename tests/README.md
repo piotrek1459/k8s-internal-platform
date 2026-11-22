@@ -96,7 +96,10 @@ Coverage includes:
 - Native OCI/chart packaging and startup on a second fresh node without a registry.
 
 Status serialization and application restart are required assertions; no known-gap
-skips remain. Authenticated registry inspection and real kubelet pulls use only
+skips remain. The runner and CI summary require a non-empty suite with zero
+failures and zero skips; expected-failure waivers also fail acceptance. Missing
+or inconsistent JUnit evidence fails the summary. Its source commit identifies
+what was actually tested, so a historical summary cannot establish current behavior. Authenticated registry inspection and real kubelet pulls use only
 the suite's owned registry and test credentials. Pending/unknown recovery and
 failed restoration retain durable locks in focused regression tests. Public HTTPS
 and native AMD64 installation remain separate acceptance boundaries.
@@ -187,3 +190,14 @@ The [Pi report](experiments/2026-11-22-raspberry-pi.md) records executed results
 The native deletion check allows up to 60 seconds for Pod garbage collection
 after the tracked delete operation completes. Deployment deletion and dependent
 Pod deletion are asynchronous. A remaining Pod after that deadline fails the check.
+
+## Core milestone audit
+
+The [M0–M4 checklists](../docs/milestones.md) distinguish completed implementation
+from remaining acceptance and missing functionality. Outstanding core work is
+tracked in [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
+The old standalone nightly run on commit `076d1fc` predates PR #14 and its two
+conditional skips. Historical reports retain their original results; current
+status/restart tests are mandatory and the updated policy rejects any skipped
+E2E workflow. Secret-reading test commands are private; known secret plaintext
+and base64-encoded values are redacted from retained diagnostics.

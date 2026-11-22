@@ -92,7 +92,8 @@ The published command `sudo bash install.sh --version v0.1.2` then exited `0`.
 The installer downloaded/imported its ARM64 bundle, installed the platform and
 established readiness without Docker, Go or Node.js on the target. Observed pins:
 K3s `v1.36.5+k3s1`, Helm `v3.22.0`; kernel `6.18.60+rpt-rpi-2712`.
-The active cgroup controllers included `memory`. Kubeconfig and installed release
+The active cgroup controllers included `memory`. Post-install `df -h` reported
+29G total, 7.8G used and 20G available on the root filesystem after K3s/images. Kubeconfig and installed release
 metadata had mode `0600`. The broker image reference was:
 
 ```text
@@ -166,3 +167,26 @@ proxies/SSH forwards were stopped; the dedicated session-survival cookie was
 revoked and its local copy removed after the successful checks. The `v0.1.2`
 installation and one healthy v1 demo remain on the Pi. The documented single-SSH
 management access command returned readiness and the login page after reboot.
+
+## M0–M4 evidence reconciliation
+
+The milestone audit separates this native functional run from a reference-host
+manual/operator baseline, resource calibration and repeated core evaluation.
+Those measurements and the remaining diagnostic, LAN, drift, crash and browser
+acceptance requirements remain open in
+[issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
+Existing migration/reopen, image-freezing and recovery unit regressions are
+identified as such; they do not stand in for every real-cluster interruption case.
+
+The latest standalone nightly result available during this audit used commit
+`076d1fc` from before PR #14. Its two status/restart skips are historical. Both
+cases passed as mandatory assertions in the current 14-case source runs. The
+new acceptance policy rejects skipped/expected-failure/empty runs and invalid
+JUnit evidence, and the CI summary identifies its tested source commit.
+
+The audit changes passed 61 Python regressions, shell syntax checks and actionlint.
+The stricter summary accepted the retained 14/0/0 JUnit evidence and rejected a
+synthetic consistent report containing two skipped cases. These are reporting-policy
+checks, not a claim that the backend was rerun solely for the summary change.
+The fixture Secret-reading command is now private, and diagnostic redaction covers
+known plaintext and base64 values before artifact retention.
