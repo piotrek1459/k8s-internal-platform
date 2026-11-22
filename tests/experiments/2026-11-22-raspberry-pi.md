@@ -50,8 +50,27 @@ adds probe `successThreshold: 1`, whereas Helm stores the manifest without that
 explicit default. The live verifier was corrected to normalize this API default
 while retaining image, probe, generation, replica and Service checks. A focused
 regression covers the defaulted object and rejects image/generation drift.
-Direct verification of the restored live resources then succeeded. A complete
-suite rerun is required before the PR is declared ready.
+Direct verification of the restored live resources then succeeded.
+
+The complete local API/browser/bundle suite subsequently passed: **14 tests,
+0 failures, 0 skips**, 568.085 seconds of test execution, with build version
+`0.1.2`. This includes browser setup and nested error rendering, Secret-reference
+submission, healthy lifecycle/idempotency, authenticated registry inspection and
+actual kubelet pull, configuration rollback, reapply after Service deletion,
+broker replacement, verified unhealthy-update restoration, a native ARM64 OCI
+bundle on a second fresh K3s node, camelCase status and Pod-replacing restart.
+
+Fast verification also passed: broker formatting/vet/uncached tests, UI type
+checking/lint/build, 55 Python regressions, complete OpenAPI validation, chart
+matrix and shell syntax. The PR's five GitHub checks passed. Raw results are
+ignored local artifacts under `.local/pi-acceptance/`; these development checks
+are separate from the next published release's native-host acceptance.
+
+Both disposable clusters, their registries and the temporary Buildx builder were
+removed by the E2E runner. Temporary Pi management/Kubernetes proxies and SSH
+forwards were stopped. The working `v0.1.1` installation and its owned baseline
+application remain available for the subsequent published-release installation
+cycle.
 
 ## Final release result
 
