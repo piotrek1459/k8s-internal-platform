@@ -23,9 +23,18 @@ def assemble(directory, version, commit, prerelease=False):
     # The downloaded guide has no adjacent docs/ tree. Pin its relative source
     # links to this release rather than leaving them broken outside a checkout.
     source_version = (Path(__file__).resolve().parent / "version.txt").read_text().strip()
-    for filename in ("INSTALL.md", "install.sh"):
-        asset = directory / filename
-        asset.write_text(asset.read_text().replace("v" + source_version, "v" + version))
+    installer = directory / "install.sh"
+    installer.write_text(installer.read_text().replace("v" + source_version, "v" + version))
+    guide = directory / "INSTALL.md"
+    example, selected = "v" + source_version, "v" + version
+    # Render runnable examples while retaining historical acceptance statements.
+    guide_text = guide.read_text().replace(
+        "The examples below use `" + example + "`.",
+        "The examples below use `" + selected + "`.")
+    guide_text = re.sub(r"(^```[^\n]*\n)(.*?)(^```[ \t]*$)",
+                        lambda match: match[1] + match[2].replace(example, selected) + match[3],
+                        guide_text, flags=re.MULTILINE | re.DOTALL)
+    guide.write_text(guide_text)
     guide = directory / "INSTALL.md"
     prefix = "https://github.com/piotrek1459/k8s-internal-platform/blob/v" + version + "/docs/"
     guide.write_text(re.sub(r"\]\((?!https?://|#)([^)]+)\)",

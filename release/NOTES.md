@@ -22,6 +22,11 @@ chart and values identity. Failed updates attempt verified restoration before
 unlocking; ambiguous state remains `needs_attention` and permits a recovery retry.
 A different historical chart artifact is refused rather than silently substituted.
 
+Application chart `0.1.1` provides a Pod-local `/tmp` emptyDir with a 64Mi
+size limit and a filesystem group for non-root image users. This permits common
+images such as unprivileged Nginx to create temporary files while the root
+filesystem stays read-only. Temporary files are discarded with their Pod.
+
 Public HTTPS, application data volumes, verified backup/restore and cross-version
 platform upgrades remain separate work. Administration uses SSH/loopback access;
 private LAN ingress requires explicit configuration. Release publication requires

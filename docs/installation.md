@@ -175,8 +175,9 @@ For UI deployment, supply an image available in a reachable public registry and
 built for the host architecture. The `v0.1.2` HTTP profile makes the complete root
 filesystem read-only and does not mount writable `/tmp`. Images such as
 unprivileged Nginx that require temporary files therefore fail startup in this
-release. The application chart `0.1.1` source fix adds a Pod-local temporary
-volume; it requires a subsequent published release before normal use. Inspect it, select its actual container port
+release. Application chart `0.1.1` adds a Pod-local temporary volume. Image compatibility
+must be checked against the installed chart; the source fix does not modify
+published `v0.1.2` assets. Inspect it, select its actual container port
 and readiness path, then deploy with Internal exposure. Public image availability
 and public application exposure are separate settings. Operation success and an
 actual HTTP response must both be verified.
