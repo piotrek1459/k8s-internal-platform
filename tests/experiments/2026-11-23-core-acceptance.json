@@ -81,5 +81,15 @@
     "skipped": 0,
     "testDurationSeconds": 16.957,
     "scope": "Source candidate, local owned real K3s: pending install SIGKILL, preserved evidence/lock, queued browser progress and guarded initial-deployment removal. Distinct from published Pi acceptance."
+  },
+  "githubSourceAcceptance": {
+    "runId": 45133364481,
+    "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45133364481",
+    "sourceCommit": "d09b5a9a312570099f0d8bb8d739c899d3ca93b0",
+    "tests": 15,
+    "failures": 0,
+    "skipped": 0,
+    "testDurationSeconds": 570.748,
+    "crashCaseSeconds": 12.825
   }
 }

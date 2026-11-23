@@ -162,7 +162,20 @@ operation page; the wizard displays progress inline. The corrected test explicit
 opens the accepted operation's durable URL before reload/navigation. The pinned
 K3s node invokes containerd through its `ctr` alias. Interrupted exploratory runs
 and the failed initial focused assertion are not counted as passing acceptance.
-The complete clean-commit GitHub suite result is recorded after verification.
+The complete [GitHub E2E run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45133364481) tested clean source
+`d09b5a9a312570099f0d8bb8d739c899d3ca93b0` on Linux AMD64: **15 tests, 0 failures, 0 skips**.
+The downloaded JUnit artifact and strict zero-skips summary were both checked.
+The crash/browser case passed in 12.825 seconds; total recorded test
+execution was 570.748 seconds, excluding environment build/setup.
+The five fast GitHub checks passed, including broker/demo regressions, UI
+check/lint/build, chart validation and OpenAPI/Python/shell checks. Local Python
+regressions totalled 63 passing tests. The final report-only commit does not
+change the tested runtime or test implementation.
+
+The full suite includes the existing API/browser/Secret/private-registry/lifecycle,
+restoration, status, restart and fresh-bundle cases as well as the new crash case.
+This source acceptance is separate from the native published v0.1.3 evidence above;
+the new cleanup feature has not been represented as part of that published release.
 
 Remaining issue #16 work includes the other interruption barriers, failed
 restoration/recovery acceptance, moved-tag and disconnected-client cases,
