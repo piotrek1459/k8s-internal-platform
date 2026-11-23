@@ -50,9 +50,20 @@ OpenAPI, chart matrix and shell checks passed after serial execution.
 An initial local UI check failed because E2E startup and the UI check concurrently
 ran `npm ci` against the same checkout. The affected UI/API/chart/syntax checks
 were rerun serially and passed. That failed attempt is not accepted as green.
-GitHub jobs use separate workspaces. Full clean-source GitHub verification is
-pending; the accompanying [machine-readable summary](2026-11-23-core-resilience.json)
-records the accepted evidence.
+GitHub jobs use separate workspaces. The clean-source [GitHub E2E run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45220381729)
+passed **20 tests, 0 failures, 0 skips** at
+`0a616fbc1c5705862cd9a68530523a7b3a803468`. Downloaded JUnit and the strict
+zero-skips summary were verified. Recorded case time totalled 729.013 seconds,
+including 36.762 seconds for workload-origin acceptance (with fixture image
+build/push), 10.427 seconds for lost-response/moved-tag retries and 9.299 seconds
+for running browser refresh. All five fast GitHub checks passed. The final
+evidence update changes documentation only.
+
+The managed workload received HTTP 200 from platform health, HTTP 401 from all
+three protected management requests and HTTP 401 / Kubernetes Status Unauthorized
+from both protected Kubernetes requests. All six transport checks succeeded and
+the service-account token was absent. The [machine-readable summary](2026-11-23-core-resilience.json)
+retains these sanitized results.
 
 ## Remaining acceptance
 

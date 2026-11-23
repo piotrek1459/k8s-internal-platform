@@ -71,8 +71,10 @@ throttling retain their separately recorded boundaries.
   records the published v0.1.6/native-SSH boundary and new disposable-cluster
   acceptance: actual workload-origin protected requests, lost committed response
   with real tag movement, and browser refresh during a running operation. The
-  focused local run passed 4 tests with zero failures/skips; full clean-source
-  GitHub verification is pending.
+  focused local run passed 4 tests with zero failures/skips. The full
+  [clean-source GitHub run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45220381729)
+  passed **20 tests, 0 failures, 0 skips** at `0a616fb`, with downloaded JUnit and
+  the strict summary verified. These tests do not establish native Pi acceptance.
 - Pull requests run uncached Go regressions, UI type checking/lint/build, OpenAPI
   validation, Python/shell checks and the chart lint/render/negative/synchronization
   matrix through `tests/run.py`. The fast jobs do not create a cluster.
