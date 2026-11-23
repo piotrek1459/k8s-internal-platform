@@ -374,9 +374,11 @@ class Workflows(unittest.TestCase):
                 page.get_by_role('button', name='Next').click()
             accepted = self.click_mutation(page, page.get_by_role('button', name='Deploy', exact=True), 'POST', '/apps')
             good = accepted['applicationId']
-            page.wait_for_url('**/operation?op='+accepted['operationId'])
             state = page.get_by_text('State:', exact=True).locator('..')
             expect(state.get_by_text('queued', exact=True)).to_be_visible()
+            # The create wizard displays progress inline. Follow the accepted
+            # operation to its durable URL before testing reload/navigation.
+            page.goto(self.e.url+'/apps/'+good+'/operation?op='+accepted['operationId'])
             page.reload()
             expect(state.get_by_text('queued', exact=True)).to_be_visible()
             page.goto(self.e.url+'/apps')

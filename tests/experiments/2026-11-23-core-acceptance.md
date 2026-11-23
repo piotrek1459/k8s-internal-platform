@@ -150,7 +150,19 @@ runtime SIGKILL to the broker container on the suite's owned k3d node. The
 expected contract is retained pending evidence and a durable first-operation
 block, independent queued-work execution, persisted browser progress without
 another submission, and tracked removal of the blocked first deployment.
-The final executed result is recorded below after verification.
+The corrected focused local run passed: **1 test, 0 failures, 0 skips**, with
+16.957 seconds of test execution (environment build/setup excluded). The actual
+container ID changed after SIGKILL; queued work completed with one submission and
+one revision, the pending release retained its UID/content, and the original
+operation stayed blocked through another broker replacement. Browser deletion
+then completed and preserved the original frozen image/history.
+
+The initial new test incorrectly assumed creation navigated automatically to the
+operation page; the wizard displays progress inline. The corrected test explicitly
+opens the accepted operation's durable URL before reload/navigation. The pinned
+K3s node invokes containerd through its `ctr` alias. Interrupted exploratory runs
+and the failed initial focused assertion are not counted as passing acceptance.
+The complete clean-commit GitHub suite result is recorded after verification.
 
 Remaining issue #16 work includes the other interruption barriers, failed
 restoration/recovery acceptance, moved-tag and disconnected-client cases,

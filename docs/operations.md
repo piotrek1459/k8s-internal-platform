@@ -233,6 +233,7 @@ stateDiagram-v2
     Recovering --> Failed: restoration or cleanup verified
     Recovering --> NeedsAttention: recovery failed or unverified
     NeedsAttention --> Recovering: documented recovery initiated
+    NeedsAttention --> Failed: first create superseded by tracked deletion
 ```
 
 No transaction spans SQLite, Helm, and Kubernetes. Execution therefore requires

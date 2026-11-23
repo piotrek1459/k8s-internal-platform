@@ -73,5 +73,13 @@
     "Cross-version upgrades refused; the prior installation contained only owned test state.",
     "Stopped archive integrity checked; restoration not exercised.",
     "No normal LAN HTTPS, resource calibration, repeated evaluation or full M0\u2013M4 acceptance claim."
-  ]
+  ],
+  "focusedSourceRecovery": {
+    "test": "test_95_pending_first_install_and_queued_browser_resume",
+    "tests": 1,
+    "failures": 0,
+    "skipped": 0,
+    "testDurationSeconds": 16.957,
+    "scope": "Source candidate, local owned real K3s: pending install SIGKILL, preserved evidence/lock, queued browser progress and guarded initial-deployment removal. Distinct from published Pi acceptance."
+  }
 }

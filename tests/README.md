@@ -94,6 +94,11 @@ Coverage includes:
 - Unhealthy rollout with verified restoration of the prior snapshot before
   mutation unlock, plus preserved previous application traffic.
 - Native OCI/chart packaging and startup on a second fresh node without a registry.
+- An observed pending first install interrupted with runtime SIGKILL on the owned
+  k3d node: unchanged Helm evidence, durable lock/409 across broker replacement,
+  independent queued browser work without resubmission, and tracked first-deployment
+  removal with retained history. This is one interruption barrier; the remaining
+  crash/restoration matrix is tracked separately.
 
 Status serialization and application restart are required assertions; no known-gap
 skips remain. The runner and CI summary require a non-empty suite with zero
