@@ -45,6 +45,9 @@ type Config struct {
 type Router struct {
 	cfg Config
 	mux *http.ServeMux
+	// One broker owns SQLite. Serialize Secret writes across the external
+	// Kubernetes call so version creation cannot race a deletion reservation.
+	secretMutations chan struct{}
 }
 
 // NewRouter registers probes, management routes and the embedded SPA when its
@@ -53,7 +56,7 @@ func NewRouter(cfg Config) *Router {
 	if cfg.Logger == nil {
 		cfg.Logger = slog.Default()
 	}
-	r := &Router{cfg: cfg, mux: http.NewServeMux()}
+	r := &Router{cfg: cfg, mux: http.NewServeMux(), secretMutations: make(chan struct{}, 1)}
 	r.registerHealth()
 	if cfg.Auth != nil {
 		r.registerAuth()

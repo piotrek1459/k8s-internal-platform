@@ -158,11 +158,31 @@ class Workflows(unittest.TestCase):
         self.e.record("Deletion removed workload and Service while retaining revision history")
 
     def test_10_browser_application_lifecycle(self):
+        from playwright.sync_api import expect
         value = secrets.token_urlsafe(24); self.e.secret_values.append(value)
-        code, secret = self.e.client.request("POST", "/secrets", {"name":"browser-secret", "data":{"value":value}})
-        self.assertEqual(code,201)
+        newer = 'newer-'+value; self.e.secret_values.append(newer)
+        secret_name = 'browser-secret-'+secrets.token_hex(3)
         with self.page("browser-lifecycle") as page:
             self.browser_login(page)
+            page.on("dialog", lambda dialog: dialog.accept())
+            page.goto(self.e.url + '/secrets')
+            page.get_by_placeholder('Name', exact=True).fill(secret_name)
+            page.get_by_placeholder('Value (write-only)', exact=True).fill(value)
+            with page.expect_response(lambda r:r.url.endswith('/api/v1/secrets') and r.request.method == 'POST') as response:
+                page.get_by_role('button', name='Create', exact=True).click()
+            self.assertEqual(response.value.status, 201)
+            secret = response.value.json()
+            self.assertTrue(value not in json.dumps(secret), 'Secret creation returned sensitive data')
+            expect(page.get_by_placeholder('Value (write-only)', exact=True)).to_have_value('')
+            row = page.get_by_text(secret_name, exact=True).locator('../..')
+            row.get_by_role('button', name='Add version', exact=True).click()
+            page.get_by_placeholder('New value (write-only)', exact=True).fill(newer)
+            with page.expect_response(lambda r:r.url.endswith('/api/v1/secrets/'+secret['id']+'/versions') and r.request.method == 'POST') as response:
+                page.get_by_role('button', name='Add', exact=True).click()
+            self.assertEqual(response.value.status, 201)
+            self.assertEqual(response.value.json()['version'], 2)
+            page.get_by_text('Versions: 1, 2', exact=True).wait_for()
+            self.assertTrue(value not in page.locator('body').inner_text() and newer not in page.locator('body').inner_text(), 'Secret management rendered a sensitive value')
             page.goto(self.e.url + "/apps/new")
             page.get_by_label("Image reference").fill(self.e.image("v1"))
             page.get_by_role("button", name="Inspect image", exact=True).click()
@@ -173,7 +193,7 @@ class Workflows(unittest.TestCase):
             for _ in range(2): page.get_by_role("button", name="Next").click()
             page.get_by_label("Secret environment variable").fill("BROWSER_SECRET")
             page.get_by_label("Secret", exact=True).select_option(secret["id"])
-            page.get_by_label("Secret version", exact=True).select_option("1")
+            page.get_by_label("Secret version", exact=True).select_option("2")
             page.get_by_role("button", name="Next").click()
             accepted = self.click_mutation(page, page.get_by_role("button", name="Deploy", exact=True), "POST", "/apps")
             app = accepted["applicationId"]
@@ -182,7 +202,17 @@ class Workflows(unittest.TestCase):
                 deployment = self.e.resource("deployments", app)[0]
                 env = deployment["spec"]["template"]["spec"]["containers"][0]["env"]
                 self.assertIn("BROWSER_SECRET", [item["name"] for item in env if "secretKeyRef" in item.get("valueFrom",{})])
+                reference = next(item['valueFrom']['secretKeyRef'] for item in env if item['name'] == 'BROWSER_SECRET')
+                self.assertTrue(reference['name'].endswith('-v2'))
+                stored = json.loads(self.e.kubectl('-n', 'platform-apps', 'get', 'secret', reference['name'], '-o', 'json').stdout)
+                self.assertTrue(base64.b64decode(stored['data']['value']).decode() == newer, 'Browser selected the wrong immutable Secret version')
                 self.e.http_version(app, "v1")
+                page.goto(self.e.url+'/secrets')
+                row = page.get_by_text(secret_name, exact=True).locator('../..')
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/secrets/'+secret['id']) and r.request.method == 'DELETE') as response:
+                    row.get_by_role('button', name='Delete', exact=True).click()
+                self.assertEqual(response.value.status, 409)
+                page.get_by_text(response.value.json()['error']['message'], exact=True).wait_for()
                 page.goto(self.e.url + "/apps/" + app + "/update")
                 page.get_by_label("Image reference").fill(self.e.image("v2"))
                 accepted = self.click_mutation(page, page.get_by_role("button", name="Apply update"), "PATCH", "/apps/" + app)
@@ -193,7 +223,6 @@ class Workflows(unittest.TestCase):
                 page.goto(self.e.url + "/apps/" + app)
                 page.get_by_role("button", name="History", exact=True).click()
                 row = page.get_by_role("row").filter(has_text=self.e.image("v1"))
-                page.on("dialog", lambda dialog: dialog.accept())
                 accepted = self.click_mutation(page, row.get_by_role("button", name="Roll back"), "POST", "/apps/" + app + "/rollback")
                 self.browser_success(page, accepted)
                 self.e.http_version(app, "v1")
@@ -202,35 +231,93 @@ class Workflows(unittest.TestCase):
                 self.browser_success(page, accepted)
                 self.assertNotIn(app, [a["id"] for a in self.e.client.get("/apps")["items"]])
                 self.assertEqual(self.e.resource("deployments,services", app), [])
+                page.goto(self.e.url+'/secrets')
+                row = page.get_by_text(secret_name, exact=True).locator('../..')
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/secrets/'+secret['id']) and r.request.method == 'DELETE') as response:
+                    row.get_by_role('button', name='Delete', exact=True).click()
+                self.assertEqual(response.value.status, 204)
+                expect(page.get_by_text(secret_name, exact=True)).to_have_count(0)
+                versions = json.loads(self.e.kubectl('-n', 'platform-apps', 'get', 'secrets', '-l', 'platform.local/secret-id='+secret['id'].replace('_','-'), '-o', 'json').stdout)['items']
+                self.assertEqual(versions, [], 'Successful Secret deletion left Kubernetes values behind')
                 page.screenshot(path=str(self.e.artifacts / "browser-complete.png"), mask=[page.locator("input, textarea")])
             finally:
                 current = next((a for a in self.e.client.get("/apps")["items"] if a["id"] == app), None)
                 if current and not current.get("activeOperationId"): self.e.delete(app)
-        self.e.record("Browser image inspection, deployment, update, progress refresh, history rollback and deletion")
+        self.e.record("Browser Secret creation/version selection, in-use deletion refusal and physical version cleanup; image inspection, deployment, update, progress refresh, history rollback and deletion")
 
     def test_15_private_registry_inspection_and_pull(self):
         from private_registry import authenticated_registry
+        from playwright.sync_api import expect
         with authenticated_registry(self.e) as private:
             self.assertEqual(self.e.client.request("POST", "/images/inspect", {"image":private["image"]})[0],503)
-            code, credential = self.e.client.request("POST", "/registry-credentials", {"label":"private acceptance", **{k:private[k] for k in ("registry","username","password")}})
-            self.assertEqual(code,201)
-            self.assertNotIn(private["password"], json.dumps(credential))
-            bad_code, bad = self.e.client.request("POST", "/registry-credentials", {"label":"invalid private acceptance", "registry":private["registry"], "username":private["username"], "password":"incorrect-password"})
-            self.assertEqual(bad_code,201)
-            self.assertEqual(self.e.client.request("POST", "/images/inspect", {"image":private["image"],"registryCredentialId":bad["id"]})[0],503)
-            self.assertEqual(self.e.client.request("DELETE", "/registry-credentials/"+bad["id"])[0],204)
-            report = self.e.client.request("POST", "/images/inspect", {"image":private["image"],"registryCredentialId":credential["id"]})
-            self.assertEqual(report[0],200)
-            accepted,_=self.e.client.mutate("POST","/apps",{"name":"private-"+secrets.token_hex(3),"image":private["image"],"registryCredentialId":credential["id"],"containerPort":8080,"profile":"http","health":{"readinessPath":"/readyz"},"exposure":{"mode":"internal"}})
-            app=accepted["applicationId"]
-            try:
-                self.e.http_version(app,"v1")
-                deployment=self.e.resource("deployments",app)[0]
-                self.assertTrue(deployment["spec"]["template"]["spec"]["imagePullSecrets"])
-                self.assertEqual(self.e.client.request("DELETE","/registry-credentials/"+credential["id"])[0],409)
-            finally: self.e.delete(app)
-            self.assertEqual(self.e.client.request("DELETE","/registry-credentials/"+credential["id"])[0],204)
-        self.e.record("Private registry rejects anonymous inspection; stored credentials support inspection and real kubelet pull")
+            with self.page('private-registry-browser') as page:
+                self.browser_login(page)
+                page.on('dialog', lambda dialog: dialog.accept())
+
+                def add_credential(label, password):
+                    page.goto(self.e.url+'/credentials')
+                    page.get_by_role('button', name='Add credential', exact=True).click()
+                    page.get_by_label('Label', exact=True).fill(label)
+                    page.get_by_label('Registry hostname', exact=True).fill(private['registry'])
+                    page.get_by_label('Username', exact=True).fill(private['username'])
+                    page.get_by_label('Password / token', exact=True).fill(password)
+                    with page.expect_response(lambda r:r.url.endswith('/api/v1/registry-credentials') and r.request.method == 'POST') as response:
+                        page.locator('form').get_by_role('button', name='Add credential', exact=True).click()
+                    self.assertEqual(response.value.status, 201)
+                    metadata = response.value.json()
+                    page.get_by_text(label, exact=True).wait_for()
+                    expect(page.get_by_label('Password / token', exact=True)).to_have_count(0)
+                    self.assertTrue(password not in json.dumps(metadata) and password not in page.locator('body').inner_text(), 'Credential management disclosed the submitted password')
+                    return metadata
+
+                credential = add_credential('private-browser-'+secrets.token_hex(3), private['password'])
+                bad = add_credential('invalid-browser-'+secrets.token_hex(3), 'incorrect-password')
+                page.goto(self.e.url+'/apps/new')
+                page.get_by_label('Image reference', exact=True).fill(private['image'])
+                page.get_by_label('Registry credential (optional)', exact=True).select_option(bad['id'])
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/images/inspect') and r.request.method == 'POST') as response:
+                    page.get_by_role('button', name='Inspect image', exact=True).click()
+                self.assertEqual(response.value.status, 503)
+                page.get_by_text(response.value.json()['error']['message'], exact=True).wait_for()
+                expect(page.get_by_role('button', name='Next')).to_have_count(0)
+                page.get_by_label('Registry credential (optional)', exact=True).select_option(credential['id'])
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/images/inspect') and r.request.method == 'POST') as response:
+                    page.get_by_role('button', name='Inspect image', exact=True).click()
+                self.assertEqual(response.value.status, 200)
+                self.assertEqual(response.value.request.post_data_json['registryCredentialId'], credential['id'])
+                page.get_by_role('button', name='Next').click()
+                page.get_by_label('Name', exact=True).fill('private-browser-'+secrets.token_hex(3))
+                page.get_by_label('Readiness path', exact=True).fill('/readyz')
+                for _ in range(3):
+                    page.get_by_role('button', name='Next').click()
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/apps') and r.request.method == 'POST') as response:
+                    page.get_by_role('button', name='Deploy', exact=True).click()
+                self.assertEqual(response.value.status, 202)
+                self.assertEqual(response.value.request.post_data_json['registryCredentialId'], credential['id'])
+                accepted = response.value.json(); app = accepted['applicationId']
+                try:
+                    self.browser_success(page, accepted, navigates=False)
+                    self.e.http_version(app,'v1')
+                    deployment=self.e.resource('deployments',app)[0]
+                    self.assertTrue(deployment['spec']['template']['spec']['imagePullSecrets'])
+                    page.goto(self.e.url+'/credentials')
+                    row=page.get_by_text(credential['label'], exact=True).locator('../..')
+                    with page.expect_response(lambda r:r.url.endswith('/api/v1/registry-credentials/'+credential['id']) and r.request.method == 'DELETE') as response:
+                        row.get_by_role('button', name='Remove', exact=True).click()
+                    self.assertEqual(response.value.status, 409)
+                    page.get_by_text(response.value.json()['error']['message'], exact=True).wait_for()
+                finally:
+                    self.e.delete(app)
+                for item in (bad, credential):
+                    page.goto(self.e.url+'/credentials')
+                    row=page.get_by_text(item['label'], exact=True).locator('../..')
+                    with page.expect_response(lambda r, identity=item['id']:r.url.endswith('/api/v1/registry-credentials/'+identity) and r.request.method == 'DELETE') as response:
+                        row.get_by_role('button', name='Remove', exact=True).click()
+                    self.assertEqual(response.value.status, 204)
+                    expect(page.get_by_text(item['label'], exact=True)).to_have_count(0)
+                    missing=self.e.kubectl('-n','platform-apps','get','secret','registry-'+item['id'].replace('_','-'),check=False)
+                    self.assertNotEqual(missing.returncode,0)
+        self.e.record('Browser credential creation/selection, invalid-password errors, private image inspection and real kubelet pull; in-use refusal and physical credential cleanup')
 
     def test_20_configuration_secrets_and_snapshot_rollback(self):
         value = secrets.token_urlsafe(24); self.e.secret_values.append(value)
@@ -258,6 +345,54 @@ class Workflows(unittest.TestCase):
             self.assertNotIn(value, json.dumps(self.e.client.get("/secrets")))
         finally: self.e.delete(app)
         self.e.record("Immutable Secret versions, write-only responses, deletion guard and configuration rollback")
+
+    def test_25_secret_deletion_failure_and_retry(self):
+        from playwright.sync_api import expect
+        value = secrets.token_urlsafe(24); self.e.secret_values.append(value)
+        name = 'retry-secret-'+secrets.token_hex(3)
+        code, secret = self.e.client.request('POST', '/secrets', {'name': name, 'data': {'value': value}})
+        self.assertEqual(code, 201)
+        self.assertEqual(self.e.client.request('POST', '/secrets/'+secret['id']+'/versions', {'data': {'value': value}})[0], 201)
+        prefix = 'app-secret-'+secret['id'].replace('_','-')
+        second = json.loads(self.e.kubectl('-n','platform-apps','get','secret',prefix+'-v2','-o','json').stdout)
+        self.e.kubectl('-n','platform-apps','label','secret',prefix+'-v2','app.kubernetes.io/managed-by=foreign-owner','--overwrite')
+        self.assertEqual(self.e.client.request('DELETE', '/secrets/'+secret['id'])[0], 409)
+        self.assertNotEqual(self.e.kubectl('-n','platform-apps','get','secret',prefix+'-v1',check=False).returncode, 0)
+        remaining = json.loads(self.e.kubectl('-n','platform-apps','get','secret',prefix+'-v2','-o','json').stdout)
+        self.assertEqual(remaining['metadata']['uid'], second['metadata']['uid'])
+        self.assertEqual(remaining['metadata']['labels']['app.kubernetes.io/managed-by'], 'foreign-owner')
+        metadata = next(item for item in self.e.client.get('/secrets')['items'] if item['id'] == secret['id'])
+        self.assertTrue(metadata['deleting']); self.assertEqual(len(metadata['versions']), 2)
+        self.assertEqual(self.e.client.request('POST', '/secrets/'+secret['id']+'/versions', {'data': {'value': value}})[0], 409)
+        before = len(self.e.client.get('/apps')['items'])
+        code, _ = self.e.client.request('POST','/apps',{'name':'unavailable-secret-'+secrets.token_hex(3),
+            'image':self.e.image('v1'),'containerPort':8080,'profile':'http','exposure':{'mode':'internal'},
+            'secretRefs':[{'environmentVariable':'APP_SECRET','secretId':secret['id'],'version':2}]},
+            {'Idempotency-Key':secrets.token_hex(16)})
+        self.assertEqual(code, 400)
+        self.assertEqual(len(self.e.client.get('/apps')['items']), before)
+        self.e.restart_broker()
+        self.assertIn('administratorId', self.e.client.get('/auth/me'))
+        metadata = next(item for item in self.e.client.get('/secrets')['items'] if item['id'] == secret['id'])
+        self.assertTrue(metadata['deleting'])
+        with self.page('secret-deletion-retry') as page:
+            self.browser_login(page); page.goto(self.e.url+'/secrets')
+            row = page.get_by_text(name, exact=True).locator('../..')
+            expect(row.get_by_role('button', name='Add version', exact=True)).to_be_disabled()
+            page.get_by_text('Deletion is pending. Retry deletion after resolving the reported error.', exact=True).wait_for()
+            # Restore only this controlled fixture's ownership, under the current
+            # UID/resource version. The platform itself must never adopt it.
+            patch=[{'op':'test','path':'/metadata/uid','value':remaining['metadata']['uid']},
+                {'op':'test','path':'/metadata/resourceVersion','value':remaining['metadata']['resourceVersion']},
+                {'op':'replace','path':'/metadata/labels/app.kubernetes.io~1managed-by','value':'k8s-internal-platform'}]
+            self.e.kubectl('-n','platform-apps','patch','secret',prefix+'-v2','--type=json','-p',json.dumps(patch))
+            page.on('dialog', lambda dialog:dialog.accept())
+            with page.expect_response(lambda r:r.url.endswith('/api/v1/secrets/'+secret['id']) and r.request.method=='DELETE') as response:
+                row.get_by_role('button', name='Retry deletion', exact=True).click()
+            self.assertEqual(response.value.status, 204)
+            expect(page.get_by_text(name, exact=True)).to_have_count(0)
+        self.assertNotEqual(self.e.kubectl('-n','platform-apps','get','secret',prefix+'-v2',check=False).returncode, 0)
+        self.e.record('Partial Secret cleanup refused foreign ownership; durable reservation survived broker replacement, rejected new references/versions and completed through guarded browser retry')
 
     def test_30_missing_registry_image_is_rejected(self):
         image = self.e.image("v1").split("/platform-demo@")[0] + "/missing-image:no-such-tag"

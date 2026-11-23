@@ -165,6 +165,7 @@ type SecretMetadata struct {
 	Owner     string
 	Name      string
 	CreatedAt time.Time
+	Deleting  bool
 }
 
 // SecretVersion is one immutable version of a secret. The plaintext lives only in

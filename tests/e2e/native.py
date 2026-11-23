@@ -38,8 +38,11 @@ class Native:
             os.chmod(self.state_path, 0o600)
             json.dump({**self.state, 'password': self.password}, file)
 
-    def kube(self, path):
-        with urllib.request.urlopen(self.kubernetes + path, timeout=20) as response:
+    def kube(self, path, method='GET', body=None, content_type='application/json'):
+        request = urllib.request.Request(self.kubernetes + path, method=method,
+            data=None if body is None else json.dumps(body).encode(),
+            headers={'Content-Type': content_type})
+        with urllib.request.urlopen(request, timeout=20) as response:
             return json.load(response)
 
     def record(self, text):
@@ -227,6 +230,9 @@ class Native:
             self.record('After host reboot: administrator, retained application, revision history and HTTP response recovered')
             if self.args.public_image:
                 self.browser_public_image()
+            if self.args.diagnostics:
+                from native_diagnostics import check_diagnostics
+                check_diagnostics(self)
             return
         images = json.loads(self.args.release_manifest.read_text())['targets']['arm64']['images']
         accepted,_ = self.client.mutate('POST','/apps',{'name':'pi-acceptance-'+secrets.token_hex(3),'image':images['v1'],'containerPort':8080,'profile':'http','health':{'startupPath':'/healthz','readinessPath':'/readyz'},'exposure':{'mode':'internal'}})
@@ -264,6 +270,9 @@ class Native:
             self.blocked_first_removal(images['v3'])
         if self.args.public_image:
             self.browser_public_image()
+        if self.args.diagnostics:
+            from native_diagnostics import check_diagnostics
+            check_diagnostics(self)
 
 
 def main():
@@ -278,6 +287,7 @@ def main():
     parser.add_argument('--resume',action='store_true')
     parser.add_argument('--public-image', help='Opt-in unprivileged Nginx image for the browser temporary-files compatibility check')
     parser.add_argument('--blocked-first-removal', action='store_true', help='Exercise a failed first deployment and guarded browser removal (adds a deliberate Helm timeout)')
+    parser.add_argument('--diagnostics', action='store_true', help='Verify published logs/events masking, ownership, browser escaping and explicit drift repair on owned fixtures')
     Native(parser.parse_args()).run()
 
 if __name__=='__main__':main()

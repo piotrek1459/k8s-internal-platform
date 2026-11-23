@@ -74,6 +74,7 @@ export interface Secret {
 	id: string;
 	name: string;
 	versions: Array<{ version: number; keys: string[]; createdAt: string }>;
+	deleting?: boolean;
 }
 
 export interface RegistryCredential {

@@ -2,10 +2,13 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"path/filepath"
 	"strings"
 	"testing"
 	"testing/fstest"
+
+	"k8s-internal-platform/broker/internal/platform"
 )
 
 // openTestDB opens a fresh database in a temp file. A file (not :memory:) is used
@@ -61,8 +64,8 @@ func TestMigrateIsIdempotent(t *testing.T) {
 	if err := db2.sql.QueryRow(`SELECT COUNT(1) FROM schema_migrations`).Scan(&applied); err != nil {
 		t.Fatalf("count migrations: %v", err)
 	}
-	if applied != 3 {
-		t.Fatalf("applied migrations = %d, want 3", applied)
+	if applied != 4 {
+		t.Fatalf("applied migrations = %d, want 4", applied)
 	}
 }
 
@@ -75,6 +78,59 @@ func TestForeignKeysEnforced(t *testing.T) {
 		 VALUES ('rev_x', 'app_missing', 1, '{}', 'tester', '2026-01-01T00:00:00Z')`)
 	if err == nil {
 		t.Fatal("insert with dangling foreign key was accepted; foreign keys not enforced")
+	}
+}
+
+func TestSecretDeletionMigrationPreservesExistingVersionsAndReservation(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "prior-schema.db")
+	connection, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	prior := &DB{sql: connection}
+	source := fstest.MapFS{}
+	for _, name := range []string{"0001_initial.sql", "0002_registry_credentials_username.sql", "0003_restart_token.sql"} {
+		body, err := migrationFiles.ReadFile("migrations/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		source["migrations/"+name] = &fstest.MapFile{Data: body}
+	}
+	if err := prior.migrateFrom(ctx, source); err != nil {
+		t.Fatal(err)
+	}
+	if err := New(prior).CreateSecret(ctx,
+		platform.SecretMetadata{ID: "sec_prior", Name: "prior", Owner: "admin"},
+		platform.SecretVersion{SecretID: "sec_prior", Version: 1, K8sSecretName: "recorded-name", K8sSecretUID: "recorded-uid"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := prior.Close(); err != nil {
+		t.Fatal(err)
+	}
+	db, err := Open(ctx, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := New(db)
+	meta, versions, err := store.GetSecret(ctx, "sec_prior")
+	if err != nil || meta.Deleting || len(versions) != 1 || versions[0].K8sSecretUID != "recorded-uid" {
+		t.Fatalf("migration changed existing metadata: %v", err)
+	}
+	if err := store.BeginSecretDeletion(ctx, meta.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := Open(ctx, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	meta, versions, err = New(reopened).GetSecret(ctx, meta.ID)
+	if err != nil || !meta.Deleting || len(versions) != 1 {
+		t.Fatalf("reopen lost deletion reservation or retry identities: %v", err)
 	}
 }
 

@@ -25,6 +25,7 @@
 		try {
 			const res = await listSecrets();
 			secrets = res.items;
+			error = '';
 		} catch (e) {
 			if (e instanceof ApiError && e.status === 401) goto('/login');
 			else error = e instanceof Error ? e.message : 'Failed to load secrets';
@@ -69,6 +70,7 @@
 			await deleteSecret(id);
 			await load();
 		} catch (e) {
+			await load();
 			error = e instanceof ApiError ? e.message : 'Failed to delete secret';
 		}
 	}
@@ -117,15 +119,18 @@
 							{#if secret.versions?.length}
 								<p class="text-xs text-gray-500 mt-0.5">Versions: {secret.versions.map(v => v.version).join(', ')}</p>
 							{/if}
+							{#if secret.deleting}
+								<p class="text-xs text-amber-700 mt-1">Deletion is pending. Retry deletion after resolving the reported error.</p>
+							{/if}
 						</div>
 						<div class="flex gap-2">
-							<button onclick={() => addingVersionFor = addingVersionFor === secret.id ? null : secret.id}
+							<button disabled={secret.deleting} onclick={() => addingVersionFor = addingVersionFor === secret.id ? null : secret.id}
 								class="text-xs text-blue-600 hover:underline">Add version</button>
 							<button onclick={() => handleDelete(secret.id)}
-								class="text-xs text-red-500 hover:underline">Delete</button>
+								class="text-xs text-red-500 hover:underline">{secret.deleting ? 'Retry deletion' : 'Delete'}</button>
 						</div>
 					</div>
-					{#if addingVersionFor === secret.id}
+					{#if addingVersionFor === secret.id && !secret.deleting}
 						<div class="mt-3 flex gap-2">
 							<input type="password" bind:value={newVersion} placeholder="New value (write-only)"
 								class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />

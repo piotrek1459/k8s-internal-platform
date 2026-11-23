@@ -86,9 +86,15 @@ Coverage includes:
 - API deployment, idempotent replay/conflict, update, stale versions, scale 2/0/1,
   rollback, deletion and retained history.
 - Browser image inspection, wizard deployment, update, operation refresh, history
-  rollback and deletion.
+  rollback and deletion. Secret creation/version management selects the exact
+  Kubernetes version; in-use deletion is refused and unused versions are removed.
+- Browser credential creation/selection, incorrect-password errors, private image
+  inspection and real kubelet pull, plus protected/physical credential removal.
 - Immutable configuration Secret versions, write-only responses, deletion guards
   and configuration rollback.
+- Partial Secret cleanup retains recorded identities and a durable reservation
+  across broker replacement. New versions/references are refused; a guarded
+  fixture repair permits explicit browser retry without adopting foreign objects.
 - Bounded owned logs/events with real fixture masking, cross-app/copied-label
   denial, escaped hostile browser text and field-path-only drift. Explicit Reapply
   repairs changed Service port-list merge keys without replacing its identity.
@@ -178,7 +184,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.4 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.5 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -196,12 +202,22 @@ container hardening, checks actual HTTP, and removes only its own test applicati
 It requires reachable public-registry inspection/pulling. Add
 `--blocked-first-removal` to verify a failed initial deployment, retained lock/409,
 browser removal and retained failed history; this adds a deliberate Helm timeout.
+Add `--diagnostics` to verify actual log/event fixture masking, copied-label and
+foreign ownership refusal, escaped browser text, field-only drift and explicit
+Service repair with stable UID/address. Raw sensitive log/event bodies remain in
+memory. Fixture identities are saved privately before waits and cleanup uses
+recorded UID/resource-version guards. Cleanup failure fails acceptance and retains
+identities for inspection; a subsequent diagnostics run refuses unresolved state.
+Published v0.1.5 passes the diagnostics reads/repair but fails Secret cleanup.
+The correction is candidate source and requires a subsequent published native run.
 After reboot, restart the forwards and run the same command with `--resume`
 instead of `--setup`. Cleanup of an installation requires separate explicit
 operator action; the test never uninstalls K3s or deletes unrelated applications.
 
+The [v0.1.5/Secret lifecycle report](experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
+records the latest native results, failed Secret cleanup and candidate correction.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
-records the latest native release and separate source diagnostic acceptance.
+retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native
 lifecycle, unpatched public-image deployment, reinstall/reboot and direct Helm
 baseline. The [earlier Pi report](experiments/2026-11-22-raspberry-pi.md) retains

@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.1.4`. Select a version available through the
+The examples below use `v0.1.5`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -10,11 +10,16 @@ The platform and its managed applications run in the same K3s cluster. The
 installer provisions K3s, imports native OCI images and installs the platform
 chart. Docker, Go and Node.js are not required on the target host.
 
-Published `v0.1.4` has passed reference Raspberry Pi core installation,
+Published `v0.1.5` has passed reference Raspberry Pi core installation,
 same-version reinstall and reboot checks; [implementation status](status.md)
 links the measured results and remaining compatibility limits. Public HTTPS, application volumes and cross-version upgrades remain outside
 this installer. Private credentials and verified failed-rollout restoration are
 implemented; their acceptance boundaries are recorded separately.
+The v0.1.5 native command failed later at diagnostic Secret cleanup: retained
+deleted-application history prevented deletion, and a separate unused-Secret
+probe left its Kubernetes value after successful metadata deletion. Current
+source corrects these defects; [the report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
+distinguishes the released behavior from the pending correction.
 The [implementation status](status.md) records the remaining boundaries. Existing
 unrelated K3s installations are refused; this installer is for a dedicated host.
 
@@ -39,7 +44,7 @@ If the installer reports missing memory cgroups, an explicit preparation step is
 available after the installer has been downloaded and verified:
 
 ```bash
-sudo bash install.sh --version v0.1.4 --prepare-host
+sudo bash install.sh --version v0.1.5 --prepare-host
 # Exit status 20 means that the boot file was prepared and a reboot is required.
 sudo reboot
 # Reconnect over SSH, then rerun --check and the normal installation.
@@ -59,13 +64,13 @@ combined with `--prepare-host`. The installer never reboots automatically.
 Run on the Pi/server as the normal SSH user:
 
 ```bash
-mkdir -p ~/platform-v0.1.4
-cd ~/platform-v0.1.4
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.4/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.4/SHA256SUMS
+mkdir -p ~/platform-v0.1.5
+cd ~/platform-v0.1.5
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.5/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.5/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.1.4 --check
+sudo bash install.sh --version v0.1.5 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -75,7 +80,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.1.4
+sudo bash install.sh --version v0.1.5
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -105,8 +110,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.1.4 \
-  --bundle platform-v0.1.4-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.5 \
+  --bundle platform-v0.1.5-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;

@@ -4,10 +4,12 @@ import (
 	"context"
 	"crypto/subtle"
 	"fmt"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s-internal-platform/broker/internal/platform"
 )
@@ -62,6 +64,55 @@ func (c *Client) CreateImmutableSecret(ctx context.Context, secretID string, ver
 		return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "create secret: %v", err)
 	}
 	return created.Name, string(created.UID), nil
+}
+
+// DeleteImmutableSecret refuses name reuse and ownership changes. Preconditions
+// also protect the interval between reading the object and issuing the delete.
+func (c *Client) DeleteImmutableSecret(ctx context.Context, version platform.SecretVersion) error {
+	if version.SecretID == "" || version.Version < 1 || version.K8sSecretUID == "" ||
+		version.K8sSecretName != secretName(version.SecretID, version.Version) {
+		return platform.Errorf(platform.CodeConflict, "recorded Secret identity is incomplete or inconsistent")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	secret, err := c.cs.CoreV1().Secrets(c.namespace).Get(ctx, version.K8sSecretName, metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return platform.Errorf(platform.CodeDependencyUnavailable, "read configuration Secret for deletion failed; retry deletion")
+	}
+	if string(secret.UID) != version.K8sSecretUID || secret.ResourceVersion == "" || secret.Namespace != c.namespace ||
+		secret.Type != corev1.SecretTypeOpaque || secret.Immutable == nil || !*secret.Immutable ||
+		secret.Labels["app.kubernetes.io/managed-by"] != "k8s-internal-platform" ||
+		secret.Labels["platform.local/secret-id"] != sanitizeID(version.SecretID) ||
+		secret.Labels["platform.local/secret-version"] != fmt.Sprint(version.Version) {
+		return platform.Errorf(platform.CodeConflict, "configuration Secret identity or ownership changed; deletion remains pending")
+	}
+	if len(secret.Finalizers) != 0 {
+		return platform.Errorf(platform.CodeConflict, "configuration Secret has finalizers; resolve them before retrying deletion")
+	}
+	uid := types.UID(version.K8sSecretUID)
+	err = c.cs.CoreV1().Secrets(c.namespace).Delete(ctx, secret.Name, metav1.DeleteOptions{
+		Preconditions: &metav1.Preconditions{UID: &uid, ResourceVersion: &secret.ResourceVersion},
+	})
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if apierrors.IsConflict(err) {
+		return platform.Errorf(platform.CodeConflict, "configuration Secret changed during deletion; retry deletion")
+	}
+	if err != nil {
+		return platform.Errorf(platform.CodeDependencyUnavailable, "configuration Secret removal failed; retry deletion")
+	}
+	remaining, err := c.cs.CoreV1().Secrets(c.namespace).Get(ctx, secret.Name, metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err == nil && string(remaining.UID) != version.K8sSecretUID {
+		return platform.Errorf(platform.CodeConflict, "configuration Secret name was reused; deletion remains pending")
+	}
+	return platform.Errorf(platform.CodeDependencyUnavailable, "configuration Secret absence could not be verified; retry deletion")
 }
 
 // secretDataEqual reports whether two secret data maps hold the same keys and
