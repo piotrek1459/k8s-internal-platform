@@ -1,0 +1,126 @@
+{
+  "recorded_date": "2026-11-23",
+  "timezone": "Europe/Warsaw",
+  "issue": 16,
+  "release": {
+    "version": "v0.1.7",
+    "source_commit": "9e9be5539c6323ae250d0e5ba3f0e0e15fe10a12",
+    "architecture": "arm64",
+    "pins": {
+      "k3s": "v1.36.5+k3s1",
+      "helm": "v3.22.0"
+    },
+    "images": {
+      "platform": "platform.local/platform-broker@sha256:117562a4e526915a9b338e61bff80869dfa5d304d4cb05ba7b3e1e581cbad997",
+      "v1": "platform.local/http-demo@sha256:3ffe60666161b0a6dabd7dbde844201bbb9f3c99b7797928fa8f045d3373bfa0",
+      "v2": "platform.local/http-demo@sha256:12fa01267cc60dbf9046e7efc4898e48ec1ce1c7496856ea5c15e439b367cc8b",
+      "v3": "platform.local/http-demo@sha256:9c6995960b6fdfff3d259712a09067caf9af6889979254bf1ae176957fcf7904"
+    }
+  },
+  "host": {
+    "platform_image": "platform.local/platform-broker@sha256:117562a4e526915a9b338e61bff80869dfa5d304d4cb05ba7b3e1e581cbad997",
+    "node": {
+      "architecture": "arm64",
+      "operatingSystem": "linux",
+      "osImage": "Debian GNU/Linux 13 (trixie)",
+      "kernelVersion": "6.18.60+rpt-rpi-2712",
+      "kubeletVersion": "v1.36.5+k3s1",
+      "containerRuntimeVersion": "containerd://2.3.4-k3s1.36"
+    },
+    "node_ready": true,
+    "capacity": {
+      "cpu": "4",
+      "ephemeral-storage": "29493708Ki",
+      "memory": "8255680Ki",
+      "pods": "110"
+    }
+  },
+  "accepted_native_results": {
+    "lifecycle": {
+      "release": "v0.1.7",
+      "checks": [
+        "Browser: root opens setup; nested token error displayed; administrator created and login succeeded",
+        "Native ARM64 system reports the expected release and a reachable cluster",
+        "Digest-pinned bundled v1 deployed; camelCase status and actual HTTP response verified",
+        "Healthy v2 update and manual scaling to 2, 0 and 1 completed",
+        "Restart replaced the Pod while retaining the exact image digest",
+        "Unhealthy v3 failed; v2 release and live workload restored, lock released after verification",
+        "Explicit rollback restored the original successful v1 snapshot",
+        "Application deletion removed Pods and retained revision history",
+        "One healthy test application retained for same-version reinstall and host-reboot verification",
+        "Published release: failed first deployment retained its lock/409; browser deletion removed the workload and retained failed operation/frozen history",
+        "Browser: unprivileged Nginx deployed without patches; Ready, HTTP 200 and writable /tmp with container hardening verified",
+        "Public-image acceptance application removed; retained lifecycle application preserved",
+        "Native diagnostics: actual log/event fixtures masked; foreign/copied-label Pods denied; bounded/authenticated reads and escaped browser text verified",
+        "Native drift: image/env/resources/probe/replica/Service differences reported without values or mutation; explicit Reapply restored HTTP v1/in_sync and retained Service UID/IP",
+        "Native diagnostic applications, copied-label Pod, events and configuration Secret removed; original retained app preserved"
+      ]
+    },
+    "secret_hold": {
+      "release": "v0.1.7",
+      "checks": [
+        "Native ARM64 system reports the expected release and a reachable cluster",
+        "Native Secret browser creation/versioning is write-only; exact Kubernetes values verified privately; referenced API/browser deletion refused with continued HTTP v1",
+        "Native partial cleanup removed v1, refused foreign-owned v2, retained metadata/reservation/history and rejected new versions/references; replace broker and reconnect before resume"
+      ]
+    },
+    "secret_resume": {
+      "release": "v0.1.7",
+      "checks": [
+        "Native ARM64 system reports the expected release and a reachable cluster",
+        "Native replacement retained original session/PVC/deletion reservation; browser retry refused unresolved ownership, then removed all versions/metadata after guarded fixture repair; revision history retained"
+      ]
+    },
+    "reboot": {
+      "release": "v0.1.7",
+      "checks": [
+        "Native ARM64 system reports the expected release and a reachable cluster",
+        "After host reboot: administrator, retained application, revision history and HTTP response recovered"
+      ]
+    }
+  },
+  "outcome": "passed",
+  "fresh_install_exit": 0,
+  "same_version_reinstall_exit": 0,
+  "original_v017_identities_unchanged_through": [
+    "broker replacement",
+    "same-version reinstall",
+    "host reboot"
+  ],
+  "configuration_secret_metadata": 0,
+  "configuration_kubernetes_values": 0,
+  "registry_credentials": 0,
+  "application_volumes": 0,
+  "retained_healthy_applications": 1,
+  "saved_verification_sessions": "revoked; cookie files removed",
+  "temporary_administrative_connections": "closed",
+  "earlier_v015_test_state_archive": "root-private; gzip integrity verified; restore not tested",
+  "cross_version_upgrade": "not tested; installer refused and only owned test state was archived/reset",
+  "excluded_attempts": [
+    "Resume called before forward readiness; no test mutations; repeated after readiness",
+    "Final inventory used wrong Deployment API group; corrected read passed"
+  ],
+  "private_evidence_sha256": {
+    "initial/native-results.json": "7c341730c8d0546fda701e0c444f0de201a615f049a81a93cd028dac5d9bbdeb",
+    "secret-hold/native-results.json": "fd5b4e86d4b86d24270a3e21824e2cf85a7e5e7fdf73ef9e6b297a38e8cc7354",
+    "secret-resume/native-results.json": "a74ad041625e782c11525e8a4ac35d65e8be895e410437b1d2ac163deac11255",
+    "reboot/native-results.json": "ccafb57ff41b99c8338f0d9c754c7d9338ebf242c2b27f1f77feefbdca1cef01",
+    "survival-before.json": "54e91018972c7c1a954fb373c92bb0e35d4407aec367a3f325138efd3d9143e2",
+    "survival-broker.json": "54e91018972c7c1a954fb373c92bb0e35d4407aec367a3f325138efd3d9143e2",
+    "survival-reinstall.json": "54e91018972c7c1a954fb373c92bb0e35d4407aec367a3f325138efd3d9143e2",
+    "survival-reboot.json": "54e91018972c7c1a954fb373c92bb0e35d4407aec367a3f325138efd3d9143e2",
+    "final-inventory.json": "10e9c74cd687bb44a398cd5eddc47942e55c33a8064ff3dd22173e3a581313c7",
+    "host.json": "8979591d11a8e305cbd229106fcb7240069aa612a593caf2412ec8dfbc143218",
+    "prior-inventory.json": "c0d2463b3c67a4b94427f4a027696168d1e94205b6845086cc9ff97a21904dd9"
+  },
+  "local_regressions": {
+    "python_passed": 73,
+    "shell_syntax": "passed"
+  },
+  "remaining_core": [
+    "private LAN HTTPS/DNS/trust and second-device routing",
+    "remaining worker crash/restoration and recovery-retry barriers",
+    "comprehensive negative-path secret disclosure",
+    "reference resource calibration and controlled repeated evaluation"
+  ]
+}

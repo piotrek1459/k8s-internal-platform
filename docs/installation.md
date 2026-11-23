@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.1.6`. Select a version available through the
+The examples below use `v0.1.7`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -10,16 +10,16 @@ The platform and its managed applications run in the same K3s cluster. The
 installer provisions K3s, imports native OCI images and installs the platform
 chart. Docker, Go and Node.js are not required on the target host.
 
-Published `v0.1.5` has passed reference Raspberry Pi core installation,
-same-version reinstall and reboot checks; [implementation status](status.md)
-links the measured results and remaining compatibility limits. Public HTTPS, application volumes and cross-version upgrades remain outside
-this installer. Private credentials and verified failed-rollout restoration are
-implemented; their acceptance boundaries are recorded separately.
-The v0.1.5 native command failed later at diagnostic Secret cleanup: retained
-deleted-application history prevented deletion, and a separate unused-Secret
-probe left its Kubernetes value after successful metadata deletion. Release
-v0.1.6 contains the correction; native verification is pending Pi SSH access; [the report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
-retains the v0.1.5 failures and source verification of the correction.
+Published `v0.1.7` passed reference-Pi fresh installation, core lifecycle,
+diagnostics/drift repair, physical Secret cleanup and retry across broker
+replacement, same-version reinstall and reboot. The original v0.1.7 administrator/
+session/app/history/PVC identity and real HTTP remained unchanged. The
+[native report](../tests/experiments/2026-11-23-v0.1.7-native.md) records exact evidence.
+The preceding v0.1.5 cleanup failures were corrected in v0.1.6 and verified in
+v0.1.7; v0.1.6 itself was not run natively. Cross-version upgrades, public HTTPS,
+application volumes and verified backup restoration remain outside this installer.
+The reference test reset archived only verified owned test state; it was not an
+upgrade or restoration test.
 The [implementation status](status.md) records the remaining boundaries. Existing
 unrelated K3s installations are refused; this installer is for a dedicated host.
 
@@ -44,7 +44,7 @@ If the installer reports missing memory cgroups, an explicit preparation step is
 available after the installer has been downloaded and verified:
 
 ```bash
-sudo bash install.sh --version v0.1.6 --prepare-host
+sudo bash install.sh --version v0.1.7 --prepare-host
 # Exit status 20 means that the boot file was prepared and a reboot is required.
 sudo reboot
 # Reconnect over SSH, then rerun --check and the normal installation.
@@ -64,13 +64,13 @@ combined with `--prepare-host`. The installer never reboots automatically.
 Run on the Pi/server as the normal SSH user:
 
 ```bash
-mkdir -p ~/platform-v0.1.6
-cd ~/platform-v0.1.6
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.6/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.6/SHA256SUMS
+mkdir -p ~/platform-v0.1.7
+cd ~/platform-v0.1.7
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.7/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.7/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.1.6 --check
+sudo bash install.sh --version v0.1.7 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -80,7 +80,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.1.6
+sudo bash install.sh --version v0.1.7
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -110,8 +110,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.1.6 \
-  --bundle platform-v0.1.6-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.7 \
+  --bundle platform-v0.1.7-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;

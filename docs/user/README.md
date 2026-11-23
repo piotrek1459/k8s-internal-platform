@@ -172,7 +172,8 @@ references are refused; after the underlying error is resolved, **Retry deletion
 continues cleanup using the recorded identities. The platform does not adopt a
 replacement object. The v0.1.5 metadata-only deletion and
 deleted-history defects are corrected in v0.1.6. Source real-cluster acceptance
-passed; native v0.1.6 confirmation is pending Pi SSH access. See [status](../status.md).
+and published v0.1.7 Pi cleanup/retry verification passed; the [native report](../../tests/experiments/2026-11-23-v0.1.7-native.md)
+records the physical version removal and retained history/session/PVC checks. See [status](../status.md).
 
 Stored registry credentials support authenticated image inspection and actual
 kubelet pulls. Passwords remain in Kubernetes; ordinary responses contain
@@ -247,9 +248,9 @@ hostname; the native installer provides Internal access and SSH forwarding.
 Public HTTPS, application volumes, a complete configuration editor and durable
 searchable log storage remain planned. Application diagnostics and drift inspection
 are included in published v0.1.5. The reference Pi verified masking, ownership
-checks, escaped text and explicit Service repair. The native run also exposed
-the Secret-deletion defects described above; its cleanup failure is retained as
-a failed acceptance result.
+checks, escaped text and explicit Service repair. The earlier v0.1.5 native run exposed
+Secret-deletion defects; that failure remains retained as evidence. Published
+v0.1.7 subsequently passed physical cleanup and retry across broker replacement.
 
 ## Stop and resume
 
