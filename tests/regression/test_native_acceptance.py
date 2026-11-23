@@ -4,13 +4,37 @@ import json
 import tempfile
 import sys
 import unittest
+import urllib.error
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'e2e'))
 from native import Native
+from native_diagnostics import delete_fixture
 
 
 class NativeDeletionTests(unittest.TestCase):
+    def test_diagnostic_cleanup_refuses_reused_or_unrecorded_identity(self):
+        for identity in ('original-uid', None):
+            environment = Mock()
+            environment.kube.return_value = {'metadata': {'uid': 'replacement-uid', 'resourceVersion': '42'}}
+            with self.assertRaisesRegex(RuntimeError, 'identity changed'):
+                delete_fixture(environment, '/owned-fixture', identity)
+            environment.kube.assert_called_once_with('/owned-fixture')
+
+    def test_diagnostic_cleanup_uses_uid_and_resource_version_preconditions(self):
+        environment = Mock()
+        environment.kube.side_effect = [{'metadata': {'uid': 'owned-uid', 'resourceVersion': '42'}}, {}]
+        delete_fixture(environment, '/owned-fixture', 'owned-uid')
+        self.assertEqual(environment.kube.call_count, 2)
+        environment.kube.assert_called_with('/owned-fixture', method='DELETE',
+            body={'preconditions': {'uid': 'owned-uid', 'resourceVersion': '42'}})
+
+    def test_diagnostic_cleanup_accepts_already_removed_fixture(self):
+        environment = Mock()
+        environment.kube.side_effect = urllib.error.HTTPError('/owned-fixture', 404, 'missing', None, None)
+        delete_fixture(environment, '/owned-fixture', 'owned-uid')
+        environment.kube.assert_called_once_with('/owned-fixture')
+
     def test_interrupted_first_deployment_retains_private_cleanup_identity(self):
         with tempfile.TemporaryDirectory() as folder:
             environment = Native.__new__(Native)

@@ -80,6 +80,22 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 			return platform.AcceptResult{}, platform.FieldErrorf(platform.CodeInvalidInput, "registryCredentialId", "registry credential is unavailable")
 		}
 	}
+	if req.Type != platform.OperationDelete {
+		refs := append([]platform.SecretRef(nil), req.Revision.Spec.SecretRefs...)
+		if req.Revision.Frozen != nil {
+			refs = append(refs, req.Revision.Frozen.SecretVersions...)
+		}
+		for _, ref := range refs {
+			var exists int
+			if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM secret_versions v JOIN secrets s ON s.id = v.secret_id
+				WHERE s.id = ? AND s.deleting = 0 AND v.version = ?`, ref.SecretID, ref.Version).Scan(&exists); err != nil {
+				return platform.AcceptResult{}, err
+			}
+			if exists != 1 {
+				return platform.AcceptResult{}, platform.FieldErrorf(platform.CodeInvalidInput, "secretRefs", "secret version is unavailable or deletion is pending")
+			}
+		}
+	}
 	if err := insertRevision(ctx, tx, req.Revision, now); err != nil {
 		return platform.AcceptResult{}, err
 	}

@@ -15,11 +15,20 @@ import (
 )
 
 // fakeSecretManager records created versions and returns deterministic names.
-type fakeSecretManager struct{ created int }
+type fakeSecretManager struct {
+	created   int
+	deleted   []platform.SecretVersion
+	deleteErr error
+}
 
 func (f *fakeSecretManager) CreateImmutableSecret(_ context.Context, secretID string, version int, _ map[string][]byte) (string, string, error) {
 	f.created++
 	return fmt.Sprintf("k8s-%s-v%d", secretID, version), fmt.Sprintf("uid-%d", f.created), nil
+}
+
+func (f *fakeSecretManager) DeleteImmutableSecret(_ context.Context, version platform.SecretVersion) error {
+	f.deleted = append(f.deleted, version)
+	return f.deleteErr
 }
 
 func newSecretsRouter(t *testing.T) (http.Handler, *store.Store) {
@@ -126,6 +135,48 @@ func TestDeleteSecretRejectedWhileReferenced(t *testing.T) {
 	h.ServeHTTP(del, req)
 	if del.Code != http.StatusConflict {
 		t.Fatalf("delete status = %d, want 409 (secret in use); body=%s", del.Code, del.Body.String())
+	}
+}
+
+func TestSecretDeletionFailureRetainsReservationForReplacementAndRetry(t *testing.T) {
+	h, st := newSecretsRouter(t)
+	id := extractSecretID(t, postJSON(h, "/api/v1/secrets", `{"name":"retry-delete","data":{"value":"controlled-private-value"}}`))
+	if rec := postJSON(h, "/api/v1/secrets/"+id+"/versions", `{"data":{"value":"controlled-second-value"}}`); rec.Code != http.StatusCreated {
+		t.Fatalf("create second version: %d", rec.Code)
+	}
+	manager := &fakeSecretManager{deleteErr: platform.Errorf(platform.CodeDependencyUnavailable, "controlled outage")}
+	makeHandler := func() http.Handler {
+		return NewRouter(Config{Logger: discardLogger(), Store: st, Secrets: manager}).Handler()
+	}
+	remove := func(handler http.Handler) *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodDelete, "/api/v1/secrets/"+id, nil)
+		req.Header.Set("X-Requested-With", "fetch")
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		return rec
+	}
+	if rec := remove(makeHandler()); rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("failed cleanup reported success: %d", rec.Code)
+	}
+	meta, versions, err := st.GetSecret(context.Background(), id)
+	if err != nil || !meta.Deleting || len(versions) != 2 {
+		t.Fatalf("failed deletion lost retry metadata: %v", err)
+	}
+	// Replacement gets a fresh in-memory semaphore; the SQL reservation still
+	// rejects adding a version before any Kubernetes create is attempted.
+	replacement := makeHandler()
+	if rec := postJSON(replacement, "/api/v1/secrets/"+id+"/versions", `{"data":{"value":"must-not-be-created"}}`); rec.Code != http.StatusConflict || manager.created != 0 {
+		t.Fatal("deletion reservation allowed a new Kubernetes version")
+	}
+	manager.deleteErr = nil
+	if rec := remove(replacement); rec.Code != http.StatusNoContent {
+		t.Fatalf("retry failed: %d", rec.Code)
+	}
+	if len(manager.deleted) != 3 || manager.deleted[1].Version != 1 || manager.deleted[2].Version != 2 {
+		t.Fatal("retry did not revisit all recorded version identities")
+	}
+	if _, _, err := st.GetSecret(context.Background(), id); err == nil {
+		t.Fatal("completed cleanup retained metadata")
 	}
 }
 

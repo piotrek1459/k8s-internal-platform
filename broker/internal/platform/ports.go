@@ -107,6 +107,9 @@ type Store interface {
 	// DeleteSecret removes a secret only when no active or rollback-eligible
 	// revision references any of its versions; otherwise CodeSecretInUse.
 	DeleteSecret(ctx context.Context, id string) error
+	// BeginSecretDeletion reserves cleanup after the same reference checks;
+	// subsequent accepts/version additions reject the durable reservation.
+	BeginSecretDeletion(ctx context.Context, id string) error
 
 	// Administrator and session persistence for the auth package.
 	CreateAdministrator(ctx context.Context, admin Administrator) error
@@ -177,6 +180,9 @@ type SecretManager interface {
 	// CreateImmutableSecret creates an immutable Secret with a deterministic
 	// versioned name and returns its name and UID for metadata storage.
 	CreateImmutableSecret(ctx context.Context, secretID string, version int, data map[string][]byte) (name, uid string, err error)
+	// DeleteImmutableSecret removes only the recorded, owned version under UID
+	// and resource-version preconditions. A missing version is already removed.
+	DeleteImmutableSecret(ctx context.Context, version SecretVersion) error
 }
 
 // ExecutionPlanner completes the immutable chart/values identity before apply.

@@ -37,15 +37,26 @@ func (s *Store) CreateSecret(ctx context.Context, meta platform.SecretMetadata, 
 
 // AddSecretVersion appends a new immutable version to an existing secret.
 func (s *Store) AddSecretVersion(ctx context.Context, version platform.SecretVersion) error {
-	var exists int
-	if err := s.db.sql.QueryRowContext(ctx,
-		`SELECT COUNT(1) FROM secrets WHERE id = ?`, version.SecretID).Scan(&exists); err != nil {
+	tx, err := s.db.sql.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback() //nolint:errcheck
+	var exists, deleting int
+	if err := tx.QueryRowContext(ctx,
+		`SELECT COUNT(1), COALESCE(MAX(deleting), 0) FROM secrets WHERE id = ?`, version.SecretID).Scan(&exists, &deleting); err != nil {
 		return err
 	}
 	if exists == 0 {
 		return platform.Errorf(platform.CodeNotFound, "secret %q not found", version.SecretID)
 	}
-	return insertSecretVersion(ctx, s.db.sql, version.SecretID, version, s.nowString())
+	if deleting != 0 {
+		return platform.Errorf(platform.CodeConflict, "secret deletion is pending; retry deletion")
+	}
+	if err := insertSecretVersion(ctx, tx, version.SecretID, version, s.nowString()); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // execer is satisfied by both *sql.DB and *sql.Tx.
@@ -76,8 +87,8 @@ func (s *Store) GetSecret(ctx context.Context, id string) (platform.SecretMetada
 	var meta platform.SecretMetadata
 	var createdAt string
 	err := s.db.sql.QueryRowContext(ctx,
-		`SELECT id, owner, name, created_at FROM secrets WHERE id = ?`, id).
-		Scan(&meta.ID, &meta.Owner, &meta.Name, &createdAt)
+		`SELECT id, owner, name, created_at, deleting FROM secrets WHERE id = ?`, id).
+		Scan(&meta.ID, &meta.Owner, &meta.Name, &createdAt, &meta.Deleting)
 	if err != nil {
 		return platform.SecretMetadata{}, nil, notFound(err, "secret", id)
 	}
@@ -108,7 +119,7 @@ func (s *Store) GetSecret(ctx context.Context, id string) (platform.SecretMetada
 
 func (s *Store) ListSecrets(ctx context.Context) ([]platform.SecretMetadata, error) {
 	rows, err := s.db.sql.QueryContext(ctx,
-		`SELECT id, owner, name, created_at FROM secrets ORDER BY created_at DESC`)
+		`SELECT id, owner, name, created_at, deleting FROM secrets ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +128,7 @@ func (s *Store) ListSecrets(ctx context.Context) ([]platform.SecretMetadata, err
 	for rows.Next() {
 		var m platform.SecretMetadata
 		var created string
-		if err := rows.Scan(&m.ID, &m.Owner, &m.Name, &created); err != nil {
+		if err := rows.Scan(&m.ID, &m.Owner, &m.Name, &created, &m.Deleting); err != nil {
 			return nil, err
 		}
 		m.CreatedAt = parseTime(created)
@@ -135,9 +146,18 @@ func (s *Store) ListSecrets(ctx context.Context) ([]platform.SecretMetadata, err
 //     recovering, or NeedsAttention), via its requested spec — even before it is
 //     frozen — so an accepted deployment cannot lose the secret it will use.
 //
-// Both checks run inside the deletion transaction so acceptance and deletion stay
-// consistent. The match uses the "SecretID" field the revision JSON serialises.
+// Retained history of a deleted application does not keep a live dependency.
+// Reference checks and the deletion reservation share a transaction with the
+// single-writer acceptance path; matching uses exact JSON fields, not SQL LIKE.
 func (s *Store) DeleteSecret(ctx context.Context, id string) error {
+	return s.changeSecretDeletion(ctx, id, false)
+}
+
+func (s *Store) BeginSecretDeletion(ctx context.Context, id string) error {
+	return s.changeSecretDeletion(ctx, id, true)
+}
+
+func (s *Store) changeSecretDeletion(ctx context.Context, id string, reserve bool) error {
 	tx, err := s.db.sql.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -152,34 +172,28 @@ func (s *Store) DeleteSecret(ctx context.Context, id string) error {
 		return platform.Errorf(platform.CodeNotFound, "secret %q not found", id)
 	}
 
-	idMatch := "%\"SecretID\":\"" + id + "\"%"     // requested spec_json
-	frozenMatch := "%\"SecretID\":\"" + id + "\"%" // frozen secret_versions_json
-
-	// Frozen active / rollback-eligible references.
-	var frozenRefs int
+	var refs int
 	if err := tx.QueryRowContext(ctx,
-		`SELECT COUNT(1) FROM revisions
-		 WHERE frozen = 1 AND result IN ('pending','succeeded')
-		   AND secret_versions_json LIKE ?`, frozenMatch).Scan(&frozenRefs); err != nil {
+		`SELECT COUNT(*) FROM revisions r JOIN applications a ON a.id = r.app_id
+		 WHERE a.deleted = 0
+		 AND (r.result IN ('pending','succeeded') OR EXISTS (
+		   SELECT 1 FROM operations o WHERE o.target_revision = r.id AND o.state NOT IN ('succeeded','failed')))
+		 AND (EXISTS (SELECT 1 FROM json_each(r.spec_json, '$.SecretRefs')
+		   WHERE json_extract(value, '$.SecretID') = ?)
+		 OR EXISTS (SELECT 1 FROM json_each(COALESCE(NULLIF(r.secret_versions_json, ''), '[]'))
+		   WHERE json_extract(value, '$.SecretID') = ?))`, id, id).Scan(&refs); err != nil {
 		return err
 	}
 
-	// References from any revision bound to a nonterminal operation, whether or not
-	// it is frozen yet. This protects a queued/accepted deployment and any
-	// NeedsAttention recovery dependency.
-	var pendingRefs int
-	if err := tx.QueryRowContext(ctx,
-		`SELECT COUNT(1) FROM revisions r
-		 JOIN operations o ON o.target_revision = r.id
-		 WHERE o.state NOT IN ('succeeded','failed')
-		   AND r.spec_json LIKE ?`, idMatch).Scan(&pendingRefs); err != nil {
-		return err
-	}
-
-	if frozenRefs+pendingRefs > 0 {
+	if refs > 0 {
 		return platform.Errorf(platform.CodeSecretInUse,
-			"secret %q is referenced by %d active/rollback-eligible and %d in-flight revision(s)",
-			id, frozenRefs, pendingRefs)
+			"secret %q is referenced by an active, rollback-eligible or in-flight revision", id)
+	}
+	if reserve {
+		if _, err := tx.ExecContext(ctx, `UPDATE secrets SET deleting = 1 WHERE id = ?`, id); err != nil {
+			return err
+		}
+		return tx.Commit()
 	}
 
 	if _, err := tx.ExecContext(ctx, `DELETE FROM secret_versions WHERE secret_id = ?`, id); err != nil {

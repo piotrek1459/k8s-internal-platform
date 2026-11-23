@@ -1,7 +1,9 @@
 package httpapi
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"k8s-internal-platform/broker/internal/platform"
 )
@@ -38,6 +40,12 @@ func (r *Router) handleCreateSecret(w http.ResponseWriter, req *http.Request) {
 		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
+	req, release, err := r.secretMutation(req)
+	if err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	defer release()
 
 	secretID := r.cfg.Factory.IDs.NewID("sec")
 	// Version 1 is created as an immutable Kubernetes Secret first; only then is
@@ -73,9 +81,19 @@ func (r *Router) handleAddSecretVersion(w http.ResponseWriter, req *http.Request
 		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
-	_, existing, err := r.cfg.Store.GetSecret(req.Context(), secretID)
+	req, release, err := r.secretMutation(req)
 	if err != nil {
 		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	defer release()
+	meta, existing, err := r.cfg.Store.GetSecret(req.Context(), secretID)
+	if err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	if meta.Deleting {
+		writeError(w, r.cfg.Logger, reqID, platform.Errorf(platform.CodeConflict, "secret deletion is pending; retry deletion"))
 		return
 	}
 	next := nextVersion(existing)
@@ -113,11 +131,53 @@ func (r *Router) handleListSecrets(w http.ResponseWriter, req *http.Request) {
 
 func (r *Router) handleDeleteSecret(w http.ResponseWriter, req *http.Request) {
 	reqID := requestID(req)
-	if err := r.cfg.Store.DeleteSecret(req.Context(), req.PathValue("id")); err != nil {
+	if r.cfg.Secrets == nil {
+		writeError(w, r.cfg.Logger, reqID, platform.Errorf(platform.CodeDependencyUnavailable, "secret storage is unavailable"))
+		return
+	}
+	req, release, err := r.secretMutation(req)
+	if err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	defer release()
+	id := req.PathValue("id")
+	if err := r.cfg.Store.BeginSecretDeletion(req.Context(), id); err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	_, versions, err := r.cfg.Store.GetSecret(req.Context(), id)
+	if err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
+		return
+	}
+	for _, version := range versions {
+		if err := r.cfg.Secrets.DeleteImmutableSecret(req.Context(), version); err != nil {
+			writeError(w, r.cfg.Logger, reqID, err)
+			return
+		}
+	}
+	if err := r.cfg.Store.DeleteSecret(req.Context(), id); err != nil {
 		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// The semaphore protects a single broker's create/version/delete sequence. The
+// durable deleting flag separately prevents acceptance and survives replacement.
+func (r *Router) secretMutation(req *http.Request) (*http.Request, func(), error) {
+	ctx, cancel := context.WithTimeout(req.Context(), 30*time.Second)
+	select {
+	case r.secretMutations <- struct{}{}:
+		if ctx.Err() == nil {
+			return req.WithContext(ctx), func() { <-r.secretMutations; cancel() }, nil
+		}
+		<-r.secretMutations
+	case <-ctx.Done():
+	}
+	cancel()
+	return req, nil, platform.Errorf(platform.CodeDependencyUnavailable, "secret operation deadline exceeded or request cancelled")
 }
 
 // createSecretVersion writes the immutable Kubernetes Secret for a version. It
@@ -138,7 +198,7 @@ func renderSecret(meta platform.SecretMetadata, versions []platform.SecretVersio
 	for _, v := range versions {
 		rendered = append(rendered, renderVersion(v))
 	}
-	return map[string]any{"id": meta.ID, "name": meta.Name, "versions": rendered}
+	return map[string]any{"id": meta.ID, "name": meta.Name, "versions": rendered, "deleting": meta.Deleting}
 }
 
 func renderVersion(v platform.SecretVersion) map[string]any {

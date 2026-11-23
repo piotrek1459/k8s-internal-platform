@@ -158,16 +158,31 @@ newer accepted configuration.
 
 The Secrets screen accepts write-only values and records immutable versions.
 The API supports the single `value` key for the environment-variable mapping
-profile and explicit secret/version references. The current application creation
-form does not submit its optional Secret-reference controls, and the version list
-has a response-type mismatch. Application Secret references currently require
-explicit API submission and verification; the UI path is not accepted as complete. Values must not
-be placed in ordinary environment fields or source control.
+profile. The creation wizard submits the selected Secret and exact version.
+The Secrets screen supports creation and **Add version**; values are cleared after
+submission and are never returned by reads. Values must not be placed in ordinary
+environment fields or source control.
+
+Current source removes the recorded Kubernetes versions before completing Secret
+deletion. Active, rollback-eligible and in-flight references return HTTP 409.
+Retained history of a deleted application does not keep a live dependency.
+If cleanup is interrupted or an object's identity/ownership has changed, the
+Secret remains marked **Deletion is pending**. New versions and deployment
+references are refused; after the underlying error is resolved, **Retry deletion**
+continues cleanup using the recorded identities. The platform does not adopt a
+replacement object. Published v0.1.5 still has metadata-only deletion and a
+deleted-history reference defect; the corrected deletion path requires a later
+release. See [status](../status.md).
 
 Stored registry credentials support authenticated image inspection and actual
 kubelet pulls. Passwords remain in Kubernetes; ordinary responses contain
-metadata. The local demonstration registry does not require a credential. The
-complete credential-management browser acceptance remains tracked in issue #16.
+metadata. In **Registries**, **Add credential** records a registry hostname,
+username and password/token. Select its label in the application's image step.
+An incorrect password is reported during **Inspect image**, before deployment.
+Creation alone does not establish that the credential works. Referenced
+credentials cannot be removed; after dependent applications are deleted,
+**Remove** deletes the credential and its Kubernetes authentication Secret.
+The local demonstration registry does not require a credential.
 
 ## Diagnostics
 
@@ -230,9 +245,11 @@ complete ordinary environment map. Creation supports versioned Secret references
 LAN selection requires an explicitly configured private ingress controller and
 hostname; the native installer provides Internal access and SSH forwarding.
 Public HTTPS, application volumes, a complete configuration editor and durable
-searchable log storage remain planned. The source diagnostics additions require
-a release containing them; the reference Pi acceptance for published v0.1.4
-covers the earlier lifecycle and blocked-first-deployment removal features.
+searchable log storage remain planned. Application diagnostics and drift inspection
+are included in published v0.1.5. The reference Pi verified masking, ownership
+checks, escaped text and explicit Service repair. The native run also exposed
+the Secret-deletion defects described above; its cleanup failure is retained as
+a failed acceptance result.
 
 ## Stop and resume
 

@@ -170,12 +170,12 @@ and storage design.
 | Session | Hashed session identifier, administrator ID, expiry/revocation data. |
 | Machine token (planned) | Hash, app/action scopes, issuer and expiry/revocation metadata. |
 | Application | Stable ID/name, optimistic version, effective desired revision, last successful revision, durable active operation reference, deletion state. |
-| Application revision | Requested candidate, frozen image and secret references, actor/time and result. Chart identity and values-hash fields exist but are not populated by execution. |
+| Application revision | Requested candidate, frozen image/Secret references, chart version/content digest, canonical values hash, actor/time and result. Execution records the frozen identity before apply. |
 | Operation | Application/type, source and target revision, durable state/stage, idempotency key and request hash, timestamps/deadline, recovery outcome. |
 | Operation event | Ordered progress entries with sanitized diagnostics and request correlation. |
 | Audit event | Actor, action, target, time, outcome, request/operation ID, safe configuration diff. |
 | Registry credential metadata | ID, registry, label, username and Kubernetes Secret reference. Passwords remain in Kubernetes; inspection and guarded usage are implemented. Creation does not claim credential verification. |
-| Secret metadata | Owner, name/key metadata, immutable Kubernetes Secret reference/version; no plaintext value. |
+| Secret metadata | Owner, name/key metadata, immutable Kubernetes Secret reference/version and durable deletion reservation; no plaintext value. |
 | Volume (planned) | The schema has a placeholder table; application PVC/mount/retention APIs are not implemented. |
 | Settings (planned API) | A placeholder schema table exists; no settings endpoints are registered. |
 
@@ -250,7 +250,7 @@ explicit; planned rows are not callable interfaces.
 | `GET /api/v1/secrets` | Secret metadata; values are never returned. | Implemented |
 | `POST /api/v1/secrets` | Versioned secret creation before use in an application. | Implemented; single value key |
 | `POST /api/v1/secrets/{id}/versions` | Creation of an immutable replacement secret version. | Implemented |
-| `DELETE /api/v1/secrets/{id}` | Secret deletion after verification of active and rollback references. | Implemented with reference checks |
+| `DELETE /api/v1/secrets/{id}` | Remove recorded Kubernetes versions and metadata after verifying live references. | Source reserves cleanup durably, guards UID/ownership and permits retry; v0.1.5 defects are recorded in status |
 | `GET /api/v1/volumes` | Attached and retained data volumes. | Planned |
 | `DELETE /api/v1/volumes/{id}` | Explicit, tracked deletion of an unused retained volume. | Planned |
 | `GET /metrics` | Private platform metrics for the monitoring profile. | Planned |

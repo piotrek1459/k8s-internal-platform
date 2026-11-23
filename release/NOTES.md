@@ -32,6 +32,15 @@ version guards while preserving identity/address. Pending transactions and forei
 ownership remain blocked; ownership checks also cover restoration and uninstall.
 Diagnostic redaction and retention limits are documented in the API guide.
 
+Configuration Secret deletion reserves cleanup durably, removes recorded immutable
+Kubernetes versions under UID/resource-version and ownership guards, then removes
+metadata. Active/rollback/in-flight references remain protected; retained history
+of deleted applications no longer blocks cleanup. Partial cleanup remains visible
+and retryable across broker replacement, and rejects new versions/references.
+The browser provides an explicit Retry deletion action. Credential and Secret
+management acceptance covers real browser creation, version selection, invalid
+private credentials, kubelet pulls, deletion guards and physical Secret removal.
+
 Application chart `0.1.1` provides a Pod-local `/tmp` emptyDir with a 64Mi
 size limit and a filesystem group for non-root image users. This permits common
 images such as unprivileged Nginx to create temporary files while the root

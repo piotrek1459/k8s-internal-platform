@@ -271,7 +271,7 @@
 						class="flex-1 border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
 						<option value="">Select secret…</option>
 						{#each secrets as s}
-							<option value={s.id}>{s.name}</option>
+							<option value={s.id} disabled={s.deleting}>{s.name}{s.deleting ? ' (deletion pending)' : ''}</option>
 						{/each}
 					</select>
 					{#if secretRef.secretId}

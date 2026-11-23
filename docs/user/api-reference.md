@@ -256,10 +256,10 @@ The app disappears from the active list; stored revision history remains.
 | `POST /apps/{id}/rollback` | `{version, revisionId}`; target must be a successful revision of this app. |
 | `GET /apps/{id}/revisions` | Revision history, newest first. |
 | `GET /operations/{id}` | State, stages, events and recovery outcome. |
-| `GET /secrets` | Metadata and versions; no plaintext values. |
+| `GET /secrets` | Metadata, versions and deletion-pending state; no plaintext values. |
 | `POST /secrets` | `{name, data:{value:...}}`; create immutable version 1. |
 | `POST /secrets/{id}/versions` | `{data:{value:...}}`; create a new immutable version. |
-| `DELETE /secrets/{id}` | Rejected when protected revisions reference the secret. |
+| `DELETE /secrets/{id}` | Refuse live protected references; remove recorded Kubernetes versions, then metadata. |
 | `GET /registry-credentials` | Credential metadata. |
 | `POST /registry-credentials` | `{label, registry, username, password}`; password stored in a Kubernetes Docker configuration Secret. |
 | `DELETE /registry-credentials/{id}` | Delete credential and its Kubernetes Secret; reject protected references. |
@@ -268,6 +268,18 @@ All application mutations require `Idempotency-Key`; mutations of existing apps
 also require the current `version` in the JSON body. The implementation uses that body field for its optimistic check; If-Match is
 not enforced. Request and camelCase response schemas are in
 [`api/openapi.yaml`](../../api/openapi.yaml).
+
+Secret deletion in current source first reserves cleanup durably. A reference
+from an active application's pending/successful revision or nonterminal operation
+returns `SECRET_IN_USE`/409. Deleted-application history remains available without
+blocking removal. New application references and new versions are refused while
+`deleting: true`. Each Kubernetes removal verifies the recorded UID, deterministic
+name, namespace and ownership, and uses UID/resource-version preconditions.
+Missing versions are already removed; changed ownership is refused. A partial
+cleanup returns 409/503 and retains metadata/identities, so repeating DELETE can
+finish after diagnosis. A 204 establishes removal of all recorded versions and
+metadata. Versions orphaned by earlier metadata-only deletion are not guessed or
+collected automatically. This corrected cleanup is not present in v0.1.5.
 
 `POST /apps/{id}/recover` is a recovery retry, not a new mutation specification.
 It accepts `{version}`, reuses the existing blocked operation ID and increments
