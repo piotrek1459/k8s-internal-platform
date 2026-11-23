@@ -1,0 +1,118 @@
+{
+  "date": "2026-11-23",
+  "issue": 16,
+  "published_release": {
+    "version": "v0.1.6",
+    "source_commit": "cdfe951719ff1903badf01c84ef1bde8007c3589",
+    "normal_release": true,
+    "native_acceptance": "pending reference-host SSH access; no attempt made"
+  },
+  "local_focused": {
+    "tests": 4,
+    "failures": 0,
+    "skips": 0,
+    "case_seconds": 42.931999999999995,
+    "cases": [
+      {
+        "name": "workflows.Workflows.test_00_browser_bootstrap",
+        "seconds": 2.049
+      },
+      {
+        "name": "workflows.Workflows.test_03_workload_management_boundaries",
+        "seconds": 21.047
+      },
+      {
+        "name": "workflows.Workflows.test_07_lost_response_and_moved_tag_retries",
+        "seconds": 11.168
+      },
+      {
+        "name": "workflows.Workflows.test_12_browser_running_operation_resume",
+        "seconds": 8.668
+      }
+    ]
+  },
+  "fast_checks": [
+    "Go broker/demo/fixture formatting, vet and tests",
+    "70 Python regressions",
+    "UI type checking, lint, build",
+    "OpenAPI, chart matrix and shell syntax"
+  ],
+  "excluded_attempt": "Concurrent host npm ci caused local UI formatter failure; affected checks were repeated serially and passed",
+  "full_clean_source_e2e": {
+    "run": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45220381729",
+    "source_commit": "0a616fbc1c5705862cd9a68530523a7b3a803468",
+    "artifact_id": 14842481100,
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "case_seconds": 729.013,
+    "new_cases": [
+      {
+        "name": "workflows.Workflows.test_03_workload_management_boundaries",
+        "seconds": 36.762
+      },
+      {
+        "name": "workflows.Workflows.test_07_lost_response_and_moved_tag_retries",
+        "seconds": 10.427
+      },
+      {
+        "name": "workflows.Workflows.test_12_browser_running_operation_resume",
+        "seconds": 9.299
+      }
+    ],
+    "workload_boundary": {
+      "requests": [
+        {
+          "name": "platform-health",
+          "status": 200,
+          "transportError": false
+        },
+        {
+          "name": "platform-read",
+          "status": 401,
+          "transportError": false
+        },
+        {
+          "name": "platform-create",
+          "status": 401,
+          "transportError": false
+        },
+        {
+          "name": "platform-secret",
+          "status": 401,
+          "transportError": false
+        },
+        {
+          "name": "kube-read",
+          "status": 401,
+          "transportError": false,
+          "kind": "Status",
+          "reason": "Unauthorized"
+        },
+        {
+          "name": "kube-create",
+          "status": 401,
+          "transportError": false,
+          "kind": "Status",
+          "reason": "Unauthorized"
+        }
+      ],
+      "serviceAccountTokenAbsent": true
+    },
+    "strict_zero_skips_summary": "success",
+    "downloaded_junit": "verified"
+  },
+  "remaining": [
+    "Native v0.1.6 verification",
+    "remaining worker interruption barriers and failed-restoration retry",
+    "comprehensive negative-path disclosure",
+    "private LAN HTTPS/DNS/trust",
+    "resource calibration and controlled repeated evaluation"
+  ],
+  "fast_github_checks": {
+    "count": 5,
+    "conclusion": "success",
+    "source_commit": "0a616fbc1c5705862cd9a68530523a7b3a803468"
+  }
+}

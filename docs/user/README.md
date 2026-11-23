@@ -163,16 +163,16 @@ The Secrets screen supports creation and **Add version**; values are cleared aft
 submission and are never returned by reads. Values must not be placed in ordinary
 environment fields or source control.
 
-Current source removes the recorded Kubernetes versions before completing Secret
+Release v0.1.6 removes the recorded Kubernetes versions before completing Secret
 deletion. Active, rollback-eligible and in-flight references return HTTP 409.
 Retained history of a deleted application does not keep a live dependency.
 If cleanup is interrupted or an object's identity/ownership has changed, the
 Secret remains marked **Deletion is pending**. New versions and deployment
 references are refused; after the underlying error is resolved, **Retry deletion**
 continues cleanup using the recorded identities. The platform does not adopt a
-replacement object. Published v0.1.5 still has metadata-only deletion and a
-deleted-history reference defect; the corrected deletion path requires a later
-release. See [status](../status.md).
+replacement object. The v0.1.5 metadata-only deletion and
+deleted-history defects are corrected in v0.1.6. Source real-cluster acceptance
+passed; native v0.1.6 confirmation is pending Pi SSH access. See [status](../status.md).
 
 Stored registry credentials support authenticated image inspection and actual
 kubelet pulls. Passwords remain in Kubernetes; ordinary responses contain
