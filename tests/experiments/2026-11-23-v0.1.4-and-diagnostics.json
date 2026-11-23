@@ -57,5 +57,24 @@
     "Prior owned test state archived; restore and cross-version upgrades unverified.",
     "Diagnostics/drift/guarded Service repair are source additions awaiting release.",
     "No resource calibration, controlled repeated evaluation or whole-milestone completion claim."
-  ]
+  ],
+  "githubSourceAcceptance": {
+    "runId": 45145508589,
+    "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45145508589",
+    "sourceCommit": "dc75094513d3c30ab51a7db0fd5c78afcc3a2a5d",
+    "tests": 16,
+    "failures": 0,
+    "skipped": 0,
+    "testDurationSeconds": 598.655,
+    "diagnosticsCaseSeconds": 24.271
+  },
+  "githubMainAcceptance": {
+    "runId": 45155499729,
+    "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45155499729",
+    "sourceCommit": "1ce33ccc60b1379a5f93eb16e6038178b88cb922",
+    "event": "schedule",
+    "tests": 15,
+    "failures": 0,
+    "skipped": 0
+  }
 }

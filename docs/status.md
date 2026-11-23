@@ -65,7 +65,9 @@ throttling retain their separately recorded boundaries.
   and as a release gate. Status serialization and Pod replacement are required
   assertions. Unhealthy updates must restore the previous snapshot before unlock.
   Authenticated registry inspection and actual kubelet image pulls are covered.
-  The [15-case source run](../tests/experiments/2026-11-23-core-acceptance.md#migration-and-blocked-deployment-follow-up)
+  The [latest 16-case source run](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md#executed-source-verification)
+  includes bounded logs/events, hostile-text escaping and owned drift repair.
+  The [earlier 15-case source run](../tests/experiments/2026-11-23-core-acceptance.md#migration-and-blocked-deployment-follow-up)
   also verifies runtime SIGKILL during a pending first install, durable blocking,
   independent queued browser work and supported blocked-first-deployment removal.
 - `tests/e2e/native.py` exercises a published ARM64 release on an explicitly
