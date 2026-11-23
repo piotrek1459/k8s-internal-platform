@@ -238,8 +238,9 @@ explicit; planned rows are not callable interfaces.
 | `POST /api/v1/apps/{id}/rollback` | Queued restoration of a selected revision. | Frozen chart/values identity verified; unavailable historical chart artifacts are refused |
 | `DELETE /api/v1/apps/{id}` | Queued workload deletion with history retention. | Includes explicit removal of a blocked first create with no successful predecessor |
 | `POST /api/v1/apps/{id}/recover` | Version-guarded retry of the existing blocked operation. | Implemented; ambiguous/pending state remains blocked |
-| `GET /api/v1/apps/{id}/logs` | Bounded recent logs, optionally a selected pod/previous container. | Planned |
-| `GET /api/v1/apps/{id}/events` | Recent cluster diagnostics and operation progress. | Planned |
+| `GET /api/v1/apps/{id}/logs` | Bounded recent application-container logs, optionally an owned Pod/previous instance. | Implemented with UID-chain verification, masking, deadlines and limits |
+| `GET /api/v1/apps/{id}/events` | Bounded retained workload events, separate from operation progress. | Implemented with current-owned-UID filtering and masking |
+| `GET /api/v1/apps/{id}/drift` | Read-only workload/route differences against frozen desired intent. | Implemented; field paths only, no automatic overwrite |
 | `GET /api/v1/operations/{id}` | Durable progress, outcome, and recovery details. | Implemented |
 | `GET /api/v1/audit-events` | Paginated administrator action history. | Planned |
 | `GET /api/v1/registry-credentials` | Credential metadata and usage, never passwords/tokens. | Metadata only |

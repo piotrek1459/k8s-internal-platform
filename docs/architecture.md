@@ -315,9 +315,9 @@ The browser communicates only with this service, never directly with Kubernetes.
 | Host installer | Dedicated Linux host checks, pinned K3s/Helm, verified OCI import and platform chart installation. Native Pi evidence is recorded separately; native AMD64 and cross-version upgrades remain outstanding. | Host-side `installer/install.sh`. |
 | Release controller | Resolve a manually selected branch HEAD, validate/build the pinned SHA and publish versioned assets after successful gates. | GitHub Actions and `release/` tooling. |
 | K3s | Kubernetes control plane and node services, scheduling, image pulling, networking, restarting containers. | Host service. |
-| Web UI | Implemented setup, forms, progress and lifecycle/history screens; response alignment and Secret submission are implemented; log browsing remains planned. | Static assets served by the Go service. |
+| Web UI | Implemented setup, forms, progress and lifecycle/history screens; Secret submission, bounded log/event browsing and owned-field drift reports are implemented in source. | Static assets served by the Go service. |
 | Go API | Authentication, validation, application model, operation submission, API responses. | One platform pod. |
-| Operation worker | Execute persisted work; recovery exists but requires target verification and restoration corrections. | Background worker in the Go service. |
+| Operation worker | Execute persisted work, verify recovery targets and restore known snapshots; ambiguous state retains its lock. | Background worker in the Go service. |
 | Status observer | Read actual workload state and publish timestamped observations. | Background worker in the Go service. |
 | SQLite | Persist platform users, specifications, operations, settings, and audit records. | Platform PVC; one writer process. |
 | Helm adapter | Install and change a versioned first-party application chart. | Go Helm SDK, called by the worker. |
@@ -383,8 +383,9 @@ recommended recovery action on failure.
 
 The table specifies the target interface. Current routes provide setup/login,
 applications, create/update, operation progress, history, Secret management and
-credential metadata. Overview capacity, settings, audit browsing, application
-logs and storage screens are planned. Existing UI/API mismatches are tracked in
+credential metadata. Source application details also provide bounded logs/events
+and drift inspection. Overview capacity, settings, audit browsing and storage
+screens remain planned. Acceptance boundaries are tracked in
 [implementation status](status.md#known-correctness-and-integration-gaps).
 
 | Target screen | Required content and actions |

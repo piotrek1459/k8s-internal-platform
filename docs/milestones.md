@@ -26,7 +26,7 @@ No entire M0–M4 milestone is declared complete by this checklist.
 ## Implementation readiness and entry criteria
 
 Updated: 2026-11-23. The audit includes merged PR #14, the source changes in
-PR #15, published `v0.1.3`, the [current core acceptance](../tests/experiments/2026-11-23-core-acceptance.md), the [earlier reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
+PR #15, published `v0.1.4`, the [v0.1.4/diagnostics report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md), the [earlier core acceptance](../tests/experiments/2026-11-23-core-acceptance.md), the [earlier reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
 and the current regression/E2E suites. Remaining work is tracked in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
 Older dated reports remain evidence only for their recorded source and scope.
@@ -36,8 +36,8 @@ Older dated reports remain evidence only for their recorded source and scope.
 | M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and local and reference-Pi manual Helm functional baselines. | Normal access from another LAN device, operator-active-time comparison and the measurements supporting M1/M4. |
 | M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; published v0.1.3 verifies temporary files with container hardening retained. | Measured resource presets and reference-LAN acceptance. |
 | M2 | Validated API, atomic migration-failure rollback, transactional acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence. | Remaining interruption barriers, moved-tag and disconnected-client acceptance; comprehensive negative-path secret-disclosure checks. |
-| M3 | Setup/login/logout, application forms/status/history, Secret-reference submission, private credential storage/pulls and completed/queued-operation refresh. | Normal private LAN HTTPS/URL, application logs/workload events, full browser credential/Secret management and running-operation refresh. |
-| M4 | Healthy update/scale/restart/rollback/delete, verified unhealthy-update restoration, blocked first-deployment removal, recovery regressions and explicit Service reapply. | Real-cluster interruption/failed-compensation acceptance, general drift reporting and the controlled core evaluation. |
+| M3 | Setup/login/logout, application forms/status/history, Secret-reference submission, private credential storage/pulls and completed/queued-operation refresh. | Normal private LAN HTTPS/URL, full browser credential/Secret management and running-operation refresh. |
+| M4 | Healthy update/scale/restart/rollback/delete, verified unhealthy-update restoration, blocked first-deployment removal, recovery regressions and explicit Service reapply. | Real-cluster interruption/failed-compensation acceptance and the controlled core evaluation. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
 The two former status/restart E2E skips are removed: both are required assertions.
@@ -129,7 +129,7 @@ configuration/history and diagnostics over a private management path.
 - [x] Secret metadata/version objects and application Secret-reference submission use the API contract. **Evidence:** write-only API tests, browser reference selection/submission and exact-version rollback.
 - [ ] Complete browser Secret creation/version management and credential creation/selection/private-image/invalid-password workflows. **Acceptance:** these browser paths use the real endpoints and show actionable errors. API private inspection/pulls already pass. Tracked in issue #16.
 - [x] Application details include observed status, revision history and operation progress/events. **Evidence:** handler contracts and browser update/history/rollback workflows.
-- [ ] Add bounded, application-scoped workload log and Kubernetes event APIs and escaped plain-text UI rendering. **Acceptance:** ownership/namespace and output limits are enforced. Operation progress events are not workload log/event browsing. Tracked in issue #16.
+- [x] Add bounded application log/event reads and escaped browser rendering. **Evidence:** handler/ownership/redaction regressions and the focused real-cluster fixture test; namespace/UID chains, cross-app/copied-label rejection, real sensitive fixture masking and hostile-text escaping are verified. Full disclosure acceptance remains separately open.
 - [x] Registry credentials are stored in Kubernetes and support real private inspection/pulls; ordinary responses remain metadata-only and invalid credentials fail. **Evidence:** registry/credential regressions and authenticated-registry E2E. Full private browser flow remains above.
 - [x] A completed operation can be reloaded from its persisted state. **Evidence:** browser operation-page refresh.
 - [x] Refresh/navigate while an operation is deliberately queued behind a pending install, then recover its persisted progress after broker replacement without resubmission. **Evidence:** browser submission count, one revision and actual HTTP checks in `test_95_pending_first_install_and_queued_browser_resume`.
@@ -141,7 +141,7 @@ surfaces and the specified remaining browser acceptance still belong to core M3.
 ## M4 — Reliable lifecycle and core evaluation (core)
 
 **Objective:** tracked lifecycle, verified restoration/rollback, durable blocking,
-crash recovery, drift reporting and measured evaluation of the core prototype.
+crash recovery, private LAN administration and measured evaluation of the core prototype.
 Application data volumes remain outside this milestone.
 
 **Tasks:**
@@ -157,11 +157,11 @@ Application data volumes remain outside this milestone.
 - [x] Startup recovery classifies queued/interrupted/pending/unknown states and verifies target release/chart/values/live identity before success. **Evidence:** positive/negative recovery and live-verifier regressions.
 - [ ] Complete the real-cluster interruption matrix around Helm and terminal SQL recording. **Acceptance:** recovery never mistakes an old deployed release for the target or removes a Helm record to bypass ambiguity. Tracked in issue #16.
 - [x] Explicit reapply recreates a manually deleted Service from recorded state without changing its image. **Evidence:** real-cluster Service-deletion/reapply E2E.
-- [ ] Report general workload/route drift against persisted intent without automatically overwriting operator changes or exposing secret material. **Acceptance:** image/configuration/resource/route differences are identified and explicit reapply resolves supported drift. Tracked in issue #16.
+- [x] Report owned workload/route drift against frozen intent without automatic overwrite or configuration values. **Evidence:** field/ownership/route unit matrix and real-cluster image/env/resources/probe/replica/Service-port drift, plus explicit Reapply and HTTP verification. Guarded Service-list repair preserves identity/address; pending/foreign ownership remains blocked. See the [source report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md).
 - [ ] Complete the [minimum core evaluation](#minimum-core-evaluation-m4) against the reference manual baseline. **Acceptance:** predefined targets/repetitions, operator steps/active time, timing/resource measurements and environment/raw results are retained. A functional run and its intentional timeout are not a performance dataset. Tracked in issue #16.
 
 **Completion boundary:** supported healthy lifecycle and failed-update restoration
-are verified. Full failure/interruption acceptance, drift reporting and the
+are verified. Full failure/interruption acceptance and the
 required core evaluation remain open. M5–M8 do not replace these core obligations.
 
 ## M5 — Application persistence and backup (extension)
@@ -263,7 +263,7 @@ observability overhead, supplementing the mandatory core evaluation.
 
 1. Publish the temporary-files compatibility fix and repeat its normal native
    browser deployment through the released installer, without manual patching.
-2. Complete the missing core diagnostic/drift/private-LAN surfaces and remaining
+2. Complete private LAN administration and the remaining
    browser/failure/security acceptance tracked in issue #16.
 3. Record the current reference-Pi manual baseline, calibrate resource defaults
    and fix the evaluation targets/repetitions before collecting comparison data.

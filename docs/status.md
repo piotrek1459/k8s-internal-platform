@@ -14,16 +14,16 @@ embedded first-party Helm chart.
 | Area | Implemented behavior | Acceptance boundary |
 | --- | --- | --- |
 | Distribution | Manually dispatched releases pin a selected branch HEAD, run regression/E2E gates and publish ARM64/AMD64 OCI bundles, installer, guide and checksums. Normal publication is the default. | Native Raspberry Pi results are recorded separately; native AMD64 host acceptance and cross-version upgrades remain outstanding. |
-| Installation | Published `v0.1.3` passed fresh Raspberry Pi installation, lifecycle, same-version rerun and reboot checks. Dedicated Linux/systemd installer provisions pinned K3s/Helm, imports native OCI digests and installs the platform. Same-version reruns retain state. Optional Pi boot preparation backs up the command line and requires a manual reboot. | Unrelated clusters and cross-version upgrades are refused. The boot-preparation transformation has regressions; physical-host evidence must identify the tested installer release. |
+| Installation | Published `v0.1.4` passed fresh Raspberry Pi installation, lifecycle, same-version rerun and reboot checks. Dedicated Linux/systemd installer provisions pinned K3s/Helm, imports native OCI digests and installs the platform. Same-version reruns retain state. Optional Pi boot preparation backs up the command line and requires a manual reboot. | Unrelated clusters and cross-version upgrades are refused. The boot-preparation transformation has regressions; physical-host evidence must identify the tested installer release. |
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Login throttling, password recovery and normal LAN HTTPS administration remain outstanding. |
-| UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Application log browsing and the complete configuration editor remain planned. LAN selection is enabled only when private ingress is explicitly configured. |
+| UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Source includes bounded application diagnostics and drift inspection; the complete configuration editor remains planned. LAN selection is enabled only when private ingress is explicitly configured. |
 | Application lifecycle | Digest-pinned deployment, update, scale 2/0/1, restart, reapply, rollback and deletion with retained history. | Replicas on one node do not provide host availability. Application data volumes remain M5 scope. |
 | Temporary files | Application chart `0.1.1` supplies a Pod-local `/tmp` emptyDir with a 64Mi size limit and non-root filesystem-group access. | Published `v0.1.3` passed unpatched browser deployment of unprivileged Nginx and real HTTP verification on the Pi. The volume is ephemeral; it does not provide M5 persistence. |
 | Execution snapshots | Image digest, exact Secret references, chart version, embedded chart content digest, canonical values hash and stable restart token are recorded before apply. | A different chart artifact is refused; old chart retrieval and rollback across chart changes are not implemented. See the M7 boundary and core acceptance tracker. |
 | Recovery | Interrupted success requires target release identity, matching chart/values and healthy matching live resources. Failed updates attempt verified restoration of the last successful revision. | Ambiguous/pending state remains blocked. A blocked first create without a successful predecessor supports tracked removal with retained evidence; other recovery retry reuses the existing operation. |
 | Configuration Secrets | Immutable Kubernetes Secret versions, metadata-only SQLite storage, explicit version references and deletion guards. | Ordinary API responses never return values. |
 | Registry credentials | Immutable Kubernetes Docker configuration Secrets support inspection and kubelet pulls. SQLite contains metadata only. Credentials are registry-scoped and deletion is guarded by active/rollback references. | Password creation does not itself verify registry access. Credential rotation and external registry-provider variations require separate acceptance. |
-| Diagnostics | Structured broker logs, operation events and observed workload state. | Application log/event APIs, audit browsing, capacity reporting and metrics remain planned. |
+| Diagnostics | Bounded owned-workload logs/events, in-memory managed-Secret masking, escaped browser text and field-path drift reports. Explicit Reapply repairs an owned Service port-list drift under UID/resource-version guards. | Source additions require a new release. Current-resource reads are not a durable log archive; audit browsing, capacity, metrics and the complete disclosure/failure matrix remain open. |
 | Networking | ClusterIP management and applications with SSH loopback forwarding. Private ingress is an explicit optional capability. | The native installer disables Traefik/ServiceLB. LAN DNS/HTTPS and public routing/tunnels remain separate work. |
 | Persistence | A platform PVC retains SQLite, accounts, sessions, revisions and history. | Application volumes, off-device backups and verified data restoration remain M5 scope. |
 
@@ -48,8 +48,8 @@ successful predecessor. It preserves the failed candidate and atomically
 transfers its lock to tracked cleanup. Running work and unresolved updates remain
 protected. Cross-version platform upgrades, unavailable historical chart artifacts,
 pending Helm transactions and failed restoration retain their stated boundaries.
-Core work still missing includes bounded application log/workload-event browsing,
-general drift reporting, normal private LAN HTTPS and parts of the real-cluster
+Source diagnostics and owned-field drift reporting are implemented.
+Core work still missing includes normal private LAN HTTPS and parts of the real-cluster
 crash/browser/security/evaluation matrix. These remain M0–M4 obligations in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16), alongside
 the [audited milestone checklists](milestones.md). Public HTTPS, application
@@ -73,6 +73,8 @@ throttling retain their separately recorded boundaries.
   only with `--setup`, retains private local credentials and one owned test app,
   supports post-reboot verification with `--resume`, and optionally checks the
   unprivileged Nginx browser workflow with `--public-image`.
+- The [v0.1.4 and diagnostics report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md)
+  records the published Pi lifecycle/removal/reinstall/reboot and separate source work.
 - The [v0.1.3 reference acceptance](../tests/experiments/2026-11-23-core-acceptance.md)
   records fresh installation, unpatched Nginx, reinstall/reboot and a manual Helm baseline.
 - The [earlier reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
@@ -89,8 +91,8 @@ reliability. Measurements must record release/source, host, pins and conditions.
 
 1. Complete the remaining core work in
    [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16):
-   diagnostics/drift/private LAN administration, the remaining failure/browser/security
-   matrix and the controlled evaluation. The v0.1.3 native compatibility gate and
+   private LAN administration, the remaining failure/browser/security
+   matrix and the controlled evaluation. The v0.1.4 native compatibility/removal gate and
    direct reference-Pi functional Helm baseline have passed.
 2. Keep measured acceptance separate from implementation: a single cached-image
    baseline does not calibrate resource limits or satisfy the repeated M4 evaluation.

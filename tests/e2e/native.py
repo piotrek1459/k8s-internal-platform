@@ -168,6 +168,47 @@ class Native:
             finally:
                 browser.close()
 
+    def blocked_first_removal(self, image):
+        code, accepted = self.client.request('POST', '/apps', {
+            'name': 'pi-blocked-'+secrets.token_hex(3), 'image': image,
+            'containerPort': 8080, 'profile': 'http',
+            'health': {'startupPath': '/healthz', 'readinessPath': '/readyz'},
+            'exposure': {'mode': 'internal'},
+        }, {'Idempotency-Key': secrets.token_hex(16)})
+        assert code == 202
+        app = accepted['applicationId']
+        self.state['blockedTestApp'] = app; self.save()
+        operation = self.client.poll(accepted['operationId'], terminal='needs_attention')
+        current = self.client.get('/apps/'+app)
+        assert not current['lastSuccessfulRevision'] and current['activeOperationId'] == operation['id']
+        frozen = self.client.get('/apps/'+app+'/revisions')['items'][0]['frozenImage']
+        code, _ = self.client.request('PATCH', '/apps/'+app,
+            {'version': current['version'], 'replicas': 2}, {'Idempotency-Key': secrets.token_hex(16)})
+        assert code == 409
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            try:
+                page = browser.new_page(); page.set_default_timeout(30000)
+                page.goto(self.url+'/login'); page.get_by_label('Password', exact=True).fill(self.password)
+                page.get_by_role('button', name='Sign in', exact=True).click(); page.wait_for_url('**/apps')
+                page.goto(self.url+'/apps/'+app)
+                page.get_by_text('The first deployment has no successful revision to restore.', exact=False).wait_for()
+                page.on('dialog', lambda dialog: dialog.accept())
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/apps/'+app) and r.request.method=='DELETE') as response:
+                    page.get_by_role('button', name='Delete', exact=True).click()
+                assert response.value.status == 202
+                self.client.poll(response.value.json()['operationId'])
+            finally:
+                browser.close()
+        self.wait_for_pod_deletion(app)
+        original = self.client.get('/operations/'+operation['id'])
+        assert original['state'] == 'failed' and original['stage'] == 'removal_requested'
+        assert self.client.get('/apps/'+app+'/revisions')['items'][-1]['frozenImage'] == frozen
+        assert app not in [item['id'] for item in self.client.get('/apps')['items']]
+        del self.state['blockedTestApp']; self.save()
+        self.record('Published release: failed first deployment retained its lock/409; browser deletion removed the workload and retained failed operation/frozen history')
+
     def run(self):
         if self.client.get('/setup/status')['setupAvailable']:
             self.browser_setup()
@@ -219,6 +260,8 @@ class Native:
         self.record('Application deletion removed Pods and retained revision history')
         self.state['retainedRevision']=self.client.get('/apps/'+app)['lastSuccessfulRevision'];self.save()
         self.record('One healthy test application retained for same-version reinstall and host-reboot verification')
+        if self.args.blocked_first_removal:
+            self.blocked_first_removal(images['v3'])
         if self.args.public_image:
             self.browser_public_image()
 
@@ -234,6 +277,7 @@ def main():
     parser.add_argument('--setup',action='store_true')
     parser.add_argument('--resume',action='store_true')
     parser.add_argument('--public-image', help='Opt-in unprivileged Nginx image for the browser temporary-files compatibility check')
+    parser.add_argument('--blocked-first-removal', action='store_true', help='Exercise a failed first deployment and guarded browser removal (adds a deliberate Helm timeout)')
     Native(parser.parse_args()).run()
 
 if __name__=='__main__':main()

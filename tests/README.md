@@ -89,6 +89,9 @@ Coverage includes:
   rollback and deletion.
 - Immutable configuration Secret versions, write-only responses, deletion guards
   and configuration rollback.
+- Bounded owned logs/events with real fixture masking, cross-app/copied-label
+  denial, escaped hostile browser text and field-path-only drift. Explicit Reapply
+  repairs changed Service port-list merge keys without replacing its identity.
 - Missing images, explicit reapply after Service deletion, session/history survival
   and continued application traffic through broker Pod replacement.
 - Unhealthy rollout with verified restoration of the prior snapshot before
@@ -175,7 +178,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.3 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.4 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -190,11 +193,15 @@ For unprivileged Nginx compatibility, add
 `--public-image docker.io/nginxinc/nginx-unprivileged:stable-alpine`. This optional
 browser check uses port `8080`, readiness `/`, validates the temporary volume and
 container hardening, checks actual HTTP, and removes only its own test application.
-It requires reachable public-registry inspection/pulling.
+It requires reachable public-registry inspection/pulling. Add
+`--blocked-first-removal` to verify a failed initial deployment, retained lock/409,
+browser removal and retained failed history; this adds a deliberate Helm timeout.
 After reboot, restart the forwards and run the same command with `--resume`
 instead of `--setup`. Cleanup of an installation requires separate explicit
 operator action; the test never uninstalls K3s or deletes unrelated applications.
 
+The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
+records the latest native release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native
 lifecycle, unpatched public-image deployment, reinstall/reboot and direct Helm
 baseline. The [earlier Pi report](experiments/2026-11-22-raspberry-pi.md) retains
