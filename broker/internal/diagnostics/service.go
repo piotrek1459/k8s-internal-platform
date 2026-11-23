@@ -63,7 +63,7 @@ func (s *Service) Logs(ctx context.Context, id string, options platform.LogOptio
 	if err != nil {
 		return platform.LogResult{}, err
 	}
-	text, err := mask.mask(result.Text, result.Truncated)
+	text, err := mask.maskContext(ctx, result.Text, result.Truncated)
 	if err != nil {
 		return platform.LogResult{}, err
 	}
@@ -100,7 +100,7 @@ func (s *Service) Events(ctx context.Context, id string, limit int) (platform.Ev
 	for i := range result.Items {
 		event := &result.Items[i]
 		for _, field := range []*string{&event.Message, &event.Reason, &event.Type, &event.Resource} {
-			masked, err := mask.mask(*field, false)
+			masked, err := mask.maskContext(ctx, *field, false)
 			if err != nil {
 				return platform.EventResult{}, err
 			}

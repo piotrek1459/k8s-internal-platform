@@ -130,6 +130,20 @@ func TestRedactorMergesOverlapsAndMasksTruncatedSuffix(t *testing.T) {
 	}
 }
 
+func TestRedactionHonorsCancelledRequestWithoutReturningOutput(t *testing.T) {
+	s, _, reader := newServiceFixture()
+	reader.values = [][]byte{[]byte("private-value")}
+	mask, err := s.redactor(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if text, err := mask.maskContext(ctx, "private-value", true); err == nil || text != "" {
+		t.Fatal("cancelled redaction returned output")
+	}
+}
+
 func TestLogsFailClosedBeforeReadingWorkloadOutput(t *testing.T) {
 	s, store, r := newServiceFixture()
 	r.valueErr = fmt.Errorf("private injected failure")

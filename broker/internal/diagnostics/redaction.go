@@ -1,6 +1,7 @@
 package diagnostics
 
 import (
+	"context"
 	"sort"
 	"strings"
 
@@ -12,10 +13,23 @@ import (
 // For a bounded read, a trailing prefix is covered as well, so truncation cannot
 // turn a complete known secret into a visible partial value.
 func (r redactor) mask(text string, truncated bool) (string, error) {
+	return r.maskContext(context.Background(), text, truncated)
+}
+
+func (r redactor) maskContext(ctx context.Context, text string, truncated bool) (string, error) {
+	if ctx.Err() != nil {
+		return "", platform.Errorf(platform.CodeDependencyUnavailable, "diagnostic request timed out or was cancelled")
+	}
 	type span struct{ start, end int }
 	spans := []span{}
 	for _, pattern := range r.patterns {
+		if ctx.Err() != nil {
+			return "", platform.Errorf(platform.CodeDependencyUnavailable, "diagnostic request timed out or was cancelled")
+		}
 		for start := 0; start < len(text); {
+			if ctx.Err() != nil {
+				return "", platform.Errorf(platform.CodeDependencyUnavailable, "diagnostic request timed out or was cancelled")
+			}
 			index := strings.Index(text[start:], pattern)
 			if index < 0 {
 				break
