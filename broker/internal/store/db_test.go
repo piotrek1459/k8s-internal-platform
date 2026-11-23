@@ -3,7 +3,9 @@ package store
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
+	"testing/fstest"
 )
 
 // openTestDB opens a fresh database in a temp file. A file (not :memory:) is used
@@ -73,5 +75,69 @@ func TestForeignKeysEnforced(t *testing.T) {
 		 VALUES ('rev_x', 'app_missing', 1, '{}', 'tester', '2026-01-01T00:00:00Z')`)
 	if err == nil {
 		t.Fatal("insert with dangling foreign key was accepted; foreign keys not enforced")
+	}
+}
+
+func TestMigrationFailureRollsBackSchemaDataAndLedger(t *testing.T) {
+	for _, failure := range []string{"statement", "ledger"} {
+		t.Run(failure, func(t *testing.T) {
+			ctx := context.Background()
+			path := filepath.Join(t.TempDir(), "platform.db")
+			db, err := Open(ctx, path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			if _, err := db.sql.Exec(`CREATE TABLE retained (value TEXT); INSERT INTO retained VALUES ('before')`); err != nil {
+				t.Fatal(err)
+			}
+			body := `CREATE TABLE candidate (value TEXT); INSERT INTO candidate VALUES ('partial'); UPDATE retained SET value = 'after';`
+			if failure == "statement" {
+				body += ` INSERT INTO missing_table VALUES ('fail');`
+			} else if _, err := db.sql.Exec(`CREATE TRIGGER fail_migration_ledger BEFORE INSERT ON schema_migrations BEGIN SELECT RAISE(ABORT, 'injected ledger failure'); END`); err != nil {
+				t.Fatal(err)
+			}
+			source := fstest.MapFS{"migrations/0004_candidate.sql": &fstest.MapFile{Data: []byte(body)}}
+			if err := db.migrateFrom(ctx, source); err == nil || !strings.Contains(err.Error(), "0004_candidate.sql") {
+				t.Fatalf("expected an identified migration failure, got %v", err)
+			}
+			if err := db.Close(); err != nil {
+				t.Fatal(err)
+			}
+			// Reopening exercises durable rollback, rather than only the failed
+			// connection's view of its own uncommitted transaction.
+			db, err = Open(ctx, path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			var tables, ledger int
+			var retained string
+			if err := db.sql.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE name = 'candidate'`).Scan(&tables); err != nil {
+				t.Fatal(err)
+			}
+			if err := db.sql.QueryRow(`SELECT COUNT(*) FROM schema_migrations WHERE name = '0004_candidate.sql'`).Scan(&ledger); err != nil {
+				t.Fatal(err)
+			}
+			if err := db.sql.QueryRow(`SELECT value FROM retained`).Scan(&retained); err != nil {
+				t.Fatal(err)
+			}
+			if tables != 0 || ledger != 0 || retained != "before" {
+				t.Fatalf("partial migration survived: table=%d ledger=%d retained=%q", tables, ledger, retained)
+			}
+			if _, err := db.sql.Exec(`DROP TRIGGER IF EXISTS fail_migration_ledger`); err != nil {
+				t.Fatal(err)
+			}
+			source["migrations/0004_candidate.sql"].Data = []byte(`CREATE TABLE candidate (value TEXT); INSERT INTO candidate VALUES ('complete')`)
+			for range 2 {
+				if err := db.migrateFrom(ctx, source); err != nil {
+					t.Fatalf("corrected migration/retry: %v", err)
+				}
+			}
+			var value string
+			if err := db.sql.QueryRow(`SELECT value FROM candidate`).Scan(&value); err != nil || value != "complete" {
+				t.Fatalf("corrected migration result: value=%q err=%v", value, err)
+			}
+		})
 	}
 }

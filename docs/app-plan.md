@@ -92,9 +92,10 @@ and immutable application secret versions belong to the core. Application data
 volumes are introduced in M5. Academic sufficiency must be assessed against the
 agreed thesis requirements and cannot be inferred from a milestone label.
 
-The next implementation work aligns UI/API contracts, corrects restart and
-recovery semantics, completes private image support, and extends core failure
-acceptance. Manual releases and nightly/API/browser acceptance are already implemented.
+UI/API contracts, restart, verified failed-update restoration and private image
+pulls are implemented. The remaining core work covers diagnostics, drift, private
+LAN administration, additional failure/browser/security acceptance and measured
+reference-host evaluation. Manual releases and nightly/API/browser acceptance are implemented.
 The [status report](status.md#next-implementation-order) defines that order.
 [Milestone acceptance](milestones.md#implementation-readiness-and-entry-criteria)
 continues to require evidence for hardware, networking, failure recovery and

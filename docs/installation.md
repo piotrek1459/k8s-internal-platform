@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.1.2`. Select a version available through the
+The examples below use `v0.1.3`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -10,7 +10,7 @@ The platform and its managed applications run in the same K3s cluster. The
 installer provisions K3s, imports native OCI images and installs the platform
 chart. Docker, Go and Node.js are not required on the target host.
 
-Published `v0.1.2` has passed reference Raspberry Pi core installation,
+Published `v0.1.3` has passed reference Raspberry Pi core installation,
 same-version reinstall and reboot checks; [implementation status](status.md)
 links the measured results and remaining compatibility limits. Public HTTPS, application volumes and cross-version upgrades remain outside
 this installer. Private credentials and verified failed-rollout restoration are
@@ -39,7 +39,7 @@ If the installer reports missing memory cgroups, an explicit preparation step is
 available after the installer has been downloaded and verified:
 
 ```bash
-sudo bash install.sh --version v0.1.2 --prepare-host
+sudo bash install.sh --version v0.1.3 --prepare-host
 # Exit status 20 means that the boot file was prepared and a reboot is required.
 sudo reboot
 # Reconnect over SSH, then rerun --check and the normal installation.
@@ -59,13 +59,13 @@ combined with `--prepare-host`. The installer never reboots automatically.
 Run on the Pi/server as the normal SSH user:
 
 ```bash
-mkdir -p ~/platform-v0.1.2
-cd ~/platform-v0.1.2
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.2/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.2/SHA256SUMS
+mkdir -p ~/platform-v0.1.3
+cd ~/platform-v0.1.3
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.3/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.3/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.1.2 --check
+sudo bash install.sh --version v0.1.3 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -75,7 +75,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.1.2
+sudo bash install.sh --version v0.1.3
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -105,8 +105,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.1.2 \
-  --bundle platform-v0.1.2-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.3 \
+  --bundle platform-v0.1.3-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;
@@ -182,13 +182,13 @@ must be created through the [API walkthrough](user/api-reference.md), using the
 registry resolution; the imported image is already available on the node.
 
 For UI deployment, supply an image available in a reachable public registry and
-built for the host architecture. The `v0.1.2` HTTP profile makes the complete root
-filesystem read-only and does not mount writable `/tmp`. Images such as
-unprivileged Nginx that require temporary files therefore fail startup in this
-release. Application chart `0.1.1` adds a Pod-local temporary volume. Image compatibility
-must be checked against the installed chart; the source fix does not modify
-published `v0.1.2` assets. Inspect it, select its actual container port
-and readiness path, then deploy with Internal exposure. Public image availability
+built for the host architecture. The HTTP profile keeps the root filesystem
+read-only and supplies writable, Pod-local `/tmp` storage through application
+chart `0.1.1`. The temporary volume has a `64Mi` size limit and is discarded with
+the Pod; it is not persistent application storage. Unprivileged Nginx on port
+`8080` with readiness path `/` is the reference compatibility check. Inspect
+the image, select its actual container port and readiness path, then deploy with
+Internal exposure. Public image availability
 and public application exposure are separate settings. Operation success and an
 actual HTTP response must both be verified.
 

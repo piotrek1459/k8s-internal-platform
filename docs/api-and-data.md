@@ -100,6 +100,12 @@ as a failed revision even while its operation requires recovery. The same rule
 applies to failed compensation during normal execution and to recovery after a
 broker restart.
 
+Explicit deletion can supersede a blocked initial create when no successful
+predecessor exists. This version-guarded transaction retains the failed candidate
+and frozen evidence and transfers the lock to tracked cleanup; it does not unlock
+the application for another deployment. Running work and unresolved updates retain
+the ordinary conflict policy.
+
 Readiness controls whether a pod receives service traffic; liveness can restart
 the container. A startup probe can protect slow startup from premature health
 failures. A TCP readiness fallback proves less than an application-specific HTTP
@@ -224,13 +230,14 @@ explicit; planned rows are not callable interfaces.
 | `POST /api/v1/images/inspect` | Image/credential inspection, reporting architecture, digest, and suggested ports. | Implemented for anonymous and stored private credentials |
 | `GET /api/v1/apps` | Paginated applications with summarized status. | Implemented |
 | `POST /api/v1/apps` | Persistence of application intent and queued installation. | Implemented for stateless HTTP |
-| `GET /api/v1/apps/{id}` | Configuration, observed status, active operation, and version. | Implemented; status JSON naming defect |
+| `GET /api/v1/apps/{id}` | Observed status, desired/successful revision IDs, active operation, and version. | Implemented with camelCase status; a complete configuration read/editor remains planned |
 | `PATCH /api/v1/apps/{id}` | Image/configuration/resources/exposure/replica change. | Implemented for supported fields |
 | `POST /api/v1/apps/{id}/restart` | Queued restart through a chart revision. | Implemented with a stable per-operation restart token |
 | `POST /api/v1/apps/{id}/reapply` | Explicit restoration of managed resources from the recorded specification/digest after drift. | Implemented; Service restoration covered by real-cluster E2E |
 | `GET /api/v1/apps/{id}/revisions` | Revision history and rollback eligibility. | Implemented |
-| `POST /api/v1/apps/{id}/rollback` | Queued restoration of a selected revision. | Implemented; full chart-artifact guarantee incomplete |
-| `DELETE /api/v1/apps/{id}` | Queued workload deletion with data retention by default. | Implemented for stateless workloads |
+| `POST /api/v1/apps/{id}/rollback` | Queued restoration of a selected revision. | Frozen chart/values identity verified; unavailable historical chart artifacts are refused |
+| `DELETE /api/v1/apps/{id}` | Queued workload deletion with history retention. | Includes explicit removal of a blocked first create with no successful predecessor |
+| `POST /api/v1/apps/{id}/recover` | Version-guarded retry of the existing blocked operation. | Implemented; ambiguous/pending state remains blocked |
 | `GET /api/v1/apps/{id}/logs` | Bounded recent logs, optionally a selected pod/previous container. | Planned |
 | `GET /api/v1/apps/{id}/events` | Recent cluster diagnostics and operation progress. | Planned |
 | `GET /api/v1/operations/{id}` | Durable progress, outcome, and recovery details. | Implemented |
@@ -238,7 +245,7 @@ explicit; planned rows are not callable interfaces.
 | `GET /api/v1/registry-credentials` | Credential metadata and usage, never passwords/tokens. | Metadata only |
 | `POST /api/v1/registry-credentials` | Write-only Kubernetes authentication Secret and metadata creation. | Implemented; password stored only in Kubernetes |
 | `PUT /api/v1/registry-credentials/{id}` | Credential rotation with reference-aware behavior. | Planned |
-| `DELETE /api/v1/registry-credentials/{id}` | Delete stored credential metadata. | Metadata deletion; dependency protection incomplete |
+| `DELETE /api/v1/registry-credentials/{id}` | Delete credential metadata and its Kubernetes Secret. | Implemented with active/rollback reference guards and retryable deletion |
 | `GET /api/v1/secrets` | Secret metadata; values are never returned. | Implemented |
 | `POST /api/v1/secrets` | Versioned secret creation before use in an application. | Implemented; single value key |
 | `POST /api/v1/secrets/{id}/versions` | Creation of an immutable replacement secret version. | Implemented |

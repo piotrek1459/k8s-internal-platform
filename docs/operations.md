@@ -67,7 +67,8 @@ OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
 its exact supported behavior: dedicated Linux/systemd host, read-only checks,
 pinned K3s/Helm, image import, chart installation and SSH/loopback access.
 Same-version reruns retain metadata; cross-version upgrades and unrelated
-clusters are refused. Native Pi and rented-server installation acceptance remain
+clusters are refused. Published `v0.1.3` passed native Pi installation,
+same-version rerun and reboot acceptance; native rented-server acceptance remains
 pending. `platform.sh` remains the Docker/k3d development launcher.
 
 The installer checks architecture, systemd, memory cgroups, RAM, free space and
@@ -101,8 +102,9 @@ release packaging. Its target sequence is:
     can resume safely or report the failed stage.
 
 Linux ARM64 on the Pi is the first reference target for validation; Linux AMD64
-is the second target. Neither native-host acceptance is established by the
-current local Docker-based evidence. Docker Engine is not required on
+is the second target. Published releases have native reference-Pi evidence in the
+[installation reports](status.md#verification-available); native AMD64 acceptance
+remains outstanding. Docker Engine is not required on
 the installed host because K3s provides the container runtime. Images are built
 with Docker/Buildx on a development machine or in CI.
 
@@ -243,6 +245,15 @@ This invariant applies both to failures during uninterrupted execution and to
 recovery after a process restart. A timeout or failed recovery attempt cannot
 release the operation block. Unrelated applications may proceed when the worker
 can do so without affecting the unresolved operation.
+
+A blocked first create with no successful predecessor supports explicit deletion.
+Its current version and an idempotency key are required. One transaction records
+the original attempt as failed (`removal_requested`), retains its frozen evidence,
+and transfers the lock to the queued delete operation. The worker uninstalls the
+release and records the application as deleted only after cleanup succeeds.
+Cleanup failure retains the new operation's lock and recovery retry path. This
+does not enable overlapping execution or removal through an unresolved update of
+a previously successful application.
 
 ### Normal deployment
 

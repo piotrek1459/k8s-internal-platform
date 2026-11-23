@@ -69,9 +69,9 @@ class ReleaseIntegrityTests(unittest.TestCase):
             folder = Path(directory)
             (folder / "install.sh").write_text("Usage: --version v" + fallback.strip())
             (folder / "INSTALL.md").write_text(
-                "The examples below use `v" + fallback.strip() + "`.\n"
-                "Previously verified v" + fallback.strip() + ".\n"
-                "```bash\nInstall v" + fallback.strip() + "\n```\n"
+                "The examples below use `v9.8.7`.\n"
+                "Previously verified v9.8.7.\n"
+                "```bash\nInstall v9.8.7\n```\n"
                 "[API](user/api-reference.md)")
             for arch in ("amd64", "arm64"):
                 raw = json.dumps({"version": "0.0.2", "architecture": arch}).encode()
@@ -84,7 +84,8 @@ class ReleaseIntegrityTests(unittest.TestCase):
             self.assertIn("Install v0.0.2", guide)
             self.assertIn("/blob/v0.0.2/docs/", guide)
             self.assertIn("The examples below use `v0.0.2`.", guide)
-            self.assertIn("Previously verified v" + fallback.strip() + ".", guide)
+            self.assertIn("Previously verified v9.8.7.", guide)
+            self.assertNotIn("Install v9.8.7", guide)
             self.assertNotIn("Install v" + fallback.strip(), guide)
         self.assertEqual((ROOT / "release/version.txt").read_text(), fallback)
 

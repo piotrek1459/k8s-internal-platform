@@ -25,19 +25,19 @@ No entire M0–M4 milestone is declared complete by this checklist.
 
 ## Implementation readiness and entry criteria
 
-Updated: 2026-11-22. The audit includes merged PR #14, the source changes in
-PR #15, published `v0.1.2`, the [reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
+Updated: 2026-11-23. The audit includes merged PR #14, the source changes in
+PR #15, published `v0.1.3`, the [current core acceptance](../tests/experiments/2026-11-23-core-acceptance.md), the [earlier reference Pi report](../tests/experiments/2026-11-22-raspberry-pi.md)
 and the current regression/E2E suites. Remaining work is tracked in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
 Older dated reports remain evidence only for their recorded source and scope.
 
 | Milestone | Completed implementation/evidence | Remaining acceptance or implementation |
 | --- | --- | --- |
-| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and a local manual Helm baseline. | Reference-Pi manual/operator baseline, normal access from another LAN device and the measurements supporting M1/M4. |
-| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; source chart 0.1.1 adds temporary files with container hardening retained. | Measured resource presets, reference-LAN acceptance and the temporary-files fix through a new published release. |
-| M2 | Validated API, schema creation/reopen, atomic acceptance, serial worker, frozen snapshots, configuration Secrets, image inspection and persisted completed state across replacement/reboot. | Migration-failure, queued/in-flight crash, moved-tag and disconnected-client acceptance; comprehensive negative-path secret-disclosure checks. |
+| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and local and reference-Pi manual Helm functional baselines. | Normal access from another LAN device, operator-active-time comparison and the measurements supporting M1/M4. |
+| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; published v0.1.3 verifies temporary files with container hardening retained. | Measured resource presets and reference-LAN acceptance. |
+| M2 | Validated API, atomic migration-failure rollback, transactional acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence. | Remaining interruption barriers, moved-tag and disconnected-client acceptance; comprehensive negative-path secret-disclosure checks. |
 | M3 | Setup/login/logout, application forms/status/history, Secret-reference submission, private credential storage/pulls and completed-operation refresh. | Normal private LAN HTTPS/URL, application logs/workload events, full browser credential/Secret management and refresh during in-flight work. |
-| M4 | Healthy update/scale/restart/rollback/delete, verified unhealthy-update restoration, blocked-recovery unit tests and explicit Service reapply. | Real-cluster interruption/failed-compensation acceptance, failed-first-deployment resolution, general drift reporting and the controlled core evaluation. |
+| M4 | Healthy update/scale/restart/rollback/delete, verified unhealthy-update restoration, blocked-recovery unit tests and explicit Service reapply. | Real-cluster interruption/failed-compensation acceptance, general drift reporting and the controlled core evaluation. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
 The two former status/restart E2E skips are removed: both are required assertions.
@@ -60,11 +60,11 @@ Manual application deployment remains relevant to the operator-effort baseline.
 - [x] Healthy v1/v2 and deliberately unhealthy v3 are distributed as native ARM64/AMD64 OCI images. **Evidence:** both published release bundles and `release.json`; a registry account is not required.
 - [x] Pinned K3s provisioning on the Pi reaches a Ready node and records version/configuration. **Evidence:** the published `v0.1.2` installer and reboot run. This replaces the earlier manual-K3s-install method, not the manual Helm comparison.
 - [x] A local manual Helm install/update/unhealthy-update/explicit-recovery procedure and results are recorded. **Evidence:** [local baseline](../tests/experiments/2026-10-14-local-m0-m1.md) and `tests/integration/helm-lifecycle.sh`. The dated raw local run was removed; its curated report is historical evidence.
-- [ ] Repeat and retain the manual Helm/operator baseline on the reference Pi with current pins/images and raw results. **Acceptance:** the direct Helm steps and platform steps can be compared under the same recorded conditions. Tracked in issue #16.
+- [x] Repeat and retain the manual Helm functional baseline on the reference Pi with current pins/images and raw results. **Evidence:** [v0.1.3 Pi baseline](../tests/experiments/2026-11-23-core-acceptance.md#direct-helm-baseline-on-the-pi), exact commands, source/archive hashes, values, responses and history. Operator active time and repeated controlled comparison remain M4 work.
 - [ ] Verify application access from another LAN device through the intended private route. **Acceptance:** private listener/DNS behavior is demonstrated; SSH/loopback application access alone does not establish normal LAN ingress. Tracked in issue #16.
 
 **Completion boundary:** host installation is verified. Reference-LAN acceptance
-and the controlled baseline/measurements supporting M1/M4 remain outstanding.
+and the controlled measurements/operator comparison supporting M1/M4 remain outstanding.
 
 ## M1 — Application chart (core)
 
@@ -80,10 +80,10 @@ probes, resources, ownership and private routes.
 - [x] Private routes explicitly select the private entrypoint. **Evidence:** isolated local listener/forged-Host baseline checks. This acceptance is local; reference-LAN setup remains in M0/M3.
 - [x] Healthy install/update and unhealthy failure diagnostics operate on K3s. **Evidence:** disposable real-cluster and published `v0.1.2` Pi workflows.
 - [x] Source chart 0.1.1 supplies a size-limited temporary `/tmp` volume and non-root filesystem-group access while retaining the read-only root filesystem. **Evidence:** rendered-manifest regression, full source E2E and the controlled native Nginx experiment.
-- [ ] Verify that temporary-files fix using a new published installer/release, without patching a Deployment manually. **Acceptance:** the Nginx browser workflow reaches Ready and returns HTTP 200. Published `v0.1.2` lacks the mount. Tracked in issue #16.
+- [x] Verify temporary files using a published installer/release without patching a Deployment manually. **Evidence:** unmodified `v0.1.3` Nginx browser deployment reached Ready and HTTP 200; [native report](../tests/experiments/2026-11-23-core-acceptance.md).
 
-**Completion boundary:** source chart behavior is verified. Resource calibration,
-reference-LAN scope and published acceptance of the new compatibility fix remain.
+**Completion boundary:** source chart behavior and published compatibility are
+verified. Resource calibration and reference-LAN scope remain outstanding.
 
 ## M2 — Durable backend (core)
 
@@ -94,7 +94,7 @@ snapshots, configuration Secrets, Helm integration and observed status.
 
 - [x] Health/system/image/application/operation/Secret routes have a validated OpenAPI contract and aligned supported response shapes. **Evidence:** full schema validation, handler contract tests and browser workflows. Frontend types are maintained manually, not generated.
 - [x] SQLite migrations create the metadata schema, reopen idempotently and enforce foreign keys. **Evidence:** `TestMigrateCreatesSchema`, `TestMigrateIsIdempotent`, `TestForeignKeysEnforced` in `broker/internal/store/db_test.go`.
-- [ ] Inject a failing migration and verify that its transaction leaves no partial schema. **Acceptance:** supported failure/retry behavior is recorded in CI. Backup restoration/cross-version upgrade support remains M5/M7. Tracked in issue #16.
+- [x] Inject failing migration statements and ledger insertion, reopen the database and verify no partial schema/data/ledger changes. **Evidence:** `TestMigrationFailureRollsBackSchemaDataAndLedger` also verifies corrected retry/idempotence. Backup restoration and cross-version upgrade support remain M5/M7.
 - [x] Application, candidate revision, operation, first event and audit acceptance is atomic. **Evidence:** store atomicity and rollback-on-failure regressions.
 - [x] The platform chart provides Service/PVC/service account and scoped RBAC; the broker deploys into `platform-apps` through in-cluster credentials. **Evidence:** local real-cluster and native release installation.
 - [x] The single-replica/Recreate platform configuration preserves completed application state, history and sessions through broker replacement; Pi reinstall/reboot preserves the PVC identity. **Evidence:** E2E broker replacement and native identity/session comparisons.
@@ -110,7 +110,7 @@ snapshots, configuration Secrets, Helm integration and observed status.
 - [ ] Drop a client response after durable acceptance and verify retry/completion without another operation/application. **Acceptance:** the committed work survives client disconnection; cancellation before commit is distinguished explicitly. Tracked in issue #16.
 
 **Completion boundary:** the normal durable backend is implemented and tested.
-The remaining crash/disconnection/migration/security failure matrix is acceptance
+The remaining crash/disconnection/security failure matrix is acceptance
 work, not a claim that the queue, schema or Secret backend is absent.
 
 ## M3 — Administrator UI (core)
