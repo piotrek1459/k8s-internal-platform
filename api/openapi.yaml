@@ -267,6 +267,13 @@ paths:
     delete:
       tags: [applications]
       summary: Delete an application and remove its workload from the cluster
+      description: >-
+        Requires the current application version and Idempotency-Key. A blocked
+        first create operation in needs_attention with no successful predecessor
+        may be superseded by tracked deletion. The failed candidate, frozen
+        snapshot and history remain recorded; the lock transfers atomically to
+        the delete operation until cleanup succeeds. Running work and unresolved
+        updates of a previously successful application still return 409.
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:

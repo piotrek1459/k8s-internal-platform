@@ -14,6 +14,23 @@ import support
 
 
 class CommandProgressTests(unittest.TestCase):
+    def test_crash_injection_refuses_an_unowned_cluster_or_node(self):
+        import json
+        with tempfile.TemporaryDirectory() as folder:
+            environment = support.Environment(Path(folder))
+            with patch.object(environment, 'run') as run:
+                with self.assertRaisesRegex(RuntimeError, 'owned E2E cluster'):
+                    environment.crash_broker()
+                run.assert_not_called()
+            environment.owns_cluster = True
+            result = subprocess.CompletedProcess([], 0, json.dumps({'items': [{
+                'metadata': {'name': 'broker'}, 'spec': {'nodeName': 'unrelated-node'}
+            }]}), '')
+            with patch.object(environment, 'kubectl', return_value=result), patch.object(environment, 'run') as run:
+                with self.assertRaisesRegex(RuntimeError, 'owned E2E node'):
+                    environment.crash_broker()
+                run.assert_not_called()
+
     def test_long_command_reports_progress_without_streaming_captured_output(self):
         heartbeat = threading.Event()
         printed = []

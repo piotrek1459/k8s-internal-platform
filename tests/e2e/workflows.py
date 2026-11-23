@@ -330,6 +330,98 @@ class Workflows(unittest.TestCase):
             self.assertNotEqual(pod["metadata"]["uid"], before)
         finally: self.e.delete(app)
 
+    def test_95_pending_first_install_and_queued_browser_resume(self):
+        from playwright.sync_api import expect
+
+        code, blocked = self.e.client.request('POST', '/apps', {
+            'name': 'interrupted-'+secrets.token_hex(4), 'image': self.e.image('v3'),
+            'containerPort': 8080, 'profile': 'http',
+            'health': {'startupPath': '/healthz', 'readinessPath': '/readyz'},
+            'exposure': {'mode': 'internal'},
+        }, {'Idempotency-Key': secrets.token_hex(16)})
+        self.assertEqual(code, 202)
+        bad = blocked['applicationId']; operation_id = blocked['operationId']
+        # The deliberately unready process keeps Helm pending. The observed
+        # release and running Pod establish the interruption barrier; no sleep
+        # guesses or production-only fault-injection switches are required.
+        deadline = time.monotonic()+120
+        pending = None
+        while time.monotonic() < deadline:
+            release = json.loads(self.e.kubectl('-n', 'platform-apps', 'get', 'secrets',
+                '-l', 'owner=helm,name=app-'+bad.replace('_', '-'), '-o', 'json').stdout)['items']
+            pods = self.e.resource('pods', bad)
+            if len(release) == 1 and release[0]['metadata']['labels'].get('status') == 'pending-install' and any(
+                s.get('state', {}).get('running') and not s.get('ready')
+                for pod in pods for s in pod.get('status', {}).get('containerStatuses', [])
+            ):
+                pending = release[0]
+                break
+            time.sleep(1)
+        self.assertIsNotNone(pending, 'No real pending Helm install/running unready Pod barrier was reached')
+        frozen_image = self.e.client.get('/apps/'+bad+'/revisions')['items'][0]['frozenImage']
+
+        with self.page('queued-recovery') as page:
+            self.browser_login(page)
+            submissions = []
+            page.on('request', lambda r: submissions.append(r.url) if r.method == 'POST' and r.url.endswith('/api/v1/apps') else None)
+            page.goto(self.e.url+'/apps/new')
+            page.get_by_label('Image reference').fill(self.e.image('v1'))
+            page.get_by_role('button', name='Inspect image', exact=True).click()
+            page.get_by_role('button', name='Next').click()
+            page.get_by_label('Name', exact=True).fill('queued-'+secrets.token_hex(4))
+            page.get_by_label('Readiness path').fill('/readyz')
+            for _ in range(3):
+                page.get_by_role('button', name='Next').click()
+            accepted = self.click_mutation(page, page.get_by_role('button', name='Deploy', exact=True), 'POST', '/apps')
+            good = accepted['applicationId']
+            state = page.get_by_text('State:', exact=True).locator('..')
+            expect(state.get_by_text('queued', exact=True)).to_be_visible()
+            # The create wizard displays progress inline. Follow the accepted
+            # operation to its durable URL before testing reload/navigation.
+            page.goto(self.e.url+'/apps/'+good+'/operation?op='+accepted['operationId'])
+            page.reload()
+            expect(state.get_by_text('queued', exact=True)).to_be_visible()
+            page.goto(self.e.url+'/apps')
+            page.goto(self.e.url+'/apps/'+good+'/operation?op='+accepted['operationId'])
+            expect(state.get_by_text('queued', exact=True)).to_be_visible()
+            self.assertEqual(len(submissions), 1)
+
+            self.e.crash_broker()
+            self.e.client.poll(operation_id, terminal='needs_attention')
+            self.e.client.poll(accepted['operationId'])
+            page.reload(); self.browser_success(page, accepted, navigates=False)
+            self.assertEqual(len(submissions), 1, 'Refresh/navigation resubmitted a mutation')
+            self.assertEqual(len(self.e.client.get('/apps/'+good+'/revisions')['items']), 1)
+            self.e.http_version(good, 'v1')
+
+            retained = json.loads(self.e.kubectl('-n', 'platform-apps', 'get', 'secret',
+                pending['metadata']['name'], '-o', 'json').stdout)
+            self.assertTrue(retained['metadata']['uid'] == pending['metadata']['uid'] and retained['data'] == pending['data'],
+                'Recovery modified/deleted the pending Helm evidence')
+            current = self.e.client.get('/apps/'+bad)
+            self.assertEqual(current['activeOperationId'], operation_id)
+            self.assertFalse(current['lastSuccessfulRevision'])
+            self.assertEqual(self.e.client.get('/apps/'+bad+'/revisions')['items'][0]['frozenImage'], frozen_image)
+            self.assertEqual(self.e.client.request('PATCH', '/apps/'+bad,
+                {'version': current['version'], 'replicas': 2}, {'Idempotency-Key': secrets.token_hex(16)})[0], 409)
+            self.e.restart_broker()
+            self.assertEqual(self.e.client.get('/operations/'+operation_id)['state'], 'needs_attention')
+            self.assertEqual(self.e.client.get('/apps/'+bad)['activeOperationId'], operation_id)
+
+            page.goto(self.e.url+'/apps/'+bad)
+            page.get_by_text('The first deployment has no successful revision to restore.', exact=False).wait_for()
+            expect(page.get_by_role('button', name='Delete', exact=True)).to_be_enabled()
+            page.on('dialog', lambda dialog: dialog.accept())
+            removed = self.click_mutation(page, page.get_by_role('button', name='Delete', exact=True), 'DELETE', '/apps/'+bad)
+            self.browser_success(page, removed)
+            original = self.e.client.get('/operations/'+operation_id)
+            self.assertEqual(original['state'], 'failed')
+            self.assertEqual(original['stage'], 'removal_requested')
+            self.assertEqual(self.e.client.get('/apps/'+bad+'/revisions')['items'][-1]['frozenImage'], frozen_image)
+            self.assertFalse(self.e.resource('deployments,services', bad))
+            self.e.delete(good)
+        self.e.record('Runtime SIGKILL preserved pending Helm evidence and a durable lock; queued browser work resumed once; explicit first-deployment removal retained history')
+
 
 class Result(unittest.TextTestResult):
     def _exc_info_to_string(self, error, test):

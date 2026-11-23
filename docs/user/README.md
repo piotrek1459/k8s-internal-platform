@@ -145,7 +145,12 @@ revisions and their frozen image references.
   removed and the application disappears from the active list. Recorded history
   remains stored. Use a separate test application for deletion experiments.
 
-The UI blocks conflicting actions while an operation is active. Accepted changes
+The UI blocks conflicting actions while an operation is active. A blocked first
+deployment with no successful revision offers **Delete** as an explicit removal
+path. Its failed deployment history is retained, and the application remains
+locked until the tracked cleanup succeeds. This exception does not apply to
+running work or unresolved updates of previously successful applications.
+Accepted changes
 also carry the application version, preventing stale forms from overwriting a
 newer accepted configuration.
 

@@ -60,6 +60,11 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 			return platform.AcceptResult{}, err
 		}
 	} else {
+		if req.Type == platform.OperationDelete {
+			if err := supersedeBlockedCreate(ctx, tx, req.Application.ID, req.ExpectVersion, now); err != nil {
+				return platform.AcceptResult{}, err
+			}
+		}
 		// Lock + version check + active-operation check in one guarded update.
 		if err := guardExistingApplication(ctx, tx, req.Application.ID, req.ExpectVersion); err != nil {
 			return platform.AcceptResult{}, err
@@ -104,6 +109,41 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 		OperationID:   req.Operation().ID,
 		State:         platform.OperationQueued,
 	}, nil
+}
+
+// supersedeBlockedCreate permits explicit removal of an initial deployment that
+// cannot be restored. It never bypasses a running operation or abandons a prior
+// successful application. Supersession and delete acceptance share a transaction:
+// any later failure restores the original lock and evidence unchanged.
+func supersedeBlockedCreate(ctx context.Context, tx *sql.Tx, appID string, version int64, now string) error {
+	var opID, revisionID string
+	var current int64
+	err := tx.QueryRowContext(ctx, `SELECT o.id, o.target_revision, a.version
+		FROM applications a JOIN operations o ON o.id = a.active_operation_id
+		WHERE a.id = ? AND a.deleted = 0
+		AND (a.last_successful_revision IS NULL OR a.last_successful_revision = '')
+		AND o.type = 'create' AND o.state = 'needs_attention'`, appID).Scan(&opID, &revisionID, &current)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil // The ordinary version/active-operation guard decides the error.
+	}
+	if err != nil {
+		return err
+	}
+	if current != version {
+		return platform.Errorf(platform.CodeVersionConflict, "application version has changed")
+	}
+	message := "administrator requested removal of the blocked first deployment"
+	if _, err := tx.ExecContext(ctx, `UPDATE operations SET state = 'failed', stage = 'removal_requested', recovery_outcome = ?, updated_at = ? WHERE id = ?`, message, now, opID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE revisions SET result = 'failed' WHERE id = ?`, revisionID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO operation_events (operation_id, at, stage, message) VALUES (?, ?, 'removal_requested', ?)`, opID, now, message); err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, `UPDATE applications SET active_operation_id = NULL WHERE id = ? AND active_operation_id = ?`, appID, opID)
+	return err
 }
 
 func (s *Store) nowString() string { return formatTime(s.db.now()) }

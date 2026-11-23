@@ -26,9 +26,14 @@ def assemble(directory, version, commit, prerelease=False):
     installer = directory / "install.sh"
     installer.write_text(installer.read_text().replace("v" + source_version, "v" + version))
     guide = directory / "INSTALL.md"
-    example, selected = "v" + source_version, "v" + version
+    guide_text = guide.read_text()
+    # Documentation examples may advance independently of the source build's
+    # fallback version. Derive their version from the guide's own declaration.
+    declaration = re.search(r"^The examples below use `(v[0-9]+\.[0-9]+\.[0-9]+)`\.", guide_text, re.MULTILINE)
+    example = declaration[1] if declaration else "v" + source_version
+    selected = "v" + version
     # Render runnable examples while retaining historical acceptance statements.
-    guide_text = guide.read_text().replace(
+    guide_text = guide_text.replace(
         "The examples below use `" + example + "`.",
         "The examples below use `" + selected + "`.")
     guide_text = re.sub(r"(^```[^\n]*\n)(.*?)(^```[ \t]*$)",

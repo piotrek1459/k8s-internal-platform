@@ -19,6 +19,7 @@
 	let actionError = $state('');
 	let actionPending = $state(false);
 	let canRecover = $state(false);
+	let canRemoveBlockedCreate = $state(false);
 
 	function newKey() {
 		return crypto.randomUUID();
@@ -37,7 +38,11 @@
 	onMount(async () => {
 		try {
 			app = await getApp(id);
-			if (app.activeOperationId) canRecover = (await getOperation(app.activeOperationId)).state === 'needs_attention';
+			if (app.activeOperationId) {
+				const operation = await getOperation(app.activeOperationId);
+				canRecover = operation.state === 'needs_attention';
+				canRemoveBlockedCreate = canRecover && operation.type === 'create' && !app.lastSuccessfulRevision;
+			}
 		} catch (e) {
 			if (e instanceof ApiError && e.status === 401) goto('/login');
 			else if (e instanceof ApiError && e.status === 404) error = 'Application not found.';
@@ -132,6 +137,9 @@
 	{#if canRecover}
 		<p class="text-sm mb-3">The application is awaiting recovery. Address the underlying cause before retrying.</p>
 		<button onclick={handleRecover} disabled={actionPending} class="px-3 py-2 border rounded mb-3">Retry recovery</button>
+		{#if canRemoveBlockedCreate}
+			<p class="text-sm mb-3">The first deployment has no successful revision to restore. Delete removes its workload and retains the failed deployment history.</p>
+		{/if}
 	{/if}
 	<!-- Action bar -->
 	<div class="flex flex-wrap gap-2 mb-6">
@@ -151,7 +159,7 @@
 		>Update</a>
 		<button
 			onclick={handleDelete}
-			disabled={actionPending || !!app.activeOperationId}
+			disabled={actionPending || (!!app.activeOperationId && !canRemoveBlockedCreate)}
 			class="px-3 py-1.5 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded disabled:opacity-40 disabled:cursor-not-allowed ml-auto"
 		>Delete</button>
 	</div>

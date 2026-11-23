@@ -199,6 +199,38 @@ class Environment:
         self.kubectl("-n", "platform-system", "rollout", "status", "deployment/platform", "--timeout=180s")
         self.start_management()
 
+    def crash_broker(self):
+        """Kill the actual broker process at a barrier established by the test.
+
+        Runtime SIGKILL bypasses the broker's graceful shutdown and Helm error
+        recording. This is restricted to this suite's owned disposable k3d node.
+        """
+        if not self.owns_cluster:
+            raise RuntimeError('Crash injection requires an owned E2E cluster')
+        pods = json.loads(self.kubectl('-n', 'platform-system', 'get', 'pods',
+            '-l', 'app.kubernetes.io/name=platform', '-o', 'json').stdout)['items']
+        pods = [p for p in pods if not p['metadata'].get('deletionTimestamp')]
+        if len(pods) != 1:
+            raise AssertionError('Expected one broker Pod for crash injection')
+        pod = pods[0]; node = pod['spec']['nodeName']
+        if node != 'k3d-'+self.name+'-server-0':
+            raise RuntimeError('Broker does not belong to the owned E2E node')
+        status = pod['status']['containerStatuses'][0]
+        container = status['containerID'].removeprefix('containerd://')
+        self.management.__exit__(None, None, None)
+        self.run('docker', 'exec', node, 'ctr', '-n', 'k8s.io',
+            'tasks', 'kill', '--signal', 'SIGKILL', container)
+        deadline = time.monotonic()+150
+        while time.monotonic() < deadline:
+            current = json.loads(self.kubectl('-n', 'platform-system', 'get',
+                'pod', pod['metadata']['name'], '-o', 'json').stdout)
+            statuses = current.get('status', {}).get('containerStatuses', [])
+            if statuses and statuses[0].get('containerID') != status['containerID'] and statuses[0].get('ready'):
+                self.start_management()
+                return
+            time.sleep(1)
+        raise AssertionError('Broker did not recover after runtime SIGKILL')
+
     @contextlib.contextmanager
     def forward(self, command, *args, port, path="/version"):
         with (self.artifacts / "forwards.log").open("a") as log:

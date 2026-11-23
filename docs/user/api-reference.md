@@ -299,6 +299,16 @@ cannot be verified. A new rollback cannot bypass it. Recovery retry reuses the
 blocked operation after diagnosis; a still-pending Helm transaction remains
 blocked. Failed updates with a complete prior snapshot attempt verified automatic
 restoration. Restart requires a changed Pod identity and retains the image digest.
+
+For a blocked first deployment with no successful predecessor, explicit
+`DELETE /apps/{id}` provides a removal path. Submit the current `version` and a
+new `Idempotency-Key`. Acceptance records the original create operation as failed
+with stage `removal_requested`, retains its frozen snapshot and history, and
+transfers the lock to queued cleanup atomically. The application leaves the active
+list only after uninstall succeeds. A failed uninstall remains blocked and can
+use recovery retry. This exception does not permit deletion to bypass running
+work or an unresolved update of a previously successful application.
+
 Public exposure and application data volumes remain outside this walkthrough.
 Demo v3 deliberately fails readiness and should be used only for failure testing.
 

@@ -110,6 +110,64 @@ class Native:
             finally: browser.close()
         self.record('Browser: root opens setup; nested token error displayed; administrator created and login succeeded')
 
+    def browser_public_image(self):
+        """Verify unmodified release compatibility with a registry image."""
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            try:
+                page = browser.new_page(); page.set_default_timeout(30000)
+                page.goto(self.url+'/login')
+                page.get_by_label('Password', exact=True).fill(self.password)
+                page.get_by_role('button', name='Sign in', exact=True).click()
+                page.wait_for_url('**/apps')
+                page.goto(self.url+'/apps/new')
+                page.get_by_label('Image reference').fill(self.args.public_image)
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/images/inspect') and r.request.method=='POST') as inspection:
+                    page.get_by_role('button', name='Inspect image', exact=True).click()
+                assert inspection.value.status == 200, 'Public image inspection failed'
+                page.get_by_role('button', name='Next').click()
+                page.get_by_label('Name', exact=True).fill('pi-nginx-'+secrets.token_hex(3))
+                page.get_by_label('Container port').fill('8080')
+                page.get_by_label('Readiness path').fill('/')
+                for _ in range(3):
+                    page.get_by_role('button', name='Next').click()
+                with page.expect_response(lambda r:r.url.endswith('/api/v1/apps') and r.request.method=='POST') as response:
+                    page.get_by_role('button', name='Deploy', exact=True).click()
+                assert response.value.status == 202
+                accepted = response.value.json(); app = accepted['applicationId']
+                self.state['publicTestApp'] = app; self.save()
+                self.client.poll(accepted['operationId'])
+                page.goto(self.url+'/apps/'+app)
+                page.get_by_text('ready', exact=True).wait_for()
+                selector = urllib.parse.quote('platform.local/app-id='+app)
+                deployments = self.kube('/apis/apps/v1/namespaces/platform-apps/deployments?labelSelector='+selector)['items']
+                assert len(deployments) == 1
+                pod = deployments[0]['spec']['template']['spec']
+                container = pod['containers'][0]
+                assert pod['securityContext']['fsGroup'] == 2000
+                assert container['securityContext']['readOnlyRootFilesystem'] is True
+                assert container['securityContext']['allowPrivilegeEscalation'] is False
+                assert any(v.get('emptyDir', {}).get('sizeLimit') == '64Mi' for v in pod['volumes'])
+                assert any(m['mountPath'] == '/tmp' for m in container['volumeMounts'])
+                services = self.kube('/api/v1/namespaces/platform-apps/services?labelSelector='+selector)['items']
+                assert len(services) == 1
+                path = '/api/v1/namespaces/platform-apps/services/'+services[0]['metadata']['name']+':80/proxy/'
+                with urllib.request.urlopen(self.kubernetes+path, timeout=20) as response:
+                    assert response.status == 200 and b'Welcome to nginx!' in response.read()
+                revision = self.client.get('/apps/'+app+'/revisions')['items'][0]
+                (self.args.artifacts/'public-image.json').write_text(json.dumps({
+                    'release': self.args.version, 'image': self.args.public_image,
+                    'frozenImage': revision['frozenImage'], 'httpStatus': 200,
+                    'readOnlyRootFilesystem': True, 'temporaryVolume': '64Mi',
+                }, indent=2)+'\n')
+                self.record('Browser: unprivileged Nginx deployed without patches; Ready, HTTP 200 and writable /tmp with container hardening verified')
+                self.mutate(app, 'DELETE'); self.wait_for_pod_deletion(app)
+                del self.state['publicTestApp']; self.save()
+                self.record('Public-image acceptance application removed; retained lifecycle application preserved')
+            finally:
+                browser.close()
+
     def run(self):
         if self.client.get('/setup/status')['setupAvailable']:
             self.browser_setup()
@@ -126,6 +184,8 @@ class Native:
             assert current['lastSuccessfulRevision'] == self.state['retainedRevision']
             self.http(app, 'v1')
             self.record('After host reboot: administrator, retained application, revision history and HTTP response recovered')
+            if self.args.public_image:
+                self.browser_public_image()
             return
         images = json.loads(self.args.release_manifest.read_text())['targets']['arm64']['images']
         accepted,_ = self.client.mutate('POST','/apps',{'name':'pi-acceptance-'+secrets.token_hex(3),'image':images['v1'],'containerPort':8080,'profile':'http','health':{'startupPath':'/healthz','readinessPath':'/readyz'},'exposure':{'mode':'internal'}})
@@ -159,6 +219,8 @@ class Native:
         self.record('Application deletion removed Pods and retained revision history')
         self.state['retainedRevision']=self.client.get('/apps/'+app)['lastSuccessfulRevision'];self.save()
         self.record('One healthy test application retained for same-version reinstall and host-reboot verification')
+        if self.args.public_image:
+            self.browser_public_image()
 
 
 def main():
@@ -171,6 +233,7 @@ def main():
     parser.add_argument('--artifacts',type=Path,required=True)
     parser.add_argument('--setup',action='store_true')
     parser.add_argument('--resume',action='store_true')
+    parser.add_argument('--public-image', help='Opt-in unprivileged Nginx image for the browser temporary-files compatibility check')
     Native(parser.parse_args()).run()
 
 if __name__=='__main__':main()

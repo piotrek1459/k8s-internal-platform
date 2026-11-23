@@ -94,6 +94,11 @@ Coverage includes:
 - Unhealthy rollout with verified restoration of the prior snapshot before
   mutation unlock, plus preserved previous application traffic.
 - Native OCI/chart packaging and startup on a second fresh node without a registry.
+- An observed pending first install interrupted with runtime SIGKILL on the owned
+  k3d node: unchanged Helm evidence, durable lock/409 across broker replacement,
+  independent queued browser work without resubmission, and tracked first-deployment
+  removal with retained history. This is one interruption barrier; the remaining
+  crash/restoration matrix is tracked separately.
 
 Status serialization and application restart are required assertions; no known-gap
 skips remain. The runner and CI summary require a non-empty suite with zero
@@ -170,7 +175,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.2 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.3 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -181,11 +186,19 @@ refused. The state file has mode `0600` and contains the generated administrator
 password and owned retained application ID; never commit or publish it. Reports
 contain check descriptions and release identity, not credentials. The command
 retains one healthy owned application for same-version reinstall and reboot checks.
+For unprivileged Nginx compatibility, add
+`--public-image docker.io/nginxinc/nginx-unprivileged:stable-alpine`. This optional
+browser check uses port `8080`, readiness `/`, validates the temporary volume and
+container hardening, checks actual HTTP, and removes only its own test application.
+It requires reachable public-registry inspection/pulling.
 After reboot, restart the forwards and run the same command with `--resume`
 instead of `--setup`. Cleanup of an installation requires separate explicit
 operator action; the test never uninstalls K3s or deletes unrelated applications.
 
-The [Pi report](experiments/2026-11-22-raspberry-pi.md) records executed results.
+The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native
+lifecycle, unpatched public-image deployment, reinstall/reboot and direct Helm
+baseline. The [earlier Pi report](experiments/2026-11-22-raspberry-pi.md) retains
+its original version-specific observations.
 
 The native deletion check allows up to 60 seconds for Pod garbage collection
 after the tracked delete operation completes. Deployment deletion and dependent

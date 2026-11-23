@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	"io/fs"
 	"sort"
 	"strings"
 	"time"
@@ -69,6 +70,12 @@ func (d *DB) Close() error { return d.sql.Close() }
 // It is idempotent: re-running against an up-to-date database is a no-op, and
 // running against a partially migrated database applies only the remainder.
 func (d *DB) migrate(ctx context.Context) error {
+	return d.migrateFrom(ctx, migrationFiles)
+}
+
+// migrateFrom uses the same transactional runner for embedded migrations and
+// failure fixtures. The source is instance-local; tests never replace globals.
+func (d *DB) migrateFrom(ctx context.Context, source fs.FS) error {
 	if _, err := d.sql.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations (
 		name       TEXT PRIMARY KEY,
 		applied_at TEXT NOT NULL
@@ -76,7 +83,7 @@ func (d *DB) migrate(ctx context.Context) error {
 		return fmt.Errorf("create schema_migrations: %w", err)
 	}
 
-	entries, err := migrationFiles.ReadDir("migrations")
+	entries, err := fs.ReadDir(source, "migrations")
 	if err != nil {
 		return fmt.Errorf("read migrations: %w", err)
 	}
@@ -97,7 +104,7 @@ func (d *DB) migrate(ctx context.Context) error {
 		if exists > 0 {
 			continue
 		}
-		body, err := migrationFiles.ReadFile("migrations/" + name)
+		body, err := fs.ReadFile(source, "migrations/"+name)
 		if err != nil {
 			return fmt.Errorf("read migration %s: %w", name, err)
 		}
