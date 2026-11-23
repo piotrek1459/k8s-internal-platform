@@ -95,6 +95,7 @@ class Environment:
         self.owns_cluster = False
         self.additional = []
         self.builders = []
+        self.fixture_image_tags = []
 
     def redact(self, text):
         for value in sorted({value for value in self.secret_values if value}, key=len, reverse=True):
@@ -284,6 +285,8 @@ class Environment:
         for process in self.forwards: self.stop_forward(process)
         for builder in self.builders:
             self.run("docker", "buildx", "rm", builder, check=False)
+        for tag in self.fixture_image_tags:
+            self.run('docker', 'image', 'rm', tag, check=False)
         for name, config in reversed([(self.name, self.config)] + self.additional):
             if name == self.name and not self.owns_cluster: continue
             if name == self.name:

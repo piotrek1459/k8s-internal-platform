@@ -15,6 +15,7 @@ changing production interfaces solely for test placement.
 | `broker/integration/` | Gated store/worker/Helm test using a prepared real cluster. | Explicit local invocation. |
 | `tests/integration/` | Owned baseline cluster and direct Helm lifecycle experiment. | Explicit local invocation. |
 | `tests/e2e/` | Fresh platform build, API/browser workflows and release-bundle installation. | Nightly, manual and release gate. |
+| `tests/e2e/fixtures/workload/` | Controlled readiness and actual workload-origin requests; standard-library Go test image. | Fixture unit checks on every PR; real use in E2E. |
 | `tests/experiments/` | Dated curated evidence and historical reports. | Documentation. |
 
 ## Fast regression checks on every pull request
@@ -79,12 +80,24 @@ in `finally` blocks. Existing installations and the default kubeconfig are not
 selected. A forced machine shutdown or SIGKILL can bypass cleanup; artifact logs
 identify the owned `platform-e2e-*` resources for inspection.
 
+Local UI checks and E2E startup both run `npm ci` in `web/`. Run them serially in
+one checkout or use separate worktrees. GitHub jobs already use separate workspaces.
+
 Coverage includes:
 
 - Invalid/valid browser bootstrap, login, logout, CSRF and consumed-token rejection.
 - Invalid and unsupported requests without unintended application creation.
 - API deployment, idempotent replay/conflict, update, stale versions, scale 2/0/1,
   rollback, deletion and retained history.
+- A real client loses the backend's durably accepted response. Registry tag
+  movement after freezing, original-key replay, broker replacement and Reapply
+  preserve identity/digest, actual HTTP version and Helm chart/values hashes.
+- Running-operation browser reload/navigation uses an observed pending Helm/
+  running-unready container barrier, then explicit readiness release; one
+  submission and one revision are retained.
+- Actual managed-Pod requests reach platform health but are refused protected
+  management/Kubernetes reads and mutations. Public-CA TLS verification, positive
+  reachability controls, token absence and unchanged resource counts are required.
 - Browser image inspection, wizard deployment, update, operation refresh, history
   rollback and deletion. Secret creation/version management selects the exact
   Kubernetes version; in-use deletion is refused and unused versions are removed.
@@ -184,7 +197,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.5 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.6 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -209,13 +222,16 @@ memory. Fixture identities are saved privately before waits and cleanup uses
 recorded UID/resource-version guards. Cleanup failure fails acceptance and retains
 identities for inspection; a subsequent diagnostics run refuses unresolved state.
 Published v0.1.5 passes the diagnostics reads/repair but fails Secret cleanup.
-The correction is candidate source and requires a subsequent published native run.
+The correction is released in v0.1.6; native confirmation awaits reference-host SSH.
 After reboot, restart the forwards and run the same command with `--resume`
 instead of `--setup`. Cleanup of an installation requires separate explicit
 operator action; the test never uninstalls K3s or deletes unrelated applications.
 
 The [v0.1.5/Secret lifecycle report](experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
-records the latest native results, failed Secret cleanup and candidate correction.
+records the latest native results and failed Secret cleanup; its correction is now released in v0.1.6.
+The [core resilience report](experiments/2026-11-23-core-resilience.md) records
+local lost-response/moved-tag, running-browser and workload-origin acceptance.
+Native v0.1.6 verification remains pending reference-host SSH access.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native

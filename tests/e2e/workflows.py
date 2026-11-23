@@ -122,6 +122,47 @@ class Workflows(unittest.TestCase):
         self.assertEqual(len(self.e.client.get("/apps")["items"]), before)
         self.e.record("Unsupported and malformed API requests leave application count unchanged")
 
+    def test_03_workload_management_boundaries(self):
+        import urllib.request
+        from resilience import fixture_images
+        image = fixture_images(self.e)['v1']
+        ca = json.loads(self.e.kubectl('-n','platform-apps','get','configmap','kube-root-ca.crt','-o','json').stdout)['data']['ca.crt']
+        app = self.e.create('boundary', image=image, environment={
+            'FIXTURE_START_READY':'true', 'FIXTURE_PLATFORM_URL':'http://platform.platform-system.svc.cluster.local',
+            'FIXTURE_KUBE_URL':'https://kubernetes.default.svc', 'FIXTURE_KUBE_CA':ca})
+        try:
+            pod = self.e.wait_replicas(app,1)[0]
+            self.assertFalse(pod['spec']['automountServiceAccountToken'])
+            self.assertEqual(pod['spec']['serviceAccountName'], 'default')
+            self.assertFalse(any(source.get('serviceAccountToken') for volume in pod['spec'].get('volumes',[])
+                for source in volume.get('projected',{}).get('sources',[])))
+            before = len(self.e.client.get('/apps')['items'])
+            secrets_before = len(self.e.client.get('/secrets')['items'])
+            with self.e.forward('forward',app,port=self.e.app_port):
+                request=urllib.request.Request(f'http://127.0.0.1:{self.e.app_port}/probe',method='POST',data=b'')
+                with urllib.request.urlopen(request,timeout=35) as response:
+                    result=json.load(response)
+            self.assertTrue(result['serviceAccountTokenAbsent'])
+            checks={item['name']:item for item in result['requests']}
+            self.assertEqual(len(checks),6)
+            self.assertTrue(all(not item['transportError'] for item in checks.values()), 'A network/TLS failure cannot establish an authorization boundary')
+            self.assertEqual(checks['platform-health']['status'],200)
+            for name in ('platform-read','platform-create','platform-secret'):
+                self.assertEqual(checks[name]['status'],401)
+            for name in ('kube-read','kube-create'):
+                self.assertIn(checks[name]['status'],(401,403))
+                self.assertEqual(checks[name]['kind'],'Status')
+                self.assertIn(checks[name]['reason'],('Unauthorized','Forbidden'))
+            self.assertEqual(len(self.e.client.get('/apps')['items']),before)
+            self.assertEqual(len(self.e.client.get('/secrets')['items']),secrets_before)
+            namespaces=json.loads(self.e.kubectl('get','namespaces','-o','json').stdout)['items']
+            self.assertNotIn('workload-boundary-attempt',[item['metadata']['name'] for item in namespaces])
+            self.e.http_version(app,'fixture-v1')
+        finally:
+            self.e.delete(app)
+        self.e.record('Actual managed workload reached platform health, received protected API refusals and TLS-verified Kubernetes administration refusals; no mounted service-account token or unintended resources',
+            checks=result)
+
     def test_05_api_lifecycle_and_idempotency(self):
         body = {"name": "api-" + secrets.token_hex(4), "image": self.e.image("v1"), "containerPort": 8080, "profile": "http", "replicas": 1, "health": {"readinessPath": "/readyz"}, "exposure": {"mode": "internal"}}
         key = secrets.token_hex(16)
@@ -156,6 +197,62 @@ class Workflows(unittest.TestCase):
         self.assertNotIn(app, [a["id"] for a in self.e.client.get("/apps")["items"]])
         self.assertGreaterEqual(len(self.e.client.get("/apps/" + app + "/revisions")["items"]), 6)
         self.e.record("Deletion removed workload and Service while retaining revision history")
+
+    def test_07_lost_response_and_moved_tag_retries(self):
+        from resilience import cleanup_fixture, control_secret, drop_accepted_response, fixture_images, move_tag, release_gate, release_identity, wait_pending
+        fixture_images(self.e)
+        image = move_tag(self.e, 'v1')
+        code, original = self.e.client.request('POST', '/images/inspect', {'image': image})
+        self.assertEqual(code, 200)
+        token, secret = control_secret(self.e)
+        key = secrets.token_hex(16)
+        body = {'name': 'lost-response-'+secrets.token_hex(4), 'image': image,
+            'containerPort': 8080, 'profile': 'http', 'health': {'readinessPath': '/readyz'},
+            'secretRefs': [{'environmentVariable': 'FIXTURE_CONTROL_TOKEN', 'secretId': secret['id'], 'version': 1}],
+            'exposure': {'mode': 'internal'}}
+        before = len(self.e.client.get('/apps')['items'])
+        accepted = drop_accepted_response(self.e.client, body, key)
+        app = accepted['applicationId']; cleaned = False
+        try:
+            frozen = wait_pending(self.e, app)
+            self.assertTrue(frozen['frozenImage'].endswith('@'+original['digest']))
+            identity = release_identity(self.e, app)
+            revision = self.e.client.get('/apps/'+app)['desiredRevision']
+            move_tag(self.e, 'v2')
+            code, moved = self.e.client.request('POST', '/images/inspect', {'image': image})
+            self.assertEqual(code, 200); self.assertNotEqual(moved['digest'], original['digest'])
+            code, replay = self.e.client.request('POST', '/apps', body, {'Idempotency-Key': key})
+            self.assertEqual(code, 202); self.assertTrue(replay['deduplicated'])
+            self.assertEqual(replay['operationId'], accepted['operationId'])
+            self.assertEqual(replay['applicationId'], app)
+            self.assertEqual(len(self.e.client.get('/apps')['items']), before+1)
+            self.assertEqual(self.e.client.get('/apps/'+app)['desiredRevision'], revision)
+            self.assertEqual(self.e.client.get('/apps/'+app+'/revisions')['items'], [frozen])
+            self.assertEqual(release_identity(self.e, app), identity)
+            release_gate(self.e, app, token)
+            self.e.client.poll(accepted['operationId'])
+            self.e.http_version(app, 'fixture-v1')
+            pod = self.e.wait_replicas(app, 1)[0]
+            self.assertEqual(pod['spec']['containers'][0]['image'], frozen['frozenImage'])
+            self.e.restart_broker()
+            code, replay = self.e.client.request('POST', '/apps', body, {'Idempotency-Key': key})
+            self.assertEqual(code, 202); self.assertEqual(replay['operationId'], accepted['operationId'])
+            self.assertEqual(replay['applicationId'], app)
+            self.assertEqual(self.e.client.get('/apps/'+app+'/revisions')['items'][0]['frozenImage'], frozen['frozenImage'])
+            current = self.e.client.get('/apps/'+app)
+            self.e.client.mutate('POST', '/apps/'+app+'/reapply', {'version': current['version']})
+            self.e.http_version(app, 'fixture-v1')
+            self.assertEqual(release_identity(self.e, app), identity)
+            cleanup_fixture(self.e, app, secret); cleaned = True
+        finally:
+            if not cleaned:
+                # Preserve the original failure; owned-cluster teardown removes
+                # unresolved fixtures without rewriting SQL or Helm evidence.
+                with contextlib.suppress(Exception):
+                    current = self.e.client.get('/apps/'+app)
+                    self.e.client.request('DELETE', '/apps/'+app, {'version':current['version']}, {'Idempotency-Key':secrets.token_hex(16)})
+        self.e.record('Lost 202 after backend acceptance; real registry tag moved; retries retained operation/app/revision/digest and chart/values identity across broker replacement and explicit Reapply',
+            originalImage=frozen['frozenImage'], movedDigest=moved['digest'], identity=identity)
 
     def test_10_browser_application_lifecycle(self):
         from playwright.sync_api import expect
@@ -244,6 +341,54 @@ class Workflows(unittest.TestCase):
                 current = next((a for a in self.e.client.get("/apps")["items"] if a["id"] == app), None)
                 if current and not current.get("activeOperationId"): self.e.delete(app)
         self.e.record("Browser Secret creation/version selection, in-use deletion refusal and physical version cleanup; image inspection, deployment, update, progress refresh, history rollback and deletion")
+
+    def test_12_browser_running_operation_resume(self):
+        from playwright.sync_api import expect
+        from resilience import cleanup_fixture, control_secret, fixture_images, release_gate, wait_pending
+        image=fixture_images(self.e)['v1'];token,secret=control_secret(self.e)
+        app=None;cleaned=False
+        try:
+            with self.page('running-operation-resume') as page:
+                self.browser_login(page)
+                submissions=[]
+                page.on('request',lambda request:submissions.append(request.url) if request.method=='POST' and request.url.endswith('/api/v1/apps') else None)
+                page.goto(self.e.url+'/apps/new')
+                page.get_by_label('Image reference').fill(image)
+                page.get_by_role('button',name='Inspect image',exact=True).click()
+                page.get_by_role('button',name='Next').click()
+                page.get_by_label('Name',exact=True).fill('running-resume-'+secrets.token_hex(4))
+                page.get_by_label('Readiness path').fill('/readyz')
+                for _ in range(2):page.get_by_role('button',name='Next').click()
+                page.get_by_label('Secret environment variable').fill('FIXTURE_CONTROL_TOKEN')
+                page.get_by_label('Secret',exact=True).select_option(secret['id'])
+                page.get_by_label('Secret version',exact=True).select_option('1')
+                page.get_by_role('button',name='Next').click()
+                accepted=self.click_mutation(page,page.get_by_role('button',name='Deploy',exact=True),'POST','/apps')
+                app=accepted['applicationId'];frozen=wait_pending(self.e,app)
+                operation=accepted['operationId']
+                url=self.e.url+'/apps/'+app+'/operation?op='+operation
+                page.goto(url)
+                state=page.get_by_text('State:',exact=True).locator('..')
+                expect(state.get_by_text('running',exact=True)).to_be_visible()
+                page.reload();expect(state.get_by_text('running',exact=True)).to_be_visible()
+                page.goto(self.e.url+'/apps');page.goto(url)
+                expect(state.get_by_text('running',exact=True)).to_be_visible()
+                self.assertEqual(submissions,[self.e.url+'/api/v1/apps'])
+                self.assertEqual(self.e.client.get('/apps/'+app+'/revisions')['items'],[frozen])
+                release_gate(self.e,app,token)
+                self.browser_success(page,accepted,navigates=False)
+                page.reload();self.browser_success(page,accepted,navigates=False)
+                self.assertEqual(len(submissions),1)
+                self.assertEqual(len(self.e.client.get('/apps/'+app+'/revisions')['items']),1)
+                self.e.http_version(app,'fixture-v1')
+            cleanup_fixture(self.e,app,secret);cleaned=True
+        finally:
+            if app and not cleaned:
+                with contextlib.suppress(Exception):
+                    current=self.e.client.get('/apps/'+app)
+                    self.e.client.request('DELETE','/apps/'+app,{'version':current['version']},{'Idempotency-Key':secrets.token_hex(16)})
+        self.e.record('Browser reload/navigation during an observed running Helm operation resumed persisted progress without resubmission; explicit readiness release completed the same operation/revision',
+            submissions=len(submissions), operationId=operation, revisionId=frozen['id'])
 
     def test_15_private_registry_inspection_and_pull(self):
         from private_registry import authenticated_registry

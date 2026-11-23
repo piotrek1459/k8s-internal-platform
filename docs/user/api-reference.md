@@ -269,7 +269,7 @@ also require the current `version` in the JSON body. The implementation uses tha
 not enforced. Request and camelCase response schemas are in
 [`api/openapi.yaml`](../../api/openapi.yaml).
 
-Secret deletion in current source first reserves cleanup durably. A reference
+Secret deletion in v0.1.6 first reserves cleanup durably. A reference
 from an active application's pending/successful revision or nonterminal operation
 returns `SECRET_IN_USE`/409. Deleted-application history remains available without
 blocking removal. New application references and new versions are refused while
@@ -279,7 +279,8 @@ Missing versions are already removed; changed ownership is refused. A partial
 cleanup returns 409/503 and retains metadata/identities, so repeating DELETE can
 finish after diagnosis. A 204 establishes removal of all recorded versions and
 metadata. Versions orphaned by earlier metadata-only deletion are not guessed or
-collected automatically. This corrected cleanup is not present in v0.1.5.
+collected automatically. This corrected cleanup is included in v0.1.6; native verification of that release
+is pending reference-host SSH access.
 
 `POST /apps/{id}/recover` is a recovery retry, not a new mutation specification.
 It accepts `{version}`, reuses the existing blocked operation ID and increments
