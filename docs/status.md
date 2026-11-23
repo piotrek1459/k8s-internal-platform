@@ -48,8 +48,8 @@ successful predecessor. It preserves the failed candidate and atomically
 transfers its lock to tracked cleanup. Running work and unresolved updates remain
 protected. Cross-version platform upgrades, unavailable historical chart artifacts,
 pending Helm transactions and failed restoration retain their stated boundaries.
-Source diagnostics and owned-field drift reporting are implemented.
-They are now released and verified on the Pi in `v0.1.5`. The native run failed
+Diagnostics and owned-field drift reporting are released and verified on the Pi
+in `v0.1.5`. The native run failed
 at subsequent Secret cleanup: deleted-application history returned 409, and a
 separate unused Secret probe returned 204 while leaving its Kubernetes value.
 The [v0.1.5 report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
@@ -87,8 +87,11 @@ throttling retain their separately recorded boundaries.
 - The [v0.1.5 report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
   distinguishes published Pi lifecycle/diagnostics/reinstall/reboot success from
   failed Secret cleanup and the candidate-source correction. Focused source
-  browser/cleanup acceptance passed 5 tests with zero failures/skips; full CI
-  evidence is recorded separately when complete.
+  browser/cleanup acceptance passed 5 tests with zero failures/skips. The full
+  [clean-source GitHub run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45194804590)
+  passed **17 tests, 0 failures, 0 skips** at `8804ced`, with downloaded JUnit and
+  the strict summary verified. The cleanup correction still requires publication
+  and native confirmation.
 - The [v0.1.4 and diagnostics report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md)
   records the published Pi lifecycle/removal/reinstall/reboot and separate source work.
 - The [v0.1.3 reference acceptance](../tests/experiments/2026-11-23-core-acceptance.md)
