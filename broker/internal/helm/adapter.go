@@ -36,6 +36,8 @@ const installTimeout = 5 * time.Minute
 
 // Adapter installs and upgrades the application chart in a target namespace.
 type Adapter struct {
+	guardMutation  func(context.Context, string, string) error
+	prepareReapply func(context.Context, string, string) error
 	verifyManifest func(context.Context, string) error
 	chart          *chart.Chart
 	namespace      string
@@ -89,6 +91,9 @@ func (a *Adapter) InstallOrUpgrade(ctx context.Context, appID string, rev platfo
 		return platform.ReleaseStatus{}, err
 	}
 
+	if err := a.checkMutation(ctx, cfg, appID, rev); err != nil {
+		return platform.ReleaseStatus{}, err
+	}
 	if exists {
 		return a.upgrade(ctx, cfg, releaseName, rev.ID, values)
 	}
@@ -139,6 +144,15 @@ func (a *Adapter) Uninstall(ctx context.Context, appID string) error {
 	}
 	if !exists {
 		return nil
+	}
+	if a.guardMutation != nil {
+		rel, err := action.NewGet(cfg).Run(name)
+		if err != nil {
+			return classifyHelmError(err)
+		}
+		if err := a.guardMutation(ctx, appID, rel.Manifest); err != nil {
+			return err
+		}
 	}
 	client := action.NewUninstall(cfg)
 	client.Timeout = installTimeout

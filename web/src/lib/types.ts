@@ -120,3 +120,26 @@ export interface Revision {
 		replicas: number;
 	};
 }
+
+export interface ApplicationLogs {
+	pod: string;
+	container: string;
+	text: string;
+	truncated: boolean;
+	observedAt: string;
+}
+
+export interface ApplicationEvents {
+	items: Array<{ at: string; type: string; reason: string; message: string; resource: string; count: number }>;
+	truncated: boolean;
+	observedAt: string;
+}
+
+export interface ApplicationDrift {
+	revisionId: string;
+	applicationVersion: number;
+	operationActive: boolean;
+	state: 'in_sync' | 'drifted';
+	differences: Array<{ resource: string; field: string; change: string }>;
+	observedAt: string;
+}

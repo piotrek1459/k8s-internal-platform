@@ -3,6 +3,7 @@ package cluster
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	"helm.sh/helm/v3/pkg/action"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -29,6 +30,9 @@ func HelmActionConfig(namespace string, logger *slog.Logger) func(string) (*acti
 		if err != nil {
 			return nil, fmt.Errorf("load in-cluster config for helm: %w", err)
 		}
+		// Bound individual SDK API requests, including release metadata reads that
+		// do not accept the caller's context. Rollout waits retain their own budget.
+		cfg.Timeout = 30 * time.Second
 		actionConfig := new(action.Configuration)
 		// The "secret" storage driver stores release state as Kubernetes Secrets in
 		// the release namespace, which the broker's RBAC permits.

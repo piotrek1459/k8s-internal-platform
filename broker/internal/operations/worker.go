@@ -140,6 +140,18 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 	rev.Frozen = &frozen
 
 	w.event(ctx, op.ID, "applying", "applying workload through Helm")
+	if op.Type == platform.OperationReapply {
+		if preparer, ok := w.helm.(platform.ReapplyPreparer); ok {
+			err = preparer.PrepareReapply(ctx, op.AppID, rev)
+			if err != nil {
+				_ = w.store.MarkRevisionResult(ctx, rev.ID, platform.RevisionFailed)
+				if ctx.Err() == nil {
+					w.needsAttention(ctx, op, "prepare-reapply", err)
+				}
+				return
+			}
+		}
+	}
 	status, err := w.helm.InstallOrUpgrade(ctx, op.AppID, rev)
 	if err != nil {
 		// A failed Helm call can leave changed resources. Restore and verify a

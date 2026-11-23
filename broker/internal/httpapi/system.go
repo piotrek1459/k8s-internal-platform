@@ -48,5 +48,8 @@ func capabilities(cfg Config) []string {
 	if cfg.Cluster != nil {
 		caps = append(caps, "cluster-observation")
 	}
+	if cfg.Diagnostics != nil {
+		caps = append(caps, "workload-diagnostics", "drift-inspection")
+	}
 	return caps
 }

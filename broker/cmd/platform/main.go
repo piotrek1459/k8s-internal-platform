@@ -22,6 +22,7 @@ import (
 	"k8s-internal-platform/broker/internal/applications"
 	"k8s-internal-platform/broker/internal/auth"
 	"k8s-internal-platform/broker/internal/cluster"
+	"k8s-internal-platform/broker/internal/diagnostics"
 	"k8s-internal-platform/broker/internal/helm"
 	"k8s-internal-platform/broker/internal/httpapi"
 	"k8s-internal-platform/broker/internal/operations"
@@ -124,6 +125,9 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		}
 		inspector := registry.NewInspector(credentials).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases)
 		helmAdapter.WithManifestVerifier(clusterClient.VerifyManifest)
+		helmAdapter.WithReapplyPreparer(clusterClient.PrepareReapply)
+		helmAdapter.WithMutationGuard(clusterClient.GuardMutation)
+		cfg.Diagnostics = diagnostics.New(st, clusterClient, helmAdapter)
 		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)
 		observer = operations.NewObserver(st, clusterClient, platform.SystemClock{}, logger)
 
