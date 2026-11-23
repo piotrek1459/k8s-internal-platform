@@ -184,6 +184,12 @@ type ExecutionPlanner interface {
 	PrepareExecution(appID string, rev Revision) (FrozenSpec, error)
 }
 
+// ReapplyPreparer normalizes explicitly owned mutable fields whose changed list
+// merge keys cannot be repaired by Helm's ordinary three-way patch.
+type ReapplyPreparer interface {
+	PrepareReapply(context.Context, string, Revision) error
+}
+
 // ReleaseVerifier establishes that persisted intent matches healthy live state.
 type ReleaseVerifier interface {
 	VerifyTarget(ctx context.Context, appID string, rev Revision) error

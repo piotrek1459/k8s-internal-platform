@@ -8,6 +8,7 @@
 		ApiError
 	} from '$lib/api.js';
 	import StatusBadge from '$components/StatusBadge.svelte';
+	import ApplicationDiagnostics from '$components/ApplicationDiagnostics.svelte';
 	import type { Application, Revision } from '$lib/types.js';
 
 	const id = $derived(page.params.id ?? '');
@@ -15,7 +16,7 @@
 	let revisions = $state<Revision[]>([]);
 	let loading = $state(true);
 	let error = $state('');
-	let activeTab = $state<'overview' | 'events' | 'history'>('overview');
+	let activeTab = $state<'overview' | 'events' | 'history' | 'diagnostics'>('overview');
 	let actionError = $state('');
 	let actionPending = $state(false);
 	let canRecover = $state(false);
@@ -170,7 +171,7 @@
 
 	<!-- Tabs -->
 	<div class="border-b border-gray-200 mb-6 flex gap-6">
-		{#each [['overview', 'Overview'], ['events', 'Events'], ['history', 'History']] as [tab, label]}
+		{#each [['overview', 'Overview'], ['events', 'Operation events'], ['history', 'History'], ['diagnostics', 'Diagnostics']] as [tab, label]}
 			<button
 				onclick={() => { activeTab = tab as typeof activeTab; if (tab === 'history') loadRevisions(); }}
 				class="pb-2 text-sm border-b-2 transition-colors
@@ -214,6 +215,8 @@
 				No active operation.
 			{/if}
 		</p>
+	{:else if activeTab === 'diagnostics'}
+		{#key id}<ApplicationDiagnostics appId={id} />{/key}
 	{:else if activeTab === 'history'}
 		{#if revisions.length === 0}
 			<p class="text-sm text-gray-500">No revisions loaded.</p>

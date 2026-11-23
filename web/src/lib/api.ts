@@ -2,6 +2,9 @@ import type {
 	AcceptResult,
 	Application,
 	ApplicationList,
+	ApplicationLogs,
+	ApplicationEvents,
+	ApplicationDrift,
 	CreateApplicationRequest,
 	ImageInspectResult,
 	Me,
@@ -236,4 +239,18 @@ function requestWithHeaders<T>(
 
 export function recoverApp(id: string, version: number): Promise<AcceptResult> {
 	return request('POST', `/api/v1/apps/${id}/recover`, { version });
+}
+
+export function getAppLogs(id: string, pod: string, previous: boolean, tailLines: number, sinceSeconds: number): Promise<ApplicationLogs> {
+	const query = new URLSearchParams({ previous: String(previous), tailLines: String(tailLines), sinceSeconds: String(sinceSeconds) });
+	if (pod.trim()) query.set('pod', pod.trim());
+	return request('GET', `/api/v1/apps/${id}/logs?${query}`);
+}
+
+export function getAppEvents(id: string): Promise<ApplicationEvents> {
+	return request('GET', `/api/v1/apps/${id}/events?limit=50`);
+}
+
+export function getAppDrift(id: string): Promise<ApplicationDrift> {
+	return request('GET', `/api/v1/apps/${id}/drift`);
 }

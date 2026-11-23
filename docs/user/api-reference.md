@@ -276,6 +276,51 @@ submission with the old version is rejected. Pending or ambiguous cluster state
 remains blocked. Failed updates with a prior complete successful snapshot attempt
 verified restoration automatically and expose the outcome in operation events.
 
+## Application diagnostics
+
+The administrator session is required. Responses use `Cache-Control: no-store`.
+Unknown or repeated query parameters are rejected.
+
+| Route | Parameters and limits |
+| --- | --- |
+| `GET /apps/{id}/logs` | `pod` optional; `previous=false`; `tailLines=100` (1–500); `sinceSeconds=3600` (1–86400). Application container only; no namespace, container, exec or follow option. |
+| `GET /apps/{id}/events` | `limit=50` (1–100); retained events for current owned resource UIDs. |
+| `GET /apps/{id}/drift` | No parameters; frozen revision, observation time, active-operation flag and field-path differences. |
+
+Log text is limited to 64 KiB. Event text is limited to 4096 bytes per field and
+64 KiB overall. Discovery is limited to 50 objects per resource kind and 50 event
+source UIDs, with at most 20 events retained per bounded source read. `truncated`
+identifies incomplete output. Kubernetes retention and bounded source reads can
+omit events. Previous logs belong to a retained container instance in the same
+Pod; deleted Pods are not archived. Pod controller UIDs are checked before and
+after reading to reject a reused Pod name.
+
+Known managed configuration and registry credentials are masked in memory,
+including plaintext, standard/URL base64 with or without padding, JSON-escaped
+strings and URL-query encoding. Overlapping matches are merged, masking precedes
+clipping, and a truncated trailing secret prefix is covered. Applications must
+avoid logging credentials: arbitrary application-defined secrets and custom
+transformations are outside this policy.
+
+Secret inventory is bounded to 100 objects per category, aggregate redaction
+inputs to 512 KiB, unique patterns to 2048 and match processing to a fixed budget.
+Missing/incomplete inventory fails closed. Two diagnostic requests may execute
+concurrently; HTTP reads have a ten-second deadline. Namespace-wide inventory
+limits can make diagnostics unavailable even when the selected app is small.
+Values are not copied to SQLite, Helm, broker logs or retained test artifacts by
+the diagnostics read path.
+
+Drift reports `in_sync` or `drifted` for owned Deployment, Service and Ingress
+fields, without expected/actual values. Readiness and allocated addresses are
+separate observations. Missing snapshots or an intent change during inspection
+produce a conflict. Inspection performs no correction. Explicit Reapply repairs
+supported owned fields, including the ClusterIP Service port list under UID and
+resource-version guards, while preserving its identity/address. Ownership checks
+also protect restoration and uninstall. Pending Helm records are not cleared.
+
+These source endpoints require a release containing the diagnostics changes;
+the published v0.1.4 Pi acceptance covers the earlier lifecycle features.
+
 ## Errors and operating limits
 
 Errors use the nested envelope:

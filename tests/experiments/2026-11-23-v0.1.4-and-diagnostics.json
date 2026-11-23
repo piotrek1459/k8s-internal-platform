@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-23",
+  "publishedRelease": {
+    "version": "0.1.4",
+    "sourceCommit": "1ce33ccc60b1379a5f93eb16e6038178b88cb922",
+    "architecture": "arm64",
+    "k3s": "v1.36.5+k3s1",
+    "helm": "v3.22.0",
+    "images": {
+      "platform": "platform.local/platform-broker@sha256:30b4e253d757577643a694e60eced5ba69c32b2cb11c7c7632d237224c5df8ad",
+      "v1": "platform.local/http-demo@sha256:37812113af93bc616076b2ed8d596281cc77fc5ec2c5036e1d35318c918b074f",
+      "v2": "platform.local/http-demo@sha256:8d122e13e8be56f5cfa34a25d6051a55eba817efa90bdff5a8591e2d3036a556",
+      "v3": "platform.local/http-demo@sha256:c8830bb7323f6a4c0b90d58f37b0bb771e1bfd5575a2fa01fd26563aa3778fe3"
+    }
+  },
+  "nativeChecks": [
+    "Browser: root opens setup; nested token error displayed; administrator created and login succeeded",
+    "Native ARM64 system reports the expected release and a reachable cluster",
+    "Digest-pinned bundled v1 deployed; camelCase status and actual HTTP response verified",
+    "Healthy v2 update and manual scaling to 2, 0 and 1 completed",
+    "Restart replaced the Pod while retaining the exact image digest",
+    "Unhealthy v3 failed; v2 release and live workload restored, lock released after verification",
+    "Explicit rollback restored the original successful v1 snapshot",
+    "Application deletion removed Pods and retained revision history",
+    "One healthy test application retained for same-version reinstall and host-reboot verification",
+    "Published release: failed first deployment retained its lock/409; browser deletion removed the workload and retained failed operation/frozen history",
+    "Browser: unprivileged Nginx deployed without patches; Ready, HTTP 200 and writable /tmp with container hardening verified",
+    "Public-image acceptance application removed; retained lifecycle application preserved"
+  ],
+  "publicImage": {
+    "release": "v0.1.4",
+    "image": "docker.io/nginxinc/nginx-unprivileged:stable-alpine",
+    "frozenImage": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+    "httpStatus": 200,
+    "readOnlyRootFilesystem": true,
+    "temporaryVolume": "64Mi"
+  },
+  "sameVersionReinstall": {
+    "exitCode": 0,
+    "originalSessionAndAccountAppHistoryPVCIdentityPreserved": true
+  },
+  "hostReboot": {
+    "k3sActiveEnabled": true,
+    "nodeReady": true,
+    "memoryCgroupActive": true,
+    "originalSessionAndAccountAppHistoryPVCIdentityPreserved": true
+  },
+  "sourceFocusedAcceptance": {
+    "test": "test_45_application_diagnostics_and_drift",
+    "tests": 1,
+    "failures": 0,
+    "skipped": 0,
+    "testDurationSeconds": 26.631,
+    "scope": "Candidate source on owned local K3s; separate from published native v0.1.4."
+  },
+  "boundaries": [
+    "Prior owned test state archived; restore and cross-version upgrades unverified.",
+    "Diagnostics/drift/guarded Service repair are source additions awaiting release.",
+    "No resource calibration, controlled repeated evaluation or whole-milestone completion claim."
+  ],
+  "githubSourceAcceptance": {
+    "runId": 45145508589,
+    "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45145508589",
+    "sourceCommit": "dc75094513d3c30ab51a7db0fd5c78afcc3a2a5d",
+    "tests": 16,
+    "failures": 0,
+    "skipped": 0,
+    "testDurationSeconds": 598.655,
+    "diagnosticsCaseSeconds": 24.271
+  },
+  "githubMainAcceptance": {
+    "runId": 45155499729,
+    "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45155499729",
+    "sourceCommit": "1ce33ccc60b1379a5f93eb16e6038178b88cb922",
+    "event": "schedule",
+    "tests": 15,
+    "failures": 0,
+    "skipped": 0
+  }
+}

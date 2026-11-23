@@ -40,7 +40,7 @@ class Workflows(unittest.TestCase):
                 # A closed browser must not replace the original failure with a
                 # screenshot error. Keep only redacted application/operation state.
                 with contextlib.suppress(Exception):
-                    page.screenshot(path=str(self.e.artifacts / (name + ".png")), full_page=True, mask=[page.locator("input, textarea")])
+                    page.screenshot(path=str(self.e.artifacts / (name + ".png")), full_page=True, mask=[page.locator("input, textarea, pre, [aria-label='Workload events']")])
                 with contextlib.suppress(Exception):
                     applications = self.e.client.get("/apps")["items"]
                     diagnostics = []
@@ -274,6 +274,103 @@ class Workflows(unittest.TestCase):
             self.e.http_version(app, "v1")
         finally: self.e.delete(app)
         self.e.record("Explicit reapply restored an owned Service from recorded state")
+
+    def test_45_application_diagnostics_and_drift(self):
+        import datetime
+        import tempfile
+        from pathlib import Path
+        import urllib.error
+        import urllib.parse
+        import urllib.request
+
+        value = 'diagnostic-private-'+secrets.token_hex(16)
+        encoded = base64.b64encode(value.encode()).decode()
+        self.e.secret_values.append(value)
+        code, secret = self.e.client.request('POST', '/secrets', {'name': 'diagnostic-'+secrets.token_hex(4), 'data': {'value': value}})
+        self.assertEqual(code, 201)
+        app = self.e.create('diagnostic', environment={'MODE': 'stable'}, secretRefs=[{'environmentVariable':'APP_SECRET','secretId':secret['id'],'version':1}])
+        other = self.e.create('other-diagnostic')
+        event_names = []
+        copied_pod = 'copied-labels-'+secrets.token_hex(4)
+        try:
+            pod = self.e.wait_replicas(app, 1)[0]
+            foreign = self.e.wait_replicas(other, 1)[0]
+            with self.e.forward('forward', app, port=self.e.app_port):
+                try:
+                    urllib.request.urlopen(f'http://127.0.0.1:{self.e.app_port}/diagnostic/'+urllib.parse.quote(value+'/'+encoded, safe=''), timeout=10)
+                except urllib.error.HTTPError as error:
+                    self.assertEqual(error.code, 404); error.close()
+            raw_logs = self.e.kubectl('-n', 'platform-apps', 'logs', pod['metadata']['name'], '-c', 'application', '--tail=100').stdout
+            self.assertTrue(value in raw_logs and encoded in raw_logs, 'Controlled fixture was not present in actual workload logs')
+            logs = self.e.client.get('/apps/'+app+'/logs')
+            self.assertNotIn(value, logs['text']); self.assertNotIn(encoded, logs['text'])
+            self.assertIn('[REDACTED]', logs['text']); self.assertLessEqual(len(logs['text'].encode()), 65536)
+            self.assertEqual(self.e.client.request('GET', '/apps/'+app+'/logs?pod='+foreign['metadata']['name'])[0], 404)
+            self.assertEqual(self.e.client.request('GET', '/apps/'+app+'/logs?namespace=kube-system')[0], 400)
+            self.assertEqual(self.e.client.request('GET', '/apps/'+app+'/logs?tailLines=501')[0], 400)
+            self.assertEqual(Client(self.e).request('GET', '/apps/'+app+'/logs')[0], 401)
+
+            payload = '<img src=x onerror="window.__diagnosticXss=1">'
+            now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
+            # Raw fixtures live outside uploaded artifacts and are deleted with
+            # their temporary directory. Kubernetes reads remain private.
+            with tempfile.TemporaryDirectory() as directory:
+                for fixture_pod, message, reason in ((pod, payload+' '+value+' '+encoded, 'DiagnosticFixture'), (foreign, 'foreign-owned-event', 'ForeignFixture')):
+                    name = 'diagnostic-'+secrets.token_hex(4); event_names.append(name)
+                    fixture = {'apiVersion':'v1','kind':'Event','metadata':{'name':name,'namespace':'platform-apps'},'involvedObject':{'apiVersion':'v1','kind':'Pod','namespace':'platform-apps','name':fixture_pod['metadata']['name'],'uid':fixture_pod['metadata']['uid']},'type':'Warning','reason':reason,'message':message,'firstTimestamp':now,'lastTimestamp':now,'count':1}
+                    path = Path(directory)/'event.json'; path.write_text(json.dumps(fixture))
+                    self.e.kubectl('create', '-f', path)
+                fake = {'apiVersion':'v1','kind':'Pod','metadata':{'name':copied_pod,'namespace':'platform-apps','labels':{'platform.local/app-id':app}},'spec':{'automountServiceAccountToken':False,'securityContext':{'runAsNonRoot':True,'seccompProfile':{'type':'RuntimeDefault'}},'containers':[{'name':'application','image':self.e.image('v1'),'resources':pod['spec']['containers'][0]['resources'],'securityContext':{'allowPrivilegeEscalation':False,'readOnlyRootFilesystem':True,'capabilities':{'drop':['ALL']}}}]}}
+                path = Path(directory)/'pod.json'; path.write_text(json.dumps(fake)); self.e.kubectl('create', '-f', path)
+            self.assertEqual(self.e.client.request('GET', '/apps/'+app+'/logs?pod='+copied_pod)[0], 404)
+            events = self.e.client.get('/apps/'+app+'/events')
+            body = json.dumps(events)
+            self.assertNotIn(value, body); self.assertNotIn(encoded, body); self.assertNotIn('foreign-owned-event', body)
+            self.assertIn('DiagnosticFixture', body)
+            self.assertEqual(self.e.client.get('/apps/'+app+'/drift')['state'], 'in_sync')
+
+            with self.page('application-diagnostics') as page:
+                self.browser_login(page); page.goto(self.e.url+'/apps/'+app)
+                page.get_by_role('button', name='Diagnostics', exact=True).click()
+                page.get_by_role('button', name='Read logs', exact=True).click()
+                page.locator('pre').wait_for()
+                self.assertNotIn(value, page.locator('pre').inner_text())
+                page.get_by_role('button', name='Read events', exact=True).click()
+                page.get_by_text('DiagnosticFixture', exact=False).wait_for()
+                section = page.get_by_role('region', name='Workload events')
+                self.assertIn(payload, section.inner_text()); self.assertEqual(section.locator('img').count(), 0)
+                self.assertIsNone(page.evaluate('window.__diagnosticXss'))
+                page.get_by_role('button', name='Inspect drift', exact=True).click()
+                page.get_by_text('No owned configuration differences detected.', exact=True).wait_for()
+
+            deployment = self.e.resource('deployments', app)[0]
+            service = self.e.resource('services', app)[0]
+            changed_image = self.e.image('v2')
+            patch = {'spec':{'replicas':2,'template':{'spec':{'containers':[{'name':'application','image':changed_image,'env':[{'name':'MODE','value':'operator-change'}],'resources':{'limits':{'memory':'256Mi'}},'readinessProbe':{'httpGet':{'path':'/version'}}}]}}}}
+            self.e.kubectl('-n', 'platform-apps', 'patch', 'deployment', deployment['metadata']['name'], '--type=strategic', '-p', json.dumps(patch))
+            self.e.kubectl('-n', 'platform-apps', 'patch', 'service', service['metadata']['name'], '--type=json', '-p', '[{"op":"replace","path":"/spec/ports/0/port","value":81}]')
+            drift = self.e.client.get('/apps/'+app+'/drift')
+            self.assertEqual(drift['state'], 'drifted')
+            fields = {item['field'] for item in drift['differences']}
+            for field in ('/spec/replicas','/spec/ports','/spec/template/spec/containers/application/image','/spec/template/spec/containers/application/env','/spec/template/spec/containers/application/resources','/spec/template/spec/containers/application/readinessProbe'):
+                self.assertIn(field, fields)
+            self.assertNotIn(changed_image, json.dumps(drift)); self.assertNotIn('operator-change', json.dumps(drift))
+            self.assertEqual(self.e.resource('services', app)[0]['spec']['ports'][0]['port'], 81, 'Inspection overwrote operator changes')
+
+            with self.page('configuration-drift') as page:
+                self.browser_login(page); page.goto(self.e.url+'/apps/'+app)
+                page.get_by_role('button', name='Diagnostics', exact=True).click()
+                page.get_by_role('button', name='Inspect drift', exact=True).click()
+                page.get_by_text('Configuration drift detected.', exact=True).wait_for()
+            current = self.e.client.get('/apps/'+app)
+            self.e.client.mutate('POST', '/apps/'+app+'/reapply', {'version':current['version']})
+            self.e.http_version(app, 'v1')
+            self.assertEqual(self.e.client.get('/apps/'+app+'/drift')['state'], 'in_sync')
+        finally:
+            self.e.kubectl('-n', 'platform-apps', 'delete', 'pod', copied_pod, '--ignore-not-found=true', check=False)
+            for name in event_names: self.e.kubectl('-n', 'platform-apps', 'delete', 'event', name, '--ignore-not-found=true', check=False)
+            self.e.delete(app); self.e.delete(other)
+        self.e.record('Owned bounded logs/events masked real fixture values; browser escaped hostile text; drift reported owned changes without mutation and explicit reapply restored intent')
 
     def test_50_broker_replacement_preserves_session_and_app(self):
         app = self.e.create("restart-broker")

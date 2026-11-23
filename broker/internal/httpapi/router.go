@@ -37,6 +37,7 @@ type Config struct {
 	Inspector             platform.ImageInspector // optional; enables POST /images/inspect
 	Secrets               platform.SecretManager  // optional; enables the secret endpoints
 	Credentials           platform.RegistryCredentials
+	Diagnostics           platform.ApplicationDiagnostics
 	Version               string // reported by GET /api/v1/system
 }
 
@@ -61,6 +62,7 @@ func NewRouter(cfg Config) *Router {
 	r.registerApplicationMutations()
 	r.registerImages()
 	r.registerSystem()
+	r.registerDiagnostics()
 	if cfg.Store != nil {
 		r.registerSecrets()
 		r.registerCredentials()

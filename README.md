@@ -17,9 +17,10 @@ prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes the resulting native
-ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.3`
+ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.4`
 commands are version examples; the downloaded guide matches the selected release.
-Native `v0.1.3` installation and application lifecycle passed on the reference Pi.
+Native `v0.1.4` installation, lifecycle, failed-first-deployment removal,
+same-version rerun and reboot passed on the reference Pi.
 The release includes writable temporary files with container hardening retained;
 verification details are recorded in [status](docs/status.md). Public HTTPS,
 application volumes and cross-version upgrades remain separate acceptance boundaries.

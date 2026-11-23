@@ -93,8 +93,9 @@ volumes are introduced in M5. Academic sufficiency must be assessed against the
 agreed thesis requirements and cannot be inferred from a milestone label.
 
 UI/API contracts, restart, verified failed-update restoration and private image
-pulls are implemented. The remaining core work covers diagnostics, drift, private
-LAN administration, additional failure/browser/security acceptance and measured
+pulls are implemented. Bounded logs/events and owned-field drift reports are implemented in source.
+Remaining core work covers private LAN administration, additional
+failure/browser/security acceptance and measured
 reference-host evaluation. Manual releases and nightly/API/browser acceptance are implemented.
 The [status report](status.md#next-implementation-order) defines that order.
 [Milestone acceptance](milestones.md#implementation-readiness-and-entry-criteria)

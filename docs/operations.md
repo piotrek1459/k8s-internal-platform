@@ -67,7 +67,7 @@ OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
 its exact supported behavior: dedicated Linux/systemd host, read-only checks,
 pinned K3s/Helm, image import, chart installation and SSH/loopback access.
 Same-version reruns retain metadata; cross-version upgrades and unrelated
-clusters are refused. Published `v0.1.3` passed native Pi installation,
+clusters are refused. Published `v0.1.4` passed native Pi installation,
 same-version rerun and reboot acceptance; native rented-server acceptance remains
 pending. `platform.sh` remains the Docker/k3d development launcher.
 
@@ -360,7 +360,7 @@ Deletion of Helm storage records solely to remove a lock is prohibited.
 
 An existing application must continue running when the broker or its UI is
 unavailable. Kubernetes handles ordinary pod replacement. The observer reports
-drift or deleted resources; the initial version offers explicit **Reapply** using
+workload status, while explicit read-only drift inspection compares owned fields; the initial version offers explicit **Reapply** using
 `POST /api/v1/apps/{id}/reapply` and the same update mechanism. Operator changes
 made during troubleshooting are not overwritten automatically.
 
@@ -369,8 +369,14 @@ made during troubleshooting are not overwritten automatically.
 ### Lightweight profile: initial implementation
 
 Structured broker logs, operation history, audit rows and cached observations
-exist. Application log/event browsing, resource reporting, metrics endpoints,
+exist. Source application log/event browsing and drift reports are implemented
+with bounded reads and metadata ownership checks. Resource reporting, metrics,
 disk reporting and retention automation below remain planned requirements.
+The [diagnostics API](user/api-reference.md#application-diagnostics) records
+redaction limits and availability semantics. Explicit Reapply normalizes owned
+Service ports under UID/resource-version guards; preparation failure retains the
+operation block. Ownership guards also apply to Helm restore/uninstall, including
+resources removed from the old manifest. No inspection writes to the cluster.
 
 - Structured broker logs with request, application, and operation IDs.
 - Durable operation history and audit events in SQLite.

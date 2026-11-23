@@ -1,7 +1,7 @@
 # Management API contract for the Kubernetes application-deployment platform.
 #
 # This schema documents the implemented core/lifecycle API and credential
-# metadata endpoints. Diagnostics, settings, automation tokens, application
+# metadata and bounded application diagnostics. Settings, automation tokens, application
 # volumes and observability endpoints remain planned. Current implementation
 # remaining boundaries are recorded in docs/status.md; fixed contracts
 # are distinguished from planned features and host-specific acceptance.
@@ -36,6 +36,7 @@ tags:
   - name: operations
   - name: secrets
   - name: registry-credentials
+  - name: diagnostics
 
 paths:
   /healthz:
@@ -291,6 +292,88 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
         "412": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/logs:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    get:
+      tags: [diagnostics]
+      summary: Read bounded recent logs from an owned application container
+      description: >-
+        Reads the application container only, with a Deployment/ReplicaSet/Pod UID
+        ownership check. No arbitrary namespace, container, exec or follow option.
+        Maximum returned text is 64 KiB. Known managed Secret values and supported
+        encodings are masked before clipping; incomplete redaction inputs fail
+        closed. Reads time out after ten seconds. Redaction does not recognize
+        arbitrary application-defined secrets or every possible transformation.
+      parameters:
+        - { name: pod, in: query, schema: { type: string, maxLength: 253 }, description: "Optional owned Pod name; default is the newest active owned Pod." }
+        - { name: previous, in: query, schema: { type: boolean, default: false } }
+        - { name: tailLines, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+        - { name: sinceSeconds, in: query, schema: { type: integer, minimum: 1, maximum: 86400, default: 3600 } }
+      responses:
+        "200":
+          description: Bounded plain text with source and truncation metadata.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationLogs" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/events:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    get:
+      tags: [diagnostics]
+      summary: Read bounded Kubernetes events for current owned resource UIDs
+      description: >-
+        Separate from durable operation progress. Current Deployment, ReplicaSet,
+        Pod, Service and Ingress ownership is verified; events for unrelated UIDs
+        are excluded. Retention is Kubernetes-managed. Per-resource/read limits
+        can omit events; truncated is reported explicitly. Text is masked before
+        clipping, limited to 4096 bytes per field and 64 KiB overall.
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+      responses:
+        "200":
+          description: Most recent retained events within the bounded read.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationEvents" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /api/v1/apps/{id}/drift:
+    parameters:
+      - $ref: "#/components/parameters/AppID"
+    get:
+      tags: [diagnostics]
+      summary: Compare owned workload and route fields with frozen desired intent
+      description: >-
+        Read-only comparison against the available recorded chart/values snapshot.
+        Differences contain resource identifiers and field paths, never values.
+        Readiness and server-allocated addresses are not configuration drift.
+        Active operations are identified; intent changes during inspection return
+        409. Reapply remains an explicit mutation. Unknown ownership is reported
+        without adopting or overwriting the object.
+      responses:
+        "200":
+          description: Snapshot identity, observation time and owned field differences.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationDrift" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /api/v1/apps/{id}/revisions:
     parameters:
@@ -690,6 +773,54 @@ components:
         operationId: { type: string }
         state: { $ref: "#/components/schemas/OperationState" }
         deduplicated: { type: boolean }
+
+    ApplicationLogs:
+      type: object
+      required: [pod, container, text, truncated, observedAt]
+      properties:
+        pod: { type: string }
+        container: { type: string }
+        text: { type: string, maxLength: 65536 }
+        truncated: { type: boolean }
+        observedAt: { type: string, format: date-time }
+
+    WorkloadEvent:
+      type: object
+      required: [at, type, reason, message, resource, count]
+      properties:
+        at: { type: string, format: date-time }
+        type: { type: string, maxLength: 4096 }
+        reason: { type: string, maxLength: 4096 }
+        message: { type: string, maxLength: 4096 }
+        resource: { type: string, maxLength: 4096 }
+        count: { type: integer }
+
+    ApplicationEvents:
+      type: object
+      required: [items, truncated, observedAt]
+      properties:
+        items: { type: array, maxItems: 100, items: { $ref: "#/components/schemas/WorkloadEvent" } }
+        truncated: { type: boolean }
+        observedAt: { type: string, format: date-time }
+
+    ApplicationDrift:
+      type: object
+      required: [revisionId, applicationVersion, operationActive, state, differences, observedAt]
+      properties:
+        revisionId: { type: string }
+        applicationVersion: { type: integer, format: int64 }
+        operationActive: { type: boolean }
+        state: { type: string, enum: [in_sync, drifted] }
+        observedAt: { type: string, format: date-time }
+        differences:
+          type: array
+          items:
+            type: object
+            required: [resource, field, change]
+            properties:
+              resource: { type: string }
+              field: { type: string }
+              change: { type: string, enum: [modified, missing, unexpected] }
 
     OperationState:
       type: string

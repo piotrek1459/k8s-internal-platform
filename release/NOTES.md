@@ -22,6 +22,16 @@ chart and values identity. Failed updates attempt verified restoration before
 unlocking; ambiguous state remains `needs_attention` and permits a recovery retry.
 A different historical chart artifact is refused rather than silently substituted.
 
+A blocked first deployment without a successful predecessor supports explicit
+tracked removal while retaining its failed operation and frozen history.
+Application details provide bounded, ownership-checked logs and Kubernetes events,
+with managed-Secret masking and escaped browser text. Read-only drift inspection
+reports owned workload/route field paths without values or automatic correction.
+Explicit Reapply repairs owned ClusterIP Service port lists under UID and resource
+version guards while preserving identity/address. Pending transactions and foreign
+ownership remain blocked; ownership checks also cover restoration and uninstall.
+Diagnostic redaction and retention limits are documented in the API guide.
+
 Application chart `0.1.1` provides a Pod-local `/tmp` emptyDir with a 64Mi
 size limit and a filesystem group for non-root image users. This permits common
 images such as unprivileged Nginx to create temporary files while the root

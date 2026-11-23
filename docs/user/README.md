@@ -164,11 +164,40 @@ has a response-type mismatch. Application Secret references currently require
 explicit API submission and verification; the UI path is not accepted as complete. Values must not
 be placed in ordinary environment fields or source control.
 
-Registry credential endpoints currently provide metadata CRUD; private registry
-authentication and image-pull provisioning are not complete end to end. The local
-registry used by this walkthrough does not require a credential.
+Stored registry credentials support authenticated image inspection and actual
+kubelet pulls. Passwords remain in Kubernetes; ordinary responses contain
+metadata. The local demonstration registry does not require a credential. The
+complete credential-management browser acceptance remains tracked in issue #16.
 
 ## Diagnostics
+
+Application details → **Diagnostics** provides three explicit reads:
+
+- **Read logs:** newest active owned Pod by default, or a selected owned Pod.
+  Recent lines are limited to 100 or 500 and the range to the last hour or day.
+  **Previous container** reads a prior container instance in that same Pod when
+  retained by Kubernetes; it does not retrieve deleted Pods or an archived release.
+- **Read events:** retained Kubernetes events for current owned resource UIDs.
+  These are separate from the application's durable operation events.
+- **Inspect drift:** compares owned workload/route fields with the frozen desired
+  execution snapshot. Differences identify fields without returning their values.
+  Active operations can still be converging; inspect again after completion.
+
+Logs and events are bounded and displayed as escaped text. Managed configuration
+and registry Secret values and supported encodings are masked before clipping.
+A failed Secret inventory read fails the diagnostic request. Arbitrary
+application-defined secrets or custom transformations cannot be recognized;
+applications must avoid logging credentials or other sensitive content.
+The [API guide](api-reference.md#application-diagnostics) records exact limits.
+
+Drift inspection changes no resources. **Reapply** remains a separate action.
+For an owned ClusterIP Service, explicit Reapply repairs the desired port list
+under UID/resource-version guards before Helm applies the frozen workload.
+Service identity and allocated addresses are retained. Foreign ownership or an
+unresolved Helm transaction blocks repair. Unsupported fields, external resources
+and the unavailable historical-chart case still require diagnosis.
+
+Development broker diagnostics remain available through:
 
 ```bash
 ./scripts/platform.sh status
@@ -200,7 +229,10 @@ The update form remains limited. A non-empty environment text area replaces the
 complete ordinary environment map. Creation supports versioned Secret references.
 LAN selection requires an explicitly configured private ingress controller and
 hostname; the native installer provides Internal access and SSH forwarding.
-Public HTTPS, application volumes and application log browsing remain planned.
+Public HTTPS, application volumes, a complete configuration editor and durable
+searchable log storage remain planned. The source diagnostics additions require
+a release containing them; the reference Pi acceptance for published v0.1.4
+covers the earlier lifecycle and blocked-first-deployment removal features.
 
 ## Stop and resume
 
