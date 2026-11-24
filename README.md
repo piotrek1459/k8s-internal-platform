@@ -17,13 +17,13 @@ prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes the resulting native
-ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.6`
+ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.7`
 commands are version examples; the downloaded guide matches the selected release.
-Native `v0.1.5` installation, lifecycle, diagnostics/drift repair, same-version
-rerun and reboot passed on the reference Pi. Diagnostic fixture cleanup exposed
-two Secret-deletion defects; released `v0.1.6` corrects them. Native v0.1.6
-verification is pending reference-host SSH access. The [verification report](tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
-retains the failed native cleanup result and separate source evidence.
+Published `v0.1.7` passed reference-Pi installation, lifecycle, diagnostics/drift,
+physical Secret cleanup and partial-cleanup retry across broker replacement,
+same-version reinstall and host reboot. Original v0.1.7 session/account/app/history/
+PVC identity and real HTTP survived. The [native report](tests/experiments/2026-11-23-v0.1.7-native.md)
+records the verified release and remaining core acceptance.
 The release includes writable temporary files with container hardening retained;
 verification details are recorded in [status](docs/status.md). Public HTTPS,
 application volumes and cross-version upgrades remain separate acceptance boundaries.

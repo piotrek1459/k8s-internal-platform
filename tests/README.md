@@ -197,7 +197,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.6 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.7 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -222,22 +222,72 @@ memory. Fixture identities are saved privately before waits and cleanup uses
 recorded UID/resource-version guards. Cleanup failure fails acceptance and retains
 identities for inspection; a subsequent diagnostics run refuses unresolved state.
 Published v0.1.5 passes the diagnostics reads/repair but fails Secret cleanup.
-The correction is released in v0.1.6; native confirmation awaits reference-host SSH.
+The correction introduced in v0.1.6 passed physical cleanup/retry verification in
+published v0.1.7; v0.1.6 itself was not installed natively.
 After reboot, restart the forwards and run the same command with `--resume`
 instead of `--setup`. Cleanup of an installation requires separate explicit
 operator action; the test never uninstalls K3s or deletes unrelated applications.
 
 The [v0.1.5/Secret lifecycle report](experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
-records the latest native results and failed Secret cleanup; its correction is now released in v0.1.6.
+retains the preceding failed v0.1.5 cleanup and source correction. The
+[latest v0.1.7 report](experiments/2026-11-23-v0.1.7-native.md) verifies native
+physical cleanup/retry, lifecycle, same-version reinstall and reboot.
 The [core resilience report](experiments/2026-11-23-core-resilience.md) records
 local lost-response/moved-tag, running-browser and workload-origin acceptance.
-Native v0.1.6 verification remains pending reference-host SSH access.
+Published v0.1.7 native acceptance is complete for the installation/Secret-cleanup
+gate; LAN, remaining worker failure/disclosure and evaluation work remain open.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native
 lifecycle, unpatched public-image deployment, reinstall/reboot and direct Helm
 baseline. The [earlier Pi report](experiments/2026-11-22-raspberry-pi.md) retains
 its original version-specific observations.
+
+### Native partial Secret cleanup across broker replacement
+
+After lifecycle/setup acceptance, the same runner supports a separate two-phase
+check against its dedicated test installation. Reuse the matching private state
+and published manifest; do not combine these phases with `--setup`, `--resume`
+or other lifecycle flags.
+
+```bash
+python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.7 \
+  --release-manifest .local/pi/release.json --state .local/pi/access.json \
+  --artifacts .local/pi/secret-hold --secret-cleanup-phase hold
+```
+
+Hold creates/versions a Secret through the browser, verifies exact contents
+privately, checks API/browser refusal while referenced, then deletes its own app.
+A UID/resource-version-guarded ownership change on v2 causes a controlled partial
+cleanup: v1 is removed, v2 refused, metadata reserved and new dependencies rejected.
+Resource identities and the original session cookie are saved privately.
+
+On the Pi, replace the broker with the documented installer-owned tool:
+
+```bash
+pkubectl -n platform-system rollout restart deployment/platform
+pkubectl -n platform-system rollout status deployment/platform --timeout=120s
+```
+
+Reconnect the management port-forward after replacement and confirm `/readyz`
+reports `status: ready` and `cluster: available`. Keep the temporary loopback
+Kubernetes proxy/SSH forward available. Then resume from the workstation:
+
+```bash
+python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.7 \
+  --release-manifest .local/pi/release.json --state .local/pi/access.json \
+  --artifacts .local/pi/secret-resume --secret-cleanup-phase resume
+```
+
+Resume requires a changed broker container identity with the same metadata PVC
+and original saved session. It verifies the pending UI and refusal before repair,
+restores only the recorded fixture's ownership under UID/resource-version tests,
+and finishes through browser retry. All versions/metadata are removed and app
+history remains; the dedicated cookie is revoked/removed. Interrupted/changed
+identities require inspection rather than forced cleanup. The broker replacement
+is an explicit operator step; the test never uninstalls K3s or resets other data.
 
 The native deletion check allows up to 60 seconds for Pod garbage collection
 after the tracked delete operation completes. Deployment deletion and dependent

@@ -222,6 +222,10 @@ class Native:
         assert system['version'] == self.args.version.removeprefix('v'), 'Installed version does not match requested release'
         assert system['clusterReachable'] and system['architecture'] == 'arm64'
         self.record('Native ARM64 system reports the expected release and a reachable cluster')
+        if self.args.secret_cleanup_phase:
+            from native_secret_cleanup import check_secret_cleanup
+            check_secret_cleanup(self, self.args.secret_cleanup_phase)
+            return
         if self.args.resume:
             app = self.state['retainedApp']
             current = self.client.get('/apps/'+app)
@@ -288,6 +292,10 @@ def main():
     parser.add_argument('--public-image', help='Opt-in unprivileged Nginx image for the browser temporary-files compatibility check')
     parser.add_argument('--blocked-first-removal', action='store_true', help='Exercise a failed first deployment and guarded browser removal (adds a deliberate Helm timeout)')
     parser.add_argument('--diagnostics', action='store_true', help='Verify published logs/events masking, ownership, browser escaping and explicit drift repair on owned fixtures')
-    Native(parser.parse_args()).run()
+    parser.add_argument('--secret-cleanup-phase', choices=('hold', 'resume'), help='Create a controlled partial cleanup, then verify browser retry after operator-performed broker replacement')
+    args = parser.parse_args()
+    if args.secret_cleanup_phase and (args.setup or args.resume or args.diagnostics or args.public_image or args.blocked_first_removal):
+        parser.error('--secret-cleanup-phase is a separate check and cannot be combined with lifecycle/setup/resume flags')
+    Native(args).run()
 
 if __name__=='__main__':main()

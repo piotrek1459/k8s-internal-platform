@@ -250,7 +250,7 @@ explicit; planned rows are not callable interfaces.
 | `GET /api/v1/secrets` | Secret metadata; values are never returned. | Implemented |
 | `POST /api/v1/secrets` | Versioned secret creation before use in an application. | Implemented; single value key |
 | `POST /api/v1/secrets/{id}/versions` | Creation of an immutable replacement secret version. | Implemented |
-| `DELETE /api/v1/secrets/{id}` | Remove recorded Kubernetes versions and metadata after verifying live references. | Released in v0.1.6 with durable cleanup, UID/ownership guards and retry; native confirmation remains pending |
+| `DELETE /api/v1/secrets/{id}` | Remove recorded Kubernetes versions and metadata after verifying live references. | Released from v0.1.6; published v0.1.7 native cleanup/retry passed with UID/ownership guards and retained metadata/session/PVC evidence |
 | `GET /api/v1/volumes` | Attached and retained data volumes. | Planned |
 | `DELETE /api/v1/volumes/{id}` | Explicit, tracked deletion of an unused retained volume. | Planned |
 | `GET /metrics` | Private platform metrics for the monitoring profile. | Planned |

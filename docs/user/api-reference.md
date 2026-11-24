@@ -279,8 +279,9 @@ Missing versions are already removed; changed ownership is refused. A partial
 cleanup returns 409/503 and retains metadata/identities, so repeating DELETE can
 finish after diagnosis. A 204 establishes removal of all recorded versions and
 metadata. Versions orphaned by earlier metadata-only deletion are not guessed or
-collected automatically. This corrected cleanup is included in v0.1.6; native verification of that release
-is pending reference-host SSH access.
+collected automatically. This corrected cleanup is included from v0.1.6 and passed native v0.1.7
+physical cleanup/browser retry acceptance. The intermediate v0.1.6 release was
+not tested natively.
 
 `POST /apps/{id}/recover` is a recovery retry, not a new mutation specification.
 It accepts `{version}`, reuses the existing blocked operation ID and increments
