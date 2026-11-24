@@ -55,6 +55,9 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			if err != nil {
 				return err
 			}
+			if got.DeletionTimestamp != nil {
+				return mismatch("resource is terminating")
+			}
 			n := int32(1)
 			if want.Spec.Replicas != nil {
 				n = *want.Spec.Replicas
@@ -88,6 +91,9 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			if err != nil {
 				return err
 			}
+			if got.DeletionTimestamp != nil {
+				return mismatch("resource is terminating")
+			}
 			if !equality.Semantic.DeepEqual(want.Spec.Selector, got.Spec.Selector) || !equality.Semantic.DeepDerivative(want.Spec.Ports, got.Spec.Ports) || got.Spec.Type != corev1.ServiceTypeClusterIP {
 				return mismatch("Service selector, ports or type differs")
 			}
@@ -104,6 +110,9 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			got, err := c.cs.NetworkingV1().Ingresses(c.namespace).Get(ctx, want.Name, metav1.GetOptions{})
 			if err != nil {
 				return err
+			}
+			if got.DeletionTimestamp != nil {
+				return mismatch("resource is terminating")
 			}
 			if !equality.Semantic.DeepDerivative(want.Spec, got.Spec) {
 				return mismatch("resource identity or count differs")

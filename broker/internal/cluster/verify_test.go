@@ -106,3 +106,34 @@ func TestVerifyManifestRejectsEnvironmentAbsentFromTarget(t *testing.T) {
 		t.Fatal("a removed environment field was treated as a wildcard")
 	}
 }
+
+func TestVerifyManifestRejectsTerminatingResources(t *testing.T) {
+	for _, kind := range []string{"Deployment", "Service", "Ingress"} {
+		t.Run(kind, func(t *testing.T) {
+			ctx := context.Background()
+			cs, manifest := verifiedFixture(t, kind == "Ingress")
+			mark := func(meta *metav1.ObjectMeta) {
+				now := metav1.Now()
+				meta.DeletionTimestamp = &now
+				meta.Finalizers = []string{"fixture.platform.test/hold"}
+			}
+			switch kind {
+			case "Deployment":
+				object, _ := cs.AppsV1().Deployments(ns).Get(ctx, "app-app-1", metav1.GetOptions{})
+				mark(&object.ObjectMeta)
+				cs.AppsV1().Deployments(ns).Update(ctx, object, metav1.UpdateOptions{})
+			case "Service":
+				object, _ := cs.CoreV1().Services(ns).Get(ctx, "app-app-1", metav1.GetOptions{})
+				mark(&object.ObjectMeta)
+				cs.CoreV1().Services(ns).Update(ctx, object, metav1.UpdateOptions{})
+			case "Ingress":
+				object, _ := cs.NetworkingV1().Ingresses(ns).Get(ctx, "app-app-1", metav1.GetOptions{})
+				mark(&object.ObjectMeta)
+				cs.NetworkingV1().Ingresses(ns).Update(ctx, object, metav1.UpdateOptions{})
+			}
+			if err := NewWithClientset(cs, ns).VerifyManifest(ctx, manifest); err == nil {
+				t.Fatal("matching fields and stale ready status accepted a terminating resource")
+			}
+		})
+	}
+}

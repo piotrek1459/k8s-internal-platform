@@ -299,7 +299,9 @@ Ingress spec or removes that owned route when the target is Internal. UID and
 resource-version preconditions reject concurrent changes; foreign resources and
 immutable selector changes are refused. Verification checks readiness, managed
 field equality, complete ownership and extra resources, including explicit route
-absence for Internal targets. A successful partial patch does not unlock an app
+absence for Internal targets. Terminating Deployments, Services and Ingresses
+cannot satisfy target verification even with stale Ready status.
+A successful partial patch does not unlock an app
 when later preparation, Helm apply or verification fails.
 
 After verified restoration, the operation becomes **Failed**, with recovery

@@ -15,6 +15,9 @@ Internal target. UID/resource-version guards and full Helm ownership prevent
 repair of foreign/concurrently changed objects. Target verification requires
 observed healthy replicas, exact managed fields and the expected resource set,
 including route absence. Failed preparation/apply/verification retains the lock.
+Terminating Deployments, Services and Ingresses are refused even if their fields
+and stale Ready counters still match. A focused regression reproduced all three
+false positives before the deletion-timestamp guard was added.
 
 Supported version-guarded retry restores an already failed candidate's predecessor
 directly, preserving that candidate's snapshot and failed Helm evidence. It does
@@ -56,7 +59,10 @@ fixtures and loopback access; finalizers removed those resources.
 These focused runs preceded the clean committed branch. They identify their
 selected cases and are not a substitute for the complete CI suite. A subsequent
 Dockerfile relocation colocates the external fixture source/build definition;
-the full committed-source run must include that layout.
+the full committed-source run must include that layout and the terminating-resource
+guard. The initial [CI run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453312193)
+was explicitly cancelled as superseded after the additional regression exposed
+that guard; it is not recorded as passing acceptance.
 
 ## Failed attempts retained
 
