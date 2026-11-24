@@ -78,9 +78,15 @@ spec:
             - name: PLATFORM_APPS_NAMESPACE
               value: {{ .Values.appsNamespace | quote }}
             - name: PLATFORM_PRIVATE_INGRESS_ENABLED
-              value: {{ .Values.privateIngressEnabled | quote }}
+              value: {{ or .Values.privateIngressEnabled .Values.privateLAN.enabled | quote }}
             - name: PLATFORM_SECURE_COOKIES
-              value: {{ .Values.secureCookies | quote }}
+              value: {{ or .Values.secureCookies .Values.privateLAN.enabled | quote }}
+            - name: PLATFORM_PRIVATE_MANAGEMENT_HOSTNAME
+              value: {{ ternary .Values.privateLAN.managementHostname "" .Values.privateLAN.enabled | quote }}
+            - name: PLATFORM_PRIVATE_APPLICATION_DOMAIN
+              value: {{ ternary .Values.privateLAN.applicationDomain "" .Values.privateLAN.enabled | quote }}
+            - name: PLATFORM_PRIVATE_HTTPS_PORT
+              value: {{ ternary (toString .Values.privateLAN.httpsPort) "" .Values.privateLAN.enabled | quote }}
             {{- if .Values.insecureRegistries }}
             - name: PLATFORM_INSECURE_REGISTRIES
               value: {{ .Values.insecureRegistries | quote }}

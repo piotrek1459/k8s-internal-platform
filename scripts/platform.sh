@@ -41,12 +41,16 @@ configure() {
     LOCAL_API_PORT="${PLATFORM_API_PORT:-6446}"
     LOCAL_UI_PORT="${PLATFORM_UI_PORT:-8080}"
     LOCAL_APP_PORT="${PLATFORM_APP_PORT:-8081}"
-    local port seen=' '
-    for port in "$LOCAL_REGISTRY_PORT" "$LOCAL_API_PORT" "$LOCAL_UI_PORT" "$LOCAL_APP_PORT"; do
+    # A disposable E2E installation may reserve an additional private TLS port.
+    # Ordinary local development publishes no gateway port.
+    LOCAL_LAN_PORT="${PLATFORM_LAN_TEST_PORT:-}"
+    local port seen=' ' ports=("$LOCAL_REGISTRY_PORT" "$LOCAL_API_PORT" "$LOCAL_UI_PORT" "$LOCAL_APP_PORT")
+    if [[ -n "$LOCAL_LAN_PORT" ]]; then ports+=("$LOCAL_LAN_PORT"); fi
+    for port in "${ports[@]}"; do
         [[ ${#port} -le 5 && "$port" =~ ^[0-9]+$ ]] || fail 'Ports must be decimal integers from 1 to 65535.'
         (( 10#$port >= 1 && 10#$port <= 65535 )) || fail 'Ports must be between 1 and 65535.'
         [[ "$port" == "$((10#$port))" ]] || fail 'Ports must not contain leading zeroes.'
-        case "$seen" in *" $port "*) fail 'The API, registry, UI and application forwards need distinct ports.' ;; esac
+        case "$seen" in *" $port "*) fail 'The API, registry, UI, application and optional LAN listener need distinct ports.' ;; esac
         seen="$seen$port "
     done
     LOCAL_STATE="$PLATFORM_LOCAL/$LOCAL_CLUSTER"
@@ -183,8 +187,10 @@ ensure_cluster() {
         fi
     else
         ensure_registry
+        local cluster_options=(--registry-use "$LOCAL_REGISTRY_CLUSTER")
+        if [[ -n "$LOCAL_LAN_PORT" ]]; then cluster_options+=(--port "127.0.0.1:$LOCAL_LAN_PORT:$LOCAL_LAN_PORT@server:0"); fi
         k3d cluster create "$LOCAL_CLUSTER" --servers 1 --agents 0 --image "$K3S_IMAGE" \
-            --registry-use "$LOCAL_REGISTRY_CLUSTER" --k3s-arg '--secrets-encryption@server:0' \
+            "${cluster_options[@]}" --k3s-arg '--secrets-encryption@server:0' \
             --api-port "127.0.0.1:$LOCAL_API_PORT" \
             --kubeconfig-update-default=false --kubeconfig-switch-context=false --wait --timeout 180s
     fi

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -104,6 +105,23 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		SecureCookies:         os.Getenv("PLATFORM_SECURE_COOKIES") == "true",
 		Inspector:             registry.NewInspector(nil).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases),
 		Version:               buildVersion,
+	}
+	if os.Getenv("PLATFORM_PRIVATE_MANAGEMENT_HOSTNAME") != "" || os.Getenv("PLATFORM_PRIVATE_APPLICATION_DOMAIN") != "" || os.Getenv("PLATFORM_PRIVATE_HTTPS_PORT") != "" {
+		port, err := strconv.Atoi(os.Getenv("PLATFORM_PRIVATE_HTTPS_PORT"))
+		if err != nil {
+			return fmt.Errorf("private HTTPS port must be an integer")
+		}
+		cfg.PrivateNetwork = httpapi.PrivateNetwork{
+			ManagementHostname: os.Getenv("PLATFORM_PRIVATE_MANAGEMENT_HOSTNAME"),
+			ApplicationDomain:  os.Getenv("PLATFORM_PRIVATE_APPLICATION_DOMAIN"),
+			HTTPSPort:          port,
+		}
+		if !cfg.PrivateIngressEnabled || !cfg.SecureCookies {
+			return fmt.Errorf("private networking requires private ingress and Secure cookies")
+		}
+		if err := cfg.PrivateNetwork.Validate(); err != nil {
+			return err
+		}
 	}
 
 	// The Helm adapter and the operation worker require in-cluster access. When it

@@ -171,6 +171,16 @@ curl -fsS http://127.0.0.1:8080/readyz
 The `/api/v1/system` endpoint requires an authenticated session; authentication
 and all mutation headers are documented in the [API guide](user/api-reference.md).
 
+## Optional private LAN HTTPS
+
+After SSH bootstrap, a release containing the LAN implementation can enable a
+private management/application listener with `--lan-config FILE`. Published
+v0.1.7 does not contain that option. Follow the [LAN guide](private-lan.md) for the
+existing TLS Secret, Python 3/OpenSSL prerequisites, explicit address/source CIDRs,
+local DNS, client trust and same-version configuration retention. Public routing
+remains disabled. Secure-cookie installations preserve TLS through the documented
+SSH fallback rather than signing in through a plain-HTTP forward.
+
 ## 5. Deploy the bundled demo
 
 Read the exact demo image reference on the server:
@@ -189,7 +199,7 @@ registry resolution; the imported image is already available on the node.
 For UI deployment, supply an image available in a reachable public registry and
 built for the host architecture. The HTTP profile keeps the root filesystem
 read-only and supplies writable, Pod-local `/tmp` storage through application
-chart `0.1.1`. The temporary volume has a `64Mi` size limit and is discarded with
+chart `0.1.1` and retained in source `0.1.2`. The temporary volume has a `64Mi` size limit and is discarded with
 the Pod; it is not persistent application storage. Unprivileged Nginx on port
 `8080` with readiness path `/` is the reference compatibility check. Inspect
 the image, select its actual container port and readiness path, then deploy with

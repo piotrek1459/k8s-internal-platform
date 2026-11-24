@@ -72,6 +72,21 @@ if [[ -d "$platform_chart" ]]; then
     "$PLATFORM_HELM" template platform "$platform_chart" \
         --namespace platform-system --set image.tag=dev >/dev/null
     printf 'Platform chart lint and render passed.\n'
+    lan_options=(--set privateLAN.enabled=true --set-string privateLAN.address=192.168.68.227
+        --set-string 'privateLAN.allowedCIDRs[0]=192.168.68.0/24'
+        --set privateLAN.managementHostname=platform.home.arpa,privateLAN.applicationDomain=apps.home.arpa)
+    "$PLATFORM_HELM" template platform "$platform_chart" --namespace platform-system --set image.tag=dev "${lan_options[@]}" >/dev/null
+    for invalid in 'privateLAN.address=0.0.0.0' 'privateLAN.address=::' 'privateLAN.address=192.168.1.999' \
+        'privateLAN.allowedCIDRs[0]=0.0.0.0/0' 'privateLAN.allowedCIDRs[0]=192.168.0.0/8' \
+        'privateLAN.httpsPort=443' 'privateLAN.managementHostname=apps.home.arpa' \
+        'privateLAN.managementHostname=platform.apps.home.arpa'; do
+        flag=--set-string
+        if [[ "$invalid" == privateLAN.httpsPort=* ]]; then flag=--set; fi
+        if "$PLATFORM_HELM" template platform "$platform_chart" --set image.tag=dev "${lan_options[@]}" "$flag" "$invalid" >/dev/null 2>&1; then
+            printf 'Expected private listener validation to refuse %s.\n' "$invalid" >&2; exit 1
+        fi
+    done
+    printf 'Private LAN chart render and invalid listener/source policy checks passed.\n'
 fi
 
 

@@ -303,3 +303,28 @@ conditional skips. Historical reports retain their original results; current
 status/restart tests are mandatory and the updated policy rejects any skipped
 E2E workflow. Secret-reading test commands are private; known secret plaintext
 and base64-encoded values are redacted from retained diagnostics.
+
+### Private LAN HTTPS acceptance
+
+`test_75_private_lan_https` exercises the source gateway in the owned disposable
+cluster. It creates an ephemeral CA/leaf and existing TLS Secret, binds the
+explicit node IPv4 address and verifies actual HTTPS using CA/hostname checks.
+An untrusted CA and unknown SNI are refused. Browser login/deployment and URL
+reload use a controlled leaf-SPKI pin without modifying system trust; management
+cookies must be Secure/HttpOnly/SameSite=Strict and absent on the app hostname.
+The actual app serves HTTP v1 through its route. Reserved/duplicate names, an
+Internal app, an excluded source with forged forwarding headers and IPv6 are
+negative cases. The original platform configuration is restored and only owned
+fixtures are removed; the suite then deletes its disposable cluster.
+
+`tests/regression/test_private_lan.py` validates native configuration and real
+OpenSSL certificate/key preflight without root/cluster access. Chart checks
+refuse wildcard/public/invalid listeners, permissive source networks and
+overlapping management/app names. Go regressions cover hostname policy, atomic
+rollback reservations and successful-revision URL selection.
+
+Source acceptance does not complete [native LAN acceptance](../docs/private-lan.md).
+After merge and manual release publication, that release must be installed on
+the reference Pi and verified from a separate LAN device with real DNS/hosts,
+CA trust, actual app HTTP, Secure cookies, private-listener isolation and reboot.
+The sequence is one PR, release, validation, then the next implementation PR.

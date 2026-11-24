@@ -1,6 +1,6 @@
 # Implementation status and next work
 
-Updated: 2026-11-23. This document distinguishes implemented behavior, executed
+Updated: 2026-11-24. This document distinguishes implemented behavior, executed
 verification and remaining scope. Plans and passing unit tests are not evidence
 of acceptance on every deployment target.
 
@@ -15,7 +15,7 @@ embedded first-party Helm chart.
 | --- | --- | --- |
 | Distribution | Manually dispatched releases pin a selected branch HEAD, run regression/E2E gates and publish ARM64/AMD64 OCI bundles, installer, guide and checksums. Normal publication is the default. | Native Raspberry Pi results are recorded separately; native AMD64 host acceptance and cross-version upgrades remain outstanding. |
 | Installation | Published v0.1.7 passed fresh Raspberry Pi installation, lifecycle, same-version rerun and reboot. The installer provisions pinned K3s/Helm and native OCI digests; same-version reruns retain state. | Verified owned v0.1.5 test state was privately archived/reset before fresh v0.1.7. This was not a cross-version upgrade or backup restoration. Unrelated installations remain protected. |
-| Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Login throttling, password recovery and normal LAN HTTPS administration remain outstanding. |
+| Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Login throttling/password recovery remain outstanding; the new LAN mode awaits published Pi acceptance. |
 | UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Released diagnostics include bounded application logs/events and drift inspection; the complete configuration editor remains planned. LAN selection is enabled only when private ingress is explicitly configured. |
 | Application lifecycle | Digest-pinned deployment, update, scale 2/0/1, restart, reapply, rollback and deletion with retained history. | Replicas on one node do not provide host availability. Application data volumes remain M5 scope. |
 | Temporary files | Application chart `0.1.1` supplies a Pod-local `/tmp` emptyDir with a 64Mi size limit and non-root filesystem-group access. | Published `v0.1.3` passed unpatched browser deployment of unprivileged Nginx and real HTTP verification on the Pi. The volume is ephemeral; it does not provide M5 persistence. |
@@ -24,7 +24,7 @@ embedded first-party Helm chart.
 | Configuration Secrets | From v0.1.6: immutable versions, exact references, durable deletion reservations, UID/ownership-guarded physical removal and retry. Published v0.1.7 verified browser creation/versioning, reference refusal, deleted-history cleanup and partial retry across actual broker replacement on the Pi. | Complete negative-path disclosure and historical orphan collection remain separate. Original v0.1.7 session/PVC/history survived the native retry and reinstall/reboot checks. |
 | Registry credentials | Immutable Kubernetes Docker configuration Secrets support inspection and kubelet pulls. SQLite contains metadata only. Credentials are registry-scoped and deletion is guarded by active/rollback references. | Password creation does not itself verify registry access. Credential rotation and external registry-provider variations require separate acceptance. |
 | Diagnostics | Published v0.1.7 verified bounded owned logs/events, managed-Secret masking, escaped text and field-only drift on the Pi. Explicit Reapply restored Service ports/HTTP/intent while retaining UID/address; fixture Secret cleanup passed. | Current-resource reads are not a durable archive. Audit browsing, capacity, metrics and the full disclosure/failure matrix remain open. |
-| Networking | ClusterIP management and applications with SSH loopback forwarding. Private ingress is an explicit optional capability. | The native installer disables Traefik/ServiceLB. LAN DNS/HTTPS and public routing/tunnels remain separate work. |
+| Networking | Default SSH/ClusterIP access; source optional private LAN HTTPS binds a specific IPv4 address, enforces source CIDRs, uses an existing TLS Secret and exposes configured app URLs with Secure cookies. | The next published release and real second-device Pi/DNS/trust checks remain required. Built-in Traefik/ServiceLB stay disabled; the opt-in private gateway is separate. Public routing remains M6 scope. |
 | Persistence | A platform PVC retains SQLite, accounts, sessions, revisions and history. | Application volumes, off-device backups and verified data restoration remain M5 scope. |
 
 ## Known correctness and integration gaps
@@ -57,7 +57,7 @@ app/revision/history/PVC identity and HTTP survived reinstall/reboot. The
 identity and evidence. The preceding v0.1.5 failure remains in its
 [dated report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md);
 v0.1.6 itself was not installed natively.
-Core work still missing includes normal private LAN HTTPS and parts of the real-cluster
+Core acceptance still missing includes native private LAN HTTPS and parts of the real-cluster
 crash/browser/security/evaluation matrix. These remain M0–M4 obligations in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16), alongside
 the [audited milestone checklists](milestones.md). Public HTTPS, application
@@ -123,9 +123,10 @@ reliability. Measurements must record release/source, host, pins and conditions.
 
 ## Next implementation order
 
-1. Provide normal private LAN HTTPS management and application routing with a
-   stable hostname, certificate trust instructions and Secure cookies. Verify from
-   another LAN device while preserving SSH/loopback bootstrap.
+1. Complete source/CI acceptance of the optional [private LAN implementation](private-lan.md),
+   merge its PR, publish a release manually and validate that unmodified release
+   on the Pi from another LAN device, including DNS/trust, Secure cookies and the
+   TLS/SSH fallback. No later implementation PR starts before this validation.
 2. Complete the remaining core reliability/security matrix in
    [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16):
    deterministic worker crash barriers, failed restoration and recovery retry,

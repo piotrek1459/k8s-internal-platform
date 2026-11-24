@@ -6,12 +6,14 @@ STATE_ROOT=/etc/k8s-internal-platform
 TOOL_ROOT=/usr/local/lib/k8s-internal-platform
 KUBECONFIG_PATH=/etc/rancher/k3s/k3s.yaml
 WORK=
+LAN_CONFIG=
 
 fail() { printf 'Error: %s\n' "$*" >&2; exit 1; }
 usage() {
     cat <<'HELP'
 Usage: sudo bash install.sh --version v0.1.2 [--check] [--prepare-host]
        sudo bash install.sh --version v0.1.2 --bundle FILE --checksum FILE
+       sudo bash install.sh --version v0.1.2 --lan-config FILE
 
 Installs the pinned K3s release and imports the platform/demo OCI images.
 Requires 64-bit Linux, systemd, memory cgroups, 2 GiB RAM and 6 GiB free disk.
@@ -20,7 +22,92 @@ Requires 64-bit Linux, systemd, memory cgroups, 2 GiB RAM and 6 GiB free disk.
 a manual reboot is required (exit status 20). No reboot is performed automatically.
 An unrelated K3s installation is never replaced. Same-version reruns retain data;
 upgrading a different installed platform version is not supported by this installer.
+--lan-config enables private HTTPS on an existing same-version installation.
+Requires Python 3, OpenSSL and an existing TLS Secret; see the LAN setup guide.
+The validated configuration is retained on subsequent same-version reruns.
 HELP
+}
+
+# Pure validation/conversion. JSON is parsed as data, never sourced or evaluated.
+lan_values() {
+    python3 - "$1" <<'PY'
+import ipaddress,json,re,sys
+try:
+    with open(sys.argv[1]) as stream: config=json.load(stream)
+    required={'address','httpsPort','allowedCIDRs','managementHostname','applicationDomain','tlsSecretName'}
+    if not isinstance(config,dict) or set(config)!=required: raise ValueError('expected exactly the documented LAN fields')
+    private=[ipaddress.ip_network(value) for value in ('10.0.0.0/8','172.16.0.0/12','192.168.0.0/16')]
+    if not isinstance(config['address'],str): raise ValueError('listener address must be a string')
+    address=ipaddress.ip_address(config['address'])
+    if address.version!=4 or not any(address in network for network in private): raise ValueError('listener must bind a specific RFC1918 IPv4 address')
+    if type(config['httpsPort']) is not int or not 1024<=config['httpsPort']<=65535: raise ValueError('HTTPS port must be between 1024 and 65535')
+    ranges=config['allowedCIDRs']
+    if not isinstance(ranges,list) or not ranges or len(ranges)!=len(set(ranges)): raise ValueError('non-empty unique source CIDRs are required')
+    for value in ranges:
+        if not isinstance(value,str): raise ValueError('source CIDRs must be strings')
+        network=ipaddress.ip_network(value,strict=True)
+        if network.version!=4 or not any(network.subnet_of(parent) for parent in private): raise ValueError('source CIDRs must be RFC1918 IPv4 subnets')
+    label=r'[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?'
+    for field in ('managementHostname','applicationDomain'):
+        name=config[field]
+        if not isinstance(name,str) or len(name)>253 or not re.fullmatch(label+r'(?:\.'+label+r')+',name): raise ValueError('valid lowercase DNS names are required')
+    host,domain=config['managementHostname'],config['applicationDomain']
+    if host==domain or host.endswith('.'+domain): raise ValueError('management hostname must be outside the application domain')
+    if not isinstance(config['tlsSecretName'],str) or not re.fullmatch(label,config['tlsSecretName']): raise ValueError('TLS Secret name must be a DNS label')
+    print(json.dumps({'privateLAN':{'enabled':True,**config}},sort_keys=True))
+except (ValueError,TypeError,KeyError,OSError) as error:
+    sys.exit('Invalid LAN configuration: '+str(error))
+PY
+}
+
+check_lan_address() {
+    python3 - "$LAN_CONFIG" <<'PY'
+import json,subprocess,sys
+with open(sys.argv[1]) as stream: address=json.load(stream)['address']
+try: interfaces=json.loads(subprocess.check_output(['ip','-j','-4','address','show']))
+except (OSError,subprocess.CalledProcessError,ValueError): sys.exit('LAN setup requires iproute2 IPv4 address inspection')
+if not any(item.get('local')==address for interface in interfaces for item in interface.get('addr_info',[])):
+    sys.exit('Configured private listener address is not assigned to this host')
+PY
+}
+
+check_lan_certificate() {
+    local secret hostname domain
+    read -r secret hostname domain < <(python3 - "$WORK/lan-values.json" <<'PY'
+import json,sys
+with open(sys.argv[1]) as stream: config=json.load(stream)['privateLAN']
+print(config['tlsSecretName'],config['managementHostname'],config['applicationDomain'])
+PY
+)
+    "$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" -n platform-system get secret "$secret" -o json > "$WORK/tls-secret.json" || fail 'Create the documented TLS Secret before enabling LAN HTTPS.'
+    python3 - "$WORK" <<'PY'
+import base64,json,pathlib,sys
+folder=pathlib.Path(sys.argv[1])
+with (folder/'tls-secret.json').open() as stream: secret=json.load(stream)
+if secret.get('type')!='kubernetes.io/tls': sys.exit('LAN certificate requires a kubernetes.io/tls Secret')
+for key in ('tls.crt','tls.key'):
+    try: value=base64.b64decode(secret['data'][key],validate=True)
+    except (KeyError,ValueError): sys.exit('TLS Secret is missing valid certificate/key data')
+    path=folder/key;path.write_bytes(value);path.chmod(0o600)
+PY
+    openssl x509 -in "$WORK/tls.crt" -noout -checkend 86400 >/dev/null || fail 'LAN certificate must remain valid for at least 24 hours.'
+    openssl x509 -in "$WORK/tls.crt" -noout -startdate > "$WORK/tls-start"
+    python3 - "$WORK/tls-start" <<'PY'
+import pathlib,ssl,sys,time
+start=pathlib.Path(sys.argv[1]).read_text().split('=',1)[1].strip()
+if ssl.cert_time_to_seconds(start)>time.time(): sys.exit('LAN certificate is not valid yet')
+PY
+    openssl x509 -in "$WORK/tls.crt" -noout -checkhost "$hostname" >/dev/null || fail 'LAN certificate does not cover the management hostname.'
+    # Require the wildcard itself, rather than accepting only one test hostname.
+    openssl x509 -in "$WORK/tls.crt" -noout -ext subjectAltName > "$WORK/tls-san"
+    python3 - "$WORK/tls-san" "$domain" <<'PY'
+import pathlib,re,sys
+names=re.findall(r'DNS:([^,\s]+)',pathlib.Path(sys.argv[1]).read_text())
+if '*.'+sys.argv[2] not in names: sys.exit('LAN certificate must cover the exact wildcard application domain')
+PY
+    openssl x509 -in "$WORK/tls.crt" -noout -pubkey | openssl pkey -pubin -outform DER > "$WORK/cert-public.der"
+    openssl pkey -in "$WORK/tls.key" -passin pass: -pubout -outform DER > "$WORK/key-public.der" || fail 'LAN key must be readable without a passphrase.'
+    cmp -s "$WORK/cert-public.der" "$WORK/key-public.der" || fail 'LAN certificate and key do not match.'
 }
 cleanup() {
     if [[ -n "$WORK" && "$WORK" == /tmp/platform-install.* && -d "$WORK" ]]; then
@@ -162,6 +249,12 @@ CONFIG
 }
 install_platform() {
     local key image archive
+    local lan_options=()
+    if [[ -n "$LAN_CONFIG" ]]; then
+        lan_values "$LAN_CONFIG" > "$WORK/lan-values.json"
+        check_lan_certificate
+        lan_options=(--values "$WORK/lan-values.json" --atomic --cleanup-on-fail)
+    fi
     for key in PLATFORM_IMAGE DEMO_V1_IMAGE DEMO_V2_IMAGE DEMO_V3_IMAGE; do
         image="${!key}"
         case "$key" in PLATFORM_IMAGE) archive=platform-image.oci.tar ;; DEMO_V1_IMAGE) archive=demo-v1.oci.tar ;; DEMO_V2_IMAGE) archive=demo-v2.oci.tar ;; DEMO_V3_IMAGE) archive=demo-v3.oci.tar ;; esac
@@ -171,15 +264,29 @@ install_platform() {
     "$TOOL_ROOT/helm" --kubeconfig "$KUBECONFIG_PATH" upgrade --install platform "$WORK/bundle/platform-chart.tgz" \
         --namespace platform-system --create-namespace \
         --set-string "image.repository=${PLATFORM_IMAGE%@*}" --set-string "image.digest=${PLATFORM_IMAGE#*@}" \
-        --set image.pullPolicy=Never --wait --timeout 180s
+        --set image.pullPolicy=Never "${lan_options[@]}" --wait --timeout 180s
     local attempt response
     for ((attempt=0; attempt<30; attempt++)); do
         response="$("$TOOL_ROOT/kubectl" --kubeconfig "$KUBECONFIG_PATH" --request-timeout=10s get --raw /api/v1/namespaces/platform-system/services/platform:80/proxy/readyz 2>/dev/null)" || response='{}'
         if grep -Eq '"status":[[:space:]]*"ready"' <<< "$response" && grep -Eq '"cluster":[[:space:]]*"available"' <<< "$response"; then
             install -m 0600 "$WORK/bundle/release.env" "$STATE_ROOT/release.env"
+            if [[ -n "$LAN_CONFIG" ]]; then
+                python3 - "$WORK/lan-values.json" "$WORK/lan-config.json" <<'PY'
+import json,sys
+with open(sys.argv[1]) as stream: config=json.load(stream)['privateLAN']
+del config['enabled']
+with open(sys.argv[2],'w') as stream: json.dump(config,stream,sort_keys=True)
+PY
+                install -m 0600 "$WORK/lan-config.json" "$STATE_ROOT/private-lan.json"
+                printf 'Private HTTPS configured. Verify local DNS and certificate trust using the LAN setup guide.\n'
+            fi
             printf 'Installed platform v%s. Metadata is retained across same-version reruns.\n' "$PLATFORM_VERSION"
             printf 'On the Pi: sudo %s/kubectl --kubeconfig %s -n platform-system port-forward --address 127.0.0.1 service/platform 8080:80\n' "$TOOL_ROOT" "$KUBECONFIG_PATH"
-            printf 'Use an SSH local forward and open http://127.0.0.1:8080/setup. Retrieve the token from current broker logs.\n'
+            if [[ -z "$LAN_CONFIG" ]]; then
+                printf 'Use an SSH local forward and open http://127.0.0.1:8080/setup. Retrieve the token from current broker logs.\n'
+            else
+                printf 'Secure cookies are enabled. Use HTTPS, including the documented TLS/SSH fallback; plain-HTTP session forwarding is not the LAN fallback.\n'
+            fi
             return
         fi
         sleep 2
@@ -193,9 +300,9 @@ main() {
             -h|--help) usage; return ;;
             --check) check=true; shift ;;
             --prepare-host) PREPARE_HOST=true; shift ;;
-            --version|--bundle|--checksum)
+            --version|--bundle|--checksum|--lan-config)
                 [[ $# -ge 2 ]] || fail "Missing value for $1"
-                case "$1" in --version) REQUESTED_VERSION="${2#v}" ;; --bundle) bundle="$2" ;; --checksum) checksum="$2" ;; esac
+                case "$1" in --version) REQUESTED_VERSION="${2#v}" ;; --bundle) bundle="$2" ;; --checksum) checksum="$2" ;; --lan-config) LAN_CONFIG="$2" ;; esac
                 shift 2 ;;
             *) fail "Unknown argument: $1" ;;
         esac
@@ -203,8 +310,18 @@ main() {
     [[ "$REQUESTED_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || fail 'Supply --version vMAJOR.MINOR.PATCH.'
     [[ ( -z "$bundle" && -z "$checksum" ) || ( -n "$bundle" && -n "$checksum" ) ]] || fail '--bundle and --checksum must be supplied together.'
     [[ "$check" != true || "$PREPARE_HOST" != true ]] || fail '--check is read-only and cannot be combined with --prepare-host.'
+    if [[ -z "$LAN_CONFIG" && -f "$STATE_ROOT/private-lan.json" ]]; then LAN_CONFIG="$STATE_ROOT/private-lan.json"; fi
+    if [[ -n "$LAN_CONFIG" ]]; then
+        command -v python3 >/dev/null && command -v openssl >/dev/null || fail 'Private LAN setup requires Python 3 and OpenSSL.'
+        lan_values "$LAN_CONFIG" >/dev/null
+        check_lan_address
+        if [[ -f "$STATE_ROOT/private-lan.json" ]]; then
+            [[ "$(lan_values "$LAN_CONFIG")" == "$(lan_values "$STATE_ROOT/private-lan.json")" ]] || fail 'Changing installed LAN settings is not supported; existing configuration was retained.'
+        fi
+    fi
     preflight
     [[ "$check" != true ]] || return
+    [[ -z "$LAN_CONFIG" || -x "$TOOL_ROOT/kubectl" ]] || fail 'Install without LAN first, then create the TLS Secret and rerun with --lan-config.'
     WORK="$(mktemp -d /tmp/platform-install.XXXXXX)"
     trap cleanup EXIT
     if [[ -z "$bundle" ]]; then

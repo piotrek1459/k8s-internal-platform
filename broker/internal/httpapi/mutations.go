@@ -65,8 +65,8 @@ func (r *Router) handleUpdateApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if newSpec.Exposure.Mode == platform.ExposureLAN && !r.cfg.PrivateIngressEnabled {
-		writeError(w, r.cfg.Logger, reqID, platform.FieldErrorf(platform.CodeUnsupportedSpec, "exposure", "private ingress is not configured on this installation"))
+	if err := r.validatePrivateExposure(newSpec.Exposure); err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
 	// When the caller did not supply a new image reference, substitute the currently

@@ -25,7 +25,7 @@ No entire M0–M4 milestone is declared complete by this checklist.
 
 ## Implementation readiness and entry criteria
 
-Updated: 2026-11-23. The audit includes merged changes through PR #20,
+Updated: 2026-11-24. The audit includes merged changes through PR #20,
 published `v0.1.7`, the [native acceptance report](../tests/experiments/2026-11-23-v0.1.7-native.md),
 the [source resilience report](../tests/experiments/2026-11-23-core-resilience.md)
 and the current regression/E2E suites. Remaining work is tracked in
@@ -37,7 +37,7 @@ Older dated reports remain evidence only for their recorded source and scope.
 | M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and local and reference-Pi manual Helm functional baselines. | Normal access from another LAN device, operator-active-time comparison and the measurements supporting M1/M4. |
 | M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; published v0.1.3 verifies temporary files with container hardening retained. | Measured resource presets and reference-LAN acceptance. |
 | M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source lost-response/moved-tag and workload-origin acceptance. | Remaining worker interruption/restoration barriers and comprehensive negative-path secret-disclosure checks. |
-| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source completed/queued/running-operation refresh acceptance and native v0.1.7 Secret cleanup/retry. | Normal private LAN HTTPS/URL. |
+| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source completed/queued/running-operation refresh acceptance and native v0.1.7 Secret cleanup/retry. | Published-release private LAN HTTPS/URL acceptance; source implementation is in the current LAN PR. |
 | M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, owned-field drift reports and guarded explicit Service repair. | Real-cluster interruption/failed-compensation acceptance and the controlled core evaluation. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
@@ -125,9 +125,9 @@ configuration/history and diagnostics over a private management path.
 
 - [x] Single-use expiring bootstrap setup creates the administrator; root navigation selects setup on a fresh installation. **Evidence:** auth service/handler tests, browser setup and native invalid-token/error checks.
 - [x] Login/logout, HttpOnly/SameSite sessions, expiry/revocation and CSRF/mutation checks operate. **Evidence:** auth regressions/E2E; the original native session survived reinstall/reboot.
-- [ ] Provide normal private LAN HTTPS administration with DNS/trust instructions and Secure cookies. **Acceptance:** another LAN device verifies the trusted private management URL; loopback SSH bootstrap remains available. This is distinct from M6 public hosting. Tracked in issue #16.
+- [ ] Verify the private LAN HTTPS implementation through a published release. **Source:** opt-in bound IPv4 listener, actual-source CIDRs, TLS Secret preflight, separate app/management names, Secure cookies and [DNS/trust/fallback instructions](private-lan.md). **Acceptance:** another LAN device verifies the trusted private management URL on the Pi; initial loopback bootstrap and the TLS/SSH fallback remain available. This is distinct from M6 public hosting. Tracked in issue #16.
 - [x] Application list, image inspection, supported creation fields and Ready/status views operate for Internal exposure. **Evidence:** real browser lifecycle and API response contract checks. Resource defaults remain provisional under M1.
-- [ ] Display and verify the configured LAN application URL through a working private route. **Acceptance:** the persisted exposure/hostname is reflected correctly in the UI and reachable from another device. Tracked in issue #16.
+- [ ] Verify the configured LAN application URL through the published private route. **Source:** details/API show access from the persisted successful revision, with configured-domain and atomic hostname-reservation guards. **Acceptance:** reload retains the correct URL and actual application content is reachable from a separate LAN device on the Pi. Tracked in issue #16.
 - [x] Secret metadata/version objects and application Secret-reference submission use the API contract. **Evidence:** write-only API tests, browser reference selection/submission and exact-version rollback.
 - [x] Verify browser Secret creation/version management and credential creation/selection/private-image/invalid-password workflows. **Evidence:** focused real-cluster browser lifecycle/private-registry cases verify exact Secret contents privately, actual private HTTP, deletion guards and physical Kubernetes cleanup. The full 17-case CI suite passed without failures/skips; release/native boundaries remain recorded in the [report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md).
 - [x] Natively verify the Secret cleanup correction introduced in v0.1.6. **Evidence:** published v0.1.7 passed referenced API/browser refusal, physical version removal after dependent-app deletion and controlled partial cleanup across actual broker replacement. Original session/PVC and reservation survived; unresolved ownership was refused, guarded fixture repair enabled browser retry, values/metadata were removed and history remained. Original v0.1.7 identities/HTTP also survived reinstall/reboot. [Report](../tests/experiments/2026-11-23-v0.1.7-native.md). v0.1.6 itself was not run natively.

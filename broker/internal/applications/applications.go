@@ -140,6 +140,14 @@ func validateExposure(e platform.Exposure) error {
 			return platform.FieldErrorf(platform.CodeInvalidInput, "exposure.hostname",
 				"a hostname is required for LAN exposure")
 		}
+		if len(e.Hostname) > 253 || len(strings.Split(e.Hostname, ".")) < 2 {
+			return platform.FieldErrorf(platform.CodeInvalidInput, "exposure.hostname", "a valid lowercase DNS hostname is required")
+		}
+		for _, label := range strings.Split(e.Hostname, ".") {
+			if len(label) > 63 || !dns1123Label.MatchString(label) {
+				return platform.FieldErrorf(platform.CodeInvalidInput, "exposure.hostname", "a valid lowercase DNS hostname is required")
+			}
+		}
 		return nil
 	case platform.ExposurePublic:
 		// Public exposure requires the networking configured in M6.

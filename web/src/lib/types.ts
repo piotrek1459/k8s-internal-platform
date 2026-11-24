@@ -14,6 +14,7 @@ export interface SystemInfo {
 	architecture: string;
 	clusterReachable: boolean;
 	capabilities: string[];
+	privateNetwork?: { managementHostname: string; applicationDomain: string; httpsPort: number };
 }
 
 export interface ApplicationSummary {
@@ -44,6 +45,7 @@ export interface Application {
 	desiredRevision: string;
 	lastSuccessfulRevision: string;
 	activeOperationId: string;
+	access?: { mode: string; hostname?: string; url?: string; revisionId: string };
 	status: ObservedStatus;
 }
 

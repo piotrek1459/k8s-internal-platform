@@ -691,6 +691,14 @@ components:
         capabilities:
           type: array
           items: { type: string }
+        privateNetwork:
+          type: object
+          description: Configured private endpoint; does not establish DNS, certificate trust or reachability.
+          required: [managementHostname, applicationDomain, httpsPort]
+          properties:
+            managementHostname: { type: string }
+            applicationDomain: { type: string }
+            httpsPort: { type: integer, minimum: 1024, maximum: 65535 }
 
     ImageInspectRequest:
       type: object
@@ -855,6 +863,15 @@ components:
         lastSuccessfulRevision: { type: string }
         activeOperationId: { type: string }
         status: { $ref: "#/components/schemas/ObservedStatus" }
+        access:
+          type: object
+          description: Access configuration from the last successful revision, or the initial desired revision when none has succeeded. A URL does not establish external reachability.
+          required: [mode, revisionId]
+          properties:
+            mode: { type: string }
+            revisionId: { type: string }
+            hostname: { type: string }
+            url: { type: string, format: uri }
 
     ApplicationSummary:
       type: object

@@ -172,6 +172,7 @@ func ingressValues(e platform.Exposure) map[string]any {
 	}
 	if e.Mode == platform.ExposureLAN {
 		ingress["enabled"] = true
+		ingress["className"] = "platform-private"
 		ingress["hostname"] = e.Hostname
 	}
 	return ingress
