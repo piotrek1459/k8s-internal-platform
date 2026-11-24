@@ -59,7 +59,7 @@ target-specific validation remains required. See the
 | Application source | Public and private container images. |
 | Operations | Application deployment, inspection, updates, scaling, and supporting recovery and lifecycle operations. |
 | Traceability | Persistent configuration, deployment history, operations, and an audit trail. |
-| Initial networking | Current development uses loopback forwarding. LAN/HTTPS is the next deployment target; domain acquisition remains deferred. |
+| Initial networking | Default development uses loopback forwarding. Published v0.1.8 passed private LAN HTTPS on the reference Pi with explicit client hosts/CA trust; public-domain acquisition remains deferred. |
 | Final networking | Public application access on the host through a connection method selected after network validation: direct ingress or an outbound tunnel. |
 | Distribution | Installable GitHub releases for both ARM64 and AMD64. |
 | Release initiation | Manual dispatch with a source branch (default `main`) and version. The selected branch HEAD is pinned for validation/builds; successful gates create the tag and release. PR, branch and tag pushes do not publish. |

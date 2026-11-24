@@ -1,0 +1,390 @@
+{
+  "recordedDate": "2026-11-24",
+  "timezone": "Europe/Warsaw",
+  "release": "v0.1.8",
+  "releaseURL": "https://github.com/piotrek1459/k8s-internal-platform/releases/tag/v0.1.8",
+  "sourceCommit": "b3fe210362b4a5596ff7e51780793eac17c8373c",
+  "releaseWorkflow": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45386453838",
+  "images": {
+    "platform": "platform.local/platform-broker@sha256:a64cf9a3189bab680c9b1c9111f7f3f3f960a805617033d97edca4bd5a9d2543",
+    "v1": "platform.local/http-demo@sha256:d204df0de302b72f67ec3186e15416d0a19840d1d5c59147b3780d2a552e3c0a",
+    "v2": "platform.local/http-demo@sha256:16460a00a231f8daae7b6e8222b2d974d687d50b556b61dd6cfa12dbe14cbc60",
+    "v3": "platform.local/http-demo@sha256:cf38bd7560ba000c9958a0c497e4a33ebeb8c9bb8d2ca259b2a902621c5e0aea"
+  },
+  "host": {
+    "hardware": "Raspberry Pi 5, 8 GB RAM, 32 GB microSD",
+    "OS": "64-bit Raspberry Pi OS / Debian 13",
+    "kernel": "6.18.60+rpt-rpi-2712",
+    "architecture": "arm64",
+    "openssl": "3.5.7",
+    "privateIPv4": "192.168.68.227",
+    "actualLANClientIPv4": "192.168.68.205"
+  },
+  "nativeCommandExitStatus": {
+    "freshPublishedInstall": 0,
+    "coreNativeAcceptance": 0,
+    "wrongHostCertificate": 1,
+    "enableLAN": 0,
+    "normalTrustedBrowserAcceptance": 0,
+    "sameVersionPublishedRerun": 0,
+    "originalSessionsAfterReinstall": 0,
+    "originalSessionsAfterReboot": 0,
+    "cleanup": 0,
+    "unsupportedLANSettingsChange": 1
+  },
+  "installerPreflight": {
+    "publishedVersion": "0.1.8",
+    "publishedInstallerSHA256": "0181a43394b97f0e7247dcaa698a3f9ba2e23cd8d28c031e134e7c71abe3f5d4",
+    "publishedCheckExit": 1,
+    "publishedCheckOutput": "Host checks passed: linux/arm64.",
+    "correctedCandidateSHA256": "9fad94935c8fb845663664fc7eeb96f1ab7fb28b7874342383669e9276a66c4b",
+    "correctedReadOnlyCheckExit": 0,
+    "candidateInstallPerformed": false,
+    "localPythonRegressions": 83,
+    "ubuntu2404PythonRegressions": 83
+  },
+  "runtimeAccepted": true,
+  "currentCycleComplete": false,
+  "cycleGate": "Publish and verify the corrected installer through a new administrator-dispatched release before the next implementation PR.",
+  "LANAPIChecks": "Digest-pinned v1/v2 HTTPS; scale 2/0/1 with bounded observed status; restart; rollback v1; hostname 400/409 and access transition 422 with unchanged version. These assertions completed before the JSON-DOM harness failure; the browser phase subsequently completed separately.",
+  "browser": {
+    "client": "Isolated Linux container on separate LAN workstation",
+    "playwright": "1.64.1",
+    "chromium": "156.0.8078.4",
+    "DNS": "OS hosts entries resolving directly to Pi IPv4",
+    "trust": "Public CA in normal Chromium NSS database",
+    "certificateIgnoreFlags": false,
+    "SPKIExceptions": false,
+    "ignoreHTTPSErrors": false,
+    "initialUntrustedCertificateRefused": true,
+    "globalMacHostsOrTrustChanged": false,
+    "cookie": "Secure, HttpOnly, SameSite=Strict, host-only; absent on app origin",
+    "applicationOriginMutationRefused": true,
+    "UIWorkflow": "Login, registry inspection, Private LAN wizard Nginx deployment, retained link after reload, actual browser HTTPS Nginx, deletion with history"
+  },
+  "negativeNetworkChecks": [
+    {
+      "address": "2a03:6600:5:712d:2ecf:67ff:fef7:b3e1",
+      "22": 0,
+      "8443": 61
+    },
+    {
+      "address": "fdc8:9f1a:536d:6700:2ecf:67ff:fef7:b3e1",
+      "22": 0,
+      "8443": 61
+    },
+    {
+      "address": "fe80::2ecf:67ff:fef7:b3e1",
+      "22": 0,
+      "8443": 61
+    },
+    {
+      "host": "platform.home.arpa",
+      "port": 80,
+      "connectResult": 61
+    },
+    {
+      "host": "platform.home.arpa",
+      "port": 443,
+      "connectResult": 61
+    },
+    {
+      "host": "demo.apps.home.arpa",
+      "port": 80,
+      "connectResult": 61
+    },
+    {
+      "host": "demo.apps.home.arpa",
+      "port": 443,
+      "connectResult": 61
+    },
+    {
+      "probe": "server-side unknown SNI",
+      "curlExit": 35
+    },
+    {
+      "probe": "unknown wildcard hostname",
+      "http": 404
+    }
+  ],
+  "reboot": {
+    "actualChangedBootId": true,
+    "observedOutage": true,
+    "automaticCAValidatedReadinessSeconds": 63.83,
+    "manualServiceStartBeforeReady": false,
+    "SSHReconnectedBeforeReady": false,
+    "identitiesAndOriginalSessionsRetained": true
+  },
+  "persistence": {
+    "changedBootId": true,
+    "sameAdministrator": true,
+    "samePVandPVC": true,
+    "sameTLSSecretUID": true,
+    "sameLANConfigurationHash": true,
+    "sameApplicationAndRouteUIDs": true,
+    "sameDeploymentSpecs": true
+  },
+  "finalState": {
+    "healthyLANApplications": 1,
+    "deletedTemporaryApplications": 3,
+    "configurationSecrets": 0,
+    "registryCredentials": 0,
+    "applicationVolumes": 0,
+    "installationTLSSecretRetained": true,
+    "temporaryFixturesRemoved": true,
+    "temporaryAccess": {
+      "localForwardPortsClosed": {
+        "18001": true,
+        "18080": true,
+        "18443": true
+      },
+      "sshMasterClosed": true,
+      "serverProxiesStopped": true,
+      "savedPersistenceSessionsRevoked": true,
+      "savedCookieFilesRemoved": true,
+      "globalWorkstationTrustAndHostsUnchanged": true
+    }
+  },
+  "excludedClaims": [
+    "Cross-version upgrade",
+    "Verified backup restoration",
+    "Native AMD64 host acceptance",
+    "Router wildcard DNS automation",
+    "Global workstation trust setup",
+    "Public internet/M6 hosting",
+    "Resource calibration or repeated performance evaluation"
+  ],
+  "incompleteHarnessAttempts": [
+    "NSS initialization of existing database stopped; fixed to import into existing NSS database.",
+    "Immediate status assertion after scale-to-zero failed; bounded observer convergence added.",
+    "Chromium JSON document DOM parsing failed after API assertions completed; browser response JSON assertion used and separate browser phase passed.",
+    "Early excluded-source app probes ran with absent/stopped route; accepted proof first required positive HTTP 200 then excluded-source HTTP 403."
+  ],
+  "evidence": [
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/release-api.json",
+      "sha256": "2b003d9df82a8576c3cabbe225c63a1462940796361852e3bc82b6f3da4688d6",
+      "bytes": 18399
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/release.json",
+      "sha256": "3dd78000c9ffbd258a9b6e87bdb8939c88c47e8cccb364ef433030994d493a32",
+      "bytes": 1372
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/download.log",
+      "sha256": "b62c0f0bad2e9a62a61285bd123e86c093c09437abcb2699365603103a9af947",
+      "bytes": 47
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/prior-inventory.json",
+      "sha256": "0204782f6ccbed491dd855e92c5339899105b67013961fcc770147f78e4f2319",
+      "bytes": 9943
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/prior-database-inventory.json",
+      "sha256": "5c9896f6e0d6dbefe77d5c284a2a2233a8b57f65683a95f9e573ebcc03eb350f",
+      "bytes": 1276
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/initial/native-results.json",
+      "sha256": "49a7d52eb9fb78644b833b8a78cc602d7e654a18dd74d7634a07a0019b4d38bd",
+      "bytes": 804
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/initial-run.log",
+      "sha256": "1a6baef97a4ca9e569c0ad5d693e767f14d638aea19d191a55863ade57a54aab",
+      "bytes": 697
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-workflows-json-dom-attempt.json",
+      "sha256": "eb132dbcb5e71a501cc23e50c387363648954ca636345d70c949ed423e0e931f",
+      "bytes": 736
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-browser.json",
+      "sha256": "fe143ee6ef18dfde56759466967e8e5d7052f8dded6fb51ca7b5f87ac07e3621",
+      "bytes": 557
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-reinstall.json",
+      "sha256": "3a09e345222711fb1616800d538b0f16abfed937e50427502bc43bef2073d3c0",
+      "bytes": 291
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-reboot.json",
+      "sha256": "cad915de00d0be1c3e44b50b16672a3ce31c689438acad7630d7c2ccf360ac76",
+      "bytes": 288
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-cleanup.json",
+      "sha256": "6293b8ccaba9369d47e98a4646ad4a67203b8d31797b6be03298533308249287",
+      "bytes": 461
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-before-retention.json",
+      "sha256": "7886a3f12124b0eefef503e4cd781b8fd287030daa460952f4ecee52539b9fa6",
+      "bytes": 12162
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-after-reinstall.json",
+      "sha256": "7b4177221bd396312b820ece1ffb08e47b68f9967520a6e221ed7ece4f7a48e2",
+      "bytes": 12162
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/client-state/lan-after-reboot.json",
+      "sha256": "b543f50cf4b03590f880d1f2283465de0073fe7f74f673e42b9b26761de9d7b9",
+      "bytes": 12162
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/automatic-reboot-readiness.json",
+      "sha256": "f2cfe429fd9682242ef24d36d5a042eb2b8cf3574fa5271cb0966ba41684b722",
+      "bytes": 3752
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/direct-lan-peer.json",
+      "sha256": "00210b1abef5e83d708c2c07398b29dad98befa4beb8867127f20a327e18fefa",
+      "bytes": 238
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/listener-negative-checks.json",
+      "sha256": "9d52a2801c848503f03695a759cb1e3766dd3e297c3a9038edc2853bc6371a49",
+      "bytes": 742
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/https-ssh-fallback.json",
+      "sha256": "cbb5986b5c4c7899ca16f0e5f605accca6ced10c7e200e20ea66a8a8072318d7",
+      "bytes": 172
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/retention-comparison.json",
+      "sha256": "52a2a3f678f51fe3eccd8cc37aa4e1be02941e633a2247d2f59aafa7bc01a0e7",
+      "bytes": 215
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/installer-check-result.json",
+      "sha256": "2d90beac5dacee715ea6118095a0a0667f7f7f81240c4cd53b79f5cc4a059a6b",
+      "bytes": 461
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/temporary-access-cleanup.json",
+      "sha256": "01fc2e35ddf1986573e4e2cf916cd09121f7476dea2af56eeba1c40541909c1c",
+      "bytes": 283
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-before-bad.json",
+      "sha256": "839f103b0672b4198b07e29b64c15ea31cc88750a30c068a18a4561897034ab9",
+      "bytes": 10826
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-after-bad.json",
+      "sha256": "839f103b0672b4198b07e29b64c15ea31cc88750a30c068a18a4561897034ab9",
+      "bytes": 10826
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-after-enable.json",
+      "sha256": "dc71f2b9cfd64654dde8b795a924c6e53985fcc6ed12fb99803421dde285e6a4",
+      "bytes": 10847
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-before-retention.json",
+      "sha256": "d7ea1e82eba9db2f7f038d50c3c0e13eff3d8e16db7e0f7b95a658531bfae8d9",
+      "bytes": 18521
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-after-reinstall.json",
+      "sha256": "16a201f457a9648f0a17cfc6218db0641c8b9e03df350acbae29855298056d20",
+      "bytes": 18559
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-after-reboot.json",
+      "sha256": "0d7fd91476cb4e63ad8b2c7d6c69c219a12341eddd277d2fec1d1f0350a307bb",
+      "bytes": 18559
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/kube-final.json",
+      "sha256": "35798f0e0693439214c06725044cf90ec39e25d4d0f9a3cd7efe9ff3815400f3",
+      "bytes": 13559
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/final-inventory.json",
+      "sha256": "d2c68f637547b8882c1b1c9e25b875bc0c0cc50f8ab67b16b96692571d7b4801",
+      "bytes": 1091
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/install-v018.log",
+      "sha256": "fdd594998932fe4501ea38cc0899cfc38d9cd1fdce3d4bca34e3ad5d65c67134",
+      "bytes": 3066
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/check-v018.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/bad-certificate-preflight.log",
+      "sha256": "1f4bf708b6dace7234701fded88ccc099c9af43133f5cfc86cb0b467652cd0a1",
+      "bytes": 293
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/enable-lan.log",
+      "sha256": "eeec2a8cf2595ded76ca32356768758456778b31ebfa970817c5f20cc1fdf864",
+      "bytes": 2084
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/reinstall-v018.log",
+      "sha256": "be3037b4fd224a440cde98ffbe686038569aa3ffe1c5e9ff622cc6840088f20c",
+      "bytes": 2084
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/excluded-existing-routes-verified.log",
+      "sha256": "b7bb08daa77cf25066fcc6a90257e6a56fa69c66ce37971ccbdb3e075fb32890",
+      "bytes": 355
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/listeners-after-reboot.log",
+      "sha256": "2752c2a44f3d655b264e3b5fc6016bf0bf990661e54d02f0d8fdd6ae00ce25fd",
+      "bytes": 118
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/corrected-read-only-check.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/changed-settings-refusal.log",
+      "sha256": "870bab15dc834ffc1ec4b6ca9e28ddd5f926ce29615f851ea161eb1f0f9ae128",
+      "bytes": 94
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/archive-sha256.txt",
+      "sha256": "63ec8915fe700d049e18d2fdf77f0df95907a914d4e99b6d6b23dd4914e12b84",
+      "bytes": 92
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/remote-evidence/temporary-listeners-final.log",
+      "sha256": "cd3de20d9b2b540509c5472957e6ab48cec5145438823bdda559e33f71f8c543",
+      "bytes": 57
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/final-local-checks.log",
+      "sha256": "b9206711c19d9fe6792efec595af343c88783eeaa45ccc5ffaabc9991f4bed45",
+      "bytes": 9702
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/final-ubuntu2404-checks.log",
+      "sha256": "997c9c9a748f7eded903b9eefe88e4a60bafe6d0758259f155ec9f49c9ce68a7",
+      "bytes": 247
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/lan-client.py",
+      "sha256": "b455cdb9b7983d12862a4c95189821ae131573198fa35b2a9443c51647c0c621",
+      "bytes": 12794
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v018/kube-snapshot.py",
+      "sha256": "a4e75a905977654daf0b758bcec11f6a88cc7a110d4a9cca6910c722e0e3f2a5",
+      "bytes": 2134
+    }
+  ]
+}

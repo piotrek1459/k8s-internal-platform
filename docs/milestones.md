@@ -21,12 +21,14 @@ stated behavior has evidence at the named scope: unit/handler, disposable real
 cluster, browser or reference Pi. It does not automatically accept a broader
 hardware, security or evaluation requirement. Compound items have been separated
 where implementation is complete but further acceptance remains outstanding.
-No entire M0–M4 milestone is declared complete by this checklist.
+The M0–M4 core remains incomplete; accepted requirements and remaining work are
+identified separately below.
 
 ## Implementation readiness and entry criteria
 
-Updated: 2026-11-24. The audit includes merged changes through PR #20,
-published `v0.1.7`, the [native acceptance report](../tests/experiments/2026-11-23-v0.1.7-native.md),
+Updated: 2026-11-24. The audit includes merged changes through PR #22,
+published `v0.1.8`, its [LAN native report](../tests/experiments/2026-11-24-v0.1.8-native.md),
+the preceding [v0.1.7 native report](../tests/experiments/2026-11-23-v0.1.7-native.md),
 the [source resilience report](../tests/experiments/2026-11-23-core-resilience.md),
 the [private LAN source acceptance](../tests/experiments/2026-11-24-private-lan.md)
 and the current regression/E2E suites. Remaining work is tracked in
@@ -35,10 +37,10 @@ Older dated reports remain evidence only for their recorded source and scope.
 
 | Milestone | Completed implementation/evidence | Remaining acceptance or implementation |
 | --- | --- | --- |
-| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and local and reference-Pi manual Helm functional baselines. | Normal access from another LAN device, operator-active-time comparison and the measurements supporting M1/M4. |
-| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; published v0.1.3 verifies temporary files with container hardening retained. | Measured resource presets and reference-LAN acceptance. |
+| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | Corrective installer publication/verification, operator-active-time comparison and measurements supporting M1/M4. |
+| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Measured resource presets. |
 | M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source lost-response/moved-tag and workload-origin acceptance. | Remaining worker interruption/restoration barriers and comprehensive negative-path secret-disclosure checks. |
-| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source completed/queued/running-operation refresh acceptance and native v0.1.7 Secret cleanup/retry. | Published-release private LAN HTTPS/URL acceptance; source 21-case acceptance has passed. |
+| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source queued/running refresh, native v0.1.7 Secret cleanup/retry and v0.1.8 LAN HTTPS/browser/URL acceptance. | No open listed M3 acceptance item. The installer gate remains under M0 and broader failure/security work under M2/M4. |
 | M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, owned-field drift reports and guarded explicit Service repair. | Real-cluster interruption/failed-compensation acceptance and the controlled core evaluation. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
@@ -63,10 +65,12 @@ Manual application deployment remains relevant to the operator-effort baseline.
 - [x] Pinned K3s provisioning on the Pi reaches a Ready node and records version/configuration. **Evidence:** the published `v0.1.2` installer and reboot run. This replaces the earlier manual-K3s-install method, not the manual Helm comparison.
 - [x] A local manual Helm install/update/unhealthy-update/explicit-recovery procedure and results are recorded. **Evidence:** [local baseline](../tests/experiments/2026-10-14-local-m0-m1.md) and `tests/integration/helm-lifecycle.sh`. The dated raw local run was removed; its curated report is historical evidence.
 - [x] Repeat and retain the manual Helm functional baseline on the reference Pi with current pins/images and raw results. **Evidence:** [v0.1.3 Pi baseline](../tests/experiments/2026-11-23-core-acceptance.md#direct-helm-baseline-on-the-pi), exact commands, source/archive hashes, values, responses and history. Operator active time and repeated controlled comparison remain M4 work.
-- [ ] Verify application access from another LAN device through the intended private route. **Acceptance:** private listener/DNS behavior is demonstrated; SSH/loopback application access alone does not establish normal LAN ingress. Tracked in issue #16.
+- [x] Verify application access from another LAN device through the intended private route. **Evidence:** published v0.1.8, direct workstation hosts/CA trust, normal browser and actual app HTTPS, source/header/SNI/IPv6 isolation and reinstall/reboot retention. [Native report](../tests/experiments/2026-11-24-v0.1.8-native.md). Router wildcard DNS was not automated.
+- [ ] Publish and verify the installer preflight exit-status correction. **Evidence:** v0.1.8 installed/reran successfully but valid `--check` returned 1; explicit-zero source correction passed 83 regressions, syntax and read-only Pi verification. The corrective release remains required in the current cycle.
 
-**Completion boundary:** host installation is verified. Reference-LAN acceptance
-and the controlled measurements/operator comparison supporting M1/M4 remain outstanding.
+**Completion boundary:** host installation and reference-LAN runtime access are
+verified. Corrective installer publication and controlled measurements/operator
+comparison supporting M1/M4 remain outstanding.
 
 ## M1 — Application chart (core)
 
@@ -79,13 +83,13 @@ probes, resources, ownership and private routes.
 - [x] Readiness, startup and optional liveness probes are configurable; startup/readiness API paths are independent. **Evidence:** chart matrix, probe-mapping regressions and the unhealthy-v3/native restoration workflow.
 - [ ] Replace provisional requests/limits with a measured reference-Pi preset. **Acceptance:** workload, sampling/repetitions and measured values are recorded before the defaults are adopted. Current 25m CPU/32Mi memory requests are not calibrated results. Tracked in issue #16.
 - [x] Managed resources have stable application ownership and release selectors. **Evidence:** rendered/installed Deployment, Service and Ingress label/selector checks.
-- [x] Private routes explicitly select the private entrypoint. **Evidence:** isolated local listener/forged-Host baseline checks. This acceptance is local; reference-LAN setup remains in M0/M3.
+- [x] Private routes explicitly select the private entrypoint. **Evidence:** isolated local listener/forged-Host baseline checks. Published v0.1.8 also passed reference-LAN routing and isolation under M0/M3.
 - [x] Healthy install/update and unhealthy failure diagnostics operate on K3s. **Evidence:** disposable real-cluster and published `v0.1.2` Pi workflows.
 - [x] Source chart 0.1.1 supplies a size-limited temporary `/tmp` volume and non-root filesystem-group access while retaining the read-only root filesystem. **Evidence:** rendered-manifest regression, full source E2E and the controlled native Nginx experiment.
 - [x] Verify temporary files using a published installer/release without patching a Deployment manually. **Evidence:** unmodified `v0.1.3` Nginx browser deployment reached Ready and HTTP 200; [native report](../tests/experiments/2026-11-23-core-acceptance.md).
 
 **Completion boundary:** source chart behavior and published compatibility are
-verified. Resource calibration and reference-LAN scope remain outstanding.
+verified, including native v0.1.8 LAN routing. Resource calibration remains outstanding.
 
 ## M2 — Durable backend (core)
 
@@ -126,9 +130,9 @@ configuration/history and diagnostics over a private management path.
 
 - [x] Single-use expiring bootstrap setup creates the administrator; root navigation selects setup on a fresh installation. **Evidence:** auth service/handler tests, browser setup and native invalid-token/error checks.
 - [x] Login/logout, HttpOnly/SameSite sessions, expiry/revocation and CSRF/mutation checks operate. **Evidence:** auth regressions/E2E; the original native session survived reinstall/reboot.
-- [ ] Verify the private LAN HTTPS implementation through a published release. **Source:** opt-in bound IPv4 listener, actual-source CIDRs, TLS Secret preflight, separate app/management names, Secure cookies and [DNS/trust/fallback instructions](private-lan.md). **Acceptance:** another LAN device verifies the trusted private management URL on the Pi; initial loopback bootstrap and the TLS/SSH fallback remain available. This is distinct from M6 public hosting. Tracked in issue #16.
+- [x] Verify private LAN HTTPS through a published release. **Evidence:** v0.1.8 on the Pi, separate-workstation normal browser CA trust/hosts resolution, Secure host-only cookies, source/listener isolation, initial SSH bootstrap and verified TLS/SSH fallback. [Native report](../tests/experiments/2026-11-24-v0.1.8-native.md). The installer correction remains tracked in M0; M6 public hosting is separate.
 - [x] Application list, image inspection, supported creation fields and Ready/status views operate for Internal exposure. **Evidence:** real browser lifecycle and API response contract checks. Resource defaults remain provisional under M1.
-- [ ] Verify the configured LAN application URL through the published private route. **Source:** details/API show access from the persisted successful revision, with configured-domain and atomic hostname-reservation guards. **Acceptance:** reload retains the correct URL and actual application content is reachable from a separate LAN device on the Pi. Tracked in issue #16.
+- [x] Verify the configured LAN application URL through the published private route. **Evidence:** v0.1.8 browser wizard deployment, URL retained after reload, actual separate-workstation HTTPS Nginx/demo content and API update/scale/restart/rollback; hostname and transition guards passed. [Native report](../tests/experiments/2026-11-24-v0.1.8-native.md).
 - [x] Secret metadata/version objects and application Secret-reference submission use the API contract. **Evidence:** write-only API tests, browser reference selection/submission and exact-version rollback.
 - [x] Verify browser Secret creation/version management and credential creation/selection/private-image/invalid-password workflows. **Evidence:** focused real-cluster browser lifecycle/private-registry cases verify exact Secret contents privately, actual private HTTP, deletion guards and physical Kubernetes cleanup. The full 17-case CI suite passed without failures/skips; release/native boundaries remain recorded in the [report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md).
 - [x] Natively verify the Secret cleanup correction introduced in v0.1.6. **Evidence:** published v0.1.7 passed referenced API/browser refusal, physical version removal after dependent-app deletion and controlled partial cleanup across actual broker replacement. Original session/PVC and reservation survived; unresolved ownership was refused, guarded fixture repair enabled browser retry, values/metadata were removed and history remained. Original v0.1.7 identities/HTTP also survived reinstall/reboot. [Report](../tests/experiments/2026-11-23-v0.1.7-native.md). v0.1.6 itself was not run natively.
@@ -141,7 +145,8 @@ configuration/history and diagnostics over a private management path.
 
 **Completion boundary:** setup/authentication, lifecycle, diagnostics and the
 specified queued/running browser refresh and Secret/credential paths have
-evidence. Normal private LAN HTTPS and application-URL acceptance remain core M3.
+evidence. Published v0.1.8 also passed normal private LAN HTTPS and application-URL
+acceptance. The separate installer publication correction remains tracked in M0.
 
 ## M4 — Reliable lifecycle and core evaluation (core)
 
@@ -266,12 +271,13 @@ observability overhead, supplementing the mandatory core evaluation.
 
 ## Core execution and evidence order
 
-1. Publish the temporary-files compatibility fix and repeat its normal native
-   browser deployment through the released installer, without manual patching.
-2. Complete private LAN administration and the remaining
-   browser/failure/security acceptance tracked in issue #16.
-3. Record the current reference-Pi manual baseline, calibrate resource defaults
-   and fix the evaluation targets/repetitions before collecting comparison data.
+1. Complete the existing LAN cycle by publishing/verifying the installer
+   preflight correction. Published v0.1.8 native LAN/browser/reinstall/reboot
+   acceptance passed; temporary-files compatibility passed in v0.1.3.
+2. Complete the remaining failure/recovery/security acceptance in issue #16
+   through one PR, manual release and native validation before the next PR.
+3. Use the retained reference-Pi manual functional baseline, calibrate resource
+   defaults and fix evaluation targets/repetitions before collecting comparison data.
 4. Retain the M4 functional/failure/operator/timing/resource dataset with source,
    versions and raw evidence. Update each relevant checklist from that evidence.
 

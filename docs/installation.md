@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.1.7`. Select a version available through the
+The examples below use `v0.1.8`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -23,6 +23,13 @@ upgrade or restoration test.
 The [implementation status](status.md) records the remaining boundaries. Existing
 unrelated K3s installations are refused; this installer is for a dedicated host.
 
+Published v0.1.8 passed fresh installation, private LAN HTTPS and normally trusted
+browser deployment, same-version retention and automatic reboot recovery. Its
+successful read-only `--check` incorrectly returns 1; source now returns 0, with
+83 regressions and read-only Pi verification passed. A corrective manual release
+is still required. The [v0.1.8 report](../tests/experiments/2026-11-24-v0.1.8-native.md)
+records the defect separately from passing installation/runtime checks.
+
 ## 1. Prepare the host
 
 A 64-bit OS, systemd, enabled memory cgroups, at least 2 GiB RAM and 6 GiB free
@@ -44,7 +51,7 @@ If the installer reports missing memory cgroups, an explicit preparation step is
 available after the installer has been downloaded and verified:
 
 ```bash
-sudo bash install.sh --version v0.1.7 --prepare-host
+sudo bash install.sh --version v0.1.8 --prepare-host
 # Exit status 20 means that the boot file was prepared and a reboot is required.
 sudo reboot
 # Reconnect over SSH, then rerun --check and the normal installation.
@@ -64,13 +71,13 @@ combined with `--prepare-host`. The installer never reboots automatically.
 Run on the Pi/server as the normal SSH user:
 
 ```bash
-mkdir -p ~/platform-v0.1.7
-cd ~/platform-v0.1.7
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.7/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.7/SHA256SUMS
+mkdir -p ~/platform-v0.1.8
+cd ~/platform-v0.1.8
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.8/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.8/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.1.7 --check
+sudo bash install.sh --version v0.1.8 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -80,7 +87,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.1.7
+sudo bash install.sh --version v0.1.8
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -110,8 +117,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.1.7 \
-  --bundle platform-v0.1.7-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.8 \
+  --bundle platform-v0.1.8-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;
@@ -173,9 +180,8 @@ and all mutation headers are documented in the [API guide](user/api-reference.md
 
 ## Optional private LAN HTTPS
 
-After SSH bootstrap, a release containing the LAN implementation can enable a
-private management/application listener with `--lan-config FILE`. Published
-v0.1.7 does not contain that option. Follow the [LAN guide](private-lan.md) for the
+After SSH bootstrap, v0.1.8 or a later release can enable a private
+management/application listener with `--lan-config FILE`. Follow the [LAN guide](private-lan.md) for the
 existing TLS Secret, Python 3/OpenSSL prerequisites, explicit address/source CIDRs,
 local DNS, client trust and same-version configuration retention. Public routing
 remains disabled. Secure-cookie installations preserve TLS through the documented

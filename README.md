@@ -17,7 +17,7 @@ prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes the resulting native
-ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.7`
+ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.8`
 commands are version examples; the downloaded guide matches the selected release.
 Published `v0.1.7` passed reference-Pi installation, lifecycle, diagnostics/drift,
 physical Secret cleanup and partial-cleanup retry across broker replacement,
@@ -25,10 +25,14 @@ same-version reinstall and host reboot. Original v0.1.7 session/account/app/hist
 PVC identity and real HTTP survived. The [native report](tests/experiments/2026-11-23-v0.1.7-native.md)
 records the verified release and remaining core acceptance.
 The release includes writable temporary files with container hardening retained;
-verification details are recorded in [status](docs/status.md). Optional private LAN HTTPS is
-implemented in source; [configuration and trust instructions](docs/private-lan.md)
-require the next release, followed by reference-Pi validation. Public HTTPS,
-application volumes and cross-version upgrades remain separate acceptance boundaries.
+verification details are recorded in [status](docs/status.md). Published v0.1.8
+passed private LAN HTTPS, normally trusted browser deployment, source/listener
+isolation, same-version retention and reboot on the Pi. The
+[LAN native report](tests/experiments/2026-11-24-v0.1.8-native.md) also records a
+published `--check` exit-status defect: its source correction passed 83 regressions
+and read-only Pi verification but awaits a corrective release. Setup follows the
+[configuration and trust instructions](docs/private-lan.md). Public HTTPS,
+application volumes and cross-version upgrades retain separate acceptance boundaries.
 
 ## Local startup
 

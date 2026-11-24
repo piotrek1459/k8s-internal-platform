@@ -394,5 +394,7 @@ PATCH changing access mode or hostname returns 422; image/replica changes contin
 to work. Route transitions require failed-mutation absence verification and remain
 part of the core recovery follow-up. Internal exposure creates no
 Ingress. See the [private LAN setup and HTTPS/SSH fallback](../private-lan.md).
-This source capability is not in published v0.1.7; native acceptance awaits the
-next release.
+This capability is included in published v0.1.8. Separate-workstation native
+browser/API routing and reinstall/reboot retention passed; the
+[native report](../../tests/experiments/2026-11-24-v0.1.8-native.md) records evidence
+and the remaining installer preflight correction.

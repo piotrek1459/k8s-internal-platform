@@ -1,10 +1,12 @@
 # Private LAN HTTPS
 
 This optional installation mode provides private management and application URLs
-in the same single-node K3s cluster. It requires the release containing the LAN
-implementation; published v0.1.7 does not include it. Published-release Raspberry
-Pi acceptance remains pending the next merge/release/validation cycle. Source
-test results are recorded separately in [status](status.md).
+in the same single-node K3s cluster. Published v0.1.8 passed reference-Pi LAN
+routing, normal browser certificate trust, UI/API application deployment,
+source/listener isolation, same-version retention and reboot. The
+[native report](../tests/experiments/2026-11-24-v0.1.8-native.md) records these checks
+and the published installer's `--check` exit-status defect; its correction awaits
+a new release. Source results are recorded separately in [status](status.md).
 
 ```mermaid
 flowchart LR

@@ -30,3 +30,27 @@ class MemoryCgroupTests(unittest.TestCase):
         result = subprocess.run(['bash', str(ROOT / 'installer/install.sh'), '--version', 'v0.1.2', '--check', '--prepare-host'], capture_output=True, text=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('read-only', result.stderr)
+
+    def test_successful_check_returns_zero_without_installing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run(['bash', '-c', '''
+source "$1"
+STATE_ROOT="$2/state"
+preflight() { printf 'Host checks passed.\n'; }
+download() { printf 'Unexpected download\n' >&2; exit 99; }
+main --version v0.1.8 --check
+test -z "$WORK"
+test ! -e "$STATE_ROOT"
+''', 'bash', str(ROOT / 'installer/install.sh'), directory], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, 'Host checks passed.\n')
+
+    def test_failed_check_preserves_preflight_exit_status(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run(['bash', '-c', '''
+source "$1"
+STATE_ROOT="$2/state"
+preflight() { return 17; }
+main --version v0.1.8 --check
+''', 'bash', str(ROOT / 'installer/install.sh'), directory], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 17, result.stderr)

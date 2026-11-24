@@ -10,13 +10,15 @@ management, data protection, and operational safety. The architecture is defined
 ## Current implementation boundary
 
 Default installation access uses SSH loopback forwards and Internal Services.
-The source also implements optional private LAN HTTPS through a pinned Traefik
+Published v0.1.8 implements optional private LAN HTTPS through a pinned Traefik
 listener bound to an explicit RFC1918 IPv4 address, mandatory source CIDRs,
 an existing TLS Secret and the `platform-private` IngressClass. Management and
 application hostnames are separate; Secure cookies and application URL display
 are enabled with this mode. Setup, DNS, trust and certificate renewal are in the
-[private LAN guide](private-lan.md). Published v0.1.7 does not include this mode;
-reference-host acceptance follows the next release and is not yet complete.
+[private LAN guide](private-lan.md). The [native report](../tests/experiments/2026-11-24-v0.1.8-native.md)
+verifies separate-workstation browser/CA trust, actual application HTTPS,
+source/listener isolation and identity retention across reinstall/reboot. The
+published installer preflight exit-status correction still requires publication.
 
 Password hashing, expiring setup/session credentials, mutation-header checks,
 scoped RBAC, restricted workloads, immutable configuration Secrets and private

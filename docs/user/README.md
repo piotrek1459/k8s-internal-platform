@@ -244,9 +244,11 @@ or unavailable historical chart can still require host-side diagnosis.
 The update form remains limited. A non-empty environment text area replaces the
 complete ordinary environment map. Creation supports versioned Secret references.
 LAN selection requires an explicitly configured private ingress controller.
-The source implementation adds an optional [private HTTPS installation](../private-lan.md)
+Published v0.1.8 adds an optional [private HTTPS installation](../private-lan.md)
 with separate management/application names, local DNS/trust instructions and
-source restrictions; it requires the next release and native validation. The
+source restrictions. Native browser/API deployment and persistence passed; the
+[native report](../../tests/experiments/2026-11-24-v0.1.8-native.md) records the
+published installer's preflight exit-status defect and pending corrective release. The
 wizard accepts one application label beneath the configured domain, and details
 show the persisted HTTPS URL after reload. Internal access and initial SSH
 bootstrap remain available.

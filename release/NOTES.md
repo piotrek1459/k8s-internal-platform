@@ -57,7 +57,15 @@ Optional private LAN HTTPS is implemented in this source: explicit private IPv4
 binding, source CIDRs, an existing certificate/key Secret, Secure cookies and
 configured app URLs. See [LAN configuration](../docs/private-lan.md) for DNS/trust,
 renewal and the TLS/SSH fallback. The gateway image is pinned and pulled on first
-use; it is not in the native OCI bundle. Native acceptance follows publication.
+use; it is not in the native OCI bundle. Published v0.1.8 passed reference-Pi
+LAN trust/browser/API routing, isolation and reinstall/reboot retention. New
+release installers require their own native verification.
 Application chart 0.1.2 adds the dedicated private class. Existing frozen chart
 identities are preserved; historical-chart retrieval and cross-version upgrades
 remain unsupported.
+
+Successful read-only installer `--check` now exits 0 while failed preflight retains
+its nonzero status. This corrects v0.1.8 returning 1 after printing a successful
+host check. The correction passed 83 regressions on the release-compatible Linux
+runner and development host, plus read-only execution on the Pi; native published
+installer verification follows manual publication.

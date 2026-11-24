@@ -330,7 +330,7 @@ main() {
         fi
     fi
     preflight
-    [[ "$check" != true ]] || return
+    if [[ "$check" == true ]]; then return 0; fi
     [[ -z "$LAN_CONFIG" || -x "$TOOL_ROOT/kubectl" ]] || fail 'Install without LAN first, then create the TLS Secret and rerun with --lan-config.'
     WORK="$(mktemp -d /tmp/platform-install.XXXXXX)"
     trap cleanup EXIT

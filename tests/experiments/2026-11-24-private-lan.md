@@ -79,15 +79,15 @@ after acceptance; credentials, raw keys and cookie headers are not published.
 
 ## Native release gate
 
-Published v0.1.7 remains running on the reference Pi. No native LAN setup or
+At source-PR validation, published v0.1.7 remained on the reference Pi. No native LAN setup or
 workstation trust-store mutation was performed for this source PR. Source browser
 acceptance pins only the ephemeral leaf SPKI; independent curl/Python clients
 verify the CA and hostname. This is not ordinary OS/browser trust acceptance.
 
-After this PR is merged and a release is manually published, native installation,
+The source-PR native gate required subsequent published installation,
 second-device DNS/trust, real app HTTP, Secure cookies, source/Host/SNI/IPv6
 isolation, same-version configuration retention and reboot must be verified.
-Only then are the corresponding M0/M3 checkboxes eligible for completion and the
+Only that evidence makes the corresponding M0/M3 checkboxes eligible for completion and the
 next recovery/security implementation PR started. Resource calibration
 and repeated manual-Helm/UI/API evaluation remain the third cycle. Issue #16
 stays open until the remaining core criteria have evidence.
@@ -118,6 +118,9 @@ PR Python/OpenAPI checks now use Ubuntu 24.04 like release verification, and bot
 workflows print the OpenSSL version. Application runtime/chart and E2E code were
 not changed by this compatibility correction.
 
-The next release requires a new manual workflow dispatch from the fixed branch
-HEAD. Re-executing the failed run retains its previously prepared commit. Native
-LAN acceptance still follows successful publication.
+A subsequent new manual dispatch published v0.1.8 from the corrected `b3fe210`
+source. Its [native LAN report](2026-11-24-v0.1.8-native.md) records successful
+browser/CA routing, lifecycle, isolation, reinstall/reboot retention and a newly
+observed read-only installer exit-status defect. That explicit-zero correction
+requires a corrective release before the next implementation cycle. The source
+results above remain scoped to their recorded commits.
