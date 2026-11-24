@@ -5,10 +5,14 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 INSTALLER = ROOT / 'installer/install.sh'
+sys.path.insert(0,str(ROOT/'tests/e2e'))
+from private_lan import TLSClient
 
 
 def config():
@@ -17,6 +21,22 @@ def config():
 
 
 class PrivateLANTests(unittest.TestCase):
+    def test_tls_transport_keeps_credentials_out_of_process_arguments(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder=Path(directory);observed=[]
+            def run(*args,**options):
+                observed.extend(map(str,args))
+                Path(args[args.index('--dump-header')+1]).write_text('')
+                self.assertTrue(options['private'])
+                return SimpleNamespace(returncode=0,stdout='{}\n200')
+            client=TLSClient(SimpleNamespace(run=run),folder,8443)
+            client.fetch('/api/v1/auth/session',method='POST',body={'password':'controlled-password'},
+                headers={'Cookie':'platform_session=controlled-cookie'})
+            self.assertNotIn('controlled-password',' '.join(observed))
+            self.assertNotIn('controlled-cookie',' '.join(observed))
+            for name in ('request.json','request.headers'):
+                self.assertEqual((folder/name).stat().st_mode&0o777,0o600)
+
     def convert(self, values):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/'lan.json';path.write_text(json.dumps(values))

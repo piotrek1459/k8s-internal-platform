@@ -26,8 +26,14 @@ class TLSClient(Client):
             '--resolve',f'{host}:{self.port}:127.0.0.1','--request',method,
             '--dump-header',str(response_headers),'--write-out','\n%{http_code}']
         if trusted: args += ['--cacert',str(self.folder/'ca.crt')]
-        for key,value in (headers or {}).items(): args += ['--header',key+': '+value]
-        if body is not None: args += ['--header','Content-Type: application/json','--data-binary',json.dumps(body)]
+        if headers:
+            header_file=self.folder/'request.headers'
+            header_file.write_text(''.join(key+': '+value+'\n' for key,value in headers.items()));header_file.chmod(0o600)
+            args += ['--header','@'+str(header_file)]
+        if body is not None:
+            body_file=self.folder/'request.json'
+            body_file.write_text(json.dumps(body));body_file.chmod(0o600)
+            args += ['--header','Content-Type: application/json','--data-binary','@'+str(body_file)]
         result=self.environment.run(*args,f'https://{host}:{self.port}'+path,private=True,check=False)
         if result.returncode: return result.returncode,None,None
         text,code=result.stdout.rsplit('\n',1)
