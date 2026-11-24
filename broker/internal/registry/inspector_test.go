@@ -2,6 +2,7 @@ package registry
 
 import (
 	"context"
+	"fmt"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -171,4 +172,12 @@ func contains(xs []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func TestRegistryErrorBodyDoesNotExposeCredentials(t *testing.T) {
+	marker := "controlled-registry-sensitive-response"
+	err := classifyRemoteError(fmt.Errorf("remote server echoed %s", marker))
+	if strings.Contains(err.Error(), marker) {
+		t.Fatal("registry response body escaped safe error classification")
+	}
 }

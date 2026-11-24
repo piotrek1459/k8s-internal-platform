@@ -389,12 +389,16 @@ establish DNS, certificate trust or external reachability.
 LAN creation/PATCH requires a single-label hostname beneath the configured app
 domain. Management/outside/nested names return 400, and another live app's
 pending/successful rollback reservation returns 409 atomically before acceptance.
-Deleting the owning app releases the reservation. In a configured LAN installation,
-PATCH changing access mode or hostname returns 422; image/replica changes continue
-to work. Route transitions require failed-mutation absence verification and remain
-part of the core recovery follow-up. Internal exposure creates no
-Ingress. See the [private LAN setup and HTTPS/SSH fallback](../private-lan.md).
+Deleting the owning app releases the reservation. Current source accepts
+version-guarded PATCH changes between Internal and LAN and changes to the LAN
+hostname as tracked revisions. Published v0.1.9 retains the earlier 422 guard;
+the new behavior awaits published-release/native validation. A failed transition
+restores the previous configuration and verifies its route or route absence
+before releasing the operation lock. Recovery retry reuses the failed operation
+and restores its successful predecessor without repeating the failed candidate.
+Internal exposure creates no Ingress. See the
+[private LAN setup and HTTPS/SSH fallback](../private-lan.md).
 This capability is included in published v0.1.8. Separate-workstation native
 browser/API routing and reinstall/reboot retention passed; the
 [native report](../../tests/experiments/2026-11-24-v0.1.8-native.md) records evidence
-and the remaining installer preflight correction.
+and the installer preflight defect corrected in [native v0.1.9](../../tests/experiments/2026-11-24-v0.1.9-native.md).

@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
@@ -20,7 +21,8 @@ import (
 // objects, including rollout generation, replicas and pod-template content.
 func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 	decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(manifest), 4096)
-	deployments, services := 0, 0
+	deployments, services, ingresses := 0, 0, 0
+	appID := ""
 	mismatch := func(reason string) error {
 		return platform.Errorf(platform.CodeConflict, "live release verification failed: %s", reason)
 	}
@@ -45,6 +47,7 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			if err := json.Unmarshal(body, &want); err != nil {
 				return err
 			}
+			appID = want.Labels[appIDLabel]
 			if want.Namespace != c.namespace {
 				return mismatch("resource identity or count differs")
 			}
@@ -90,6 +93,7 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			}
 			services++
 		case "Ingress":
+			ingresses++
 			var want networkingv1.Ingress
 			if err := json.Unmarshal(body, &want); err != nil {
 				return err
@@ -108,8 +112,27 @@ func (c *Client) VerifyManifest(ctx context.Context, manifest string) error {
 			return mismatch("resource identity or count differs")
 		}
 	}
-	if deployments != 1 || services != 1 {
+	if deployments != 1 || services != 1 || ingresses > 1 || appID == "" {
 		return mismatch("resource identity or count differs")
+	}
+	if ingresses == 0 {
+		_, err := c.cs.NetworkingV1().Ingresses(c.namespace).Get(ctx, releaseFor(appID), metav1.GetOptions{})
+		if err == nil {
+			return mismatch("an unexpected route remains")
+		}
+		if !apierrors.IsNotFound(err) {
+			return platform.Errorf(platform.CodeDependencyUnavailable, "could not verify route absence")
+		}
+	}
+	// A partial structural match permits extra fields omitted by the target.
+	// Require the complete managed-field comparison and absence of extra owned
+	// resources before calling an interrupted or restored revision verified.
+	differences, err := c.CompareManifest(ctx, appID, manifest)
+	if err != nil {
+		return err
+	}
+	if len(differences) != 0 {
+		return mismatch("managed configuration or resource set differs")
 	}
 	return nil
 }

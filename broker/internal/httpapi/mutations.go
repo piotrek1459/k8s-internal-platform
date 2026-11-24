@@ -65,10 +65,6 @@ func (r *Router) handleUpdateApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := r.validateExposureChange(curRev.Spec.Exposure, newSpec.Exposure); err != nil {
-		writeError(w, r.cfg.Logger, reqID, err)
-		return
-	}
 	if err := r.validatePrivateExposure(newSpec.Exposure); err != nil {
 		writeError(w, r.cfg.Logger, reqID, err)
 		return

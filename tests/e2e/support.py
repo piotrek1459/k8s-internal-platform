@@ -200,7 +200,7 @@ class Environment:
         self.kubectl("-n", "platform-system", "rollout", "status", "deployment/platform", "--timeout=180s")
         self.start_management()
 
-    def crash_broker(self):
+    def crash_broker(self, after_kill=None):
         """Kill the actual broker process at a barrier established by the test.
 
         Runtime SIGKILL bypasses the broker's graceful shutdown and Helm error
@@ -221,6 +221,8 @@ class Environment:
         self.management.__exit__(None, None, None)
         self.run('docker', 'exec', node, 'ctr', '-n', 'k8s.io',
             'tasks', 'kill', '--signal', 'SIGKILL', container)
+        if after_kill is not None:
+            after_kill()
         deadline = time.monotonic()+150
         while time.monotonic() < deadline:
             current = json.loads(self.kubectl('-n', 'platform-system', 'get',

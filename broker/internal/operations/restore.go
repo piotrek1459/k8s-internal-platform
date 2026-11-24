@@ -24,6 +24,12 @@ func (w *Worker) restore(ctx context.Context, op platform.Operation) bool {
 		return false
 	}
 	w.event(ctx, op.ID, "restoring", "restoring the previous successful revision")
+	if preparer, ok := w.helm.(platform.RestorationPreparer); ok {
+		if err := preparer.PrepareRestoration(ctx, op.AppID, previous); err != nil {
+			w.restorationFailure(ctx, op, "prepare", err)
+			return false
+		}
+	}
 	if _, err := w.helm.InstallOrUpgrade(ctx, op.AppID, previous); err != nil {
 		w.restorationFailure(ctx, op, "apply", err)
 		return false

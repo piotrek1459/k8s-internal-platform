@@ -36,6 +36,41 @@ func (a *Adapter) WithReapplyPreparer(prepare func(context.Context, string, stri
 	return a
 }
 
+func (a *Adapter) WithRestorationPreparer(prepare func(context.Context, string, string) error) *Adapter {
+	a.prepareRestoration = prepare
+	return a
+}
+
+// PrepareRestoration refuses pending transactions before changing resources.
+// Repair uses the recorded chart and values, never a substituted artifact.
+func (a *Adapter) PrepareRestoration(ctx context.Context, appID string, revision platform.Revision) error {
+	if a.prepareRestoration == nil {
+		return nil
+	}
+	if _, err := a.PrepareExecution(appID, revision); err != nil {
+		return err
+	}
+	status, exists, err := a.Status(ctx, appID)
+	if err != nil {
+		return err
+	}
+	if !exists || (status.Status != "deployed" && status.Status != "failed") {
+		return platform.Errorf(platform.CodeConflict, "the release is not available for restoration; pending transactions require operator recovery")
+	}
+	cfg, err := a.actionConfigFor(a.namespace)
+	if err != nil {
+		return platform.Errorf(platform.CodeDependencyUnavailable, "could not initialize restoration")
+	}
+	if err := a.checkMutation(ctx, cfg, appID, revision); err != nil {
+		return err
+	}
+	manifest, err := a.RenderExecution(appID, revision)
+	if err != nil {
+		return err
+	}
+	return a.prepareRestoration(ctx, appID, manifest)
+}
+
 func (a *Adapter) PrepareReapply(ctx context.Context, appID string, revision platform.Revision) error {
 	if a.prepareReapply == nil {
 		return nil

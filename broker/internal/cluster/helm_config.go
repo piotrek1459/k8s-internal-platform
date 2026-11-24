@@ -36,11 +36,14 @@ func HelmActionConfig(namespace string, logger *slog.Logger) func(string) (*acti
 		actionConfig := new(action.Configuration)
 		// The "secret" storage driver stores release state as Kubernetes Secrets in
 		// the release namespace, which the broker's RBAC permits.
-		if err := actionConfig.Init(&restGetter{cfg: cfg, namespace: ns}, ns, "secret", func(format string, v ...interface{}) {
-			logger.Debug("helm", "message", fmt.Sprintf(format, v...))
+		if err := actionConfig.Init(&restGetter{cfg: cfg, namespace: ns}, ns, "secret", func(string, ...interface{}) {
+			// SDK/admission diagnostics may include submitted data. Structured
+			// operation stages provide context without retaining arbitrary payloads.
+			logger.Debug("helm_sdk_activity", "namespace", ns)
 		}); err != nil {
 			return nil, fmt.Errorf("init helm action configuration: %w", err)
 		}
+		actionConfig.Releases.Driver = secretSafeReleaseDriver{actionConfig.Releases.Driver}
 		return actionConfig, nil
 	}
 }

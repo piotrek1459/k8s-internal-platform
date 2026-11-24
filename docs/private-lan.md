@@ -5,8 +5,11 @@ in the same single-node K3s cluster. Published v0.1.8 passed reference-Pi LAN
 routing, normal browser certificate trust, UI/API application deployment,
 source/listener isolation, same-version retention and reboot. The
 [native report](../tests/experiments/2026-11-24-v0.1.8-native.md) records these checks
-and the published installer's `--check` exit-status defect; its correction awaits
-a new release. Source results are recorded separately in [status](status.md).
+and the published installer's `--check` exit-status defect. Its correction passed
+the [v0.1.9 native gate](../tests/experiments/2026-11-24-v0.1.9-native.md), including
+normal browser deployment and original session/config retention through reinstall
+and reboot. Separate rollout-adjacent browser timeout observations remain in that
+report; uninterrupted rolling HTTP service has not been established. Source results are recorded separately in [status](status.md).
 
 ```mermaid
 flowchart LR
@@ -233,11 +236,15 @@ curl --noproxy '*' --cacert ca.crt -fsS https://demo.apps.home.arpa:8443/version
 The `/version` endpoint exists on the bundled demo; use the deployed image's own
 endpoint for other images. Internal applications create no route. The API refuses
 management/outside/nested hostnames and a hostname reserved by another live app's
-pending/successful rollback history. Deleting the owner releases that reservation. Access mode and hostname are
-immutable after creation in this mode; changing them through PATCH returns 422.
-Image updates, scaling, restart and rollback remain available. Route transitions
-require explicit absence verification after failed Helm mutations and remain
-tracked in the core recovery work rather than being accepted without that proof.
+pending/successful rollback history. Deleting the owner releases that reservation.
+Current source accepts version-guarded PATCH changes between Internal and LAN,
+and LAN hostname changes, through the tracked revision path. The effective URL
+continues to identify the last successful revision until the candidate succeeds.
+Failed changes restore the previous managed configuration and verify the expected
+route or its absence before unlocking. Failed preparation or verification retains
+`needs_attention`; recovery retry restores the previous successful snapshot.
+Published v0.1.9 retains the earlier 422 transition guard. The new transition and
+failure tests require their own published-release/native validation.
 
 Negative acceptance must include an excluded source network, forged
 `X-Forwarded-For`/`Forwarded` headers, an unknown host/SNI and IPv6. The source

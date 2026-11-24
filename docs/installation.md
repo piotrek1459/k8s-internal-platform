@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.1.8`. Select a version available through the
+The examples below use `v0.1.9`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -23,12 +23,12 @@ upgrade or restoration test.
 The [implementation status](status.md) records the remaining boundaries. Existing
 unrelated K3s installations are refused; this installer is for a dedicated host.
 
-Published v0.1.8 passed fresh installation, private LAN HTTPS and normally trusted
-browser deployment, same-version retention and automatic reboot recovery. Its
-successful read-only `--check` incorrectly returns 1; source now returns 0, with
-83 regressions and read-only Pi verification passed. A corrective manual release
-is still required. The [v0.1.8 report](../tests/experiments/2026-11-24-v0.1.8-native.md)
-records the defect separately from passing installation/runtime checks.
+Published v0.1.9 passed fresh installation, private LAN HTTPS and normally trusted
+browser deployment, same-version retention and automatic reboot recovery. All
+published read-only `--check` variants returned 0, correcting v0.1.8's exit-status
+defect. The [v0.1.9 report](../tests/experiments/2026-11-24-v0.1.9-native.md)
+records accepted phases and separate rollout-adjacent browser timeout observations;
+those observations do not establish interruption-free rolling HTTP service.
 
 ## 1. Prepare the host
 
@@ -51,7 +51,7 @@ If the installer reports missing memory cgroups, an explicit preparation step is
 available after the installer has been downloaded and verified:
 
 ```bash
-sudo bash install.sh --version v0.1.8 --prepare-host
+sudo bash install.sh --version v0.1.9 --prepare-host
 # Exit status 20 means that the boot file was prepared and a reboot is required.
 sudo reboot
 # Reconnect over SSH, then rerun --check and the normal installation.
@@ -71,13 +71,13 @@ combined with `--prepare-host`. The installer never reboots automatically.
 Run on the Pi/server as the normal SSH user:
 
 ```bash
-mkdir -p ~/platform-v0.1.8
-cd ~/platform-v0.1.8
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.8/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.8/SHA256SUMS
+mkdir -p ~/platform-v0.1.9
+cd ~/platform-v0.1.9
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.9/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.9/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.1.8 --check
+sudo bash install.sh --version v0.1.9 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -87,7 +87,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.1.8
+sudo bash install.sh --version v0.1.9
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -117,8 +117,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.1.8 \
-  --bundle platform-v0.1.8-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.9 \
+  --bundle platform-v0.1.9-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;

@@ -144,6 +144,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		inspector := registry.NewInspector(credentials).WithInsecureRegistries(insecureRegistries).WithRegistryAliases(registryAliases)
 		helmAdapter.WithManifestVerifier(clusterClient.VerifyManifest)
 		helmAdapter.WithReapplyPreparer(clusterClient.PrepareReapply)
+		helmAdapter.WithRestorationPreparer(clusterClient.PrepareRestoration)
 		helmAdapter.WithMutationGuard(clusterClient.GuardMutation)
 		cfg.Diagnostics = diagnostics.New(st, clusterClient, helmAdapter)
 		worker = operations.NewWorker(st, helmAdapter, clusterClient, inspector, platform.SystemClock{}, logger)

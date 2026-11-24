@@ -545,6 +545,30 @@ class Workflows(unittest.TestCase):
         self.assertIn(code, (422, 503)); self.assertIn("code", body["error"])
         self.e.record("Image inspection reports unavailable/nonexistent registry content")
 
+    def test_32_crash_before_helm_mutation(self):
+        from recovery_matrix import check_crash_boundary
+        check_crash_boundary(self, 'before-helm')
+
+    def test_33_crash_during_pending_release(self):
+        from recovery_matrix import check_crash_boundary
+        check_crash_boundary(self, 'pending')
+
+    def test_34_crash_after_cluster_apply(self):
+        from recovery_matrix import check_crash_boundary
+        check_crash_boundary(self, 'after-apply')
+
+    def test_35_crash_before_terminal_sql(self):
+        from recovery_matrix import check_terminal_sql_boundary
+        check_terminal_sql_boundary(self)
+
+    def test_36_failed_restoration_and_verification_retry(self):
+        from recovery_matrix import check_failed_restoration
+        check_failed_restoration(self)
+
+    def test_37_secret_disclosure_failure_paths(self):
+        from recovery_matrix import check_disclosure
+        check_disclosure(self)
+
     def test_40_reapply_after_service_deletion(self):
         app = self.e.create("reapply")
         try:

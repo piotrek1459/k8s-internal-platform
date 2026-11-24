@@ -18,7 +18,7 @@ are enabled with this mode. Setup, DNS, trust and certificate renewal are in the
 [private LAN guide](private-lan.md). The [native report](../tests/experiments/2026-11-24-v0.1.8-native.md)
 verifies separate-workstation browser/CA trust, actual application HTTPS,
 source/listener isolation and identity retention across reinstall/reboot. The
-published installer preflight exit-status correction still requires publication.
+published installer preflight correction passed the [v0.1.9 native gate](../tests/experiments/2026-11-24-v0.1.9-native.md).
 
 Password hashing, expiring setup/session credentials, mutation-header checks,
 scoped RBAC, restricted workloads, immutable configuration Secrets and private
