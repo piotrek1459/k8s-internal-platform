@@ -230,7 +230,11 @@ curl --noproxy '*' --cacert ca.crt -fsS https://demo.apps.home.arpa:8443/version
 The `/version` endpoint exists on the bundled demo; use the deployed image's own
 endpoint for other images. Internal applications create no route. The API refuses
 management/outside/nested hostnames and a hostname reserved by another live app's
-pending/successful rollback history. Deleting the owner releases that reservation.
+pending/successful rollback history. Deleting the owner releases that reservation. Access mode and hostname are
+immutable after creation in this mode; changing them through PATCH returns 422.
+Image updates, scaling, restart and rollback remain available. Route transitions
+require explicit absence verification after failed Helm mutations and remain
+tracked in the core recovery work rather than being accepted without that proof.
 
 Negative acceptance must include an excluded source network, forged
 `X-Forwarded-For`/`Forwarded` headers, an unknown host/SNI and IPv6. The source

@@ -56,6 +56,22 @@ func TestPrivateExposureRefusesUnconfiguredAndReservedRoutes(t *testing.T) {
 	}
 }
 
+func TestPrivateAccessTransitionsAreRefusedBeforeHelmAcceptance(t *testing.T) {
+	router := NewRouter(Config{PrivateIngressEnabled: true, PrivateNetwork: testPrivateNetwork()})
+	internal := platform.Exposure{Mode: platform.ExposureInternal}
+	lan := platform.Exposure{Mode: platform.ExposureLAN, Hostname: "demo.apps.home.arpa"}
+	for _, pair := range [][2]platform.Exposure{{internal, lan}, {lan, internal}, {lan, {Mode: platform.ExposureLAN, Hostname: "new.apps.home.arpa"}}} {
+		if err := router.validateExposureChange(pair[0], pair[1]); err == nil {
+			t.Fatal("accepted a route transition without an absence-verification contract")
+		}
+	}
+	for _, exposure := range []platform.Exposure{internal, lan} {
+		if err := router.validateExposureChange(exposure, exposure); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 type accessStore struct {
 	*fakeStore
 	revisions map[string]platform.Revision

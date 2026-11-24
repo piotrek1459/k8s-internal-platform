@@ -200,6 +200,18 @@ def verify_private_lan(case):
                 'containerPort':8080,'profile':'http','exposure':{'mode':'lan','hostname':hostname}}, {'Idempotency-Key':secrets.token_hex(16)})
             case.assertEqual(code,409);case.assertEqual(len(client.get('/apps')['items']),before)
             internal=e.create('private-no-route')
+            for identity,exposure in ((internal,{'mode':'lan','hostname':'new.apps.home.arpa'}),
+                (app,{'mode':'internal'}),(app,{'mode':'lan','hostname':'renamed.apps.home.arpa'})):
+                current=client.get('/apps/'+identity)
+                code,_=client.request('PATCH','/apps/'+identity,{'version':current['version'],'exposure':exposure},
+                    {'Idempotency-Key':secrets.token_hex(16)})
+                case.assertEqual(code,422)
+                case.assertEqual(client.get('/apps/'+identity)['version'],current['version'])
+            previous=client.get('/apps/'+app)['lastSuccessfulRevision']
+            client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
+            case.assertEqual(json.loads(client.fetch('/version',host=hostname)[2][0])['version'],'v2')
+            client.mutate('POST','/apps/'+app+'/rollback',{'version':client.get('/apps/'+app)['version'],'revisionId':previous})
+            case.assertEqual(json.loads(client.fetch('/version',host=hostname)[2][0])['version'],'v1')
             case.assertEqual(e.resource('ingresses',internal),[])
             case.assertEqual(client.fetch('/version',host='internal.apps.home.arpa')[1],404)
             verify_public_listener_refusal(case)

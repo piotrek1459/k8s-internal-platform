@@ -71,6 +71,17 @@ func (r *Router) validatePrivateExposure(e platform.Exposure) error {
 	return nil
 }
 
+// Route transitions require absence verification after failed Helm mutations.
+// Until that recovery contract is implemented, private-LAN installations retain
+// their initial exposure while ordinary image/configuration changes continue.
+func (r *Router) validateExposureChange(previous, next platform.Exposure) error {
+	if r.cfg.PrivateNetwork.ApplicationDomain != "" && previous != next {
+		return platform.FieldErrorf(platform.CodeUnsupportedSpec, "exposure",
+			"access mode and hostname cannot change after creation; create a separate application")
+	}
+	return nil
+}
+
 func (r *Router) applicationAccess(ctx context.Context, app platform.Application) (map[string]any, error) {
 	id := app.LastSuccessfulRevision
 	if id == "" {
