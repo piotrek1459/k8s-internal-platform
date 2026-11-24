@@ -20,12 +20,13 @@ class TLSClient(Client):
         super().__init__(environment)
         self.folder, self.port, self.session = folder, port, ''
 
-    def fetch(self, path, host='platform.home.arpa', method='GET', body=None, headers=None, trusted=True):
+    def fetch(self, path, host='platform.home.arpa', method='GET', body=None, headers=None, trusted=True, insecure=False):
         response_headers = self.folder/'response.headers'
         args=['curl','--noproxy','*','--silent','--show-error','--connect-timeout','5','--max-time','30',
             '--resolve',f'{host}:{self.port}:127.0.0.1','--request',method,
             '--dump-header',str(response_headers),'--write-out','\n%{http_code}']
-        if trusted: args += ['--cacert',str(self.folder/'ca.crt')]
+        if insecure: args += ['--insecure']
+        elif trusted: args += ['--cacert',str(self.folder/'ca.crt')]
         if headers:
             header_file=self.folder/'request.headers'
             header_file.write_text(''.join(key+': '+value+'\n' for key,value in headers.items()));header_file.chmod(0o600)
@@ -161,7 +162,9 @@ def verify_private_lan(case):
             # Positive verified TLS is required before trusting negative requests.
             case.assertEqual(client.fetch('/healthz')[1],200)
             case.assertEqual(client.fetch('/healthz',trusted=False)[0],60,'Untrusted CA was accepted')
-            case.assertNotEqual(client.fetch('/healthz',host='unknown.home.arpa')[0],0,'Unknown SNI was accepted')
+            # Disable client verification only for this negative probe: require
+            # a server-side handshake refusal, not merely a hostname mismatch.
+            case.assertEqual(client.fetch('/healthz',host='unknown.home.arpa',insecure=True)[0],35,'Server accepted unknown SNI')
             case.assertEqual(client.request('GET','/system')[0],401)
             client.login()
             case.assertEqual(client.get('/system')['privateNetwork']['httpsPort'],port)
