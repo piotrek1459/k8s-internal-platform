@@ -204,6 +204,17 @@ def verify_private_lan(case):
                     case.assertEqual(client.get('/apps/'+app)['access']['url'],app_url)
                     wait_version(hostname,'v1')
                     page.goto(app_url+'version');case.assertEqual(json.loads(page.locator('body').inner_text())['version'],'v1')
+                    case.assertEqual(page.evaluate('location.origin'),app_url.rstrip('/'))
+                    cross_origin=page.evaluate('''async url => {
+                        try {
+                            await fetch(url+'/api/v1/auth/session', {method:'DELETE',credentials:'include',
+                                headers:{'X-Requested-With':'XMLHttpRequest'}});
+                            return 'unexpectedly allowed';
+                        } catch { return 'blocked'; }
+                    }''',management)
+                    case.assertEqual(cross_origin,'blocked','Application origin bypassed management CORS/CSRF boundary')
+                    page.goto(management+'/apps/'+app)
+                    expect(page.get_by_role('link',name=app_url,exact=True)).to_be_visible()
                 finally:browser.close()
 
             before=len(client.get('/apps')['items'])
@@ -237,7 +248,7 @@ def verify_private_lan(case):
                     case.assertEqual(client.fetch('/healthz',host=host,headers=headers)[1],403,'Forwarded headers bypassed source restriction')
             configure(values)
             client.request('DELETE','/auth/session')
-            e.record('Private HTTPS: CA/hostname checks and pinned-browser LAN deployment/link/HTTP passed; Secure host-only cookies, reserved/duplicate hosts, internal-route absence, IPv6 refusal and forged-header source restrictions verified')
+            e.record('Private HTTPS: CA/hostname and pinned-browser deployment/link/HTTP, update/rollback convergence, host-only Secure cookies and application-origin CORS/CSRF refusal passed; route/transition guards, independent Host/SNI listeners, IPv6 and forged-header source restrictions verified')
         finally:
             # Only this owned disposable cluster is changed; failures remain failures.
             if configured:
