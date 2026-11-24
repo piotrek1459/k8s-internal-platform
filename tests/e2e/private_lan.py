@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import secrets
 import socket
+import ssl
 import subprocess
 import tempfile
 import time
@@ -76,6 +77,23 @@ def verify_public_listener_refusal(case):
         finally:e.stop_forward(process)
 
 
+def observed_peer(environment, folder, port, node_address):
+    """Measure the real connection peer; k3d port proxies can replace its IP."""
+    context=ssl.create_default_context(cafile=str(folder/'ca.crt'))
+    with socket.create_connection(('127.0.0.1',port),timeout=10) as raw:
+        with context.wrap_socket(raw,server_hostname='platform.home.arpa'):
+            node='k3d-'+environment.name+'-server-0'
+            rows=environment.run('docker','exec',node,'cat','/proc/net/tcp',private=True).stdout.splitlines()[1:]
+            peers=set()
+            for row in rows:
+                fields=row.split();local,remote=fields[1:3]
+                local_address=socket.inet_ntoa(bytes.fromhex(local.split(':')[0])[::-1])
+                if local_address==node_address and int(local.split(':')[1],16)==port and fields[3]=='01':
+                    peers.add(socket.inet_ntoa(bytes.fromhex(remote.split(':')[0])[::-1]))
+            if len(peers)!=1: raise AssertionError('Expected one observed peer on the owned TLS listener')
+            return peers.pop()
+
+
 def verify_private_lan(case):
     from playwright.sync_api import sync_playwright, expect
     e=case.e
@@ -101,10 +119,11 @@ def verify_private_lan(case):
         client=TLSClient(e,folder,port)
 
         def wait_http(expected):
+            statuses=expected if isinstance(expected,tuple) else (expected,)
             deadline=time.monotonic()+90
             while time.monotonic()<deadline:
                 error,code,_=client.fetch('/healthz')
-                if not error and code==expected: return
+                if not error and code in statuses: return
                 time.sleep(1)
             raise AssertionError('Private TLS listener did not return expected health status '+str(expected))
 
@@ -118,7 +137,11 @@ def verify_private_lan(case):
             if settings['privateLAN']['enabled']: wait_http(expected)
 
         try:
-            configured=True;configure(values)
+            configured=True;configure(values,(200,403))
+            peer=observed_peer(e,folder,port,address)
+            values['privateLAN']['allowedCIDRs']=[peer+'/32']
+            configure(values)
+            e.record('Measured the actual owned TLS connection peer and applied an exact /32 source policy')
             # Positive verified TLS is required before trusting negative requests.
             case.assertEqual(client.fetch('/healthz')[1],200)
             case.assertEqual(client.fetch('/healthz',trusted=False)[0],60,'Untrusted CA was accepted')
@@ -187,7 +210,7 @@ def verify_private_lan(case):
             denied={'privateLAN':{**values['privateLAN'],'allowedCIDRs':['10.250.0.1/32']}}
             configure(denied,403)
             for host in ('platform.home.arpa',hostname):
-                for headers in ({},{'X-Forwarded-For':gateway,'X-Real-IP':gateway,'Forwarded':'for='+gateway+';proto=https'}):
+                for headers in ({},{'X-Forwarded-For':peer,'X-Real-IP':peer,'Forwarded':'for='+peer+';proto=https'}):
                     case.assertEqual(client.fetch('/healthz',host=host,headers=headers)[1],403,'Forwarded headers bypassed source restriction')
             configure(values)
             client.request('DELETE','/auth/session')
