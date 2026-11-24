@@ -18,7 +18,7 @@ embedded first-party Helm chart.
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Login throttling/password recovery remain outstanding; the new LAN mode awaits published Pi acceptance. |
 | UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Released diagnostics include bounded application logs/events and drift inspection; the complete configuration editor remains planned. LAN selection is enabled only when private ingress is explicitly configured. |
 | Application lifecycle | Digest-pinned deployment, update, scale 2/0/1, restart, reapply, rollback and deletion with retained history. | Replicas on one node do not provide host availability. Application data volumes remain M5 scope. |
-| Temporary files | Application chart `0.1.1` supplies a Pod-local `/tmp` emptyDir with a 64Mi size limit and non-root filesystem-group access. | Published `v0.1.3` passed unpatched browser deployment of unprivileged Nginx and real HTTP verification on the Pi. The volume is ephemeral; it does not provide M5 persistence. |
+| Temporary files | A Pod-local `/tmp` emptyDir, introduced in chart `0.1.1` and retained in `0.1.2`, provides temporary storage with a 64Mi size limit and non-root filesystem-group access. | Published `v0.1.3` passed unpatched browser deployment of unprivileged Nginx and real HTTP verification on the Pi. The volume is ephemeral; it does not provide M5 persistence. |
 | Execution snapshots | Image digest, exact Secret references, chart version, embedded chart content digest, canonical values hash and stable restart token are recorded before apply. | A different chart artifact is refused; old chart retrieval and rollback across chart changes are not implemented. See the M7 boundary and core acceptance tracker. |
 | Recovery | Interrupted success requires target release identity, matching chart/values and healthy matching live resources. Failed updates attempt verified restoration of the last successful revision. | Ambiguous/pending state remains blocked. A blocked first create without a successful predecessor supports tracked removal with retained evidence; other recovery retry reuses the existing operation. |
 | Configuration Secrets | From v0.1.6: immutable versions, exact references, durable deletion reservations, UID/ownership-guarded physical removal and retry. Published v0.1.7 verified browser creation/versioning, reference refusal, deleted-history cleanup and partial retry across actual broker replacement on the Pi. | Complete negative-path disclosure and historical orphan collection remain separate. Original v0.1.7 session/PVC/history survived the native retry and reinstall/reboot checks. |
@@ -66,6 +66,13 @@ throttling retain their separately recorded boundaries.
 
 ## Verification available
 
+- The [private LAN source report](../tests/experiments/2026-11-24-private-lan.md)
+  records a focused 2/0/0 workflow and full clean-source **21/0/0** acceptance at
+  `ddec3aa`, with downloaded JUnit/strict summary and artifact digest verified.
+  Actual TLS/browser/update/rollback, cookie/CORS, source/route/Host/SNI and IPv6
+  checks passed. The read-only native bundle-capability guard added afterward is
+  covered by the 80-case Python suite; runtime/chart/E2E code is unchanged.
+  Native LAN criteria await merge, manual release and second-device Pi acceptance.
 - The [published v0.1.7 native report](../tests/experiments/2026-11-23-v0.1.7-native.md)
   verifies fresh installation, lifecycle, diagnostics/drift, physical Secret cleanup,
   browser retry across replacement, same-version reinstall and reboot with original
@@ -123,13 +130,14 @@ reliability. Measurements must record release/source, host, pins and conditions.
 
 ## Next implementation order
 
-1. Complete source/CI acceptance of the optional [private LAN implementation](private-lan.md),
-   merge its PR, publish a release manually and validate that unmodified release
+1. Merge the source-accepted [private LAN implementation](private-lan.md),
+   publish a release manually and validate that unmodified release
    on the Pi from another LAN device, including DNS/trust, Secure cookies and the
    TLS/SSH fallback. No later implementation PR starts before this validation.
 2. Complete the remaining core reliability/security matrix in
    [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16):
-   deterministic worker crash barriers, failed restoration and recovery retry,
+   deterministic worker crash barriers, failed restoration/recovery retry, expected
+   route absence before lifting the interim access-transition guard,
    and comprehensive negative-path Secret disclosure acceptance.
 3. Define repetitions/workload/targets before reference-Pi resource calibration
    and manual-Helm versus UI/API evaluation. Separate cold pulls from cached images;

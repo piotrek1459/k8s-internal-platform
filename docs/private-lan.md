@@ -157,7 +157,8 @@ sudo bash install.sh --version "$PLATFORM_VERSION" --lan-config private-lan.json
 ```
 
 Python 3, OpenSSL and iproute2 are additional prerequisites for this opt-in mode. The
-installer checks that the bind address belongs to the host and checks the existing Secret before Helm changes, enables Secure cookies
+installer checks that the selected bundle supports LAN mode, that the bind
+address belongs to the host, and that the existing Secret is valid before Helm changes, enables Secure cookies
 and persists validated configuration under `/etc/k8s-internal-platform/` with mode
 0600. LAN changes use Helm atomic rollback and cleanup-on-failure against the
 existing platform release; failed readiness is not accepted as configuration

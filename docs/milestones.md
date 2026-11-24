@@ -27,7 +27,8 @@ No entire M0–M4 milestone is declared complete by this checklist.
 
 Updated: 2026-11-24. The audit includes merged changes through PR #20,
 published `v0.1.7`, the [native acceptance report](../tests/experiments/2026-11-23-v0.1.7-native.md),
-the [source resilience report](../tests/experiments/2026-11-23-core-resilience.md)
+the [source resilience report](../tests/experiments/2026-11-23-core-resilience.md),
+the [private LAN source acceptance](../tests/experiments/2026-11-24-private-lan.md)
 and the current regression/E2E suites. Remaining work is tracked in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
 Older dated reports remain evidence only for their recorded source and scope.
@@ -37,7 +38,7 @@ Older dated reports remain evidence only for their recorded source and scope.
 | M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles and local and reference-Pi manual Helm functional baselines. | Normal access from another LAN device, operator-active-time comparison and the measurements supporting M1/M4. |
 | M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy real-cluster workflows; published v0.1.3 verifies temporary files with container hardening retained. | Measured resource presets and reference-LAN acceptance. |
 | M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source lost-response/moved-tag and workload-origin acceptance. | Remaining worker interruption/restoration barriers and comprehensive negative-path secret-disclosure checks. |
-| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source completed/queued/running-operation refresh acceptance and native v0.1.7 Secret cleanup/retry. | Published-release private LAN HTTPS/URL acceptance; source implementation is in the current LAN PR. |
+| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source completed/queued/running-operation refresh acceptance and native v0.1.7 Secret cleanup/retry. | Published-release private LAN HTTPS/URL acceptance; source 21-case acceptance has passed. |
 | M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, owned-field drift reports and guarded explicit Service repair. | Real-cluster interruption/failed-compensation acceptance and the controlled core evaluation. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
@@ -154,7 +155,7 @@ Application data volumes remain outside this milestone.
 - [x] Unhealthy-v3 rollout failure restores and verifies the prior successful v2 snapshot before recording the failed operation and releasing its lock. **Evidence:** real-cluster E2E and the published `v0.1.2` native run.
 - [x] Unverified restoration retains a failed candidate, nonterminal `needs_attention` and conflict guards; version-guarded recovery retry retains operation identity. **Evidence:** store/worker/recovery unit regressions.
 - [x] Provide supported removal of a blocked first deployment without a successful predecessor. **Evidence:** atomic store rejection/rollback/replay regressions and real browser deletion after runtime SIGKILL, retained blocking and a subsequent broker replacement. Failed candidate/snapshot/history remain recorded.
-- [ ] Verify failed restoration of a previously successful application and its lock/retry resolution across actual broker restarts. **Acceptance:** conflicts remain rejected until the restored state is verified. Tracked in issue #16.
+- [ ] Verify failed restoration of a previously successful application and its lock/retry resolution across actual broker restarts. **Acceptance:** conflicts remain rejected until the restored state is verified. Include absence of newly introduced routes and clearing removed fields before lifting the interim 422 access-transition guard. Tracked in issue #16.
 - [x] Supported rollback creates a new revision preserving the selected image, exact Secret versions and available chart/values identity. Unavailable chart artifacts are refused rather than substituted. **Evidence:** native rollback, configuration-version E2E and chart/snapshot regressions. Historical-chart retrieval across platform upgrades remains M7 scope.
 - [x] Restart replaces Pods with a stable operation token and fixed image digest; stateless scale 2/0/1 reaches its expected states. **Evidence:** mandatory status/restart assertions, API E2E and the native workflow. There are no acceptance skips for these paths.
 - [x] Tracked stateless deletion removes Helm-managed workload/routing resources and retains history. **Evidence:** API/browser/native deletion checks. Dependent Pod garbage collection is asynchronous and has a bounded native acceptance check.

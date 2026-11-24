@@ -312,7 +312,9 @@ explicit node IPv4 address and verifies actual HTTPS using CA/hostname checks.
 An untrusted CA and unknown SNI are refused. Browser login/deployment and URL
 reload use a controlled leaf-SPKI pin without modifying system trust; management
 cookies must be Secure/HttpOnly/SameSite=Strict and absent on the app hostname.
-The actual app serves HTTP v1 through its route. Reserved/duplicate names, an
+The actual app serves HTTP v1, then v2 and rolled-back v1 through its route with
+bounded convergence. App-origin CORS/CSRF attempts cannot revoke the management
+session. Reserved/duplicate names, immutable access transitions, an
 Internal app, an excluded source with forged forwarding headers and IPv6 are
 negative cases. The original platform configuration is restored and only owned
 fixtures are removed; the suite then deletes its disposable cluster.
@@ -328,3 +330,9 @@ After merge and manual release publication, that release must be installed on
 the reference Pi and verified from a separate LAN device with real DNS/hosts,
 CA trust, actual app HTTP, Secure cookies, private-listener isolation and reboot.
 The sequence is one PR, release, validation, then the next implementation PR.
+
+The [dated source acceptance report](experiments/2026-11-24-private-lan.md) records
+the full 21-case CI result, exact source/artifact identities, scope of the earlier
+focused run and outstanding published-release/native gates. Native mode also
+refuses an older bundle without private listener support before Helm changes;
+that read-only compatibility preflight has its own fast regression.

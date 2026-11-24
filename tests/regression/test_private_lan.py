@@ -21,6 +21,15 @@ def config():
 
 
 class PrivateLANTests(unittest.TestCase):
+    def test_lan_setup_refuses_a_bundle_without_listener_support(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder=Path(directory);tool=folder/'helm'
+            tool.write_text('#!/bin/sh\nprintf \'%s\\n\' "$CHART_VALUES_FIXTURE"\n');tool.chmod(0o755)
+            for values,expected in (('image:\n  tag: legacy',1),('privateLAN:\n  enabled: false',0)):
+                result=subprocess.run(['bash','-c','source "$1"; TOOL_ROOT="$2"; WORK="$2"; check_lan_chart','bash',str(INSTALLER),str(folder)],
+                    env={**os.environ,'CHART_VALUES_FIXTURE':values},capture_output=True,text=True)
+                self.assertEqual(result.returncode,expected,result.stderr)
+
     def test_tls_transport_keeps_credentials_out_of_process_arguments(self):
         with tempfile.TemporaryDirectory() as directory:
             folder=Path(directory);observed=[]

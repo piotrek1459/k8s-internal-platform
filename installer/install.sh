@@ -71,6 +71,11 @@ if not any(item.get('local')==address for interface in interfaces for item in in
 PY
 }
 
+check_lan_chart() {
+    "$TOOL_ROOT/helm" show values "$WORK/bundle/platform-chart.tgz" | grep '^privateLAN:' >/dev/null ||
+        fail 'This release bundle does not support private LAN HTTPS; use a matching installer and LAN-capable release.'
+}
+
 check_lan_certificate() {
     local secret hostname domain
     read -r secret hostname domain < <(python3 - "$WORK/lan-values.json" <<'PY'
@@ -251,6 +256,7 @@ install_platform() {
     local key image archive
     local lan_options=()
     if [[ -n "$LAN_CONFIG" ]]; then
+        check_lan_chart
         lan_values "$LAN_CONFIG" > "$WORK/lan-values.json"
         check_lan_certificate
         lan_options=(--values "$WORK/lan-values.json" --atomic --cleanup-on-fail)
