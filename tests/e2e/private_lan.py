@@ -127,6 +127,16 @@ def verify_private_lan(case):
                 time.sleep(1)
             raise AssertionError('Private TLS listener did not return expected health status '+str(expected))
 
+        def wait_version(host, expected):
+            # Ready Pods and ingress-provider endpoint observation are separate
+            # asynchronous boundaries. Require actual HTTPS convergence too.
+            deadline=time.monotonic()+60
+            while time.monotonic()<deadline:
+                error,code,response=client.fetch('/version',host=host)
+                if not error and code==200 and json.loads(response[0])['version']==expected:return
+                time.sleep(1)
+            raise AssertionError(f'Private app did not serve {expected}; last curl status {error}, HTTP status {code}')
+
         def configure(settings, expected=200):
             (folder/'values.json').write_text(json.dumps(settings))
             e.management.__exit__(None,None,None)
@@ -186,12 +196,7 @@ def verify_private_lan(case):
                     page.goto(management+'/apps/'+app);page.reload()
                     expect(page.get_by_role('link',name=app_url,exact=True)).to_have_attribute('href',app_url)
                     case.assertEqual(client.get('/apps/'+app)['access']['url'],app_url)
-                    deadline=time.monotonic()+60
-                    while time.monotonic()<deadline:
-                        error,code,response=client.fetch('/version',host=hostname)
-                        if not error and code==200 and json.loads(response[0])['version']=='v1':break
-                        time.sleep(1)
-                    else:raise AssertionError('Private application did not serve actual HTTP v1')
+                    wait_version(hostname,'v1')
                     page.goto(app_url+'version');case.assertEqual(json.loads(page.locator('body').inner_text())['version'],'v1')
                 finally:browser.close()
 
@@ -209,9 +214,9 @@ def verify_private_lan(case):
                 case.assertEqual(client.get('/apps/'+identity)['version'],current['version'])
             previous=client.get('/apps/'+app)['lastSuccessfulRevision']
             client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
-            case.assertEqual(json.loads(client.fetch('/version',host=hostname)[2][0])['version'],'v2')
+            wait_version(hostname,'v2')
             client.mutate('POST','/apps/'+app+'/rollback',{'version':client.get('/apps/'+app)['version'],'revisionId':previous})
-            case.assertEqual(json.loads(client.fetch('/version',host=hostname)[2][0])['version'],'v1')
+            wait_version(hostname,'v1')
             case.assertEqual(e.resource('ingresses',internal),[])
             case.assertEqual(client.fetch('/version',host='internal.apps.home.arpa')[1],404)
             verify_public_listener_refusal(case)
