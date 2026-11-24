@@ -36,11 +36,12 @@ const installTimeout = 5 * time.Minute
 
 // Adapter installs and upgrades the application chart in a target namespace.
 type Adapter struct {
-	guardMutation  func(context.Context, string, string) error
-	prepareReapply func(context.Context, string, string) error
-	verifyManifest func(context.Context, string) error
-	chart          *chart.Chart
-	namespace      string
+	guardMutation      func(context.Context, string, string) error
+	prepareReapply     func(context.Context, string, string) error
+	prepareRestoration func(context.Context, string, string) error
+	verifyManifest     func(context.Context, string) error
+	chart              *chart.Chart
+	namespace          string
 	// actionConfigFor builds a Helm action configuration bound to a release
 	// namespace. It is a field so tests can inject an in-memory configuration.
 	actionConfigFor func(namespace string) (*action.Configuration, error)
@@ -245,7 +246,9 @@ func sanitize(id string) string {
 // classifyHelmError maps Helm errors to domain errors. A rollout or wait failure
 // is reported so the worker records it; it is not retried blindly.
 func classifyHelmError(err error) error {
-	return platform.Errorf(platform.CodeDependencyUnavailable, "helm operation failed: %v", err)
+	// Admission/transport errors can echo submitted data. Do not persist arbitrary
+	// SDK messages as vetted history or structured broker error fields.
+	return platform.Errorf(platform.CodeDependencyUnavailable, "helm operation failed; inspect application diagnostics and release state")
 }
 
 // valuesHash returns a stable hash of the rendered values, recorded on the frozen

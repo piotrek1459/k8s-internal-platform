@@ -225,13 +225,23 @@ def verify_private_lan(case):
                 'containerPort':8080,'profile':'http','exposure':{'mode':'lan','hostname':hostname}}, {'Idempotency-Key':secrets.token_hex(16)})
             case.assertEqual(code,409);case.assertEqual(len(client.get('/apps')['items']),before)
             internal=e.create('private-no-route')
-            for identity,exposure in ((internal,{'mode':'lan','hostname':'new.apps.home.arpa'}),
-                (app,{'mode':'internal'}),(app,{'mode':'lan','hostname':'renamed.apps.home.arpa'})):
-                current=client.get('/apps/'+identity)
-                code,_=client.request('PATCH','/apps/'+identity,{'version':current['version'],'exposure':exposure},
-                    {'Idempotency-Key':secrets.token_hex(16)})
-                case.assertEqual(code,422)
-                case.assertEqual(client.get('/apps/'+identity)['version'],current['version'])
+            for identity,host in ((internal,'new.apps.home.arpa'),(app,'renamed.apps.home.arpa')):
+                client.mutate('PATCH','/apps/'+identity,{'version':client.get('/apps/'+identity)['version'],
+                    'exposure':{'mode':'lan','hostname':host}})
+                wait_version(host,'v1')
+                case.assertEqual(client.get('/apps/'+identity)['access']['url'],f'https://{host}:{port}/')
+                client.mutate('PATCH','/apps/'+identity,{'version':client.get('/apps/'+identity)['version'],
+                    'exposure':{'mode':'internal'}})
+                case.assertEqual(e.resource('ingresses',identity),[])
+                case.assertEqual(client.get('/apps/'+identity)['access']['mode'],'internal')
+                deadline=time.monotonic()+60
+                while time.monotonic()<deadline:
+                    if client.fetch('/version',host=host)[1]==404:break
+                    time.sleep(.2)
+                else:raise AssertionError('Removed LAN route still served traffic')
+            client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],
+                'exposure':{'mode':'lan','hostname':hostname}})
+            wait_version(hostname,'v1')
             previous=client.get('/apps/'+app)['lastSuccessfulRevision']
             client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
             wait_version(hostname,'v2')
@@ -251,7 +261,7 @@ def verify_private_lan(case):
                     case.assertEqual(client.fetch('/healthz',host=host,headers=headers)[1],403,'Forwarded headers bypassed source restriction')
             configure(values)
             client.request('DELETE','/auth/session')
-            e.record('Private HTTPS: CA/hostname and pinned-browser deployment/link/HTTP, update/rollback convergence, host-only Secure cookies and application-origin CORS/CSRF refusal passed; route/transition guards, independent Host/SNI listeners, IPv6 and forged-header source restrictions verified')
+            e.record('Private HTTPS: CA/hostname and pinned-browser deployment/link/HTTP, update/rollback convergence, host-only Secure cookies and application-origin CORS/CSRF refusal passed; tracked mode/hostname transitions and route absence, independent Host/SNI listeners, IPv6 and forged-header source restrictions verified')
         finally:
             # Only this owned disposable cluster is changed; failures remain failures.
             if configured:

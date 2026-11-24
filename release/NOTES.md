@@ -20,6 +20,12 @@ errors preserve the server message and creation submits selected Secret versions
 Restart replaces Pods while retaining the image digest. Execution snapshots record
 chart and values identity. Failed updates attempt verified restoration before
 unlocking; ambiguous state remains `needs_attention` and permits a recovery retry.
+Restoration now clears failed-candidate fields and verifies the full managed
+resource set, including absence of an Internal application's route. Guarded retry
+restores the successful predecessor without re-executing an already failed
+candidate. Access-mode and LAN hostname changes use tracked revisions; failed
+transitions retain their lock until the previous state is verified. Pending Helm
+records and foreign ownership remain protected.
 A different historical chart artifact is refused rather than silently substituted.
 
 A blocked first deployment without a successful predecessor supports explicit
@@ -31,6 +37,13 @@ Explicit Reapply repairs owned ClusterIP Service port lists under UID and resour
 version guards while preserving identity/address. Pending transactions and foreign
 ownership remain blocked; ownership checks also cover restoration and uninstall.
 Diagnostic redaction and retention limits are documented in the API guide.
+Upstream Helm/registry/Secret error bodies and dynamic SDK debug arguments are
+excluded from broker errors/logs. New failed Helm release descriptions are
+sanitized before storage without rewriting historical evidence or removing errors
+that earlier versions already stored. Deterministic
+external admission/SQLite barriers test four worker crash boundaries, failed
+restoration/retry and controlled disclosure paths in disposable clusters; these
+fixtures are absent from the released broker image.
 
 Configuration Secret deletion reserves cleanup durably, removes recorded immutable
 Kubernetes versions under UID/resource-version and ownership guards, then removes
@@ -58,7 +71,9 @@ binding, source CIDRs, an existing certificate/key Secret, Secure cookies and
 configured app URLs. See [LAN configuration](../docs/private-lan.md) for DNS/trust,
 renewal and the TLS/SSH fallback. The gateway image is pinned and pulled on first
 use; it is not in the native OCI bundle. Published v0.1.8 passed reference-Pi
-LAN trust/browser/API routing, isolation and reinstall/reboot retention. New
+LAN trust/browser/API routing, isolation and reinstall/reboot retention. Published
+v0.1.9 additionally passed corrected installer checks and fresh installation,
+trusted LAN workflows, same-version retention and reboot. New
 release installers require their own native verification.
 Application chart 0.1.2 adds the dedicated private class. Existing frozen chart
 identities are preserved; historical-chart retrieval and cross-version upgrades
@@ -66,6 +81,9 @@ remain unsupported.
 
 Successful read-only installer `--check` now exits 0 while failed preflight retains
 its nonzero status. This corrects v0.1.8 returning 1 after printing a successful
-host check. The correction passed 83 regressions on the release-compatible Linux
-runner and development host, plus read-only execution on the Pi; native published
-installer verification follows manual publication.
+host check. The unmodified published v0.1.9 installer passed fresh/installed/LAN/
+reinstalled/rebooted preflight checks and the native lifecycle/persistence gate.
+The new recovery/security and access-transition behavior requires separate native
+validation after manual publication. Resource calibration and controlled core
+evaluation remain outstanding; the native report retains unresolved rollout-adjacent
+browser timeouts without claiming a confirmed cause or uninterrupted service.

@@ -196,6 +196,12 @@ type ReapplyPreparer interface {
 	PrepareReapply(context.Context, string, Revision) error
 }
 
+// RestorationPreparer repairs chart-owned configuration left by a failed Helm
+// candidate outside the last deployed release's three-way merge baseline.
+type RestorationPreparer interface {
+	PrepareRestoration(context.Context, string, Revision) error
+}
+
 // ReleaseVerifier establishes that persisted intent matches healthy live state.
 type ReleaseVerifier interface {
 	VerifyTarget(ctx context.Context, appID string, rev Revision) error

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"k8s-internal-platform/broker/internal/applications"
 	"k8s-internal-platform/broker/internal/platform"
 )
 
@@ -56,18 +57,47 @@ func TestPrivateExposureRefusesUnconfiguredAndReservedRoutes(t *testing.T) {
 	}
 }
 
-func TestPrivateAccessTransitionsAreRefusedBeforeHelmAcceptance(t *testing.T) {
-	router := NewRouter(Config{PrivateIngressEnabled: true, PrivateNetwork: testPrivateNetwork()})
+type transitionStore struct {
+	*fakeStore
+	revision platform.Revision
+}
+
+func (s *transitionStore) GetApplicationWithRevision(ctx context.Context, id string) (platform.Application, platform.Revision, error) {
+	app, err := s.GetApplication(ctx, id)
+	return app, s.revision, err
+}
+func TestPrivateAccessTransitionsUseTrackedAcceptanceAndHostnameValidation(t *testing.T) {
 	internal := platform.Exposure{Mode: platform.ExposureInternal}
 	lan := platform.Exposure{Mode: platform.ExposureLAN, Hostname: "demo.apps.home.arpa"}
-	for _, pair := range [][2]platform.Exposure{{internal, lan}, {lan, internal}, {lan, {Mode: platform.ExposureLAN, Hostname: "new.apps.home.arpa"}}} {
-		if err := router.validateExposureChange(pair[0], pair[1]); err == nil {
-			t.Fatal("accepted a route transition without an absence-verification contract")
+	renamed := platform.Exposure{Mode: platform.ExposureLAN, Hostname: "renamed.apps.home.arpa"}
+	for _, pair := range [][2]platform.Exposure{{internal, lan}, {lan, internal}, {lan, renamed}} {
+		st := &transitionStore{fakeStore: newFakeStore(), revision: platform.Revision{ID: "old", Spec: platform.RevisionSpec{Image: "example.com/app@sha256:" + strings.Repeat("a", 64), ContainerPort: 8080, Replicas: 1, Profile: platform.ProfileHTTP, Exposure: pair[0]}}}
+		st.apps["app"] = platform.Application{ID: "app", Name: "tracked", Version: 1}
+		calls := 0
+		st.accept = func(_ context.Context, req platform.AcceptRequest) (platform.AcceptResult, error) {
+			calls++
+			if req.Revision.Spec.Exposure != pair[1] || req.ExpectVersion != 1 {
+				t.Fatal("transition lost desired exposure or version guard")
+			}
+			return platform.AcceptResult{ApplicationID: "app", OperationID: "op", State: platform.OperationQueued}, nil
 		}
-	}
-	for _, exposure := range []platform.Exposure{internal, lan} {
-		if err := router.validateExposureChange(exposure, exposure); err != nil {
-			t.Fatal(err)
+		h := NewRouter(Config{Store: st, Factory: applications.Factory{IDs: platform.RandomIDGenerator{}, Clock: platform.SystemClock{}}, PrivateIngressEnabled: true, PrivateNetwork: testPrivateNetwork()}).Handler()
+		body, _ := json.Marshal(map[string]any{"version": 1, "exposure": map[string]string{"mode": string(pair[1].Mode), "hostname": pair[1].Hostname}})
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/apps/app", strings.NewReader(string(body)))
+		req.Header.Set("Idempotency-Key", "controlled-transition")
+		req.Header.Set("X-Requested-With", "XMLHttpRequest")
+		response := httptest.NewRecorder()
+		h.ServeHTTP(response, req)
+		if response.Code != 202 || calls != 1 {
+			t.Fatalf("tracked transition status=%d calls=%d body=%s", response.Code, calls, response.Body.String())
+		}
+		bad := httptest.NewRequest(http.MethodPatch, "/api/v1/apps/app", strings.NewReader(`{"version":1,"exposure":{"mode":"lan","hostname":"outside.example"}}`))
+		bad.Header.Set("Idempotency-Key", "invalid-transition")
+		bad.Header.Set("X-Requested-With", "XMLHttpRequest")
+		response = httptest.NewRecorder()
+		h.ServeHTTP(response, bad)
+		if response.Code != 400 || calls != 1 {
+			t.Fatal("out-of-domain hostname reached acceptance")
 		}
 	}
 }

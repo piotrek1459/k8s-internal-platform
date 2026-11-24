@@ -238,7 +238,12 @@ recorded image digest and replaces Pods using a stable per-operation token.
 After a failed update, the previous successful snapshot is restored and verified
 before its operation is marked failed and the application is unlocked. An
 unresolved result remains `NeedsAttention`; **Retry recovery** reuses the blocked
-operation after its underlying cause has been addressed. A pending Helm release
+operation after its underlying cause has been addressed. Current source restores
+the successful predecessor directly when the candidate is already recorded as
+failed; it does not submit that candidate again. Restoration verifies managed
+fields, readiness and the expected route or its absence before unlocking.
+These additional recovery paths await published-release/native validation.
+A pending Helm release
 or unavailable historical chart can still require host-side diagnosis.
 
 The update form remains limited. A non-empty environment text area replaces the
@@ -248,7 +253,8 @@ Published v0.1.8 adds an optional [private HTTPS installation](../private-lan.md
 with separate management/application names, local DNS/trust instructions and
 source restrictions. Native browser/API deployment and persistence passed; the
 [native report](../../tests/experiments/2026-11-24-v0.1.8-native.md) records the
-published installer's preflight exit-status defect and pending corrective release. The
+published installer's preflight exit-status defect. Its correction passed
+the [v0.1.9 native installer/LAN/reinstall/reboot gate](../../tests/experiments/2026-11-24-v0.1.9-native.md). The
 wizard accepts one application label beneath the configured domain, and details
 show the persisted HTTPS URL after reload. Internal access and initial SSH
 bootstrap remain available.

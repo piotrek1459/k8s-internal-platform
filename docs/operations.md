@@ -17,9 +17,10 @@ record current commands, evidence and known gaps.
 A dedicated Linux installer, native OCI packaging and manually dispatched release
 workflow are implemented. Their procedures are documented in the
 [installation guide](installation.md) and [release guide](../release/README.md).
-Native host installation, backup/restore upgrades, metrics and complete failed-rollout
-recovery remain acceptance requirements; local startup or a healthy update does
-not establish those results.
+Native Pi installation, LAN browser/API routing and same-version/reboot retention
+have published v0.1.9 evidence. Backup/restore upgrades, metrics and the remaining
+native failure/interruption matrix retain separate acceptance requirements;
+local startup or a healthy update does not establish those results.
 
 ## Reference hardware and operating limits
 
@@ -67,14 +68,16 @@ OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
 its exact supported behavior: dedicated Linux/systemd host, read-only checks,
 pinned K3s/Helm, image import, chart installation and SSH/loopback access.
 Same-version reruns retain metadata; cross-version upgrades and unrelated
-clusters are refused. Published `v0.1.4` passed native Pi installation,
-same-version rerun and reboot acceptance; native rented-server acceptance remains
+clusters are refused. Published `v0.1.9` passed native Pi installation, corrected
+read-only preflight, normal private LAN HTTPS, same-version rerun and reboot;
+native rented-server acceptance remains
 pending. `platform.sh` remains the Docker/k3d development launcher.
 
 The installer checks architecture, systemd, memory cgroups, RAM, free space and
 installation ownership. Time synchronization, comprehensive network/CIDR and
-firewall validation, normal private HTTPS management and stage-by-stage recovery
-remain target requirements in the following sequence.
+firewall validation and stage-by-stage host recovery remain target requirements.
+Normal private HTTPS management is implemented and has native v0.1.8/v0.1.9
+evidence. The following sequence distinguishes broader installer requirements.
 
 The production installer shall support execution from a source checkout before
 release packaging. Its target sequence is:
@@ -289,6 +292,18 @@ retained. A rollout deadline failure records the candidate revision as failed,
 collects diagnostics, and moves the operation to **Recovering** before a
 controlled restoration is attempted. The restored workload must be verified.
 
+Current source prepares restoration from the frozen first-party chart and values.
+It resets the owned Deployment template, replicas and strategy, repairs the owned
+Service port list without replacing its UID/address, and restores the canonical
+Ingress spec or removes that owned route when the target is Internal. UID and
+resource-version preconditions reject concurrent changes; foreign resources and
+immutable selector changes are refused. Verification checks readiness, managed
+field equality, complete ownership and extra resources, including explicit route
+absence for Internal targets. Terminating Deployments, Services and Ingresses
+cannot satisfy target verification even with stale Ready status.
+A successful partial patch does not unlock an app
+when later preparation, Helm apply or verification fails.
+
 After verified restoration, the operation becomes **Failed**, with recovery
 outcome **Previous version restored**. Effective desired state points to the
 restored specification, and the failed candidate remains in history. The terminal
@@ -311,6 +326,20 @@ Automatic retries are bounded and restricted to classified transient failures.
 Invalid configurations are not automatically resubmitted, and `NeedsAttention`
 operations are not retried automatically. Explicit recovery follows the procedure
 defined below.
+
+After the cause has been addressed, supported recovery retry of an already failed
+candidate restores its successful predecessor directly under the existing
+operation/version guard. The candidate and its frozen identity remain unchanged;
+the failed candidate is not deployed again. Pending/unknown Helm state is refused
+before restoration repair and remains blocked.
+
+Kubernetes/registry/Helm error boundaries return classified generic messages rather
+than raw upstream bodies. Helm SDK debug callbacks omit dynamic arguments. New
+failed Helm storage writes also replace raw failure descriptions before persistence;
+classifying the returned SDK error alone cannot protect that earlier write.
+Successful descriptions and historical records are preserved; the new sanitizer
+does not remove raw errors that an earlier version already stored. This is a scoped
+disclosure control, not a claim that arbitrary workload-generated output is safe.
 
 Kubernetes reports stalled Deployments but does not automatically roll them back.
 A pinned Helm SDK/tooling major and tested failure behavior are required; Helm 3
@@ -337,14 +366,14 @@ from accessing the same SQLite file. Startup examines every nonterminal operatio
   reference. Startup does not automatically retry or dismiss it.
 - An already applied target release is verified before completion of the existing operation.
 - An operation with no applied changes may resume using the recorded specification and digest.
-- A pending Helm release is inspected and recovered through a tested procedure,
-  using the previous successful release where safe.
+- A pending or unknown Helm release remains blocked for operator diagnosis;
+  recovery retry does not delete its storage records or force an unlock.
 - An interrupted initial installation permits cleanup/retry only for owned
   disposable workload resources; independent Secrets, PVCs, and audit records are retained.
 - Unverified recovery enters **NeedsAttention**, with diagnostics and a documented
   recovery action. Conflicting mutations remain blocked.
 
-The required future recovery procedure for **NeedsAttention** requires an explicit
+The supported recovery procedure for **NeedsAttention** requires an explicit
 administrator action, records the recovery attempt, and transitions the same
 operation to **Recovering**. The procedure inspects the persisted specification,
 Helm history, and owned resources before applying a supported restoration or

@@ -93,3 +93,38 @@ func TestReapplyPreparationRefusesPendingReleaseBeforeAnyMutation(t *testing.T) 
 		})
 	}
 }
+
+func TestRestorationPreparationRefusesPendingReleaseBeforeRepair(t *testing.T) {
+	for _, status := range []release.Status{release.StatusDeployed, release.StatusFailed, release.StatusPendingUpgrade, release.StatusPendingInstall, release.StatusPendingRollback} {
+		t.Run(string(status), func(t *testing.T) {
+			factory := memoryActionConfig(t)
+			cfg, err := factory("platform-apps")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := cfg.Releases.Create(&release.Release{Name: "app-app-1", Namespace: "platform-apps", Version: 1, Info: &release.Info{Status: status}}); err != nil {
+				t.Fatal(err)
+			}
+			adapter, err := NewAdapter("platform-apps", factory)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := frozenRevision("app_1", baseSpec())
+			f, err := adapter.PrepareExecution("app_1", r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.Frozen = &f
+			calls := 0
+			adapter.WithRestorationPreparer(func(context.Context, string, string) error { calls++; return nil })
+			err = adapter.PrepareRestoration(context.Background(), "app_1", r)
+			allowed := status == release.StatusDeployed || status == release.StatusFailed
+			if allowed && (err != nil || calls != 1) {
+				t.Fatalf("supported restoration: %v calls=%d", err, calls)
+			}
+			if !allowed && (err == nil || calls != 0) {
+				t.Fatal("pending release permitted resource repair")
+			}
+		})
+	}
+}

@@ -261,9 +261,9 @@ func (i *Inspector) nameOptionsFor(originalRef, aliasedRef string) []name.Option
 func classifyRemoteError(err error) error {
 	var transportErr *transportError
 	if errors.As(err, &transportErr) {
-		return platform.Errorf(platform.CodeRegistryUnavailable, "registry request failed: %v", err)
+		return platform.Errorf(platform.CodeRegistryUnavailable, "registry request failed")
 	}
-	return platform.Errorf(platform.CodeRegistryUnavailable, "could not inspect image: %v", err)
+	return platform.Errorf(platform.CodeRegistryUnavailable, "could not inspect image")
 }
 
 // transportError is a sentinel type the tests can wrap to assert the retryable

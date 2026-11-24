@@ -124,3 +124,11 @@ browser/CA routing, lifecycle, isolation, reinstall/reboot retention and a newly
 observed read-only installer exit-status defect. That explicit-zero correction
 requires a corrective release before the next implementation cycle. The source
 results above remain scoped to their recorded commits.
+
+## Subsequent native gate
+
+The [published v0.1.9 report](2026-11-24-v0.1.9-native.md) closes the native
+installer/LAN gate, including the corrected preflight and reinstall/reboot
+persistence. Earlier source/native results retain their own tested commits and
+scope. Rollout-adjacent browser timeout observations remain explicitly recorded
+without a confirmed cause or uninterrupted-service claim.

@@ -100,6 +100,13 @@ as a failed revision even while its operation requires recovery. The same rule
 applies to failed compensation during normal execution and to recovery after a
 broker restart.
 
+Current source verifies the complete managed field/resource set, including absence
+of a canonical route for Internal exposure. A supported retry for an already failed
+candidate restores the previous successful snapshot under the same operation and
+application-version guard; it preserves the failed snapshot instead of executing
+it again. Pending/unknown Helm state remains blocked. These additional failure
+paths have disposable-cluster evidence and await published native acceptance.
+
 Explicit deletion can supersede a blocked initial create when no successful
 predecessor exists. This version-guarded transaction retains the failed candidate
 and frozen evidence and transfers the lock to tracked cleanup; it does not unlock

@@ -13,6 +13,7 @@ changing production interfaces solely for test placement.
 | `tests/regression/` | CLI, rollback evidence, transcript, OCI packaging and installer guards. | Every PR. |
 | `tests/checks/` | Broker/UI/API/chart checks and OpenAPI helper. | Every PR. |
 | `broker/integration/` | Gated store/worker/Helm test using a prepared real cluster. | Explicit local invocation. |
+| `broker/integration/fixtures/barrier/` | External admission/SQLite crash fixture using the broker's pinned Go module; excluded from release images. | Built and used by disposable E2E. |
 | `tests/integration/` | Owned baseline cluster and direct Helm lifecycle experiment. | Explicit local invocation. |
 | `tests/e2e/` | Fresh platform build, API/browser workflows and release-bundle installation. | Nightly, manual and release gate. |
 | `tests/e2e/fixtures/workload/` | Controlled readiness and actual workload-origin requests; standard-library Go test image. | Fixture unit checks on every PR; real use in E2E. |
@@ -119,8 +120,27 @@ Coverage includes:
 - An observed pending first install interrupted with runtime SIGKILL on the owned
   k3d node: unchanged Helm evidence, durable lock/409 across broker replacement,
   independent queued browser work without resubmission, and tracked first-deployment
-  removal with retained history. This is one interruption barrier; the remaining
-  crash/restoration matrix is tracked separately.
+  removal with retained history.
+- Four deterministic crash boundaries: frozen before Helm mutation, pending Helm
+  storage, applied/unready workload and deployed Helm before terminal SQL. Exact
+  image/Secret/chart/values identity is retained while the registry tag moves;
+  recovery either verifies the exact target once or preserves blocking/evidence.
+- Failed restoration and failed verification across actual broker restarts for
+  Internal-to-LAN, LAN-to-Internal and LAN hostname changes. Conflict guards remain
+  active until supported retry verifies the previous snapshot and route/absence;
+  failed-candidate fields are cleared without rerunning that candidate.
+- Controlled raw/encoded configuration and registry-secret disclosure checks after
+  real Secret/Helm/Deployment admission errors. Ordinary/diagnostic responses,
+  SQLite/WAL/SHM with a positive control, raw broker logs, Helm values/history and
+  failed descriptions, and sanitized artifacts are checked.
+
+The six required cases `test_32` through `test_37` live in
+`tests/e2e/recovery_matrix.py`; the external fixture's
+[guide](../broker/integration/fixtures/barrier/README.md) describes scope, ownership
+and cleanup. They add no test endpoints or pause switches to the production broker.
+The [dated source report](experiments/2026-11-24-core-recovery.md) records the full
+27-case CI result, exact tested source/artifact identities and the separate
+published-release/native gate.
 
 Status serialization and application restart are required assertions; no known-gap
 skips remain. The runner and CI summary require a non-empty suite with zero
@@ -128,7 +148,7 @@ failures and zero skips; expected-failure waivers also fail acceptance. Missing
 or inconsistent JUnit evidence fails the summary. Its source commit identifies
 what was actually tested, so a historical summary cannot establish current behavior. Authenticated registry inspection and real kubelet pulls use only
 the suite's owned registry and test credentials. Pending/unknown recovery and
-failed restoration retain durable locks in focused regression tests. Public HTTPS
+failed restoration retain durable locks in unit and real-cluster tests. Public HTTPS
 and native AMD64 installation remain separate acceptance boundaries.
 
 `.github/workflows/e2e.yml` runs at **02:00 UTC daily**, through
@@ -197,7 +217,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.7 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.9 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -230,12 +250,14 @@ operator action; the test never uninstalls K3s or deletes unrelated applications
 
 The [v0.1.5/Secret lifecycle report](experiments/2026-11-23-v0.1.5-secret-lifecycle.md)
 retains the preceding failed v0.1.5 cleanup and source correction. The
-[latest v0.1.7 report](experiments/2026-11-23-v0.1.7-native.md) verifies native
+[v0.1.7 report](experiments/2026-11-23-v0.1.7-native.md) verifies native
 physical cleanup/retry, lifecycle, same-version reinstall and reboot.
 The [core resilience report](experiments/2026-11-23-core-resilience.md) records
 local lost-response/moved-tag, running-browser and workload-origin acceptance.
-Published v0.1.7 native acceptance is complete for the installation/Secret-cleanup
-gate; LAN, remaining worker failure/disclosure and evaluation work remain open.
+The [v0.1.9 report](experiments/2026-11-24-v0.1.9-native.md) records the corrected
+published installer, trusted separate-workstation LAN browser/API workflows and
+same-version/reboot retention. The current recovery/security changes still require
+their own release/native validation; resource calibration and evaluation remain open.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native
@@ -314,9 +336,10 @@ reload use a controlled leaf-SPKI pin without modifying system trust; management
 cookies must be Secure/HttpOnly/SameSite=Strict and absent on the app hostname.
 The actual app serves HTTP v1, then v2 and rolled-back v1 through its route with
 bounded convergence. App-origin CORS/CSRF attempts cannot revoke the management
-session. Reserved/duplicate names, immutable access transitions, an
-Internal app, an excluded source with forged forwarding headers and IPv6 are
-negative cases. The original platform configuration is restored and only owned
+session. Tracked Internal/LAN/hostname transitions verify actual HTTPS, effective
+URLs and removed-route responses. Reserved/duplicate names, an Internal app, an
+excluded source with forged forwarding headers and IPv6 are negative cases.
+The original platform configuration is restored and only owned
 fixtures are removed; the suite then deletes its disposable cluster.
 
 `tests/regression/test_private_lan.py` validates native configuration and real

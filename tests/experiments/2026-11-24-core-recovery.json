@@ -1,0 +1,212 @@
+{
+  "date": "2026-11-24",
+  "scope": "source-cluster acceptance; native release validation remains required",
+  "baseCommit": "8e2a73f23f77c2ffe107933984e29eed7ad7dd75",
+  "runtimeCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd",
+  "pullRequest": "https://github.com/piotrek1459/k8s-internal-platform/pull/23",
+  "focusedRuns": [
+    {
+      "run": "focused-01",
+      "tests": 2,
+      "failures": 1,
+      "skipped": 0,
+      "junitPrivatePath": ".local/core-recovery/focused-01/junit.xml",
+      "junitSHA256": "c9ce779ed245061bfcce3e903f8d52281a5ab20ad2713a81d2dd4bc0a1cad754"
+    },
+    {
+      "run": "focused-02",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "junitPrivatePath": ".local/core-recovery/focused-02/junit.xml",
+      "junitSHA256": "cab601e2d24f5a0b2c65147b2ed86db49acf48e7141f9a4a4f1a45a7565cc9eb"
+    },
+    {
+      "run": "focused-03",
+      "tests": 3,
+      "failures": 1,
+      "skipped": 0,
+      "junitPrivatePath": ".local/core-recovery/focused-03/junit.xml",
+      "junitSHA256": "2dd584a4f0c0103db399752c597e9a7a531f2c7427bbf2025aa15a3a367fd451"
+    },
+    {
+      "run": "focused-04",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "junitPrivatePath": ".local/core-recovery/focused-04/junit.xml",
+      "junitSHA256": "4e13d00d0a7deb70a032ee9a4075bc8d8eb617addec914e0190c1b2b32b77330"
+    },
+    {
+      "run": "focused-05",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "junitPrivatePath": ".local/core-recovery/focused-05/junit.xml",
+      "junitSHA256": "337dd250e796859ec56ff6809058fb59baf6ac5ab498494c58781c2d108171e0"
+    }
+  ],
+  "cleanCI": {
+    "run": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453842119",
+    "runId": 45453842119,
+    "attempt": 1,
+    "event": "workflow_dispatch",
+    "sourceCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd",
+    "status": "success",
+    "tests": 27,
+    "failures": 0,
+    "skipped": 0,
+    "strictSummaryVerified": true,
+    "artifactId": 14950677120,
+    "artifactSHA256": "8f81102270c25b81cceb57b7833b07fd8d3cf066988d2dd3ca01c8d0fc13da45",
+    "junitSHA256": "bb4cf8e3e79b3fee5dd770fb0bd119492324d8f3187d69a23e1a717340836370",
+    "testCases": [
+      "workflows.Workflows.test_00_browser_bootstrap",
+      "workflows.Workflows.test_01_authentication_and_csrf",
+      "workflows.Workflows.test_02_invalid_requests_do_not_create_workloads",
+      "workflows.Workflows.test_03_workload_management_boundaries",
+      "workflows.Workflows.test_05_api_lifecycle_and_idempotency",
+      "workflows.Workflows.test_07_lost_response_and_moved_tag_retries",
+      "workflows.Workflows.test_10_browser_application_lifecycle",
+      "workflows.Workflows.test_12_browser_running_operation_resume",
+      "workflows.Workflows.test_15_private_registry_inspection_and_pull",
+      "workflows.Workflows.test_20_configuration_secrets_and_snapshot_rollback",
+      "workflows.Workflows.test_25_secret_deletion_failure_and_retry",
+      "workflows.Workflows.test_30_missing_registry_image_is_rejected",
+      "workflows.Workflows.test_32_crash_before_helm_mutation",
+      "workflows.Workflows.test_33_crash_during_pending_release",
+      "workflows.Workflows.test_34_crash_after_cluster_apply",
+      "workflows.Workflows.test_35_crash_before_terminal_sql",
+      "workflows.Workflows.test_36_failed_restoration_and_verification_retry",
+      "workflows.Workflows.test_37_secret_disclosure_failure_paths",
+      "workflows.Workflows.test_40_reapply_after_service_deletion",
+      "workflows.Workflows.test_45_application_diagnostics_and_drift",
+      "workflows.Workflows.test_50_broker_replacement_preserves_session_and_app",
+      "workflows.Workflows.test_70_unhealthy_update_restores_previous_snapshot",
+      "workflows.Workflows.test_75_private_lan_https",
+      "workflows.Workflows.test_80_release_bundle_deploys_on_a_fresh_cluster",
+      "workflows.Workflows.test_90_status_contract",
+      "workflows.Workflows.test_91_application_restart",
+      "workflows.Workflows.test_95_pending_first_install_and_queued_browser_resume"
+    ]
+  },
+  "nativePublishedReleaseGate": "not_run_for_new_changes",
+  "excludedClaims": [
+    "Native acceptance of new runtime",
+    "Historical chart retrieval",
+    "Cross-version upgrade",
+    "Backup restoration",
+    "Uninterrupted rolling HTTPS",
+    "Measured resource presets",
+    "Repeated evaluation dataset"
+  ],
+  "fastChecks": [
+    {
+      "name": "Type-check / Lint / Build",
+      "conclusion": "success",
+      "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453837839/job/138657817581",
+      "sourceCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd"
+    },
+    {
+      "name": "HTTP demo regression tests",
+      "conclusion": "success",
+      "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453837902/job/138657817524",
+      "sourceCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd"
+    },
+    {
+      "name": "Format / Vet / Test",
+      "conclusion": "success",
+      "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453837902/job/138657816828",
+      "sourceCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd"
+    },
+    {
+      "name": "OpenAPI spec",
+      "conclusion": "success",
+      "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453837762/job/138657816806",
+      "sourceCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd"
+    },
+    {
+      "name": "Helm chart",
+      "conclusion": "success",
+      "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453837762/job/138657815942",
+      "sourceCommit": "97b81c6859924fa9bef1aaec340d3db22acbc9bd"
+    }
+  ],
+  "supersededCI": {
+    "runId": 45453312193,
+    "conclusion": "cancelled",
+    "reason": "cancelled after terminating-resource false positives were reproduced and fixed; not accepted evidence"
+  },
+  "localEvidence": [
+    {
+      "privatePath": ".local/core-recovery/fast-go.log",
+      "sha256": "02cb68cc000f47634623e273399ec3a495dd4750162126467aba2d506fda7e79",
+      "bytes": 1120
+    },
+    {
+      "privatePath": ".local/core-recovery/fast-go-final.log",
+      "sha256": "b6cb9f4da0b8be617382fd54fdc995b08b49306c6828850fa7132bf86e410095",
+      "bytes": 1027
+    },
+    {
+      "privatePath": ".local/core-recovery/fast-python-api-final.log",
+      "sha256": "f779ede00cc0843c09ed4141b35536f72cbfd5cbd4d87018e05ada3c6d6a91ac",
+      "bytes": 10326
+    },
+    {
+      "privatePath": ".local/core-recovery/fast-chart.log",
+      "sha256": "7ec89e6089f685fb4662d22f9f1b9f6afc61c362388ee4ed7d73b63e58862bac",
+      "bytes": 1862
+    },
+    {
+      "privatePath": ".local/core-recovery/focused-01.log",
+      "sha256": "21b6ab94fb15b051513b1b97e6c741c0d56432057c4c91802c63f1b051a5937f",
+      "bytes": 4928
+    },
+    {
+      "privatePath": ".local/core-recovery/focused-02.log",
+      "sha256": "e50d1eae1142f89ab2660c1f9bf69465cb029ab0a0d6f4d12513fc7bc799e13c",
+      "bytes": 6387
+    },
+    {
+      "privatePath": ".local/core-recovery/focused-03.log",
+      "sha256": "b7861c3fd3b33fce7fa54e7fa3821cda2dd112ac76e1a9905e3c6d6ef64aa769",
+      "bytes": 6740
+    },
+    {
+      "privatePath": ".local/core-recovery/focused-04.log",
+      "sha256": "a35963a19cf9056b7909c214f7065709ea6ac710a9bca48014b91bc46a5d2f14",
+      "bytes": 5870
+    },
+    {
+      "privatePath": ".local/core-recovery/focused-05.log",
+      "sha256": "c8aebabdf0526c385b0b2761a5c0b316151913080482a33ba3bdd31fd25e51fb",
+      "bytes": 17131
+    },
+    {
+      "privatePath": ".local/core-recovery/final-e2e.zip",
+      "sha256": "8f81102270c25b81cceb57b7833b07fd8d3cf066988d2dd3ca01c8d0fc13da45",
+      "bytes": 30422
+    },
+    {
+      "privatePath": ".local/core-recovery/final-e2e/junit.xml",
+      "sha256": "bb4cf8e3e79b3fee5dd770fb0bd119492324d8f3187d69a23e1a717340836370",
+      "bytes": 2602
+    },
+    {
+      "privatePath": ".local/core-recovery/final-strict-summary.md",
+      "sha256": "c6109caf6661d9e08fafd9d5eeae53486f85e7ef91f7394dc8a617aa1417d174",
+      "bytes": 119
+    },
+    {
+      "privatePath": ".local/core-recovery/final-ci-run.json",
+      "sha256": "9d3b348c9e558acf605d4d0653e5844e096b5ce30e81e824454045d5ef998902",
+      "bytes": 15769
+    },
+    {
+      "privatePath": ".local/core-recovery/final-artifact.json",
+      "sha256": "c716bd023322063b042e0c5af1de63f524bbf1ecbff9ae7d28eb502c6540dbb3",
+      "bytes": 828
+    }
+  ]
+}

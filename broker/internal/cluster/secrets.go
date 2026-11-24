@@ -52,7 +52,7 @@ func (c *Client) CreateImmutableSecret(ctx context.Context, secretID string, ver
 		// acknowledged as success.
 		existing, getErr := c.cs.CoreV1().Secrets(c.namespace).Get(ctx, name, metav1.GetOptions{})
 		if getErr != nil {
-			return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "read existing secret: %v", getErr)
+			return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "could not read existing configuration Secret")
 		}
 		if !secretDataEqual(existing.Data, data) {
 			return "", "", platform.Errorf(platform.CodeConflict,
@@ -61,7 +61,7 @@ func (c *Client) CreateImmutableSecret(ctx context.Context, secretID string, ver
 		return existing.Name, string(existing.UID), nil
 	}
 	if err != nil {
-		return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "create secret: %v", err)
+		return "", "", platform.Errorf(platform.CodeDependencyUnavailable, "could not create configuration Secret")
 	}
 	return created.Name, string(created.UID), nil
 }

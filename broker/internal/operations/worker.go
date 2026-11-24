@@ -132,6 +132,22 @@ func (w *Worker) executeApply(ctx context.Context, op platform.Operation) {
 		return
 	}
 
+	// Retry unresolved restoration instead of executing a known-failed update
+	// again. Initial installs retain their separate resume/removal policy.
+	if op.State == platform.OperationRecovering && rev.Result == platform.RevisionFailed {
+		app, readErr := w.store.GetApplication(ctx, op.AppID)
+		if readErr != nil {
+			w.needsAttention(ctx, op, "recovery", readErr)
+			return
+		}
+		if app.LastSuccessfulRevision != "" {
+			if !w.restore(ctx, op) {
+				w.needsAttention(ctx, op, "recovery", platform.Errorf(platform.CodeConflict, "previous revision restoration remains unverified"))
+			}
+			return
+		}
+	}
+
 	frozen, err := w.freeze(ctx, op, rev)
 	if err != nil {
 		w.fail(ctx, op, "freeze", err)
