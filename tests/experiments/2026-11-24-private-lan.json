@@ -1,0 +1,168 @@
+{
+  "recorded_date": "2026-11-24",
+  "timezone": "Europe/Warsaw",
+  "issue": 16,
+  "pull_request": 22,
+  "scope": "source runtime/chart acceptance; published-release native LAN verification remains pending",
+  "full_source_acceptance": {
+    "id": 45378412653,
+    "sha": "ddec3aa7fdd1fb5615308027db265c36278c9490",
+    "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45378412653",
+    "artifact_id": 14914456323,
+    "artifact_sha256": "5417198975718b7e46fe271e5fd99fc972f0d2774d54626aab284b87b5e2627e",
+    "junit_sha256": "b33144dad549b19b41b6fa779b67b8ae7c121b872b42c1146778c90f91e762a5",
+    "tests": 21,
+    "failures": 0,
+    "skips": 0,
+    "case_seconds": 765.857,
+    "cases": [
+      {
+        "name": "workflows.Workflows.test_00_browser_bootstrap",
+        "seconds": 1.525
+      },
+      {
+        "name": "workflows.Workflows.test_01_authentication_and_csrf",
+        "seconds": 0.625
+      },
+      {
+        "name": "workflows.Workflows.test_02_invalid_requests_do_not_create_workloads",
+        "seconds": 0.079
+      },
+      {
+        "name": "workflows.Workflows.test_03_workload_management_boundaries",
+        "seconds": 30.211
+      },
+      {
+        "name": "workflows.Workflows.test_05_api_lifecycle_and_idempotency",
+        "seconds": 32.494
+      },
+      {
+        "name": "workflows.Workflows.test_07_lost_response_and_moved_tag_retries",
+        "seconds": 19.614
+      },
+      {
+        "name": "workflows.Workflows.test_10_browser_application_lifecycle",
+        "seconds": 25.48
+      },
+      {
+        "name": "workflows.Workflows.test_12_browser_running_operation_resume",
+        "seconds": 8.181
+      },
+      {
+        "name": "workflows.Workflows.test_15_private_registry_inspection_and_pull",
+        "seconds": 14.363
+      },
+      {
+        "name": "workflows.Workflows.test_20_configuration_secrets_and_snapshot_rollback",
+        "seconds": 16.524
+      },
+      {
+        "name": "workflows.Workflows.test_25_secret_deletion_failure_and_retry",
+        "seconds": 3.019
+      },
+      {
+        "name": "workflows.Workflows.test_30_missing_registry_image_is_rejected",
+        "seconds": 0.325
+      },
+      {
+        "name": "workflows.Workflows.test_40_reapply_after_service_deletion",
+        "seconds": 7.823
+      },
+      {
+        "name": "workflows.Workflows.test_45_application_diagnostics_and_drift",
+        "seconds": 22.524
+      },
+      {
+        "name": "workflows.Workflows.test_50_broker_replacement_preserves_session_and_app",
+        "seconds": 8.392
+      },
+      {
+        "name": "workflows.Workflows.test_70_unhealthy_update_restores_previous_snapshot",
+        "seconds": 311.535
+      },
+      {
+        "name": "workflows.Workflows.test_75_private_lan_https",
+        "seconds": 60.836
+      },
+      {
+        "name": "workflows.Workflows.test_80_release_bundle_deploys_on_a_fresh_cluster",
+        "seconds": 171.07
+      },
+      {
+        "name": "workflows.Workflows.test_90_status_contract",
+        "seconds": 6.253
+      },
+      {
+        "name": "workflows.Workflows.test_91_application_restart",
+        "seconds": 11.761
+      },
+      {
+        "name": "workflows.Workflows.test_95_pending_first_install_and_queued_browser_resume",
+        "seconds": 13.223
+      }
+    ],
+    "fast_checks": [
+      {
+        "name": "OpenAPI spec",
+        "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45378192812/job/138389969652"
+      },
+      {
+        "name": "Helm chart",
+        "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45378192812/job/138389969109"
+      },
+      {
+        "name": "Type-check / Lint / Build",
+        "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45378192666/job/138389968651"
+      },
+      {
+        "name": "Format / Vet / Test",
+        "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45378192722/job/138389968109"
+      },
+      {
+        "name": "HTTP demo regression tests",
+        "url": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45378192722/job/138389967861"
+      }
+    ],
+    "outcome": "passed"
+  },
+  "focused_local_acceptance": {
+    "source_commit": "bfe62aaf89fe381a89ed0150e9e5ae84bb3da7a8",
+    "tests": 2,
+    "failures": 0,
+    "skips": 0,
+    "case_seconds": 104.921,
+    "boundary": "Precedes the additional transport-privacy, application-origin CORS and strict-SNI assertions covered by the full CI run.",
+    "junit_sha256": "98d9fededc4a4ed42319a52364fadd69817c2c6dcbd15809123a2bfe1e70caa8"
+  },
+  "post_suite_change": "Read-only native preflight now refuses a bundle lacking privateLAN support; its new guard regression is included in the 80-case Python suite. Application runtime/chart and E2E code are unchanged after the full CI run.",
+  "gateway": {
+    "version": "v3.7.19",
+    "image": "docker.io/library/traefik@sha256:a6c0194dda77bcb804824580f36fa7edc56e315b1acfe933366c8b52844a78a4",
+    "listener": "one explicit RFC1918 IPv4 address; ports 1024-65535",
+    "source_policy": "actual peer CIDRs; forwarded headers and PROXY protocol untrusted",
+    "certificates": "existing TLS Secret; CA/hostname verified by clients; isolated browser leaf SPKI pin"
+  },
+  "development_attempts": "Earlier proxy-parser, retained-env, source-IP assumption and immediate post-rollback HTTP failures were corrected. A launcher-edited-during-execution attempt and two superseded CI runs were not accepted.",
+  "reference_pi": "Published v0.1.7 unchanged; no native LAN configuration or workstation trust-store changes performed",
+  "temporary_local_resources": "Owned clusters, forwards and ephemeral CA/key/session fixtures removed",
+  "remaining_native": [
+    "Manually published LAN-capable release installation",
+    "Second-device DNS/CA trust and actual private application HTTP",
+    "Secure management cookies and application-origin boundary",
+    "Private source/forged Host-SNI/IPv6 isolation",
+    "Same-version LAN configuration retention and host reboot"
+  ],
+  "remaining_core": [
+    "Failed-mutation route absence and supported access transitions before removing interim 422 guard",
+    "Remaining worker crash/restoration/recovery and negative-path disclosure matrix",
+    "Reference resource calibration and controlled repeated manual-Helm versus UI/API evaluation"
+  ],
+  "fast_validation": {
+    "python_passed": 80,
+    "shell_syntax": "passed",
+    "go_format_vet_regressions": "passed",
+    "ui_typecheck_lint_build": "passed",
+    "openapi": "passed",
+    "chart_positive_negative_sync": "passed"
+  }
+}

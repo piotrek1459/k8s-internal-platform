@@ -52,3 +52,12 @@ private LAN ingress requires explicit configuration. Release publication require
 fast regressions, real-cluster API/browser/private-pull/bundle checks and both
 architecture packages. Publication is manual from a selected branch HEAD.
 Nightly E2E is scheduled at 02:00 UTC and also supports manual dispatch.
+
+Optional private LAN HTTPS is implemented in this source: explicit private IPv4
+binding, source CIDRs, an existing certificate/key Secret, Secure cookies and
+configured app URLs. See [LAN configuration](../docs/private-lan.md) for DNS/trust,
+renewal and the TLS/SSH fallback. The gateway image is pinned and pulled on first
+use; it is not in the native OCI bundle. Native acceptance follows publication.
+Application chart 0.1.2 adds the dedicated private class. Existing frozen chart
+identities are preserved; historical-chart retrieval and cross-version upgrades
+remain unsupported.

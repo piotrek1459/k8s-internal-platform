@@ -15,9 +15,12 @@ remaining correctness and product requirements.
   runs non-root with a read-only root filesystem, dropped capabilities and the
   runtime-default seccomp profile. Its service-account token enables in-cluster
   access; no administrator kubeconfig is mounted.
-- A ClusterIP management Service. The chart creates no management Ingress or TLS
-  setup. Current local access uses loopback forwarding, including after the UI
-  milestone; normal LAN HTTPS remains outstanding.
+- A ClusterIP management Service, with SSH loopback access by default.
+- Optional private LAN gateway and management Ingress. An explicit private IPv4
+  bind address, mandatory source CIDRs, existing TLS Secret and `platform-private`
+  IngressClass supply HTTPS; Secure cookies are enabled automatically. See the
+  [LAN guide](../../../docs/private-lan.md) for DNS/trust, permissions, renewal and
+  the published-release acceptance boundary.
 
 ## Values
 
@@ -31,7 +34,14 @@ remaining correctness and product requirements.
 | `persistence.storageClassName` | Empty uses the cluster default, such as K3s local-path. |
 | `resources` | Broker requests and limits; reference-host measurements remain outstanding. |
 | `service.port` | Management Service port, 80 by default. |
-| `secureCookies` | Enables Secure session cookies when management HTTPS is configured. |
+| `secureCookies` | Enables Secure session cookies; private LAN mode always enables them. |
+| `privateLAN.enabled` | Installs the private gateway, class and management route; false by default. |
+| `privateLAN.address` / `httpsPort` | Explicit RFC1918 IPv4 bind address and port 1024–65535, default 8443. No public/IPv6 listener is installed. |
+| `privateLAN.allowedCIDRs` | Required RFC1918 source networks, matched against the connection peer. Forwarded headers are not trusted. |
+| `privateLAN.managementHostname` / `applicationDomain` | Separate management name and wildcard application domain. App hostnames must be one label beneath the domain. |
+| `privateLAN.tlsSecretName` | Existing TLS Secret in the platform namespace; its key is mounted, never supplied in chart values. |
+| `privateLAN.image` | Pinned Traefik v3.7.19 multi-architecture digest; first use pulls from Docker Hub. |
+| `privateIngressEnabled` | Legacy operator-managed ingress capability flag; does not itself install HTTPS. |
 | `insecureRegistries` | Explicit registry addresses using plain HTTP for local development. |
 | `registryAliases` | Comma-separated inspection address rewrites, such as published identity to local registry container port 5000. |
 
@@ -62,7 +72,7 @@ kubectl --kubeconfig "$PLATFORM_CONFIG" apply -f dev/namespace.yaml
 ```
 
 The shared namespace manifest assumes the pinned K3s/Pod Security version.
-The [preview installer](../../../docs/installation.md) applies it and installs
+The [native installer](../../../docs/installation.md) applies it and installs
 this chart from a verified native OCI bundle, with `image.pullPolicy=Never` for
 the imported broker. Public routing and production network-policy acceptance
 remain separate requirements.

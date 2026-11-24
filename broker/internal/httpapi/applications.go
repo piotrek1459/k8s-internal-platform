@@ -140,8 +140,8 @@ func (r *Router) handleCreateApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if spec.Exposure.Mode == platform.ExposureLAN && !r.cfg.PrivateIngressEnabled {
-		writeError(w, r.cfg.Logger, reqID, platform.FieldErrorf(platform.CodeUnsupportedSpec, "exposure", "private ingress is not configured on this installation"))
+	if err := r.validatePrivateExposure(spec.Exposure); err != nil {
+		writeError(w, r.cfg.Logger, reqID, err)
 		return
 	}
 	// The request hash is computed over the canonical decoded body so a byte-level
@@ -182,7 +182,7 @@ func (r *Router) handleGetApp(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("ETag", etag(app.Version))
-	writeJSON(w, r.cfg.Logger, http.StatusOK, map[string]any{
+	response := map[string]any{
 		"id":                     app.ID,
 		"name":                   app.Name,
 		"version":                app.Version,
@@ -190,7 +190,16 @@ func (r *Router) handleGetApp(w http.ResponseWriter, req *http.Request) {
 		"lastSuccessfulRevision": app.LastSuccessfulRevision,
 		"activeOperationId":      app.ActiveOperationID,
 		"status":                 status,
-	})
+	}
+	if r.cfg.PrivateNetwork.ApplicationDomain != "" {
+		access, err := r.applicationAccess(req.Context(), app)
+		if err != nil {
+			writeError(w, r.cfg.Logger, reqID, platform.Errorf(platform.CodeInternal, "application access could not be read"))
+			return
+		}
+		response["access"] = access
+	}
+	writeJSON(w, r.cfg.Logger, http.StatusOK, response)
 }
 
 func (r *Router) handleGetOperation(w http.ResponseWriter, req *http.Request) {

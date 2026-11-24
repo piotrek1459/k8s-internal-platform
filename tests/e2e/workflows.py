@@ -682,6 +682,10 @@ class Workflows(unittest.TestCase):
         self.e.delete(app)
         self.e.record("Unhealthy candidate failed; previous snapshot restored and verified, mutation lock released")
 
+    def test_75_private_lan_https(self):
+        from private_lan import verify_private_lan
+        verify_private_lan(self)
+
     def test_80_release_bundle_deploys_on_a_fresh_cluster(self):
         from bundle import verify_bundle_installation
         verify_bundle_installation(self.e)

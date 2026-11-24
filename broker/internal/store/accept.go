@@ -81,6 +81,22 @@ func (s *Store) AcceptOperation(ctx context.Context, req platform.AcceptRequest)
 		}
 	}
 	if req.Type != platform.OperationDelete {
+		if exposure := req.Revision.Spec.Exposure; exposure.Mode == platform.ExposureLAN {
+			var references int
+			if err := tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM revisions r
+				JOIN applications a ON a.id = r.app_id
+				WHERE a.deleted = 0 AND a.id <> ?
+				AND json_extract(r.spec_json, '$.Exposure.Mode') = 'lan'
+				AND json_extract(r.spec_json, '$.Exposure.Hostname') = ?
+				AND (r.result IN ('pending','succeeded') OR EXISTS
+					(SELECT 1 FROM operations o WHERE o.target_revision = r.id
+					AND o.state NOT IN ('succeeded','failed')))`, req.Application.ID, exposure.Hostname).Scan(&references); err != nil {
+				return platform.AcceptResult{}, err
+			}
+			if references != 0 {
+				return platform.AcceptResult{}, platform.FieldErrorf(platform.CodeConflict, "exposure.hostname", "LAN hostname is reserved by another application or its rollback history")
+			}
+		}
 		refs := append([]platform.SecretRef(nil), req.Revision.Spec.SecretRefs...)
 		if req.Revision.Frozen != nil {
 			refs = append(refs, req.Revision.Frozen.SecretVersions...)

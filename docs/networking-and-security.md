@@ -9,18 +9,21 @@ management, data protection, and operational safety. The architecture is defined
 
 ## Current implementation boundary
 
-Current local access uses loopback management/application forwards and Internal
-Services. The backend accepts `lan`, and the chart can render an explicit private
-entrypoint, but the launcher does not configure a usable LAN HTTPS installation.
-The UI LAN value/hostname fields also require correction. Public exposure is
-rejected by the current application policy.
+Default installation access uses SSH loopback forwards and Internal Services.
+The source also implements optional private LAN HTTPS through a pinned Traefik
+listener bound to an explicit RFC1918 IPv4 address, mandatory source CIDRs,
+an existing TLS Secret and the `platform-private` IngressClass. Management and
+application hostnames are separate; Secure cookies and application URL display
+are enabled with this mode. Setup, DNS, trust and certificate renewal are in the
+[private LAN guide](private-lan.md). Published v0.1.7 does not include this mode;
+reference-host acceptance follows the next release and is not yet complete.
 
 Password hashing, expiring setup/session credentials, mutation-header checks,
-scoped RBAC, restricted workload defaults and immutable configuration Secrets are
-implemented. Login throttling, host-local password recovery, network policies,
-registry-destination restrictions, private credential use and verified
-backup/restore remain outstanding. The sections below specify target controls;
-[current status](status.md) records acceptance boundaries.
+scoped RBAC, restricted workloads, immutable configuration Secrets and private
+registry credentials are implemented. Login throttling, host-local password
+recovery, network policies, registry-destination restrictions and verified
+backup/restore retain their separate acceptance requirements. The sections below
+specify target controls; [current status](status.md) records evidence boundaries.
 
 ## Networking: LAN first, public access later
 

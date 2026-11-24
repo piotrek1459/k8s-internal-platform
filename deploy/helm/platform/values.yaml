@@ -47,3 +47,16 @@ registryAliases: ""
 
 # Enable only after a private ingress controller and DNS have been configured.
 privateIngressEnabled: false
+
+# Optional, IPv4-only private HTTPS listener on a dedicated single-node host.
+# Certificate/key material belongs in an existing Kubernetes TLS Secret.
+privateLAN:
+  enabled: false
+  address: ""
+  httpsPort: 8443
+  allowedCIDRs: []
+  managementHostname: ""
+  applicationDomain: ""
+  tlsSecretName: platform-private-tls
+  # Traefik v3.7.19, multi-architecture Docker Official Image index.
+  image: docker.io/library/traefik@sha256:a6c0194dda77bcb804824580f36fa7edc56e315b1acfe933366c8b52844a78a4

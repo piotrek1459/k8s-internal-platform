@@ -22,7 +22,11 @@
 	// Step 3 – Access
 	let hostname = $state('');
 	let lanAvailable = $state(false);
-	$effect(() => { getSystem().then(s => lanAvailable = s.capabilities.includes('private-ingress')).catch(() => {}); });
+	let applicationDomain = $state('');
+	$effect(() => { getSystem().then(s => {
+		lanAvailable = s.capabilities.includes('private-ingress');
+		applicationDomain = s.privateNetwork?.applicationDomain ?? '';
+	}).catch(() => {}); });
 	let exposureMode = $state<'internal' | 'lan' | 'public'>('internal');
 
 	// Step 4 – Configuration
@@ -232,7 +236,10 @@
 	</div>
 	{#if exposureMode === 'lan'}
 		<label for="hostname" class="block text-sm mt-3">LAN hostname</label>
-		<input id="hostname" bind:value={hostname} placeholder="app.pi.home.arpa" class="w-full border rounded px-3 py-2" />
+		<input id="hostname" bind:value={hostname} placeholder={applicationDomain ? `app.${applicationDomain}` : 'app.pi.home.arpa'} class="w-full border rounded px-3 py-2" />
+		{#if applicationDomain}
+			<p class="text-xs text-gray-500 mt-1">Use one name beneath {applicationDomain}. Local DNS and certificate trust must be configured on the client device.</p>
+		{/if}
 		<p class="text-xs text-gray-500 mt-1">Requires a configured private ingress controller and local DNS.</p>
 	{/if}
 	<div class="flex gap-2 mt-4">

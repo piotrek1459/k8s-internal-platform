@@ -90,7 +90,7 @@
       "required": ["enabled", "className", "entrypoint", "hostname", "tls"],
       "properties": {
         "enabled": {"type": "boolean"},
-        "className": {"const": "traefik"},
+        "className": {"enum": ["traefik", "platform-private"]},
         "entrypoint": {"const": "private", "description": "Explicit private Traefik listener; no public exposure in M1."},
         "hostname": {"type": "string"},
         "tls": {

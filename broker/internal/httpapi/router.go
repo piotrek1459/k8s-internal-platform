@@ -27,6 +27,7 @@ type Enqueuer interface {
 // and optional cluster/image/Secret capabilities.
 type Config struct {
 	PrivateIngressEnabled bool
+	PrivateNetwork        PrivateNetwork
 	Logger                *slog.Logger
 	Cluster               ClusterPinger // optional; nil means cluster connectivity is reported unknown
 	Store                 platform.Store

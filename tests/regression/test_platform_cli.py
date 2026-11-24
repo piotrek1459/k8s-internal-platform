@@ -18,7 +18,7 @@ class PlatformCommandTests(unittest.TestCase):
             env = dict(os.environ)
             for key in (
                 "PLATFORM_CLUSTER_NAME", "PLATFORM_REGISTRY_PORT", "PLATFORM_API_PORT",
-                "PLATFORM_UI_PORT", "PLATFORM_APP_PORT",
+                "PLATFORM_UI_PORT", "PLATFORM_APP_PORT", "PLATFORM_LAN_TEST_PORT",
             ):
                 env.pop(key, None)
             env.update(settings or {})
@@ -61,7 +61,7 @@ print_token
         self.assertIn("DNS label", result.stderr)
 
     def test_all_port_pairs_must_be_distinct(self):
-        for key in ("PLATFORM_API_PORT", "PLATFORM_REGISTRY_PORT", "PLATFORM_APP_PORT"):
+        for key in ("PLATFORM_API_PORT", "PLATFORM_REGISTRY_PORT", "PLATFORM_APP_PORT", "PLATFORM_LAN_TEST_PORT"):
             with self.subTest(key=key):
                 result = self.run_cli("up", settings={key: "8080"})
                 self.assertNotEqual(result.returncode, 0)

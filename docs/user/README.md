@@ -243,8 +243,13 @@ or unavailable historical chart can still require host-side diagnosis.
 
 The update form remains limited. A non-empty environment text area replaces the
 complete ordinary environment map. Creation supports versioned Secret references.
-LAN selection requires an explicitly configured private ingress controller and
-hostname; the native installer provides Internal access and SSH forwarding.
+LAN selection requires an explicitly configured private ingress controller.
+The source implementation adds an optional [private HTTPS installation](../private-lan.md)
+with separate management/application names, local DNS/trust instructions and
+source restrictions; it requires the next release and native validation. The
+wizard accepts one application label beneath the configured domain, and details
+show the persisted HTTPS URL after reload. Internal access and initial SSH
+bootstrap remain available.
 Public HTTPS, application volumes, a complete configuration editor and durable
 searchable log storage remain planned. Application diagnostics and drift inspection
 are included in published v0.1.5. The reference Pi verified masking, ownership

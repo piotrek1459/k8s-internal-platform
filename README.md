@@ -25,7 +25,9 @@ same-version reinstall and host reboot. Original v0.1.7 session/account/app/hist
 PVC identity and real HTTP survived. The [native report](tests/experiments/2026-11-23-v0.1.7-native.md)
 records the verified release and remaining core acceptance.
 The release includes writable temporary files with container hardening retained;
-verification details are recorded in [status](docs/status.md). Public HTTPS,
+verification details are recorded in [status](docs/status.md). Optional private LAN HTTPS is
+implemented in source; [configuration and trust instructions](docs/private-lan.md)
+require the next release, followed by reference-Pi validation. Public HTTPS,
 application volumes and cross-version upgrades remain separate acceptance boundaries.
 
 ## Local startup

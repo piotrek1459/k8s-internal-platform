@@ -181,6 +181,13 @@
 	</div>
 
 	{#if activeTab === 'overview'}
+		{#if app.access?.url}
+			<div class="mb-4 text-sm">
+				<p class="text-gray-500 text-xs mb-1">Private application URL</p>
+				<a href={app.access.url} target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">{app.access.url}</a>
+				<p class="text-xs text-gray-500 mt-1">Configured URL. DNS, certificate trust and client reachability require separate verification.</p>
+			</div>
+		{/if}
 		<dl class="grid grid-cols-2 gap-4 text-sm max-w-lg">
 			<div>
 				<dt class="text-gray-500 text-xs mb-0.5">Ready replicas</dt>

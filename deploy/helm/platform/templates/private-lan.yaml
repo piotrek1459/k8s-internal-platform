@@ -1,0 +1,201 @@
+{{- if .Values.privateLAN.enabled }}
+{{- $lan := .Values.privateLAN }}
+{{- if or (eq $lan.managementHostname $lan.applicationDomain) (hasSuffix (printf ".%s" $lan.applicationDomain) $lan.managementHostname) }}
+{{- fail "management hostname must be outside the application domain" }}
+{{- end }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-private
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-private-read
+rules:
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingressclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-private-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-private-read
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-private
+    namespace: {{ .Release.Namespace }}
+{{- range $namespace := list .Release.Namespace .Values.appsNamespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $.Release.Name }}-private-read
+  namespace: {{ $namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["services", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $.Release.Name }}-private-read
+  namespace: {{ $namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $.Release.Name }}-private-read
+subjects:
+  - kind: ServiceAccount
+    name: {{ $.Release.Name }}-private
+    namespace: {{ $.Release.Namespace }}
+{{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: platform-private
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-private
+  namespace: {{ .Release.Namespace }}
+data:
+  dynamic.yaml: |
+    http:
+      middlewares:
+        private-source:
+          ipAllowList:
+            sourceRange: {{ $lan.allowedCIDRs | toJson }}
+    tls:
+      certificates:
+        - certFile: /certificates/tls.crt
+          keyFile: /certificates/tls.key
+      options:
+        default:
+          minVersion: VersionTLS12
+          sniStrict: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: platform-private
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: platform-private
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        platform.local/config: {{ $lan | toJson | sha256sum | quote }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-private
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ingress
+          image: {{ $lan.image | quote }}
+          args:
+            - --global.checknewversion=false
+            - --global.sendanonymoususage=false
+            - --api.dashboard=false
+            - --entrypoints.private.address={{ $lan.address }}:{{ $lan.httpsPort }}
+            - --entrypoints.private.http.tls=true
+            - --entrypoints.private.http.middlewares=private-source@file
+            - --entrypoints.private.forwardedheaders.insecure=false
+            - --providers.file.filename=/configuration/dynamic.yaml
+            - --providers.kubernetesingress=true
+            - --providers.kubernetesingress.ingressclass=platform-private
+            - --providers.kubernetesingress.namespaces={{ .Release.Namespace }},{{ .Values.appsNamespace }}
+            - --providers.kubernetesingress.labelselector=app.kubernetes.io/part-of=k8s-internal-platform
+            - --entrypoints.health.address=127.0.0.1:9000
+            - --ping=true
+            - --ping.entrypoint=health
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 25m, memory: 64Mi}
+            limits: {cpu: 250m, memory: 192Mi}
+          readinessProbe:
+            httpGet:
+              host: 127.0.0.1
+              port: 9000
+              path: /ping
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              host: 127.0.0.1
+              port: 9000
+              path: /ping
+            periodSeconds: 20
+          volumeMounts:
+            - {name: configuration, mountPath: /configuration, readOnly: true}
+            - {name: certificates, mountPath: /certificates, readOnly: true}
+      volumes:
+        - name: configuration
+          configMap:
+            name: {{ .Release.Name }}-private
+        - name: certificates
+          secret:
+            secretName: {{ $lan.tlsSecretName }}
+            defaultMode: 0440
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-management
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: private
+spec:
+  ingressClassName: platform-private
+  rules:
+    - host: {{ $lan.managementHostname | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  name: http
+{{- end }}

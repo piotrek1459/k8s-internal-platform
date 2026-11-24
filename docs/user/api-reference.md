@@ -376,3 +376,23 @@ Logout after the walkthrough:
 ```bash
 api --request DELETE "$PLATFORM_API/auth/session"
 ```
+
+## Configured private network access
+
+With the optional LAN mode, `GET /system` includes `privateNetwork` configuration
+(`managementHostname`, `applicationDomain`, `httpsPort`). `GET /apps/{id}` adds
+`access` with mode/revision ID and a configured LAN hostname/HTTPS URL. Access
+uses the last successful revision until a candidate succeeds; an initial app
+without a successful revision uses its desired revision. These fields do not
+establish DNS, certificate trust or external reachability.
+
+LAN creation/PATCH requires a single-label hostname beneath the configured app
+domain. Management/outside/nested names return 400, and another live app's
+pending/successful rollback reservation returns 409 atomically before acceptance.
+Deleting the owning app releases the reservation. In a configured LAN installation,
+PATCH changing access mode or hostname returns 422; image/replica changes continue
+to work. Route transitions require failed-mutation absence verification and remain
+part of the core recovery follow-up. Internal exposure creates no
+Ingress. See the [private LAN setup and HTTPS/SSH fallback](../private-lan.md).
+This source capability is not in published v0.1.7; native acceptance awaits the
+next release.

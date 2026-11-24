@@ -73,9 +73,9 @@ an application-specific values file is expected to fail.
 | `probes.liveness` | Disabled by default; HTTP `/healthz` when enabled. |
 | `ingress.enabled` | Disabled by default. Without ingress, only the ClusterIP Service is created. |
 | `ingress.hostname` | Required DNS hostname when ingress is enabled. Wildcards are unsupported. |
-| `ingress.className` | Fixed to `traefik`. |
+| `ingress.className` | `traefik` for the manual development baseline or `platform-private` for broker-managed private LAN routes. |
 | `ingress.entrypoint` | Fixed to `private`; default public listeners cannot be selected. |
-| `ingress.tls` | Optional existing TLS secret; `enabled: true` requires `secretName`. |
+| `ingress.tls` | Optional existing TLS secret; `enabled: true` requires `secretName`. The managed private listener supplies TLS/certificates centrally through entrypoint defaults. |
 
 Each probe accepts `type: http` or `type: tcp`, `path`, `initialDelaySeconds`,
 `periodSeconds`, `timeoutSeconds`, and `failureThreshold`. An HTTP probe requires
@@ -195,3 +195,8 @@ persistent capacity guarantee. Applications requiring writable paths outside
 Application data volumes remain part of M5. The chart version/content digest
 changes with this fix; existing execution snapshots from another chart artifact
 remain subject to the documented cross-chart rollback restriction.
+
+Source chart version 0.1.2 permits the dedicated private class. Existing frozen
+0.1.1 chart identities are not silently rewritten; historical-chart retrieval
+and cross-version platform upgrades remain M7 scope. Native validation of the
+next release uses a fresh, explicitly owned test installation.

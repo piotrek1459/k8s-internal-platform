@@ -21,12 +21,16 @@ func (r *Router) handleSystem(w http.ResponseWriter, req *http.Request) {
 	if version == "" {
 		version = "dev"
 	}
-	writeJSON(w, r.cfg.Logger, http.StatusOK, map[string]any{
+	response := map[string]any{
 		"version":          version,
 		"architecture":     runtime.GOARCH,
 		"clusterReachable": clusterReachable,
 		"capabilities":     capabilities(r.cfg),
-	})
+	}
+	if r.cfg.PrivateNetwork.ApplicationDomain != "" {
+		response["privateNetwork"] = r.cfg.PrivateNetwork
+	}
+	writeJSON(w, r.cfg.Logger, http.StatusOK, response)
 }
 
 // capabilities lists the optional features this installation has configured, so a
