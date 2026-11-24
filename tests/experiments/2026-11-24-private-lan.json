@@ -164,5 +164,34 @@
     "ui_typecheck_lint_build": "passed",
     "openapi": "passed",
     "chart_positive_negative_sync": "passed"
+  },
+  "release_verification_follow_up": {
+    "failed_run": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45383021528",
+    "failed_source": "40f467a0d39701caf474dc1e02c79318edb9afc6",
+    "failed_test": "LANCertificateTests.test_wrong_hostname_wildcard_key_and_secret_type_are_refused: wrong-host",
+    "prior_pr_runner": "Ubuntu 26.04.1",
+    "release_runner": "Ubuntu 24.04",
+    "cause": "OpenSSL 3.0.13 x509 -checkhost exits successfully for a mismatch",
+    "fix": "verify -verify_hostname with explicit supplied-leaf trust and partial-chain verification; client CA trust remains separate",
+    "checks": [
+      {
+        "environment": "Ubuntu 24.04 container",
+        "openssl": "3.0.13",
+        "python_passed": 81,
+        "shell_syntax": "passed"
+      },
+      {
+        "environment": "development host",
+        "openssl": "3.6.2",
+        "python_passed": 81,
+        "shell_syntax": "passed"
+      }
+    ],
+    "ubuntu_image": "ubuntu@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1e07929e6b",
+    "before_regression_log_sha256": "4fdf39979360a4388f82755eedbf5b7701d73c10adf520f097e953677b8f1078",
+    "after_regression_log_sha256": "dbd71cb9409e32233d9186a01cc9773505b33b99399fec9d1c18c4573a119817",
+    "ci_prevention": "Python/OpenAPI PR job pinned to Ubuntu 24.04 like Release.verify; both log OpenSSL version",
+    "publication": "none in failed run; new manual dispatch required to resolve fixed HEAD",
+    "application_runtime_chart_e2e_changes": false
   }
 }

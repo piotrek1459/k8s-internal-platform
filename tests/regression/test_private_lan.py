@@ -89,6 +89,17 @@ class LANCertificateTests(unittest.TestCase):
             subprocess.run(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','2',
                 '-keyout',str(cls.folder/(name+'.key')),'-out',str(cls.folder/(name+'.crt')),
                 '-subj','/CN=controlled-test','-addext','subjectAltName='+sans],check=True,capture_output=True)
+        # The installer checks the leaf identity without requiring the issuing
+        # private CA to be installed in the server's own trust store.
+        subprocess.run(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','2',
+            '-keyout',str(cls.folder/'issuer.key'),'-out',str(cls.folder/'issuer.crt'),
+            '-subj','/CN=controlled-issuer','-addext','basicConstraints=critical,CA:TRUE'],check=True,capture_output=True)
+        subprocess.run(['openssl','req','-new','-key',str(cls.folder/'valid.key'),
+            '-subj','/CN=platform.home.arpa','-out',str(cls.folder/'issued.csr')],check=True,capture_output=True)
+        (cls.folder/'issued.ext').write_text('basicConstraints=critical,CA:FALSE\nsubjectAltName=DNS:platform.home.arpa,DNS:*.apps.home.arpa\n')
+        subprocess.run(['openssl','x509','-req','-in',str(cls.folder/'issued.csr'),'-CA',str(cls.folder/'issuer.crt'),
+            '-CAkey',str(cls.folder/'issuer.key'),'-CAcreateserial','-days','2','-extfile',str(cls.folder/'issued.ext'),
+            '-out',str(cls.folder/'issued.crt')],check=True,capture_output=True)
 
     @classmethod
     def tearDownClass(cls): cls.temporary.cleanup()
@@ -107,6 +118,10 @@ class LANCertificateTests(unittest.TestCase):
 
     def test_existing_matching_certificate_is_accepted(self):
         result=self.check();self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_private_ca_issued_leaf_does_not_require_server_issuer_trust(self):
+        result=self.check(certificate='issued',key='valid')
+        self.assertEqual(result.returncode,0,result.stderr)
 
     def test_wrong_hostname_wildcard_key_and_secret_type_are_refused(self):
         for changes in ({'certificate':'wrong-host'},{'certificate':'wrong-wildcard'},{'key':'wrong-host'},{'secret_type':'Opaque'}):

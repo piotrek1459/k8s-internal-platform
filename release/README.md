@@ -80,3 +80,8 @@ Helm and system-image downloads still require network access. The
 remaining native-host acceptance. Published versions are listed on the
 [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases);
 [implementation status](../docs/status.md) records current acceptance and availability.
+
+A run retains the source commit resolved during preparation. After correcting a
+failing check on the source branch, start a new **Run workflow** dispatch to use
+the updated branch HEAD. **Re-run failed jobs** retains the earlier prepared
+commit. Preparation checks version/tag conflicts again on each new dispatch.

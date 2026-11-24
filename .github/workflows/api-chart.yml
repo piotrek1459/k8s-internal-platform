@@ -6,13 +6,16 @@ on:
 jobs:
   api:
     name: OpenAPI spec
-    runs-on: ubuntu-latest
+    # Native installer checks must use the same OpenSSL family as Release.verify.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: python -m pip install -r tests/requirements.txt
+      - name: Record certificate tool version
+        run: openssl version
       - name: Syntax, Python regressions and full API validation
         run: python3 -B tests/run.py unit --suite syntax --suite python --suite api
   chart:

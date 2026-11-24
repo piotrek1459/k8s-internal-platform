@@ -91,3 +91,33 @@ Only then are the corresponding M0/M3 checkboxes eligible for completion and the
 next recovery/security implementation PR started. Resource calibration
 and repeated manual-Helm/UI/API evaluation remain the third cycle. Issue #16
 stays open until the remaining core criteria have evidence.
+
+## Release verification compatibility correction
+
+The [manual v0.1.8 release run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45383021528)
+resolved `main` to `40f467a0d39701caf474dc1e02c79318edb9afc6` and failed
+before E2E, bundle creation or publication. Its wrong-hostname regression
+observed successful installer preflight for an invalid certificate. No v0.1.8
+release or tag was created by that run.
+
+The previously successful PR Python job ran Ubuntu 26.04.1; release verification
+ran Ubuntu 24.04. OpenSSL 3.0.13 reproduced the defect: `x509 -checkhost`
+returned success despite a hostname mismatch. The implementation now uses
+`verify -verify_hostname` with the supplied leaf as the explicit local trust
+anchor and partial-chain verification. This establishes local certificate
+identity without requiring the server to trust its private issuer; browser/client
+CA trust remains a separate requirement. The behavior follows the
+[OpenSSL verification contract](https://docs.openssl.org/3.0/man1/openssl-verification-options/).
+
+All **81 Python regressions and shell syntax checks passed** with OpenSSL 3.0.13
+in Ubuntu 24.04 and OpenSSL 3.6.2 on the development host. The original wrong-host
+case remains required; an additional valid privately issued leaf checks against
+overly restrictive rejection. The Ubuntu container base was
+`ubuntu@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1e07929e6b`.
+PR Python/OpenAPI checks now use Ubuntu 24.04 like release verification, and both
+workflows print the OpenSSL version. Application runtime/chart and E2E code were
+not changed by this compatibility correction.
+
+The next release requires a new manual workflow dispatch from the fixed branch
+HEAD. Re-executing the failed run retains its previously prepared commit. Native
+LAN acceptance still follows successful publication.

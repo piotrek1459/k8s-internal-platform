@@ -66,6 +66,13 @@ throttling retain their separately recorded boundaries.
 
 ## Verification available
 
+- The [release compatibility follow-up](../tests/experiments/2026-11-24-private-lan.md#release-verification-compatibility-correction)
+  records the failed v0.1.8 verification at `40f467a`: OpenSSL 3.0.13 returned
+  success for a wrong hostname while the earlier PR job used Ubuntu 26.04.
+  Corrected certificate verification passed **81 Python regressions and syntax**
+  on OpenSSL 3.0.13/Ubuntu 24.04 and OpenSSL 3.6.2. PR Python checks now match the
+  release runner. No release was published; a new manual dispatch must select the
+  fixed branch HEAD before native LAN acceptance.
 - The [private LAN source report](../tests/experiments/2026-11-24-private-lan.md)
   records a focused 2/0/0 workflow and full clean-source **21/0/0** acceptance at
   `ddec3aa`, with downloaded JUnit/strict summary and artifact digest verified.

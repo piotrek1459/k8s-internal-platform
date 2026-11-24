@@ -102,7 +102,11 @@ import pathlib,ssl,sys,time
 start=pathlib.Path(sys.argv[1]).read_text().split('=',1)[1].strip()
 if ssl.cert_time_to_seconds(start)>time.time(): sys.exit('LAN certificate is not valid yet')
 PY
-    openssl x509 -in "$WORK/tls.crt" -noout -checkhost "$hostname" >/dev/null || fail 'LAN certificate does not cover the management hostname.'
+    # OpenSSL 3.0 x509 -checkhost can exit 0 for a mismatch. Verification reports
+    # failure reliably. Trust this exact leaf only for the local identity check;
+    # client CA/chain trust remains a separate administrator responsibility.
+    openssl verify -trusted "$WORK/tls.crt" -partial_chain -verify_hostname "$hostname" \
+        "$WORK/tls.crt" >/dev/null || fail 'LAN certificate does not cover the management hostname.'
     # Require the wildcard itself, rather than accepting only one test hostname.
     openssl x509 -in "$WORK/tls.crt" -noout -ext subjectAltName > "$WORK/tls-san"
     python3 - "$WORK/tls-san" "$domain" <<'PY'

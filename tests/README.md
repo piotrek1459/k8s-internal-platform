@@ -336,3 +336,10 @@ the full 21-case CI result, exact source/artifact identities, scope of the earli
 focused run and outstanding published-release/native gates. Native mode also
 refuses an older bundle without private listener support before Helm changes;
 that read-only compatibility preflight has its own fast regression.
+
+Certificate preflight is exercised on Ubuntu 24.04 in the Python/OpenAPI PR job,
+matching `Release.verify`; both log `openssl version`. The
+[compatibility follow-up](experiments/2026-11-24-private-lan.md#release-verification-compatibility-correction)
+records why `x509 -checkhost` exit status was insufficient on OpenSSL 3.0 and the
+81-case regression results on OpenSSL 3.0.13 and 3.6.2. Valid private-CA-issued
+leaves remain accepted by installer identity checks without configuring OS trust.
