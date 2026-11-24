@@ -78,10 +78,20 @@ are not counted as passing evidence.
 
 ## Clean committed-source acceptance
 
-The full CI run, exact source, downloaded artifact digest, JUnit and strict
-summary will be recorded here before the PR is marked ready. All 27 workflows
-must pass without failures, skips or expected-failure waivers; all five fast PR
-checks must also pass. Local evidence remains private under `.local/core-recovery/`.
+The [full GitHub run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453842119) passed **27 tests, 0 failures, 0 skips**
+at exact source `97b81c6859924fa9bef1aaec340d3db22acbc9bd`. All six new failure cases are present
+in downloaded JUnit; its counts/individual outcomes and the strict non-empty,
+zero-failure/zero-skip summary were independently checked. All five fast PR
+checks passed at that same runtime source.
+
+Downloaded artifact `14950677120` matched GitHub's SHA-256 digest
+`8f81102270c25b81cceb57b7833b07fd8d3cf066988d2dd3ca01c8d0fc13da45`. JUnit SHA-256:
+`bb4cf8e3e79b3fee5dd770fb0bd119492324d8f3187d69a23e1a717340836370`. The [machine summary](2026-11-24-core-recovery.json)
+records exact run/source/case identities, fast-check URLs, superseded/failed
+attempts and private evidence hashes. Local evidence remains under
+`.local/core-recovery/`; cookies, credentials and raw Secret resources are excluded.
+Subsequent documentation records this result without changing the tested runtime.
+This is source acceptance, not native release or performance acceptance.
 
 ## Remaining acceptance
 
@@ -93,3 +103,24 @@ bounded. The v0.1.9 rollout-adjacent browser timeout observation remains unconfi
 and needs reproducible availability measurement; this source does not claim to
 fix it or establish uninterrupted service. Resource calibration and repeated
 manual-Helm/UI/API evaluation remain open in M0/M1/M4. Issue #16 remains open.
+
+The native cycle must retain the following observations separately:
+
+| Phase | Required evidence |
+| --- | --- |
+| Published identity | Unmodified installer/bundle checksums, source and live ARM64 image identity; read-only preflight exits; ownership inventory before any authorized test-state reset. |
+| Healthy baseline | Setup/login, native lifecycle, actual trusted app HTTPS and retained operation/revision identities. |
+| Failed restoration | An owned successful app, an actually applied unhealthy candidate and a bounded guarded denial of restoration; failed candidate/frozen evidence and 409 conflicts remain after actual broker replacement. |
+| Failed verification | Restore permission permits apply while a guarded verification denial retains the lock despite healthy predecessor HTTP; replacement preserves that block. |
+| Supported retry | Restore the exact recorded permissions under UID/resource-version checks; version-guarded recovery keeps the operation ID, preserves failed evidence and unlocks only after verifying the predecessor. Candidate-only env/Secret/pull fields are absent. |
+| Access changes | Successful and failed Internal/LAN/hostname changes, effective API URLs, original route/absence and actual trusted HTTPS after convergence. |
+| Disclosure | Controlled markers/encodings excluded from native ordinary/diagnostic responses, raw broker logs and read-only SQLite/Helm evidence; sensitive commands/files remain private. |
+| Retention and cleanup | Same-version installer and actual reboot retain original identities/sessions/config; owned faults/temporary permissions/fixtures are removed and administrative access is closed. |
+
+Fault controls must have cleanup recorded before activation. Unknown resource or
+permission identity requires inspection rather than forced repair. No SQL rows
+or Helm release records may be edited to resolve a lock. An unrelated/user app
+in the ownership inventory requires a non-destructive validation plan instead
+of resetting that installation. The four exhaustive external crash barriers
+remain mandatory disposable E2E, not a reason to install the test webhook/PVC
+fixture on the reference host.

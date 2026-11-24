@@ -39,7 +39,8 @@ ownership remain blocked; ownership checks also cover restoration and uninstall.
 Diagnostic redaction and retention limits are documented in the API guide.
 Upstream Helm/registry/Secret error bodies and dynamic SDK debug arguments are
 excluded from broker errors/logs. New failed Helm release descriptions are
-sanitized before storage without rewriting historical evidence. Deterministic
+sanitized before storage without rewriting historical evidence or removing errors
+that earlier versions already stored. Deterministic
 external admission/SQLite barriers test four worker crash boundaries, failed
 restoration/retry and controlled disclosure paths in disposable clusters; these
 fixtures are absent from the released broker image.

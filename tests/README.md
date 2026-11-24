@@ -138,6 +138,9 @@ The six required cases `test_32` through `test_37` live in
 `tests/e2e/recovery_matrix.py`; the external fixture's
 [guide](../broker/integration/fixtures/barrier/README.md) describes scope, ownership
 and cleanup. They add no test endpoints or pause switches to the production broker.
+The [dated source report](experiments/2026-11-24-core-recovery.md) records the full
+27-case CI result, exact tested source/artifact identities and the separate
+published-release/native gate.
 
 Status serialization and application restart are required assertions; no known-gap
 skips remain. The runner and CI summary require a non-empty suite with zero

@@ -337,7 +337,8 @@ Kubernetes/registry/Helm error boundaries return classified generic messages rat
 than raw upstream bodies. Helm SDK debug callbacks omit dynamic arguments. New
 failed Helm storage writes also replace raw failure descriptions before persistence;
 classifying the returned SDK error alone cannot protect that earlier write.
-Successful descriptions and historical records are preserved. This is a scoped
+Successful descriptions and historical records are preserved; the new sanitizer
+does not remove raw errors that an earlier version already stored. This is a scoped
 disclosure control, not a claim that arbitrary workload-generated output is safe.
 
 Kubernetes reports stalled Deployments but does not automatically roll them back.

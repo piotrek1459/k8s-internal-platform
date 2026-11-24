@@ -74,8 +74,11 @@ throttling retain their separately recorded boundaries.
 - The [recovery/security source report](../tests/experiments/2026-11-24-core-recovery.md)
   records four deterministic external crash barriers, failed restoration and
   verification across replacements for all three access transitions, controlled
-  secret-disclosure failures and trusted source HTTPS transitions. Published
-  v0.1.9 does not contain these changes; its successful native gate is separate.
+  secret-disclosure failures and trusted source HTTPS transitions. The
+  [full committed-source run](https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45453842119) passed **27/0/0** at
+  `97b81c6`; downloaded artifact digest, JUnit and strict summary
+  were verified, with all five fast checks green. Published v0.1.9 does not contain
+  these changes; its successful native gate is separate.
 
 - The [release compatibility follow-up](../tests/experiments/2026-11-24-private-lan.md#release-verification-compatibility-correction)
   records the failed v0.1.8 verification at `40f467a`: OpenSSL 3.0.13 returned
