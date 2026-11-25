@@ -17,6 +17,7 @@ changing production interfaces solely for test placement.
 | `tests/integration/` | Owned baseline cluster and direct Helm lifecycle experiment. | Explicit local invocation. |
 | `tests/e2e/` | Fresh platform build, API/browser workflows and release-bundle installation. | Nightly, manual and release gate. |
 | `tests/e2e/fixtures/workload/` | Controlled readiness and actual workload-origin requests; standard-library Go test image. | Fixture unit checks on every PR; real use in E2E. |
+| `tests/evaluation/` | Explicit reference-host lifecycle, pull/cache, cgroup/HTTP experiments and human timed walkthrough. | Opt-in Pi/workstation run; evidence regressions on every PR. |
 | `tests/experiments/` | Dated curated evidence and historical reports. | Documentation. |
 
 ## Fast regression checks on every pull request
@@ -370,3 +371,12 @@ matching `Release.verify`; both log `openssl version`. The
 records why `x509 -checkhost` exit status was insufficient on OpenSSL 3.0 and the
 81-case regression results on OpenSSL 3.0.13 and 3.6.2. Valid private-CA-issued
 leaves remain accepted by installer identity checks without configuring OS trust.
+
+## Reference-host system and human evaluation
+
+The [evaluation guide](evaluation/README.md) defines explicit native commands,
+owned cleanup and retained raw evidence. The [fixed protocol](../docs/evaluation.md)
+separates system timings from the [human walkthrough](evaluation/HUMAN.md).
+No human measurements are inferred from automation. The fast Python suite
+checks incomplete data, invalid statistics, cache classification and fixture
+ownership without contacting or mutating a cluster.
