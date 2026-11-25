@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "referenceRelease": "0.1.10",
+  "repetitions": 3,
+  "sampleIntervalSeconds": 1,
+  "idleSeconds": 30,
+  "loadedSeconds": 60,
+  "warmupSeconds": 10,
+  "requestRatePerSecond": 20,
+  "requestTimeoutSeconds": 3,
+  "healthyDeadlineSeconds": 120,
+  "helmFailureTimeoutSeconds": 300,
+  "operationDeadlineSeconds": 390,
+  "targets": {
+    "cachedDeploySeconds": 30,
+    "cachedUpdateSeconds": 30,
+    "recoveryAfterFailureSeconds": 60,
+    "loadedRequestSuccessRate": 1.0,
+    "loadedP95Milliseconds": 500,
+    "temperatureCeilingCelsius": 80,
+    "minimumFreeDiskBytes": 6442450944,
+    "maximumContainerRestarts": 0,
+    "maximumOOMKills": 0
+  },
+  "methodOrder": [
+    [
+      "api",
+      "helm"
+    ],
+    [
+      "helm",
+      "api"
+    ],
+    [
+      "api",
+      "helm"
+    ]
+  ],
+  "resourceCandidate": {
+    "cpuRequest": "25m",
+    "cpuLimit": "250m",
+    "memoryRequest": "32Mi",
+    "memoryLimit": "128Mi"
+  },
+  "cacheConditions": {
+    "bundledDemo": "cached; exact imported digests verified before timing",
+    "publicImage": "pull-required and cached series recorded separately; content-cache reuse must be disclosed",
+    "globalPruneAllowed": false,
+    "cacheResetRequiresExplicitOptIn": true
+  },
+  "operatorTime": "human trial pending; automated command/request durations are system timings only",
+  "claims": {
+    "singleReferenceHost": true,
+    "genericWorkloadSizing": false,
+    "highAvailability": false,
+    "humanUsabilityFromAutomation": false
+  },
+  "presetDerivation": {
+    "cpuRequest": "2 x maximum steady loaded CPU, rounded up to 25m, minimum 25m",
+    "cpuLimit": "2 x derived request, rounded up to 250m, minimum 250m",
+    "memoryRequest": "2 x maximum lifetime container memory peak, rounded up to 16Mi, minimum 32Mi",
+    "memoryLimit": "2 x derived memory request, rounded up to 64Mi, minimum 128Mi",
+    "scope": "Only measured small stateless HTTP workloads; throttling/limits can censor demand and must be reported"
+  },
+  "publicImage": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+  "availabilityProbe": {
+    "ratePerSecond": 5,
+    "durationSeconds": 75,
+    "updateAfterSeconds": 15,
+    "steadyScope": "separate from lifecycle timings; all observed errors retained"
+  }
+}
