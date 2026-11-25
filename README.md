@@ -16,24 +16,23 @@ validated and built before its tag and GitHub release are published. The
 prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
-The [installation guide](docs/installation.md) describes the resulting native
-ARM64/AMD64 bundles, dedicated Linux installer and SSH access. Its `v0.1.9`
-commands are version examples; the downloaded guide matches the selected release.
-Published `v0.1.7` passed reference-Pi installation, lifecycle, diagnostics/drift,
-physical Secret cleanup and partial-cleanup retry across broker replacement,
-same-version reinstall and host reboot. Original v0.1.7 session/account/app/history/
-PVC identity and real HTTP survived. The [native report](tests/experiments/2026-11-23-v0.1.7-native.md)
-records the verified release and remaining core acceptance.
-The release includes writable temporary files with container hardening retained;
-verification details are recorded in [status](docs/status.md). Published v0.1.8
-passed private LAN HTTPS, normally trusted browser deployment, source/listener
-isolation, same-version retention and reboot on the Pi. The
-[LAN native report](tests/experiments/2026-11-24-v0.1.8-native.md) also records a
-published `--check` exit-status defect. Its correction passed the
-[v0.1.9 native installer/LAN/reinstall/reboot gate](tests/experiments/2026-11-24-v0.1.9-native.md);
-separate rollout-adjacent timeout observations remain documented. Setup follows the
-[configuration and trust instructions](docs/private-lan.md). Public HTTPS,
-application volumes and cross-version upgrades retain separate acceptance boundaries.
+The [installation guide](docs/installation.md) describes ARM64/AMD64 bundles,
+the dedicated Linux installer and initial SSH access. Its `v0.1.10` commands
+are version examples; the downloaded guide matches the selected release.
+
+Published v0.1.10 passed reference-Pi installation/preflight, trusted private LAN
+UI/API deployment, tracked access changes, forced restoration/verification failure,
+guarded recovery, controlled disclosure checks and original identity/session
+retention across same-version reinstall and host reboot. The
+[native report](tests/experiments/2026-11-25-v0.1.10-native.md) records accepted
+phases and separate route-convergence/request-timeout observations. Measured
+resource presets and the controlled system/human evaluation remain outstanding
+in [status](docs/status.md). Earlier Secret cleanup/diagnostic evidence retains
+its own release identities in the [verification guide](tests/README.md).
+
+Private HTTPS requires the [configuration and trust setup](docs/private-lan.md).
+Public hosting, application volumes, verified backup restoration and cross-version
+upgrades retain separate acceptance boundaries.
 
 ## Local startup
 

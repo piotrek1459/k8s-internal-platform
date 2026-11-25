@@ -217,7 +217,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.9 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.10 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -256,8 +256,12 @@ The [core resilience report](experiments/2026-11-23-core-resilience.md) records
 local lost-response/moved-tag, running-browser and workload-origin acceptance.
 The [v0.1.9 report](experiments/2026-11-24-v0.1.9-native.md) records the corrected
 published installer, trusted separate-workstation LAN browser/API workflows and
-same-version/reboot retention. The current recovery/security changes still require
-their own release/native validation; resource calibration and evaluation remain open.
+same-version/reboot retention. The [v0.1.10 native report](experiments/2026-11-25-v0.1.10-native.md) completes
+the published recovery/security gate: forced failure/retry across replacements,
+unchanged failed/frozen evidence, controlled disclosure scans and reinstall/reboot
+retention. Resource calibration, repeated evaluation and the agreed human timed
+walkthrough remain open. Helper failures and unconfirmed request timeouts remain
+separate observations rather than passing attempts or claimed fixes.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native

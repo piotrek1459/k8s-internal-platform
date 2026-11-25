@@ -83,7 +83,8 @@ Successful read-only installer `--check` now exits 0 while failed preflight reta
 its nonzero status. This corrects v0.1.8 returning 1 after printing a successful
 host check. The unmodified published v0.1.9 installer passed fresh/installed/LAN/
 reinstalled/rebooted preflight checks and the native lifecycle/persistence gate.
-The new recovery/security and access-transition behavior requires separate native
-validation after manual publication. Resource calibration and controlled core
+The recovery/security and access-transition behavior passed published native
+v0.1.10 validation, including failed restoration/verification across replacements,
+controlled disclosure failures and retained sessions/identities after reinstall/reboot. Resource calibration and controlled core
 evaluation remain outstanding; the native report retains unresolved rollout-adjacent
 browser timeouts without claiming a confirmed cause or uninterrupted service.

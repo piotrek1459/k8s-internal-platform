@@ -392,7 +392,7 @@ pending/successful rollback reservation returns 409 atomically before acceptance
 Deleting the owning app releases the reservation. Current source accepts
 version-guarded PATCH changes between Internal and LAN and changes to the LAN
 hostname as tracked revisions. Published v0.1.9 retains the earlier 422 guard;
-the new behavior awaits published-release/native validation. A failed transition
+the new behavior passed [native v0.1.10 validation](../../tests/experiments/2026-11-25-v0.1.10-native.md). A failed transition
 restores the previous configuration and verifies its route or route absence
 before releasing the operation lock. Recovery retry reuses the failed operation
 and restores its successful predecessor without repeating the failed candidate.

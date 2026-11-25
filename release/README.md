@@ -13,7 +13,7 @@ PR or pre-existing tag.
 1. Open the repository's **Actions → Release → Run workflow**.
 2. Keep **Use workflow from** set to `main` to use the installed workflow definition.
 3. Set **branch** to the source branch to release; the default is `main`.
-4. Enter an unused **version**, for example `v0.1.10`; an existing release version is refused.
+4. Enter an unused **version**, for example `v0.1.11`; an existing release version is refused.
 5. Leave **prerelease** unchecked for a normal release, or check it for a prerelease.
 6. Select **Run workflow**. On success, the workflow creates the version tag at the
    tested commit and publishes the complete release.
@@ -26,7 +26,7 @@ source branch.
 The same operation through GitHub CLI is:
 
 ```bash
-gh workflow run release.yml --ref main -f branch=main -f version=v0.1.10 -f prerelease=false
+gh workflow run release.yml --ref main -f branch=main -f version=v0.1.11 -f prerelease=false
 ```
 
 `--ref` selects the workflow definition; `branch` selects the application source.

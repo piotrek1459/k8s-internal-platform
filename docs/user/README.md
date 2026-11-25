@@ -242,7 +242,7 @@ operation after its underlying cause has been addressed. Current source restores
 the successful predecessor directly when the candidate is already recorded as
 failed; it does not submit that candidate again. Restoration verifies managed
 fields, readiness and the expected route or its absence before unlocking.
-These additional recovery paths await published-release/native validation.
+These recovery paths passed [published native v0.1.10 validation](../../tests/experiments/2026-11-25-v0.1.10-native.md).
 A pending Helm release
 or unavailable historical chart can still require host-side diagnosis.
 

@@ -124,3 +124,10 @@ in the ownership inventory requires a non-destructive validation plan instead
 of resetting that installation. The four exhaustive external crash barriers
 remain mandatory disposable E2E, not a reason to install the test webhook/PVC
 fixture on the reference host.
+
+## Subsequent published validation
+
+The [v0.1.10 native report](2026-11-25-v0.1.10-native.md) completes the next
+release's recovery/security/retention gate. This dated report preserves its own
+original scope and failed observations; it does not establish measured resource
+presets, human operator time or uninterrupted request availability.

@@ -18,8 +18,9 @@ A dedicated Linux installer, native OCI packaging and manually dispatched releas
 workflow are implemented. Their procedures are documented in the
 [installation guide](installation.md) and [release guide](../release/README.md).
 Native Pi installation, LAN browser/API routing and same-version/reboot retention
-have published v0.1.9 evidence. Backup/restore upgrades, metrics and the remaining
-native failure/interruption matrix retain separate acceptance requirements;
+have published v0.1.10 evidence, including native failure/retry/disclosure checks.
+Backup/restore upgrades, metrics and controlled resource/evaluation retain
+separate acceptance requirements;
 local startup or a healthy update does not establish those results.
 
 ## Reference hardware and operating limits
@@ -68,7 +69,7 @@ OCI bundles for ARM64/AMD64. The [installation guide](installation.md) describes
 its exact supported behavior: dedicated Linux/systemd host, read-only checks,
 pinned K3s/Helm, image import, chart installation and SSH/loopback access.
 Same-version reruns retain metadata; cross-version upgrades and unrelated
-clusters are refused. Published `v0.1.9` passed native Pi installation, corrected
+clusters are refused. Published `v0.1.10` passed native Pi installation, corrected
 read-only preflight, normal private LAN HTTPS, same-version rerun and reboot;
 native rented-server acceptance remains
 pending. `platform.sh` remains the Docker/k3d development launcher.

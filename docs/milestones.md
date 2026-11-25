@@ -26,8 +26,8 @@ identified separately below.
 
 ## Implementation readiness and entry criteria
 
-Updated: 2026-11-24. The audit includes merged changes through PR #22,
-published `v0.1.9`, its [installer/native report](../tests/experiments/2026-11-24-v0.1.9-native.md),
+Updated: 2026-11-25. The audit includes merged changes through PR #23,
+published `v0.1.10`, its [recovery/native report](../tests/experiments/2026-11-25-v0.1.10-native.md),
 the [v0.1.8 LAN native report](../tests/experiments/2026-11-24-v0.1.8-native.md),
 the preceding [v0.1.7 native report](../tests/experiments/2026-11-23-v0.1.7-native.md),
 the [source resilience report](../tests/experiments/2026-11-23-core-resilience.md),
@@ -40,9 +40,9 @@ Older dated reports remain evidence only for their recorded source and scope.
 | --- | --- | --- |
 | M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | Operator-active-time comparison and measurements supporting M1/M4. The published v0.1.9 installer correction is accepted. |
 | M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Measured resource presets. |
-| M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source crash/restoration/disclosure matrix. | Published native acceptance of the new failure paths. |
+| M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source crash/restoration/disclosure matrix. | No open listed M2 acceptance item; request-availability evaluation remains M4. |
 | M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source queued/running refresh, native v0.1.7 Secret cleanup/retry and v0.1.8 LAN HTTPS/browser/URL acceptance. | No open listed M3 acceptance item. The installer gate passed in v0.1.9; broader failure/security work remains under M2/M4. |
-| M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | Native acceptance of the new recovery paths and the controlled core evaluation. |
+| M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | Resource calibration, repeated core evaluation and agreed human active-time trial. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
 The two former status/restart E2E skips are removed: both are required assertions.
@@ -110,7 +110,7 @@ snapshots, configuration Secrets, Helm integration and observed status.
 - [x] Complete disposable-cluster before-Helm, pending, after-apply and before-terminal-SQL interruption barriers with full frozen Secret/chart/values identity checks. **Evidence:** required `test_32`–`test_35`, actual runtime SIGKILL and observed external barriers; [source report](../tests/experiments/2026-11-24-core-recovery.md). Native acceptance of the new paths is tracked separately below.
 - [x] Manual chart/development access and published native installation procedures are recorded. **Evidence:** local development and Linux installation guides.
 - [x] Configuration Secret creation/versioning, immutable Kubernetes values, metadata-only records, exact version references and deletion guards operate. **Evidence:** Secret handler/store tests, browser reference submission and real-cluster configuration rollback.
-- [x] Complete the controlled disposable-cluster negative-path disclosure matrix. **Evidence:** `test_37` scans actual SQLite/WAL/SHM with a positive control, decoded Helm payloads including failed descriptions, ordinary/diagnostic responses, raw broker logs and sanitized artifacts after real Secret/Helm/Deployment admission errors. Raw/base64/authentication forms are absent; [source report](../tests/experiments/2026-11-24-core-recovery.md). This finite matrix is not a proof against arbitrary disclosure; native validation remains below.
+- [x] Complete the controlled disposable-cluster negative-path disclosure matrix. **Evidence:** `test_37` scans actual SQLite/WAL/SHM with a positive control, decoded Helm payloads including failed descriptions, ordinary/diagnostic responses, raw broker logs and sanitized artifacts after real Secret/Helm/Deployment admission errors. Raw/base64/authentication forms are absent; [source report](../tests/experiments/2026-11-24-core-recovery.md). This finite matrix is not a proof against arbitrary disclosure; published native validation is recorded below.
 - [x] Image inspection resolves digests and Linux architectures; incompatible images map to `IMAGE_ARCH_UNSUPPORTED`. **Evidence:** registry and handler tests, native ARM64 inspection and public/private real-cluster pulls.
 - [x] Serial claiming and one-shot snapshot freezing preserve recorded image, chart/version/content digest, values hash, Secret versions and restart identity. **Evidence:** store/worker/snapshot regressions and lifecycle E2E.
 - [x] Verify real moved-tag API replay, completed-operation broker replacement and explicit Reapply retain the committed digest. **Evidence:** `test_07_lost_response_and_moved_tag_retries` confirms the registry tag actually changes, with one operation/application/revision, matching chart/values hashes and real HTTP v1. Mid-flight worker-crash variants remain under the interruption matrix above.
@@ -120,7 +120,8 @@ snapshots, configuration Secrets, Helm integration and observed status.
 
 **Completion boundary:** the normal durable backend is implemented and tested.
 The source worker-crash/restoration/security matrix has disposable-cluster evidence.
-Published native validation of its new runtime changes remains required under M4.
+Published v0.1.10 also passed the native failure/retry/disclosure gate;
+[report](../tests/experiments/2026-11-25-v0.1.10-native.md). Controlled evaluation remains M4.
 
 ## M3 — Administrator UI (core)
 
@@ -161,20 +162,21 @@ Application data volumes remain outside this milestone.
 - [x] Unhealthy-v3 rollout failure restores and verifies the prior successful v2 snapshot before recording the failed operation and releasing its lock. **Evidence:** real-cluster E2E and the published `v0.1.2` native run.
 - [x] Unverified restoration retains a failed candidate, nonterminal `needs_attention` and conflict guards; version-guarded recovery retry retains operation identity. **Evidence:** store/worker/recovery unit regressions.
 - [x] Provide supported removal of a blocked first deployment without a successful predecessor. **Evidence:** atomic store rejection/rollback/replay regressions and real browser deletion after runtime SIGKILL, retained blocking and a subsequent broker replacement. Failed candidate/snapshot/history remain recorded.
-- [x] Verify failed restoration and failed verification across actual broker restarts in a disposable cluster. **Evidence:** `test_36` retains failed/frozen evidence and 409 guards for Internal/LAN/hostname transitions, clears candidate-only fields and verifies the prior route/absence before supported retry unlocks. The interim 422 guard is removed in source; [report](../tests/experiments/2026-11-24-core-recovery.md). Native acceptance remains below.
+- [x] Verify failed restoration and failed verification across actual broker restarts in a disposable cluster. **Evidence:** `test_36` retains failed/frozen evidence and 409 guards for Internal/LAN/hostname transitions, clears candidate-only fields and verifies the prior route/absence before supported retry unlocks. The interim 422 guard is removed in source; [report](../tests/experiments/2026-11-24-core-recovery.md). Published native acceptance is recorded below.
 - [x] Supported rollback creates a new revision preserving the selected image, exact Secret versions and available chart/values identity. Unavailable chart artifacts are refused rather than substituted. **Evidence:** native rollback, configuration-version E2E and chart/snapshot regressions. Historical-chart retrieval across platform upgrades remains M7 scope.
 - [x] Restart replaces Pods with a stable operation token and fixed image digest; stateless scale 2/0/1 reaches its expected states. **Evidence:** mandatory status/restart assertions, API E2E and the native workflow. There are no acceptance skips for these paths.
 - [x] Tracked stateless deletion removes Helm-managed workload/routing resources and retains history. **Evidence:** API/browser/native deletion checks. Dependent Pod garbage collection is asynchronous and has a bounded native acceptance check.
 - [x] Startup recovery classifies queued/interrupted/pending/unknown states and verifies target release/chart/values/live identity before success. **Evidence:** positive/negative recovery and live-verifier regressions.
 - [x] Complete the disposable real-cluster interruption matrix around Helm and terminal SQL recording. **Evidence:** `test_32`–`test_35` require exact target completion or durable blocking, stable frozen identity and unchanged pending evidence without deleting Helm records; [report](../tests/experiments/2026-11-24-core-recovery.md).
-- [ ] Validate the recovery/security PR through its unmodified published release on the reference Pi. **Acceptance:** native lifecycle, owned failure/retry/access transitions, same-version reinstall/reboot and retained identities/evidence. v0.1.9 is the accepted installer/LAN baseline, not evidence for these new paths. Tracked in issue #16.
+- [x] Validate the recovery/security PR through its unmodified published release on the reference Pi. **Evidence:** v0.1.10 native lifecycle, all three forced restoration/verification failures with six replacements and unchanged failed/frozen evidence, trusted browser recovery, controlled disclosure/file scans, tracked access transitions, original session/identity retention through reinstall/reboot and guarded cleanup. [Report](../tests/experiments/2026-11-25-v0.1.10-native.md). Request-timeout/route-convergence observations remain in the evaluation scope below.
 - [x] Explicit reapply recreates a manually deleted Service from recorded state without changing its image. **Evidence:** real-cluster Service-deletion/reapply E2E.
 - [x] Report owned workload/route drift against frozen intent without automatic overwrite or configuration values. **Evidence:** field/ownership/route unit matrix and real-cluster image/env/resources/probe/replica/Service-port drift, plus explicit Reapply and HTTP verification. Guarded Service-list repair preserves identity/address; pending/foreign ownership remains blocked. See the [source report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md).
 - [ ] Complete the [minimum core evaluation](#minimum-core-evaluation-m4) against the reference manual baseline. **Acceptance:** predefined targets/repetitions, operator steps/active time, timing/resource measurements and environment/raw results are retained. A functional run and its intentional timeout are not a performance dataset. Tracked in issue #16.
 
 **Completion boundary:** supported healthy lifecycle and failed-update restoration
 are verified. The new failure/interruption matrix has source-cluster evidence;
-published native acceptance and the required core evaluation remain open. M5–M8 do not replace these core obligations.
+published v0.1.10 native acceptance is complete. Resource calibration, repeated
+system evaluation and the agreed human timed walkthrough remain open. M5–M8 do not replace these core obligations.
 
 ## M5 — Application persistence and backup (extension)
 
@@ -276,8 +278,8 @@ observability overhead, supplementing the mandatory core evaluation.
 The LAN/installer cycle passed published v0.1.9 native acceptance; temporary-files
 compatibility passed in v0.1.3.
 
-1. Complete remaining failure/recovery/security acceptance in issue #16 through
-   one PR, manual release and native validation before the next PR.
+1. Published v0.1.10 completed the native failure/recovery/security gate in issue #16.
+   The final resource/evaluation PR follows, then manual release/native validation.
 2. Use the retained reference-Pi manual functional baseline, calibrate resource
    defaults and fix evaluation targets/repetitions before collecting comparison data.
 3. Retain the M4 functional/failure/operator/timing/resource dataset with source,

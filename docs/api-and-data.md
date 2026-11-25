@@ -105,7 +105,8 @@ of a canonical route for Internal exposure. A supported retry for an already fai
 candidate restores the previous successful snapshot under the same operation and
 application-version guard; it preserves the failed snapshot instead of executing
 it again. Pending/unknown Helm state remains blocked. These additional failure
-paths have disposable-cluster evidence and await published native acceptance.
+paths have disposable-cluster evidence and published native v0.1.10 acceptance;
+[report](../tests/experiments/2026-11-25-v0.1.10-native.md).
 
 Explicit deletion can supersede a blocked initial create when no successful
 predecessor exists. This version-guarded transaction retains the failed candidate

@@ -243,8 +243,11 @@ continues to identify the last successful revision until the candidate succeeds.
 Failed changes restore the previous managed configuration and verify the expected
 route or its absence before unlocking. Failed preparation or verification retains
 `needs_attention`; recovery retry restores the previous successful snapshot.
-Published v0.1.9 retains the earlier 422 transition guard. The new transition and
-failure tests require their own published-release/native validation.
+Published v0.1.9 retains the earlier 422 transition guard. Published v0.1.10
+passed the transition and forced-failure/recovery checks on the Pi;
+[native report](../tests/experiments/2026-11-25-v0.1.10-native.md). Managed Ingress
+absence does not acknowledge synchronous gateway reload. Actual HTTPS/404
+convergence is checked separately; immediate reachability is not guaranteed.
 
 Negative acceptance must include an excluded source network, forged
 `X-Forwarded-For`/`Forwarded` headers, an unknown host/SNI and IPv6. The source

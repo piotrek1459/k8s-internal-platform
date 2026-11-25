@@ -1,0 +1,1005 @@
+{
+  "date": "2026-11-25",
+  "timezone": "Europe/Warsaw",
+  "release": "v0.1.10",
+  "sourceCommit": "c9caa4782d4d3a1d63093be06abf2d199d3b7e3f",
+  "releaseWorkflow": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45503810502",
+  "releaseE2E": {
+    "tests": 27,
+    "failures": 0,
+    "skipped": 0,
+    "artifactId": 14973689005,
+    "artifactSHA256": "e0dfcb468bac4ed9a2bd2d29277206a14bf2e2e6fe1051a0c410a78a7b88e182"
+  },
+  "images": {
+    "platform": "platform.local/platform-broker@sha256:9e8d6c167b71f150af774e1b6d08025812dc63934e2dcdcbcdc8937eb0487591",
+    "v1": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+    "v2": "platform.local/http-demo@sha256:90983c70380ccc3f84a7c00b974744c89e68fa1b45836c22427c679749d0a882",
+    "v3": "platform.local/http-demo@sha256:64d7f47ba8129659f6bf3932b089f7ef9fab98e16c44df6dff87355b83cbaaa7"
+  },
+  "publishedInstallerExits": {
+    "sameVersionArgumentCheckBeforeReset": 0,
+    "crossVersionCheckBeforeReset": 1,
+    "freshCheck": 0,
+    "freshInstall": 0,
+    "installedCheck": 0,
+    "enableLAN": 0,
+    "LANCheck": 0,
+    "sameVersionReinstallWithoutLANOption": 0,
+    "reinstalledCheck": 0,
+    "rebootedCheck": 0
+  },
+  "acceptedPhases": {
+    "nativeCoreLifecycle": 0,
+    "trustedLANWorkflow": 0,
+    "fullRecoveryMatrix": 0,
+    "disclosureMatrix": 0,
+    "faultCleanup": 0,
+    "reinstallRetention": 0,
+    "rebootRetention": 0,
+    "savedSessionAndFixtureCleanup": 0
+  },
+  "recovery": {
+    "cases": [
+      {
+        "check": "Native failed preparation/verification survived both replacements; supported retry restored predecessor without candidate reexecution",
+        "application": "app_1664fea2e26a00a5",
+        "operation": "op_873b4caf0546c77f",
+        "transition": {
+          "from": {
+            "mode": "internal"
+          },
+          "to": {
+            "mode": "lan",
+            "hostname": "recovery-failed.apps.home.arpa"
+          }
+        },
+        "frozen": {
+          "image": "platform.local/http-demo@sha256:64d7f47ba8129659f6bf3932b089f7ef9fab98e16c44df6dff87355b83cbaaa7",
+          "chartVersion": "0.1.2",
+          "chart": "sha256:19bdeb5882e12d5eeb553aadcc37a9f1f1ded6a5b0ef286a24d37f73b77c32ce",
+          "values": "8a54192a3e66cdeab3c2478762878a50ea834c72a8842f11e8e39bd27f357338",
+          "secretRefs": "[{\"EnvironmentVariable\":\"BASE_SECRET\",\"SecretID\":\"sec_db657a9b48294083\",\"Version\":1},{\"EnvironmentVariable\":\"CANDIDATE_SECRET\",\"SecretID\":\"sec_db657a9b48294083\",\"Version\":1}]",
+          "frozenAt": "2026-11-25T17:19:19.31817162Z",
+          "restart": ""
+        },
+        "failedHelmUID": "cd061da8-2eb1-4486-8d3f-3f39342735cc",
+        "failedHelmPayloadSHA256": "1367040aaa327984efecea88734fea88e6f6d917a9b25ea4e8b553aefee91c42",
+        "restorationStage": "restored",
+        "serviceUID": "6fc0172e-4638-491e-ac03-78a3e54827ae"
+      },
+      {
+        "check": "Native failed preparation/verification survived both replacements; supported retry restored predecessor without candidate reexecution",
+        "application": "app_6c99564554e6c5d2",
+        "operation": "op_776b2ed19b59d5b7",
+        "transition": {
+          "from": {
+            "mode": "lan",
+            "hostname": "recovery-original.apps.home.arpa"
+          },
+          "to": {
+            "mode": "internal"
+          }
+        },
+        "frozen": {
+          "image": "platform.local/http-demo@sha256:64d7f47ba8129659f6bf3932b089f7ef9fab98e16c44df6dff87355b83cbaaa7",
+          "chartVersion": "0.1.2",
+          "chart": "sha256:19bdeb5882e12d5eeb553aadcc37a9f1f1ded6a5b0ef286a24d37f73b77c32ce",
+          "values": "7e144cf34d36d13d2d844c64db88525ba1eae8904141d4dec9d7ed57a9ae48d3",
+          "secretRefs": "[{\"EnvironmentVariable\":\"BASE_SECRET\",\"SecretID\":\"sec_10d0891510d90bd3\",\"Version\":1},{\"EnvironmentVariable\":\"CANDIDATE_SECRET\",\"SecretID\":\"sec_10d0891510d90bd3\",\"Version\":1}]",
+          "frozenAt": "2026-11-25T17:20:13.629567204Z",
+          "restart": ""
+        },
+        "failedHelmUID": "fe5e5cfd-82c4-43c1-98c0-8bf724bc23e5",
+        "failedHelmPayloadSHA256": "1d7101175e1edbdd6bbdcda5692783df6fdea0baac274786811df0502b275c1a",
+        "restorationStage": "restored",
+        "serviceUID": "ab3dd1e0-d787-46d1-9761-0b5cb2416b0d"
+      },
+      {
+        "check": "Native failed preparation/verification survived both replacements; supported retry restored predecessor without candidate reexecution",
+        "application": "app_2fe032ace8707a8f",
+        "operation": "op_0ac10cc958a80e3b",
+        "transition": {
+          "from": {
+            "mode": "lan",
+            "hostname": "recovery-original.apps.home.arpa"
+          },
+          "to": {
+            "mode": "lan",
+            "hostname": "recovery-renamed.apps.home.arpa"
+          }
+        },
+        "frozen": {
+          "image": "platform.local/http-demo@sha256:64d7f47ba8129659f6bf3932b089f7ef9fab98e16c44df6dff87355b83cbaaa7",
+          "chartVersion": "0.1.2",
+          "chart": "sha256:19bdeb5882e12d5eeb553aadcc37a9f1f1ded6a5b0ef286a24d37f73b77c32ce",
+          "values": "7ac1faf077b0da1a9eaa7f2d4b955d07cdd5c4b1d1ae07f801a901650aee7e34",
+          "secretRefs": "[{\"EnvironmentVariable\":\"BASE_SECRET\",\"SecretID\":\"sec_3339fcaf9823c763\",\"Version\":1},{\"EnvironmentVariable\":\"CANDIDATE_SECRET\",\"SecretID\":\"sec_3339fcaf9823c763\",\"Version\":1}]",
+          "frozenAt": "2026-11-25T17:21:02.265938837Z",
+          "restart": ""
+        },
+        "failedHelmUID": "8f2886e7-a272-4f8a-a36d-499fd892e3f7",
+        "failedHelmPayloadSHA256": "3bb3827a409a121660b8fc033e6a20b54c25b1ae5bf8c66736a4fb181baf074a",
+        "restorationStage": "restored",
+        "serviceUID": "4fcc9072-742c-46f3-afc3-c10b683d43c5"
+      }
+    ],
+    "actualBrokerReplacements": [
+      {
+        "check": "Actual native broker replacement retained original session and PVC",
+        "phase": "case-0-failed-prepare",
+        "beforePod": [
+          "b40277f1-92ea-4ca4-b2ed-078e521900cb"
+        ],
+        "afterPod": "6ce3a063-21df-4e4a-9f3e-526aa65d54e6",
+        "PVC": "bc29a0f1-a77f-4d04-85e5-51391a989080"
+      },
+      {
+        "check": "Actual native broker replacement retained original session and PVC",
+        "phase": "case-0-failed-verify",
+        "beforePod": [
+          "6ce3a063-21df-4e4a-9f3e-526aa65d54e6"
+        ],
+        "afterPod": "8912f8f8-e09f-462e-8c77-ac6421a625af",
+        "PVC": "bc29a0f1-a77f-4d04-85e5-51391a989080"
+      },
+      {
+        "check": "Actual native broker replacement retained original session and PVC",
+        "phase": "case-1-failed-prepare",
+        "beforePod": [
+          "8912f8f8-e09f-462e-8c77-ac6421a625af"
+        ],
+        "afterPod": "95f1af19-46ad-46b4-a965-c4a59f236569",
+        "PVC": "bc29a0f1-a77f-4d04-85e5-51391a989080"
+      },
+      {
+        "check": "Actual native broker replacement retained original session and PVC",
+        "phase": "case-1-failed-verify",
+        "beforePod": [
+          "95f1af19-46ad-46b4-a965-c4a59f236569"
+        ],
+        "afterPod": "f9c278eb-2d84-467c-806e-aa154b26145b",
+        "PVC": "bc29a0f1-a77f-4d04-85e5-51391a989080"
+      },
+      {
+        "check": "Actual native broker replacement retained original session and PVC",
+        "phase": "case-2-failed-prepare",
+        "beforePod": [
+          "f9c278eb-2d84-467c-806e-aa154b26145b"
+        ],
+        "afterPod": "e7777fa5-696e-44c5-b85e-e3e6a8e69aa7",
+        "PVC": "bc29a0f1-a77f-4d04-85e5-51391a989080"
+      },
+      {
+        "check": "Actual native broker replacement retained original session and PVC",
+        "phase": "case-2-failed-verify",
+        "beforePod": [
+          "e7777fa5-696e-44c5-b85e-e3e6a8e69aa7"
+        ],
+        "afterPod": "a72d9e1a-a956-43f2-a823-9bf6e16c60c6",
+        "PVC": "bc29a0f1-a77f-4d04-85e5-51391a989080"
+      }
+    ],
+    "originalRoleRestored": true,
+    "failedCandidateNotReexecuted": true,
+    "failedHelmIdentityAndPayloadRetained": true,
+    "originalSessionAndPVCRetained": true,
+    "trustedBrowserRetryAndLogout": true
+  },
+  "disclosure": {
+    "controlledErrorBoundaries": [
+      "configuration Secret CREATE",
+      "registry credential Secret CREATE",
+      "Helm release Secret CREATE",
+      "Deployment UPDATE"
+    ],
+    "rawAndEncodedValuesAbsent": true,
+    "surfaces": [
+      "ordinary/history/diagnostic responses",
+      "decoded failed Helm storage and values",
+      "raw broker logs",
+      "actual SQLite/WAL/SHM"
+    ],
+    "databaseScan": {
+      "id": "fc469315ef7c3b0174b26e8ee4fe3e74",
+      "found": false,
+      "positiveFound": true,
+      "files": 3
+    },
+    "temporaryPoliciesAndBindingsRemoved": true,
+    "testWebhookOrPVCFixtureInstalled": false
+  },
+  "persistence": {
+    "changedBootID": true,
+    "originalAdministratorSessionsAndHistoriesRetained": true,
+    "originalPVandPVCRetained": true,
+    "originalTLSSecretAndLANConfigRetained": true,
+    "retainedAppAndRouteUIDsAndSpecs": true,
+    "livePlatformImageIDMatchesRelease": true
+  },
+  "reboot": {
+    "directVerifiedHTTPS": true,
+    "outageObserved": true,
+    "readyAfterMonitorSeconds": 64.659,
+    "secondsAfterFirstUnavailable": 62.485,
+    "SSHOrManualServiceStartBeforeReady": false,
+    "observations": [
+      {
+        "seconds": 0.116,
+        "ready": true
+      },
+      {
+        "seconds": 0.662,
+        "ready": true
+      },
+      {
+        "seconds": 2.174,
+        "ready": false
+      },
+      {
+        "seconds": 2.796,
+        "ready": false
+      },
+      {
+        "seconds": 3.425,
+        "ready": false
+      },
+      {
+        "seconds": 6.935,
+        "ready": false
+      },
+      {
+        "seconds": 10.439,
+        "ready": false
+      },
+      {
+        "seconds": 13.948,
+        "ready": false
+      },
+      {
+        "seconds": 17.455,
+        "ready": false
+      },
+      {
+        "seconds": 20.965,
+        "ready": false
+      },
+      {
+        "seconds": 24.472,
+        "ready": false
+      },
+      {
+        "seconds": 27.984,
+        "ready": false
+      },
+      {
+        "seconds": 31.498,
+        "ready": false
+      },
+      {
+        "seconds": 32.22,
+        "ready": false
+      },
+      {
+        "seconds": 32.845,
+        "ready": false
+      },
+      {
+        "seconds": 33.467,
+        "ready": false
+      },
+      {
+        "seconds": 34.136,
+        "ready": false
+      },
+      {
+        "seconds": 34.763,
+        "ready": false
+      },
+      {
+        "seconds": 35.389,
+        "ready": false
+      },
+      {
+        "seconds": 36.014,
+        "ready": false
+      },
+      {
+        "seconds": 36.635,
+        "ready": false
+      },
+      {
+        "seconds": 37.282,
+        "ready": false
+      },
+      {
+        "seconds": 37.907,
+        "ready": false
+      },
+      {
+        "seconds": 38.534,
+        "ready": false
+      },
+      {
+        "seconds": 39.156,
+        "ready": false
+      },
+      {
+        "seconds": 39.777,
+        "ready": false
+      },
+      {
+        "seconds": 40.425,
+        "ready": false
+      },
+      {
+        "seconds": 41.047,
+        "ready": false
+      },
+      {
+        "seconds": 41.673,
+        "ready": false
+      },
+      {
+        "seconds": 42.294,
+        "ready": false
+      },
+      {
+        "seconds": 42.92,
+        "ready": false
+      },
+      {
+        "seconds": 43.571,
+        "ready": false
+      },
+      {
+        "seconds": 44.188,
+        "ready": false
+      },
+      {
+        "seconds": 44.809,
+        "ready": false
+      },
+      {
+        "seconds": 45.435,
+        "ready": false
+      },
+      {
+        "seconds": 46.063,
+        "ready": false
+      },
+      {
+        "seconds": 46.715,
+        "ready": false
+      },
+      {
+        "seconds": 47.331,
+        "ready": false
+      },
+      {
+        "seconds": 47.953,
+        "ready": false
+      },
+      {
+        "seconds": 48.569,
+        "ready": false
+      },
+      {
+        "seconds": 49.198,
+        "ready": false
+      },
+      {
+        "seconds": 49.866,
+        "ready": false
+      },
+      {
+        "seconds": 50.491,
+        "ready": false
+      },
+      {
+        "seconds": 51.117,
+        "ready": false
+      },
+      {
+        "seconds": 51.739,
+        "ready": false
+      },
+      {
+        "seconds": 52.364,
+        "ready": false
+      },
+      {
+        "seconds": 53.007,
+        "ready": false
+      },
+      {
+        "seconds": 53.634,
+        "ready": false
+      },
+      {
+        "seconds": 54.248,
+        "ready": false
+      },
+      {
+        "seconds": 54.87,
+        "ready": false
+      },
+      {
+        "seconds": 55.496,
+        "ready": false
+      },
+      {
+        "seconds": 56.154,
+        "ready": false
+      },
+      {
+        "seconds": 56.778,
+        "ready": false
+      },
+      {
+        "seconds": 57.398,
+        "ready": false
+      },
+      {
+        "seconds": 58.022,
+        "ready": false
+      },
+      {
+        "seconds": 58.638,
+        "ready": false
+      },
+      {
+        "seconds": 59.3,
+        "ready": false
+      },
+      {
+        "seconds": 59.925,
+        "ready": false
+      },
+      {
+        "seconds": 60.527,
+        "ready": false
+      },
+      {
+        "seconds": 61.121,
+        "ready": false
+      },
+      {
+        "seconds": 61.649,
+        "ready": false
+      },
+      {
+        "seconds": 62.188,
+        "ready": false
+      },
+      {
+        "seconds": 62.835,
+        "ready": false
+      },
+      {
+        "seconds": 63.498,
+        "ready": false
+      },
+      {
+        "seconds": 64.12,
+        "ready": false
+      },
+      {
+        "seconds": 64.659,
+        "ready": true
+      }
+    ]
+  },
+  "finalState": {
+    "healthyLANApplications": 1,
+    "configurationSecrets": 0,
+    "registryCredentials": 0,
+    "applicationVolumes": 0,
+    "nonterminalOperations": 0,
+    "intentionalInstallationTLSSecrets": 1,
+    "temporaryAccess": {
+      "SSHMasterClosed": true,
+      "local18001and18080Closed": true,
+      "controlDirectoryRemoved": true,
+      "remoteProxyStopped": true,
+      "savedCookiesRevokedAndRemoved": true
+    }
+  },
+  "routeObservation": {
+    "initialImmediateAbsenceAssertion": "failed; first non-error response not retained",
+    "subsequentManagedIngressCount": 0,
+    "subsequentHTTPS": [
+      {
+        "status": 404
+      },
+      {
+        "status": 404
+      },
+      {
+        "status": 404
+      },
+      {
+        "status": 404
+      },
+      {
+        "status": 404
+      }
+    ],
+    "acceptedRepeat": {
+      "demo.apps.home.arpa": [
+        {
+          "secondsAfterOperation": 0.033,
+          "status": 404
+        }
+      ],
+      "renamed.apps.home.arpa": [
+        {
+          "secondsAfterOperation": 0.035,
+          "status": 404
+        }
+      ]
+    },
+    "exactInitialPropagationDuration": null,
+    "uninterruptedOrImmediateDataPlaneClaim": false
+  },
+  "postCleanupLoginObservation": {
+    "result": "TimeoutError",
+    "phase": "fresh direct HTTPS POST /auth/session after access closure",
+    "timeoutSeconds": 40,
+    "responseStatusCaptured": false,
+    "causeConfirmed": false,
+    "subsequentReadiness": 200,
+    "subsequentApplicationHTTP": 200,
+    "subsequentFreshLogin": 204,
+    "subsequentLoginSeconds": 0.293,
+    "protocolOrCertificateBypass": false
+  },
+  "remaining": [
+    "measured reference resource presets",
+    "controlled repeated system evaluation",
+    "human active operator time from the agreed timed walkthrough",
+    "reproducibility/availability investigation of earlier rollout-adjacent browser timeouts"
+  ],
+  "excludedClaims": [
+    "cross-version upgrade",
+    "verified archive consistency/restoration",
+    "native AMD64 installation",
+    "human usability benchmark",
+    "measured resource preset/performance dataset",
+    "instantaneous gateway convergence",
+    "uninterrupted rolling HTTPS",
+    "root cause or fix of earlier browser navigation timeouts"
+  ],
+  "evidence": [
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/release-api.json",
+      "sha256": "055d2e34811c07d381a4d31a6f178614754d49b45b35b75a94c7e2b60dfe41e8",
+      "bytes": 20309
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/release.json",
+      "sha256": "afa7ef4adfbb27333d5be0fd1f08b364f3b9b4a10d9224ac3559174eb7c54d2e",
+      "bytes": 1375
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/release-e2e.zip",
+      "sha256": "e0dfcb468bac4ed9a2bd2d29277206a14bf2e2e6fe1051a0c410a78a7b88e182",
+      "bytes": 30516
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/release-junit.xml",
+      "sha256": "69d0ed93946ef081f852dae08203c75912da2b4bd5eee83babf56af025b0aa3d",
+      "bytes": 2604
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/release-summary.md",
+      "sha256": "39deef06419402854b8574c959493f338bd1fdde4209da751517a18b55b1224e",
+      "bytes": 119
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/prior-api-inventory.json",
+      "sha256": "9ec73908513567944c8c8f5346afc3d1d9dcb0f497955fccc11cd7391f5a32a9",
+      "bytes": 6561
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/prior-database.json",
+      "sha256": "dc157503f15c7c2259497ec1f329d8aa54fded5029544eac30bb493abc6cdd76",
+      "bytes": 938
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/prior-kube.json",
+      "sha256": "93b39375e8391708095792075178aaa0c9dd65aee22b772e9c30d951a5f5a429",
+      "bytes": 13558
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/initial/native-results.json",
+      "sha256": "a87903cd7045cfdbb4b72be84b4127b2f7014a7a2fffab7d513d793ff9c663df",
+      "bytes": 805
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/initial-run.log",
+      "sha256": "1a6baef97a4ca9e569c0ad5d693e767f14d638aea19d191a55863ade57a54aab",
+      "bytes": 697
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/initial-run-attempt1.log",
+      "sha256": "e3e1b2e3c90b19f73cae8e346e17fc9129523a225f06ef866e152e9aec02febf",
+      "bytes": 1792
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-workflows.log",
+      "sha256": "385d976a3059a2cff6770a6ca406bbec12b37ff1716fff1fd28c2ceba6176dd2",
+      "bytes": 735
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-workflows-attempt1.log",
+      "sha256": "84344f7ce2826204aa516d6a8a1a14b14234ac8813a4df73ad70db7279e52e41",
+      "bytes": 743
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-workflows-attempt2.log",
+      "sha256": "edc4b36900c6781f894abf22a439f5b2bb4598c8e1ae64997f3a2d1c44186795",
+      "bytes": 526
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/post-first-transition-probe.json",
+      "sha256": "70568e508f1ef10ad1464fd275bd629f8ab0094af5e0af2b6b4191925531f6ea",
+      "bytes": 308
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/client-state/route-absence-observations.json",
+      "sha256": "0e7c11befa9e60a5912fbc14ea46f7a49a929ed32fb1d72513019c2cc0ae2d9a",
+      "bytes": 210
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-reinstall.log",
+      "sha256": "65e328be44445b7a36eb1aebe1b1071a9150451adaa69d1eea6f25325f2576cc",
+      "bytes": 240
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-reboot.log",
+      "sha256": "abc5e12f1cc51c5db48bd84791c9fcc61d505707df8bc1abf8df0374994e89be",
+      "bytes": 237
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-cleanup.log",
+      "sha256": "53b610d8c14b0074c9a188dc40fa219abd160707d462ae95f0af9710fe3a11c9",
+      "bytes": 386
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery.log",
+      "sha256": "845038f8b1293ae1c32008588d6ae1ca53cbc1f85d37b294b73a58d8f789f7f2",
+      "bytes": 924
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery-results.json",
+      "sha256": "b3cc7caa09d6406e28e9f37ad12e96a1221b8126a97b10b189934ecc87bc64bd",
+      "bytes": 5954
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery-attempt1.log",
+      "sha256": "046645455942937197382b8907c6789fcb756c0eff79199d21f316d4560aa4a1",
+      "bytes": 2075
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery-attempt2.log",
+      "sha256": "1436f9118757c90ff2e26e9f07adc5db067f16742352205ec0911530aa819233",
+      "bytes": 923
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery-attempt3.log",
+      "sha256": "3641159450e4b34abf24d570c57bf077ecb938cadc6e15a769fc96996905d3eb",
+      "bytes": 1319
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/hostname-reservation-refusal.json",
+      "sha256": "42bc5ba26e5f7028bd072cbef832b71761db1ff44046881295c2226dec15c3f4",
+      "bytes": 315
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/browser-cleanup-recovery.json",
+      "sha256": "7aa2a3f749fd9c9afaeacda915d1a1b81f04121f1cc344253d6e649782e7bebc",
+      "bytes": 799
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/interrupted-case-resolution.json",
+      "sha256": "a97ea1f0a0114776240d27b9c23a9382d1c5fdf38086672d283bc383a6467910",
+      "bytes": 844
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery-browser.log",
+      "sha256": "0d80e4011165bf14e511b3b669655bd85b598df5a552768c89d451b6c6ffb3e8",
+      "bytes": 154
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery-browser-attempt1.log",
+      "sha256": "e525dc7088888c48a9595ecb396b9b7c35215a30eec5a07db504b176f9a1cfed",
+      "bytes": 1995
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/disclosure.log",
+      "sha256": "b73717111a05eec0b0d5117f11a5a08e9fb9d2383579faa091d8814dd89b5341",
+      "bytes": 659
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/disclosure-results.json",
+      "sha256": "e3de1ec4894f388e3b1c2b29208c24bfa5511f222d960db7cddee24a8c75c542",
+      "bytes": 765
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/disclosure-attempt1.log",
+      "sha256": "8dc0e2867ac4cba1311119e1e0878ec9d969822b334106256cbd19651301450f",
+      "bytes": 1142
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/disclosure-attempt2.log",
+      "sha256": "83117bfa68dfbc85a70fb972324c8d4748d88d59c285de2a286d8d9e47bf754a",
+      "bytes": 479
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/disclosure-attempt3.log",
+      "sha256": "9474a44baa1739464c0cf6023afb1f0a5a97c4f9768fbb3dfa85329ab0855ebd",
+      "bytes": 1616
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/probe-policy-timing.log",
+      "sha256": "d39681cdc1491a872a01f7bc9d0558ac86b56b057ffb3a349a7aad29afd0e739",
+      "bytes": 5471
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/native-disclosure-scan.json",
+      "sha256": "65b8988bba8805d0e02b9118e613558f18ff1d8212bbb16478482483c084cf7c",
+      "bytes": 104
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/fault-cleanup.json",
+      "sha256": "0ce16e3884ec58421042b5070fa237185c6cfd0de867c176e2efb8e39ab7b598",
+      "bytes": 232
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/automatic-reboot-readiness.json",
+      "sha256": "f9e295aae8550abbeec1617a210f17122d94ae0822e8f06f01feda78c637798f",
+      "bytes": 4090
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/kube-before-retention.json",
+      "sha256": "0aac0753d80c36d540a9f39c0d2d3234e3585848f79c594db27716d1413abff8",
+      "bytes": 18521
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/kube-after-reinstall.json",
+      "sha256": "c00e9eaee9c8ffaade01588e03d307035398e97e224c38e657e6d0cf670f98bb",
+      "bytes": 18559
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/kube-after-reboot.json",
+      "sha256": "0717de3a8f00adab9883c689a94be37fdc0356bf21f842e57b0ddfd94955301a",
+      "bytes": 18559
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/boot-before.txt",
+      "sha256": "74c60fc588de84e56163780842d3a4976f1fa84125756f7ff667f5ccd81c3b60",
+      "bytes": 37
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/boot-after.txt",
+      "sha256": "b818d3d03e9dee744737243b29a6e70f5addbf5e4a77b1d02fee1d6d69718924",
+      "bytes": 37
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/final-api-inventory.json",
+      "sha256": "215233837ef383cc40e5535c018aee1556cad042eb336bf5c01a1d03d4ae057c",
+      "bytes": 7006
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/host-facts.txt",
+      "sha256": "4fd8479a56723310e3ced680b1c2445a3391d07f934298bc92520f9ac243a641",
+      "bytes": 588
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/kubernetes-version.json",
+      "sha256": "0f42f2a62ab61669a741221e35a15148431b96142aaa88ff2d854a8d1463f940",
+      "bytes": 384
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/temporary-access-cleanup.json",
+      "sha256": "a9012c96fbc83db6417b6f822aac3abbc34f7020d6f73f3cd138a095200adeba",
+      "bytes": 172
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/post-cleanup-login-attempt1.json",
+      "sha256": "699ca666cc9a5d8f57b0a4147aedef823ace9c18cb201f02d132ebca6fa2a18e",
+      "bytes": 362
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/post-cleanup-login-probe.json",
+      "sha256": "0568aec76983e885a26ad9ffe9fb629b3f3b50f686c1190fd489be114e537eef",
+      "bytes": 62
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/post-cleanup-readiness-probes.json",
+      "sha256": "cabc4a593d195374bde44d37047693838278c3c2fc6f0fa124c266f81fec5d10",
+      "bytes": 390
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/public-image-revisions.json",
+      "sha256": "04da14a0621ccba3646701c5449f427c284b5567697449f8a0f5f10dc5cc8a90",
+      "bytes": 633
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/native_common.py",
+      "sha256": "12191f1123bc82bf71f90be118e269a664d1a16e83f737eba2cc27279b0abd41",
+      "bytes": 7646
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/recovery.py",
+      "sha256": "d6717197737165baf82a474e9e9aee303d795f057ebc2190c8b39d9daab435c5",
+      "bytes": 8882
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/disclosure.py",
+      "sha256": "cee611934da56cfe2594dbc19e8ab103bcb46e8636a30bf27ab8f07c7ed4e616",
+      "bytes": 11124
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/metadata-observer.py",
+      "sha256": "038838040fa6c6fa3936e9d623b478a567db4439ce45a4dffee4aaeb38ca0502",
+      "bytes": 5127
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/lan-client.py",
+      "sha256": "cd24db79e23679aeabeae674e28a640f2417b780c3ad01a01ae4aff0e1b6740d",
+      "bytes": 15124
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/prepare-retention.py",
+      "sha256": "a35c8518abe80863bc5f234079e19d637fab13e88eb6f0f8189cef9dde7a07bd",
+      "bytes": 2612
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/reboot-monitor.py",
+      "sha256": "983ba4a487473c757e337f79aa1134664785142ce783b4e23c5671d2391f1ca3",
+      "bytes": 1238
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/pre-reset-all-resources.json",
+      "sha256": "0b81c7744ade88d1e3a68fbb66686f72674abea91968a98a778e8e41aff4e287",
+      "bytes": 19421
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/listeners-after-cleanup.txt",
+      "sha256": "1c46da76798141def5b4ac07dcd4fc0d9b1f1634c7dcdd6ae7e9bd599b92d3d9",
+      "bytes": 186
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/scan-result.json",
+      "sha256": "65b8988bba8805d0e02b9118e613558f18ff1d8212bbb16478482483c084cf7c",
+      "bytes": 104
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/fresh-install.log",
+      "sha256": "a5d2bb787ba9b819e3e46745e65ebbb5761c006038dbe569a9de356c2048ae7a",
+      "bytes": 3068
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/published-check-on-v019.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/enable-lan.log",
+      "sha256": "f01622883b9e5b877ad8548740901b313580869e1b88e024890458144475bae1",
+      "bytes": 2086
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/reset-owned.log",
+      "sha256": "ab66e3372a41fb14424495935d72ab8459b0cb21d12fa7212caae29aa93fce07",
+      "bytes": 115
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/policy-watchdog-cleaned.json",
+      "sha256": "bd5ce0af0bae77dde6fe067c60ee83c2a564d1fbd79f3a5468bc896892f41e1a",
+      "bytes": 59
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/reinstall.log",
+      "sha256": "7ba776a859ecf0b833f158b99cea8a65f4b6727e3f3d1291719af89de8b54543",
+      "bytes": 2086
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/metadata-observer.log",
+      "sha256": "01e28f406fd9dfeca6ba56c6a33d7a3a86ba83e923348d6beb2484433abd4602",
+      "bytes": 123
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/final-database.json",
+      "sha256": "c79f3bfd01c3283110b91ca237167875e310abee3c44569646be8ab3fe88dcb3",
+      "bytes": 2040
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/final-kube.json",
+      "sha256": "3e07b1ac3600cbb53867fbef5185c62d732b3f546e3c972d34d21bf3c66a0df3",
+      "bytes": 13560
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/rebooted-check.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/published-check-on-v019.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/archive-sha256.txt",
+      "sha256": "31669bb867d001b20680e5d73ca58ce3a7ee5d6a88dda85fb5f225ac2811eea7",
+      "bytes": 120
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/fresh-check.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/metadata-observer-phase1.log",
+      "sha256": "a7ce0db39109fa86fa65d7211548c1d5bb7b6a0ea9d277a016a4cc703b6a77ca",
+      "bytes": 145
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/reset-owned-attempt1.log",
+      "sha256": "86206729f418acb8d5edc84a0878fbc0dbf6a00d2e4744952e10fdf28298730b",
+      "bytes": 89
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/final-listeners.txt",
+      "sha256": "21e23bb523e8f7b7d0c8982f39aa97aebdd2f0a133eef776b7625aa108c8c293",
+      "bytes": 282
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/metadata-observer-phase2.log",
+      "sha256": "01e28f406fd9dfeca6ba56c6a33d7a3a86ba83e923348d6beb2484433abd4602",
+      "bytes": 123
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/reset-owned-attempt2.log",
+      "sha256": "805b729ad2ae9fa27992c3eadf251e3e6110278233f9ac6b4c556c1d1739c4f7",
+      "bytes": 95
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/lan-check.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/reinstalled-check.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/owned-uninstall.log",
+      "sha256": "ed3723ef6609b7f4db7356725ed28231123f040e81b1ffb4cee1ac26ac0beac5",
+      "bytes": 7220
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/temporary-cleanup.json",
+      "sha256": "45ed2c59dbca60d8c4fbf48319e498f3bcf0045f302ec1c05986b217ff4a27dc",
+      "bytes": 181
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/cross-version-check.log",
+      "sha256": "7a041cf5ffc1936f9b3aef868aa2a57001c4691053b2a0b6c5611c33ed5c1edb",
+      "bytes": 108
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/installed-check.log",
+      "sha256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "bytes": 33
+    },
+    {
+      "privatePath": ".local/pi-acceptance/native-v0110/remote-evidence/cross-version-check.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    }
+  ]
+}
