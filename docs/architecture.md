@@ -10,14 +10,16 @@ observability are in [operations.md](operations.md).
 ## Current implementation boundary
 
 The Go broker, SQLite store, embedded application chart, Svelte administrator UI
-and k3d development workflow are implemented. The platform and managed apps share
-one cluster. Current access uses loopback forwards and Internal application
-Services. The [status report](status.md) records verified workflows and open
-correctness gaps.
+and k3d development workflow are implemented. Published native ARM64 installation
+and trusted private LAN HTTPS UI/API/application access have reference-Pi
+acceptance through v0.1.10. The platform and managed apps share one cluster;
+Internal Services and loopback development forwarding remain supported. The
+[status report](status.md) records versioned evidence and remaining boundaries.
 
 The diagrams and responsibility tables below describe the target architecture.
-Private/public ingress separation, application volumes, production installation,
-monitoring and complete recovery are requirements rather than accepted features.
+The restricted private listener and stateless recovery have native acceptance.
+Public hosting, application volumes, verified backup restoration, cross-version
+upgrades, high availability and extended monitoring remain separate requirements.
 
 ## Deployment targets: host-agnostic by design
 

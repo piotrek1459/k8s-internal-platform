@@ -55,6 +55,8 @@ class Experiment:
                 'planSHA256': canonical_hash(self.plan), 'release': self.release,
                 'platformDeploymentUID': deployment['metadata']['uid'], 'host': self.host.facts(),
                 'originalApplications': self.original_apps, 'humanOperatorTime': None,
+                'collectorSHA256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                                    for path in sorted(Path(__file__).parent.glob('*.py'))},
                 'chartInputSHA256': self.chart_files()}
             write_json(self.folder / 'environment.json', self.environment)
             self.save_owned()
@@ -149,9 +151,9 @@ class Experiment:
         self.owned['applications'].pop(app)
         self.save_owned()
         end = time.monotonic() + 60
-        while self.host.app_pods(app) and time.monotonic() < end:
+        while self.host.app_pods(app, include_deleting=True) and time.monotonic() < end:
             time.sleep(.5)
-        if self.host.app_pods(app):
+        if self.host.app_pods(app, include_deleting=True):
             raise ValueError('Deleted benchmark Pods remain after the cleanup budget')
 
     def api_trial(self, repetition, failure=True):

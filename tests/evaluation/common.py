@@ -102,15 +102,20 @@ def lifecycle_acceptance(timings, plan, include_failure=True):
     return {'passed': not missing and not failed, 'missingScenarios': missing, 'failedTargets': failed}
 
 
-def content_state(descriptors, present):
+def content_state(descriptors, present, chain_ids=None, snapshot_keys=None):
     """Classify all recorded native content, never infer coldness from a missing tag."""
     if not descriptors or not any(x['kind'] == 'layer' for x in descriptors):
         raise ValueError('Native manifest and layer evidence are required')
     missing = [x for x in descriptors if x['digest'] not in present]
     layers = [x for x in descriptors if x['kind'] == 'layer']
     missing_layers = [x for x in layers if x['digest'] not in present]
-    condition = 'fully-cold-content' if len(missing) == len(descriptors) else 'partial-cache' if missing else 'all-content-cached'
-    return {'condition': condition, 'missingContent': missing,
+    snapshot_evidence = bool(chain_ids) and snapshot_keys is not None
+    cached_chains = sorted(set(chain_ids or ()) & set(snapshot_keys or ()))
+    fully_cold = len(missing) == len(descriptors) and snapshot_evidence and not cached_chains
+    condition = ('fully-cold-content-and-snapshots' if fully_cold else 'compressed-content-absent' if len(missing) == len(descriptors)
+                 else 'partial-cache' if missing else 'all-content-cached')
+    return {'condition': condition, 'missingContent': missing, 'fullyColdPullProven': fully_cold,
+            'snapshotInventoryMeasured': snapshot_evidence, 'cachedNativeChainIDs': cached_chains,
             'missingLayerBytes': sum(x['size'] for x in missing_layers),
             'totalLayerBytes': sum(x['size'] for x in layers),
             'presentDescriptors': len(descriptors) - len(missing), 'totalDescriptors': len(descriptors)}

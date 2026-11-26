@@ -68,5 +68,7 @@
     "durationSeconds": 75,
     "updateAfterSeconds": 15,
     "steadyScope": "separate from lifecycle timings; all observed errors retained"
-  }
+  },
+  "maximumOutstandingRequests": 32,
+  "collectorAmendment": "Resource series v2: four request slots caused three unsent observations during a ~334 ms response burst; original invalid run retained. Request rate, duration and acceptance targets are unchanged. All resource scenarios are repeated with 32 bounded slots."
 }

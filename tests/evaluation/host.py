@@ -42,9 +42,9 @@ class Host:
     def raw(self, path):
         return json.loads(self.command([self.kubectl, '--kubeconfig', self.kubeconfig, 'get', '--raw', path]))
 
-    def app_pods(self, app_id):
+    def app_pods(self, app_id, include_deleting=False):
         pods = self.kube('-n', 'platform-apps', 'get', 'pods', '-l', 'platform.local/app-id=' + app_id)['items']
-        return [p for p in pods if not p['metadata'].get('deletionTimestamp')]
+        return [p for p in pods if include_deleting or not p['metadata'].get('deletionTimestamp')]
 
     def containers(self, app_id):
         result = []
@@ -72,6 +72,7 @@ class Host:
 
     def facts(self):
         return {'machine': platform.machine(), 'kernel': platform.release(),
+                'bootID': Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
                 'OS': Path('/etc/os-release').read_text(), 'memory': memory_info(),
                 'disk': dict(zip(('total', 'used', 'free'), shutil.disk_usage('/var/lib/rancher/k3s'))),
                 'Kubernetes': self.kube('version'),
@@ -82,6 +83,8 @@ def sample(host, app_id, output, seconds=110, interval=1):
     if platform.system() != 'Linux' or not 1 <= seconds <= 900 or not 0.1 <= interval <= 10:
         raise ValueError('Use Linux and bounded sampling duration/interval')
     output = Path(output)
+    if output.exists() and any(output.iterdir()):
+        raise ValueError('Refused to overwrite an existing host-sampling attempt')
     output.mkdir(mode=0o700, parents=True, exist_ok=True)
     selected = host.containers(app_id)
     write_json(output / 'identity-before.json', {'appID': app_id, 'containers': selected, 'host': host.facts()})

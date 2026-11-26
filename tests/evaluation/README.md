@@ -87,7 +87,9 @@ python3 tests/evaluation/load.py \
 ```
 
 The explicit IP override preserves SNI and normal CA/hostname validation. The
-client uses HTTP/1.1, four workers and a bounded outstanding-request count;
+client uses HTTP/1.1, up to 32 workers and a bounded outstanding-request count; the initial four-slot client was retained
+as an invalid attempt after unsent requests during a latency burst. The amended
+plan repeats the entire resource matrix with the original rate/targets;
 client saturation, late scheduling, missing responses and unexpected content
 remain failures. This controlled client does not measure browser usability or
 all browser protocols. After sampling, delete the fixture with `cleanup.py`.
@@ -113,7 +115,7 @@ python3 tools/pulls.py "${evaluation_args[@]}" --output pulls-01 \
 ```
 
 Three pull-required/cached pairs retain native manifest/config/layer inventories,
-missing compressed layer bytes, Kubernetes pull events and actual image identity.
+missing compressed layer bytes, unpacked native snapshot-chain identities, Kubernetes pull events and actual image identity.
 A missing image reference with all layers present is **not** a fully cold pull;
 fully cold, partial-cache and all-content-cached results remain separate. A reset
 refusal is evidence and must not be bypassed by broad pruning.

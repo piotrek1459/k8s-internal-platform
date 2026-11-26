@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import http.client
 import ipaddress
 import json
+import os
 from pathlib import Path
 import socket
 import ssl
@@ -32,7 +33,7 @@ def summarize(records, target_p95=500, expected_count=None, expected_total=None)
 
 
 def run(url, output, ca, address=None, rate=20, seconds=60, warmup=10, timeout=3,
-        expected_version=None, expected_text=None):
+        expected_version=None, expected_text=None, workers=32):
     target = urllib.parse.urlsplit(url)
     if target.scheme != 'https' or not target.hostname or target.username or target.password or target.query or target.fragment:
         raise ValueError('Use an HTTPS application URL without credentials/query/fragment')
@@ -40,20 +41,36 @@ def run(url, output, ca, address=None, rate=20, seconds=60, warmup=10, timeout=3
         raise ValueError('Rate/duration/warmup/timeout exceed the bounded experiment range')
     if expected_version is None and expected_text is None:
         raise ValueError('An expected version or response text is required as a positive control')
-    context = ssl.create_default_context(cafile=str(ca))
-    original_dns = socket.getaddrinfo
+    if type(workers) is not int or not 1 <= workers <= 32:
+        raise ValueError('Outstanding request slots must be bounded between 1 and 32')
     if address is not None:
         ipaddress.ip_address(address)
+    context = ssl.create_default_context(cafile=str(ca))
+    output = Path(output)
+    output.mkdir(mode=0o700, parents=True, exist_ok=True)
+    raw = output / 'requests.jsonl'
+    # Exclusive creation preserves an interrupted attempt instead of replacing it.
+    file = os.fdopen(os.open(raw, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'w')
+    original_dns = socket.getaddrinfo
+    if address is not None:
         def resolve(host, port, *args, **kwargs):
             return original_dns(address if host == target.hostname else host, port, *args, **kwargs)
         socket.getaddrinfo = resolve
     local = threading.local()
     connections = []
     lock = threading.Lock()
-    permits = threading.BoundedSemaphore(4)
+    permits = threading.BoundedSemaphore(workers)
     records = []
     started = time.monotonic()
     wall_started = time.time()
+    write_json(output / 'started.json', {'startedEpochSeconds': wall_started,
+               'expectedRequestsIncludingWarmup': rate * (seconds + warmup), 'url': url})
+
+    def retain(record):
+        with lock:
+            records.append(record)
+            file.write(json.dumps(record) + '\n')
+            file.flush()
 
     def request(sequence, scheduled):
         begin = time.monotonic()
@@ -77,7 +94,9 @@ def run(url, output, ca, address=None, rate=20, seconds=60, warmup=10, timeout=3
             valid = response.status == 200
             if expected_version is not None:
                 data = json.loads(body)
-                valid = valid and data.get('version') == expected_version
+                versions = (expected_version,) if isinstance(expected_version, str) else tuple(expected_version)
+                valid = valid and data.get('version') in versions
+                record['applicationVersion'] = data.get('version')
                 record['applicationHostname'] = data.get('hostname')
             if expected_text is not None:
                 valid = valid and expected_text.encode() in body
@@ -91,12 +110,11 @@ def run(url, output, ca, address=None, rate=20, seconds=60, warmup=10, timeout=3
                 del local.connection
         finally:
             record['latencyMilliseconds'] = round((time.monotonic() - begin) * 1000, 6)
-            with lock:
-                records.append(record)
+            retain(record)
             permits.release()
 
     try:
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
             for sequence in range(rate * (seconds + warmup)):
                 scheduled = sequence / rate
                 delay = started + scheduled - time.monotonic()
@@ -105,7 +123,7 @@ def run(url, output, ca, address=None, rate=20, seconds=60, warmup=10, timeout=3
                 if permits.acquire(blocking=False):
                     executor.submit(request, sequence, scheduled)
                 else:
-                    records.append({'sequence': sequence, 'warmup': sequence < rate * warmup,
+                    retain({'sequence': sequence, 'warmup': sequence < rate * warmup,
                                     'scheduledEpochSeconds': wall_started + scheduled,
                                     'scheduleDelaySeconds': round(time.monotonic() - started - scheduled, 6),
                                     'status': None, 'success': False, 'error': 'client_saturated',
@@ -114,16 +132,11 @@ def run(url, output, ca, address=None, rate=20, seconds=60, warmup=10, timeout=3
         for connection in connections:
             connection.close()
         socket.getaddrinfo = original_dns
+        file.close()
     records.sort(key=lambda item: item['sequence'])
-    output = Path(output)
-    output.mkdir(mode=0o700, parents=True, exist_ok=True)
-    raw = output / 'requests.jsonl'
-    with raw.open('w') as file:
-        for record in records:
-            file.write(json.dumps(record) + '\n')
-    raw.chmod(0o600)
     result = {'url': url, 'addressOverride': address, 'certificateVerification': True,
               'ratePerSecond': rate, 'durationSeconds': seconds, 'warmupSeconds': warmup,
+              'maximumOutstandingRequests': workers,
               'startedEpochSeconds': wall_started, 'finishedEpochSeconds': time.time(),
               **summarize(records, expected_count=rate * seconds, expected_total=rate * (seconds + warmup))}
     write_json(output / 'summary.json', result)
@@ -140,12 +153,14 @@ def main():
     parser.add_argument('--seconds', type=int, default=60)
     parser.add_argument('--warmup', type=int, default=10)
     parser.add_argument('--timeout', type=int, default=3)
+    parser.add_argument('--workers', type=int, default=32)
     expected = parser.add_mutually_exclusive_group(required=True)
     expected.add_argument('--version')
+    expected.add_argument('--versions', nargs='+', help='Allowed versions during a controlled rolling update')
     expected.add_argument('--contains')
     args = parser.parse_args()
     result = run(args.url, args.output, args.ca, args.address, args.rate, args.seconds,
-                 args.warmup, args.timeout, args.version, args.contains)
+                 args.warmup, args.timeout, args.versions or args.version, args.contains, args.workers)
     print(json.dumps(result, indent=2))
     return 0 if result['targetsPassed'] else 1
 

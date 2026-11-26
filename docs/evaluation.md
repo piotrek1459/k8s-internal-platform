@@ -47,6 +47,11 @@ method. Gateway request observations remain separate from backend readiness.
   optional reset targets only the exact unused owned benchmark image after live
   Pod/application/history checks, with explicit opt-in.
 
+The resource-collector amendment is fixed before its replacement series: 32
+bounded outstanding requests replace four after client saturation caused three
+unsent requests. The invalid attempt is retained. The rate, duration and acceptance
+targets are unchanged; all resource scenarios are repeated under the amended plan.
+
 The initial candidate remains 25m/32Mi requests and 250m/128Mi limits. No measured
 preset is claimed before results exist. A resulting reference profile must retain
 headroom above observed peaks, satisfy zero OOM/restarts and state the tested

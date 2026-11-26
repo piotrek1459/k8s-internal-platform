@@ -26,6 +26,8 @@ def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
         raise ValueError('Load client targeted another application hostname')
     if not host_result['evidenceValid'] or not samples or len(samples) != host_result['sampleCount']:
         raise ValueError('Host evidence is incomplete or container identity changed')
+    if client.get('maximumOutstandingRequests') != plan['maximumOutstandingRequests']:
+        raise ValueError('Client concurrency differs from the selected plan revision')
     expected = plan['requestRatePerSecond'] * plan['loadedSeconds']
     total = plan['requestRatePerSecond'] * (plan['loadedSeconds'] + plan['warmupSeconds'])
     request_result = summarize(requests, plan['targets']['loadedP95Milliseconds'], expected, total)
@@ -43,6 +45,7 @@ def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
         raise ValueError('Host samples do not cover the prescribed idle and loaded windows')
     identities = {c['containerID'] for c in before['containers']}
     phase = {'idle': [], 'loaded': []}
+    host_phase = {'idle': [], 'loaded': []}
     memory_peak = 0
     maximum_oom = 0
     for sample in samples:
@@ -58,6 +61,16 @@ def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
         selected = 'idle' if previous['epochSeconds'] >= idle_start and current['epochSeconds'] <= idle_end else 'loaded' if previous['epochSeconds'] >= loaded_start and current['epochSeconds'] <= loaded_end else None
         if selected is None:
             continue
+        old_cpu = list(map(int, previous['hostCPU'].split()[1:9]))
+        new_cpu = list(map(int, current['hostCPU'].split()[1:9]))
+        delta = [new - old for old, new in zip(old_cpu, new_cpu)]
+        if len(delta) != 8 or min(delta) < 0 or sum(delta) <= 0:
+            raise ValueError('Invalid host CPU counters')
+        memory = current['hostMemoryBytes']
+        host_phase[selected].append({
+            'cpuBusyPercentAcrossAllCores': 100 * (sum(delta) - delta[3] - delta[4]) / sum(delta),
+            'unavailableMemoryBytes': memory['MemTotal'] - memory['MemAvailable'],
+            'usedSwapBytes': memory['SwapTotal'] - memory['SwapFree']})
         old = {c['containerID']: c for c in previous['containers']}
         for item in current['containers']:
             baseline = old[item['containerID']]
@@ -91,6 +104,10 @@ def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
                              'throttledMicroseconds': sum(r['throttledMicroseconds'] for r in data),
                              'throttledPeriods': sum(r['throttledPeriods'] for r in data),
                              'periods': sum(r['periods'] for r in data)} for name, data in phase.items()},
+            'hostPhases': {name: {metric: describe([r[metric] for r in data]) for metric in
+                ('cpuBusyPercentAcrossAllCores', 'unavailableMemoryBytes', 'usedSwapBytes')}
+                for name, data in host_phase.items()},
+            'hostScope': 'Whole host including K3s, platform, retained demo and collectors; not broker-only RSS',
             'maximumLifetimeContainerMemoryPeakBytes': memory_peak, 'maximumOOMKills': maximum_oom,
             'maximumRestartCount': restarts, 'maximumTemperatureCelsius': max(temperatures),
             'minimumFreeDiskBytes': disk_free, 'derivedReferencePreset': derive_reference_preset(max_cpu, memory_peak),

@@ -1,17 +1,20 @@
 # Application platform plan (index)
 
-Updated: 2026-11-08. Status: local core prototype implemented in part;
-UI/API alignment, reliable recovery and reference-host acceptance remain open. This document accompanies
+Updated: 2026-11-25. Status: the published core functional/recovery/security
+workflows have reference-Pi acceptance; resource calibration and the controlled
+system/human evaluation retain separate completion gates. This document accompanies
 [project-outline.md](project-outline.md), which preserves the original thesis
 scope and supplied university requirements. The plan records target requirements and does not contain thesis chapters.
 [Implementation status and next work](status.md) records current capabilities,
 verification evidence and known gaps.
 
 The broker, Svelte UI, application/platform charts and unified local workflow are
-implemented. The healthy local API lifecycle has been verified. The
+implemented. Native installation, trusted LAN UI/API workflows, guarded recovery,
+controlled disclosure checks and reinstall/reboot retention have published
+v0.1.10 evidence. The
 [local development guide](local-development.md) covers current execution and the
-separate manual Helm baseline. No M0–M4 milestone is declared fully accepted on
-the reference hardware.
+separate manual Helm baseline. The [milestone audit](milestones.md) separates
+accepted M2/M3 workflows from the remaining M0/M1/M4 evaluation requirements.
 
 This file is the **index**. The detailed plan is split across focused documents:
 
@@ -94,9 +97,9 @@ agreed thesis requirements and cannot be inferred from a milestone label.
 
 UI/API contracts, restart, verified failed-update restoration and private image
 pulls are implemented. Bounded logs/events and owned-field drift reports are implemented in source.
-Remaining core work covers private LAN administration, additional
-failure/browser/security acceptance and measured
-reference-host evaluation. Manual releases and nightly/API/browser acceptance are implemented.
+Published v0.1.10 passed native private LAN administration and the controlled
+failure/browser/security gate. Remaining core work is measured reference-host
+evaluation and the agreed human timed walkthrough. Manual releases and nightly/API/browser acceptance are implemented.
 The [status report](status.md#next-implementation-order) defines that order.
 [Milestone acceptance](milestones.md#implementation-readiness-and-entry-criteria)
 continues to require evidence for hardware, networking, failure recovery and
@@ -107,6 +110,8 @@ evaluation; existing code alone does not satisfy those requirements.
 The [M0–M4 audit](milestones.md#implementation-readiness-and-entry-criteria)
 records completed implementation separately from pending acceptance. Remaining
 core work is tracked in [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16).
-The passing supported lifecycle does not establish normal private LAN HTTPS,
-application diagnostics/drift reporting, every failure scenario or the measured
-core evaluation. Those obligations remain relevant before core completion is claimed.
+Functional evidence is recorded in the [native report](../tests/experiments/2026-11-25-v0.1.10-native.md).
+The [evaluation protocol](evaluation.md) defines the remaining resource/system
+measurements and [short human walkthrough](../tests/evaluation/HUMAN.md).
+Automated timings cannot establish human active operator time; the corresponding
+record remains pending until the administrator performs the trial.

@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch, MagicMock
 
 ROOT = Path(__file__).resolve().parents[2]
 EVALUATION = ROOT / 'tests/evaluation'
@@ -113,7 +114,10 @@ class EvaluationTests(unittest.TestCase):
         result = common.content_state(descriptors, {'layer'})
         self.assertEqual(result['condition'], 'partial-cache')
         self.assertEqual(result['missingLayerBytes'], 0)
-        self.assertEqual(common.content_state(descriptors, set())['condition'], 'fully-cold-content')
+        self.assertEqual(common.content_state(descriptors, set())['condition'], 'compressed-content-absent')
+        self.assertFalse(common.content_state(descriptors, set())['fullyColdPullProven'])
+        self.assertFalse(common.content_state(descriptors, set(), ['chain'], {'chain'})['fullyColdPullProven'])
+        self.assertTrue(common.content_state(descriptors, set(), ['chain'], set())['fullyColdPullProven'])
         self.assertEqual(common.content_state(descriptors, {'manifest', 'layer'})['condition'], 'all-content-cached')
         with self.assertRaises(ValueError):
             common.content_state([], set())
@@ -137,10 +141,10 @@ class EvaluationTests(unittest.TestCase):
             identity = {'containerID': 'original', 'restartCount': 0}
             common.write_json(host/'identity-before.json', {'appID': fixture['appID'], 'containers': [identity]})
             common.write_json(host/'summary.json', {'appID': fixture['appID'], 'evidenceValid': True, 'sampleCount': 7, 'containersAfter': [identity]})
-            common.write_json(client/'summary.json', {'url': 'https://fixture.test/version', 'ratePerSecond': 2, 'durationSeconds': 2, 'warmupSeconds': 1})
+            common.write_json(client/'summary.json', {'url': 'https://fixture.test/version', 'ratePerSecond': 2, 'durationSeconds': 2, 'warmupSeconds': 1, 'maximumOutstandingRequests': 32})
             observations = [{'sequence': i, 'warmup': i < 2, 'scheduledEpochSeconds': 1+i/2, 'success': True, 'latencyMilliseconds': 10} for i in range(6)]
             (client/'requests.jsonl').write_text(''.join(json.dumps(x)+'\n' for x in observations))
-            samples = [{'epochSeconds': i, 'temperatureCelsius': 50, 'freeDiskBytes': 10*2**30, 'containers': [
+            samples = [{'epochSeconds': i, 'hostCPU': f'cpu {i*10} 0 0 {i*90} 0 0 0 0 0 0', 'hostMemoryBytes': {'MemTotal': 8*2**30, 'MemAvailable': 6*2**30, 'SwapTotal': 4*2**30, 'SwapFree': 4*2**30}, 'temperatureCelsius': 50, 'freeDiskBytes': 10*2**30, 'containers': [
                 {'containerID': 'original', 'memoryPeakBytes': 10*2**20, 'memoryCurrentBytes': 8*2**20,
                  'memoryEvents': {'oom_kill': 0}, 'CPU': {'usage_usec': i*1000, 'throttled_usec': 0, 'nr_periods': i*10, 'nr_throttled': 0}}]} for i in range(7)]
             def save():
@@ -155,3 +159,21 @@ class EvaluationTests(unittest.TestCase):
             samples.pop();save()
             with self.assertRaises(ValueError):
                 analyzer.analyze(host, client, fixture, plan)
+
+    def test_interrupted_load_retains_partial_requests_and_refuses_overwrite(self):
+        connection = MagicMock()
+        response = connection.getresponse.return_value
+        response.status = 200
+        response.read.return_value = b'{"version":"v1"}'
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)/'attempt'
+            with patch.object(load.ssl, 'create_default_context'), patch.object(load.http.client, 'HTTPSConnection', return_value=connection), patch.object(load.time, 'sleep', side_effect=KeyboardInterrupt):
+                with self.assertRaises(KeyboardInterrupt):
+                    load.run('https://fixture.test/', folder, 'test-ca', rate=20, seconds=1, warmup=0, expected_version='v1')
+                retained = (folder/'requests.jsonl').read_text().splitlines()
+                self.assertGreaterEqual(len(retained), 1)
+                self.assertFalse((folder/'summary.json').exists())
+                original = (folder/'requests.jsonl').read_bytes()
+                with self.assertRaises(FileExistsError):
+                    load.run('https://fixture.test/', folder, 'test-ca', rate=20, seconds=1, warmup=0, expected_version='v1')
+                self.assertEqual((folder/'requests.jsonl').read_bytes(), original)
