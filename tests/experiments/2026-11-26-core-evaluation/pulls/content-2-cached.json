@@ -1,0 +1,21 @@
+{
+  "condition": "all-content-cached",
+  "missingContent": [],
+  "fullyColdPullProven": false,
+  "snapshotInventoryMeasured": true,
+  "cachedNativeChainIDs": [
+    "sha256:04dfa01844a0f9de7ff41283faa7ec0af5ab1a82e6239a78858e69963097c13c",
+    "sha256:0ec31686a791bf17248c7420f0bd82227da6c54715adb87433f5c1732ce49071",
+    "sha256:1b349a3334531b575b01d409540dd8aca14ef29abddacd50f36643d7c949db4b",
+    "sha256:519fe884539e33bfb6a0443f5ef8483f81edc00c0508a9efa57f8b826a9523dc",
+    "sha256:6c03c80d0cb80766f5fc8f445c7e7642536ab2e094db3634033188d63fadba5f",
+    "sha256:c1c14a94fbdccd1f63e2f2a6d4824e62e524d3644d47d77844e2e45e34306d3d",
+    "sha256:ce92c881469bb0b0c50a75334ab0b68da336a67c283dcfa141710db36e860665",
+    "sha256:eb6859292c16aa10cc347e73f907681efe309315a5ef211a882c5133fa2f8c80",
+    "sha256:fd3ed05a9674c536ddc200474a25cc4b8e316cd57493aedf5e7b6454c7e7e433"
+  ],
+  "missingLayerBytes": 0,
+  "totalLayerBytes": 25938928,
+  "presentDescriptors": 12,
+  "totalDescriptors": 12
+}

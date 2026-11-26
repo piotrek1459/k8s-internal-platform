@@ -50,9 +50,9 @@ is running or published. [Dockerfile reference](https://docs.docker.com/referenc
 | Environment | Optional non-sensitive key/value settings. |
 | Secrets | Write-only input or references to stored secret versions. |
 | Replicas | One initially; manual changes for supported stateless applications. |
-| Resources | Provisional local defaults; reference-host measurements and admission policy remain outstanding. |
+| Resources | Measured source reference profile: 25m/48Mi requests, 250m/128Mi limits for the tested small HTTP workloads. Arbitrary workload sizing and admission policy remain separate; see [evaluation](evaluation.md). |
 | Readiness | Optional HTTP path; otherwise a documented TCP readiness fallback. |
-| Startup check | The chart supports separate probes; the current API mapping reuses a supplied readiness path for startup and needs correction. |
+| Startup check | Independent optional `health.startupPath`; omitted paths use TCP startup. The current UI supplies only readiness, so startup remains TCP there. |
 | Liveness | Configurable in direct chart values; disabled in broker-generated values and not exposed through the current application API. |
 | Storage | Planned M5 profile; non-null storage is rejected by the current create API. |
 
@@ -61,6 +61,12 @@ the host's Linux CPU architecture, and obtain runtime settings from the configur
 environment or files. It should log to stdout/stderr and handle termination.
 Supported non-root execution and volume permissions must be documented. Images
 requiring unsupported privileges must produce an actionable compatibility error.
+
+The source application chart uses a five-second kubelet-native preStop sleep
+within its 30-second termination grace period. The remaining 25 seconds are
+available for the application's own graceful shutdown. The native action requires
+Kubernetes 1.34+; the pinned reference is K3s 1.36. A finite passing rollout trace
+does not guarantee uninterrupted long-lived connections or arbitrary applications.
 
 Registry manifest inspection must precede deployment, including authentication
 and architecture validation where possible. Deployment uses an immutable digest

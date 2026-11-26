@@ -1,0 +1,2336 @@
+{
+  "schemaVersion": 1,
+  "runtimeRelease": "0.1.10",
+  "runtimeCommit": "c9caa4782d4d3a1d63093be06abf2d199d3b7e3f",
+  "resourcePlanSHA256": "2970adaa6391cae7bc30917eef66f61d23ec9029247e8b3a44c712d3f6e8e97c",
+  "lifecycle": {
+    "acceptance": {
+      "passed": true,
+      "missingScenarios": [],
+      "failedTargets": []
+    },
+    "runID": "49eec167fdfd",
+    "planSHA256": "9cd9af067be9f67192cf4923626a7165003742ee4c0f5d536eb15fde936fa3ed",
+    "methods": {
+      "api": {
+        "delete": {
+          "count": 3,
+          "minimum": 0.771174,
+          "median": 0.77212,
+          "p95": 1.018109,
+          "maximum": 1.018109
+        },
+        "deploy-v1": {
+          "count": 3,
+          "minimum": 4.682151,
+          "median": 4.723836,
+          "p95": 4.812145,
+          "maximum": 4.812145
+        },
+        "unhealthy-v3-and-restoration": {
+          "count": 3,
+          "minimum": 301.70428,
+          "median": 301.902404,
+          "p95": 302.091261,
+          "maximum": 302.091261
+        },
+        "update-v2": {
+          "count": 3,
+          "minimum": 4.950321,
+          "median": 4.954915,
+          "p95": 4.964988,
+          "maximum": 4.964988
+        }
+      },
+      "helm": {
+        "delete": {
+          "count": 3,
+          "minimum": 0.235443,
+          "median": 0.237683,
+          "p95": 0.238732,
+          "maximum": 0.238732
+        },
+        "deploy-v1": {
+          "count": 3,
+          "minimum": 4.548625,
+          "median": 4.550734,
+          "p95": 4.611839,
+          "maximum": 4.611839
+        },
+        "unhealthy-v3-and-restoration": {
+          "count": 3,
+          "minimum": 302.822715,
+          "median": 302.836889,
+          "p95": 302.86041,
+          "maximum": 302.86041
+        },
+        "update-v2": {
+          "count": 3,
+          "minimum": 4.537062,
+          "median": 4.547463,
+          "p95": 4.678141,
+          "maximum": 4.678141
+        }
+      }
+    },
+    "failureScenariosIncluded": true,
+    "humanOperatorTime": null,
+    "humanTrialStatus": "pending",
+    "coreEvaluationComplete": false,
+    "ownedFixturesRemaining": {
+      "runID": "49eec167fdfd",
+      "applications": {},
+      "releases": {}
+    },
+    "originalApplicationsRetained": true
+  },
+  "resources": [
+    {
+      "appID": "app_878c8a4e15157afd",
+      "image": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+      "clockOffsetSecondsHostMinusClient": 0.017563819885253906,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 5.322459,
+          "median": 11.326917,
+          "p95": 83.055083,
+          "maximum": 106.36675
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.5110123053176014,
+            "maximum": 0.5130030577365025
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 2326528,
+            "median": 3366912.0,
+            "p95": 4423680,
+            "maximum": 4423680
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 6
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 4.382995820049458,
+            "median": 6.045998558521615,
+            "p95": 6.564998434782401,
+            "maximum": 7.669987199327851
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 5554176,
+            "median": 8749056,
+            "p95": 10813440,
+            "maximum": 11337728
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 450
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5037783375314862,
+            "median": 1.256281407035176,
+            "p95": 2.5,
+            "maximum": 3.0
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1297170432,
+            "median": 1312358400.0,
+            "p95": 1336590336,
+            "maximum": 1339015168
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.759493670886076,
+            "median": 1.7721518987341771,
+            "p95": 3.007518796992481,
+            "maximum": 3.2663316582914574
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1296318464,
+            "median": 1300643840,
+            "p95": 1305001984,
+            "maximum": 1305280512
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 11452416,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 37.5,
+      "minimumFreeDiskBytes": 20219682816,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "go-1"
+    },
+    {
+      "appID": "app_2db6c713cd8a214c",
+      "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "clockOffsetSecondsHostMinusClient": 0.017563819885253906,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 4.884375,
+          "median": 9.955354,
+          "p95": 80.682583,
+          "maximum": 103.086125
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.379000451803746,
+            "maximum": 0.43200247193797264
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 5881856,
+            "median": 7512064.0,
+            "p95": 9093120,
+            "maximum": 9093120
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 4
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 3.140012726835336,
+            "median": 4.517992459786601,
+            "p95": 4.994994045503086,
+            "maximum": 5.123996335032223
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 7389184,
+            "median": 9142272,
+            "p95": 9879552,
+            "maximum": 9977856
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 435
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5012531328320802,
+            "median": 1.5,
+            "p95": 7.769423558897243,
+            "maximum": 8.620689655172415
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1310851072,
+            "median": 1329930240.0,
+            "p95": 1351909376,
+            "maximum": 1354072064
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.7556675062972292,
+            "median": 1.7676767676767677,
+            "p95": 3.526448362720403,
+            "maximum": 6.030150753768845
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1303691264,
+            "median": 1307639808,
+            "p95": 1311145984,
+            "maximum": 1311637504
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10141696,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 39.15,
+      "minimumFreeDiskBytes": 20218699776,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "nginx-1"
+    },
+    {
+      "appID": "app_8c0a3f6e2ec745c6",
+      "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "clockOffsetSecondsHostMinusClient": 0.017563819885253906,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 5.143084,
+          "median": 10.259292,
+          "p95": 82.141167,
+          "maximum": 103.158291
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.3910002796651933,
+            "maximum": 0.4450008487717605
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 6045696,
+            "median": 8224768.0,
+            "p95": 9273344,
+            "maximum": 10289152
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 4
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 3.3779967784912315,
+            "median": 4.546994579560066,
+            "p95": 5.110009746570103,
+            "maximum": 5.386007704745825
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 7651328,
+            "median": 9125888,
+            "p95": 9977856,
+            "maximum": 10076160
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 418
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.25125628140703515,
+            "median": 1.0025062656641603,
+            "p95": 3.491271820448878,
+            "maximum": 4.477611940298507
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1315602432,
+            "median": 1320558592.0,
+            "p95": 1358675968,
+            "maximum": 1359757312
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.5063291139240507,
+            "median": 1.7632241813602014,
+            "p95": 3.2418952618453867,
+            "maximum": 7.769423558897243
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1309851648,
+            "median": 1312342016,
+            "p95": 1314275328,
+            "maximum": 1315176448
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10289152,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 38.6,
+      "minimumFreeDiskBytes": 20218175488,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "nginx-2"
+    },
+    {
+      "appID": "app_dd2df43fe1e276da",
+      "image": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+      "clockOffsetSecondsHostMinusClient": 0.017563819885253906,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 4.969667,
+          "median": 11.047146,
+          "p95": 81.66325,
+          "maximum": 102.35275
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.6050030291232137,
+            "maximum": 0.6079994201665686
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 2359296,
+            "median": 3956736.0,
+            "p95": 5521408,
+            "maximum": 5521408
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 6
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 5.521015795752895,
+            "median": 6.092007262238577,
+            "p95": 7.016988289137358,
+            "maximum": 8.060024981576147
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 6504448,
+            "median": 8929280,
+            "p95": 10829824,
+            "maximum": 10928128
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 451
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.7518796992481203,
+            "median": 1.3759915786307757,
+            "p95": 4.5,
+            "maximum": 7.30478589420655
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1300594688,
+            "median": 1326129152.0,
+            "p95": 1391476736,
+            "maximum": 1395015680
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 1.0075566750629723,
+            "median": 2.0,
+            "p95": 3.0150753768844223,
+            "maximum": 3.2338308457711444
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1301184512,
+            "median": 1305903104,
+            "p95": 1309966336,
+            "maximum": 1310801920
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10944512,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 40.8,
+      "minimumFreeDiskBytes": 20216320000,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "go-2"
+    },
+    {
+      "appID": "app_7dc3ee92264ee7fd",
+      "image": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+      "clockOffsetSecondsHostMinusClient": 0.017563819885253906,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 4.869625,
+          "median": 11.258688,
+          "p95": 81.4455,
+          "maximum": 104.131708
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.5430044017194888,
+            "maximum": 0.6610009455694373
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 2375680,
+            "median": 2916352.0,
+            "p95": 4521984,
+            "maximum": 4521984
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 4
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 5.3370012724402605,
+            "median": 6.161983839554254,
+            "p95": 6.666030196803507,
+            "maximum": 7.486967869419658
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 5308416,
+            "median": 8110080,
+            "p95": 9863168,
+            "maximum": 10289152
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 431
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.25125628140703515,
+            "median": 1.256289337954458,
+            "p95": 3.9800995024875623,
+            "maximum": 7.231920199501247
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1310916608,
+            "median": 1326555136.0,
+            "p95": 1366343680,
+            "maximum": 1367801856
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 1.0126582278481013,
+            "median": 1.7676767676767677,
+            "p95": 2.977667493796526,
+            "maximum": 3.25
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1309048832,
+            "median": 1313259520,
+            "p95": 1318043648,
+            "maximum": 1319157760
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10878976,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 41.35,
+      "minimumFreeDiskBytes": 20215820288,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "go-3"
+    },
+    {
+      "appID": "app_dfd92eb8453ac791",
+      "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "clockOffsetSecondsHostMinusClient": 0.017563819885253906,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 4.362584,
+          "median": 10.100875,
+          "p95": 80.583625,
+          "maximum": 102.796792
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.3989996194843106,
+            "maximum": 0.5680012187983916
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 5865472,
+            "median": 7012352.0,
+            "p95": 9076736,
+            "maximum": 9076736
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 6
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 3.155009778768331,
+            "median": 4.65,
+            "p95": 5.110991470112731,
+            "maximum": 5.273972336914203
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 7471104,
+            "median": 8896512,
+            "p95": 9945088,
+            "maximum": 10059776
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 424
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 1.25,
+            "p95": 3.2663316582914574,
+            "maximum": 3.7406483790523692
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1316405248,
+            "median": 1332240384.0,
+            "p95": 1374994432,
+            "maximum": 1383038976
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.7575757575757576,
+            "median": 1.7632241813602014,
+            "p95": 3.2338308457711444,
+            "maximum": 8.928571428571429
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1314193408,
+            "median": 1317240832,
+            "p95": 1319911424,
+            "maximum": 1319976960
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10125312,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 41.9,
+      "minimumFreeDiskBytes": 20215312384,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "nginx-3"
+    }
+  ],
+  "maximumObservedSteadyCPUMillicores": 8.060024981576147,
+  "maximumObservedLifetimeMemoryPeakBytes": 17989632,
+  "derivedReferencePreset": {
+    "cpuRequest": "25m",
+    "cpuLimit": "250m",
+    "memoryRequest": "48Mi",
+    "memoryLimit": "128Mi"
+  },
+  "operatorTime": null,
+  "humanTrialStatus": "pending",
+  "coreEvaluationComplete": false,
+  "publishedDefaultValidationPending": true,
+  "clockOffset": {
+    "hostEpoch": 1795698348.038506,
+    "clientBeforeEpoch": 1795698347.996057,
+    "clientAfterEpoch": 1795698348.0458272,
+    "offsetHostMinusClient": 0.017563819885253906,
+    "uncertaintySeconds": 0.024885058403015137
+  },
+  "coldPullConditions": [
+    {
+      "condition": "fully-cold-content-and-snapshots",
+      "missingContent": [
+        {
+          "digest": "sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+          "size": 6791,
+          "kind": "index-or-manifest"
+        },
+        {
+          "digest": "sha256:4d831b13e3a78d153ba888f43a784a519944cb8f65a0fad07219a42e5db59456",
+          "size": 2614,
+          "kind": "manifest"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.config.v1+json",
+          "digest": "sha256:cdccc05ccd31521e39450b201be8f452d5688a98cd5527c4a01d710052f11c69",
+          "size": 14031,
+          "kind": "config"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+          "size": 4187659,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+          "size": 4678026,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+          "size": 2795,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+          "size": 628,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+          "size": 967,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+          "size": 405,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+          "size": 1203,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+          "size": 1399,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+          "size": 17065846,
+          "kind": "layer"
+        }
+      ],
+      "fullyColdPullProven": true,
+      "snapshotInventoryMeasured": true,
+      "cachedNativeChainIDs": [],
+      "missingLayerBytes": 25938928,
+      "totalLayerBytes": 25938928,
+      "presentDescriptors": 0,
+      "totalDescriptors": 12
+    },
+    {
+      "condition": "fully-cold-content-and-snapshots",
+      "missingContent": [
+        {
+          "digest": "sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+          "size": 6791,
+          "kind": "index-or-manifest"
+        },
+        {
+          "digest": "sha256:4d831b13e3a78d153ba888f43a784a519944cb8f65a0fad07219a42e5db59456",
+          "size": 2614,
+          "kind": "manifest"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.config.v1+json",
+          "digest": "sha256:cdccc05ccd31521e39450b201be8f452d5688a98cd5527c4a01d710052f11c69",
+          "size": 14031,
+          "kind": "config"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+          "size": 4187659,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+          "size": 4678026,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+          "size": 2795,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+          "size": 628,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+          "size": 967,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+          "size": 405,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+          "size": 1203,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+          "size": 1399,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+          "size": 17065846,
+          "kind": "layer"
+        }
+      ],
+      "fullyColdPullProven": true,
+      "snapshotInventoryMeasured": true,
+      "cachedNativeChainIDs": [],
+      "missingLayerBytes": 25938928,
+      "totalLayerBytes": 25938928,
+      "presentDescriptors": 0,
+      "totalDescriptors": 12
+    },
+    {
+      "condition": "fully-cold-content-and-snapshots",
+      "missingContent": [
+        {
+          "digest": "sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+          "size": 6791,
+          "kind": "index-or-manifest"
+        },
+        {
+          "digest": "sha256:4d831b13e3a78d153ba888f43a784a519944cb8f65a0fad07219a42e5db59456",
+          "size": 2614,
+          "kind": "manifest"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.config.v1+json",
+          "digest": "sha256:cdccc05ccd31521e39450b201be8f452d5688a98cd5527c4a01d710052f11c69",
+          "size": 14031,
+          "kind": "config"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+          "size": 4187659,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+          "size": 4678026,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+          "size": 2795,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+          "size": 628,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+          "size": 967,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+          "size": 405,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+          "size": 1203,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+          "size": 1399,
+          "kind": "layer"
+        },
+        {
+          "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+          "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+          "size": 17065846,
+          "kind": "layer"
+        }
+      ],
+      "fullyColdPullProven": true,
+      "snapshotInventoryMeasured": true,
+      "cachedNativeChainIDs": [],
+      "missingLayerBytes": 25938928,
+      "totalLayerBytes": 25938928,
+      "presentDescriptors": 0,
+      "totalDescriptors": 12
+    }
+  ],
+  "excludedAttempts": {
+    "beforePowerOff": "No matching separate-client trace; not a loaded dataset",
+    "fourSlotSeries": "Three unsent observations in Nginx repetition 2; entire initial resource series excluded from final comparison",
+    "lateGo2": "Client began after the host window; joined-data validation refused the sample; repeated separately"
+  },
+  "explicitProfileValidation": {
+    "passed": true,
+    "profile": {
+      "cpuRequest": "25m",
+      "cpuLimit": "250m",
+      "memoryRequest": "48Mi",
+      "memoryLimit": "128Mi"
+    },
+    "validationPlanSHA256": "a8df5ea31210536fc48775a1bb43ffe687aad575610b75fc51bedb261139b069",
+    "cases": [
+      {
+        "workload": "go",
+        "appID": "app_7f7885de45c1f5c9",
+        "actualHTTPS": 200,
+        "replicas": 2,
+        "resources": {
+          "requests": {
+            "cpu": "25m",
+            "memory": "48Mi"
+          },
+          "limits": {
+            "cpu": "250m",
+            "memory": "128Mi"
+          }
+        },
+        "containers": [
+          {
+            "podUID": "1c3bd847-80e3-48fc-bec2-f0f2fc68a75b",
+            "containerID": "4cefdd16c5a2d30b9bbd855c0401edf6d443a9af21627f42752bd6ef9272606a",
+            "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod1c3bd847_80e3_48fc_bec2_f0f2fc68a75b.slice/cri-containerd-4cefdd16c5a2d30b9bbd855c0401edf6d443a9af21627f42752bd6ef9272606a.scope",
+            "lifetimeMemoryPeakBytes": 6324224
+          },
+          {
+            "podUID": "1a15adb8-91b8-4adb-a725-f6888f96fe5a",
+            "containerID": "4cec9ccb95d4af78d4c6a36b8ac8077fcc0b905272db6e5c4b39cce20abc3b25",
+            "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod1a15adb8_91b8_4adb_a725_f6888f96fe5a.slice/cri-containerd-4cec9ccb95d4af78d4c6a36b8ac8077fcc0b905272db6e5c4b39cce20abc3b25.scope",
+            "lifetimeMemoryPeakBytes": 7929856
+          }
+        ],
+        "HTTPSProbes": [
+          {
+            "epochSeconds": 1795700396.985009,
+            "status": 200,
+            "expectedContent": true
+          }
+        ]
+      },
+      {
+        "workload": "nginx",
+        "appID": "app_c0643940a64acb70",
+        "actualHTTPS": 200,
+        "replicas": 2,
+        "resources": {
+          "requests": {
+            "cpu": "25m",
+            "memory": "48Mi"
+          },
+          "limits": {
+            "cpu": "250m",
+            "memory": "128Mi"
+          }
+        },
+        "containers": [
+          {
+            "podUID": "5f41fcb7-2ea3-4eae-8444-67fb1985680c",
+            "containerID": "13e0e5ec527a093bdf0e69c68d38e76f4da203ff656ba753128df5d3b755a2c5",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod5f41fcb7_2ea3_4eae_8444_67fb1985680c.slice/cri-containerd-13e0e5ec527a093bdf0e69c68d38e76f4da203ff656ba753128df5d3b755a2c5.scope",
+            "lifetimeMemoryPeakBytes": 9764864
+          },
+          {
+            "podUID": "60bca1c9-6e3f-4aa9-b155-3ba076a5d8e2",
+            "containerID": "d7ffb39f40bf779bec270e7e1b513f6489b9a35f658564b94e2b607d6451cdcc",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod60bca1c9_6e3f_4aa9_b155_3ba076a5d8e2.slice/cri-containerd-d7ffb39f40bf779bec270e7e1b513f6489b9a35f658564b94e2b607d6451cdcc.scope",
+            "lifetimeMemoryPeakBytes": 8978432
+          }
+        ],
+        "HTTPSProbes": [
+          {
+            "epochSeconds": 1795700404.9665995,
+            "status": 200,
+            "expectedContent": true
+          }
+        ]
+      }
+    ],
+    "originalApplicationsRetained": true,
+    "owned": {
+      "runID": "ba17a2d566ae",
+      "applications": {},
+      "releases": {}
+    },
+    "publishedDefaultValidationPending": true
+  },
+  "sourceDrainComparison": {
+    "cases": [
+      {
+        "condition": "control",
+        "storedChartSHA256": "1319d0e014420dd79c06e87482680664871b98e263b929a5a339b764f998af79",
+        "storedConfig": {
+          "appId": "eval-88b70b18887c-control",
+          "containerPort": 8080,
+          "env": {},
+          "image": {
+            "digest": "sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+            "pullPolicy": "IfNotPresent",
+            "repository": "platform.local/http-demo",
+            "tag": ""
+          },
+          "imagePullSecrets": [],
+          "ingress": {
+            "className": "platform-private",
+            "enabled": true,
+            "entrypoint": "private",
+            "hostname": "eval-88b70b18887c-control.apps.home.arpa",
+            "tls": {
+              "enabled": false,
+              "secretName": ""
+            }
+          },
+          "probes": {
+            "liveness": {
+              "enabled": false,
+              "failureThreshold": 3,
+              "initialDelaySeconds": 0,
+              "path": "/healthz",
+              "periodSeconds": 10,
+              "timeoutSeconds": 1,
+              "type": "http"
+            },
+            "readiness": {
+              "enabled": true,
+              "failureThreshold": 3,
+              "initialDelaySeconds": 0,
+              "path": "/readyz",
+              "periodSeconds": 5,
+              "timeoutSeconds": 1,
+              "type": "http"
+            },
+            "startup": {
+              "enabled": true,
+              "failureThreshold": 30,
+              "initialDelaySeconds": 0,
+              "path": "/healthz",
+              "periodSeconds": 2,
+              "timeoutSeconds": 1,
+              "type": "http"
+            }
+          },
+          "replicas": 1,
+          "resources": {
+            "limits": {
+              "cpu": "250m",
+              "memory": "128Mi"
+            },
+            "requests": {
+              "cpu": "25m",
+              "memory": "48Mi"
+            }
+          },
+          "restartToken": "",
+          "secretRefs": []
+        },
+        "client": {
+          "url": "https://eval-88b70b18887c-control.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 75,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795700845.651114,
+          "finishedEpochSeconds": 1795700920.46194,
+          "requests": 375,
+          "successful": 344,
+          "successRate": 0.9173333333333333,
+          "latencyMilliseconds": {
+            "count": 344,
+            "minimum": 6.814541,
+            "median": 11.304354,
+            "p95": 37.208167,
+            "maximum": 175.163667
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 375,
+          "complete": true,
+          "targetsPassed": false,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "timeline": [
+          {
+            "stage": "update-1",
+            "version": "v2",
+            "submittedEpochSeconds": 1795700860.6350484,
+            "verifiedEpochSeconds": 1795700865.0460262,
+            "liveLifecycle": [
+              null
+            ]
+          },
+          {
+            "stage": "update-2",
+            "version": "v1",
+            "submittedEpochSeconds": 1795700880.6350436,
+            "verifiedEpochSeconds": 1795700888.2388623,
+            "liveLifecycle": [
+              null
+            ]
+          },
+          {
+            "stage": "update-3",
+            "version": "v2",
+            "submittedEpochSeconds": 1795700900.6350405,
+            "verifiedEpochSeconds": 1795700908.2409706,
+            "liveLifecycle": [
+              null
+            ]
+          }
+        ]
+      },
+      {
+        "condition": "candidate",
+        "storedChartSHA256": "518242a085f7ccc6c3d90869483501dd7865dcbda1dc65bd53f3d458504fc2da",
+        "storedConfig": {
+          "appId": "eval-88b70b18887c-candidate",
+          "containerPort": 8080,
+          "env": {},
+          "image": {
+            "digest": "sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+            "pullPolicy": "IfNotPresent",
+            "repository": "platform.local/http-demo",
+            "tag": ""
+          },
+          "imagePullSecrets": [],
+          "ingress": {
+            "className": "platform-private",
+            "enabled": true,
+            "entrypoint": "private",
+            "hostname": "eval-88b70b18887c-candidate.apps.home.arpa",
+            "tls": {
+              "enabled": false,
+              "secretName": ""
+            }
+          },
+          "probes": {
+            "liveness": {
+              "enabled": false,
+              "failureThreshold": 3,
+              "initialDelaySeconds": 0,
+              "path": "/healthz",
+              "periodSeconds": 10,
+              "timeoutSeconds": 1,
+              "type": "http"
+            },
+            "readiness": {
+              "enabled": true,
+              "failureThreshold": 3,
+              "initialDelaySeconds": 0,
+              "path": "/readyz",
+              "periodSeconds": 5,
+              "timeoutSeconds": 1,
+              "type": "http"
+            },
+            "startup": {
+              "enabled": true,
+              "failureThreshold": 30,
+              "initialDelaySeconds": 0,
+              "path": "/healthz",
+              "periodSeconds": 2,
+              "timeoutSeconds": 1,
+              "type": "http"
+            }
+          },
+          "replicas": 1,
+          "resources": {
+            "limits": {
+              "cpu": "250m",
+              "memory": "128Mi"
+            },
+            "requests": {
+              "cpu": "25m",
+              "memory": "48Mi"
+            }
+          },
+          "restartToken": "",
+          "secretRefs": []
+        },
+        "client": {
+          "url": "https://eval-88b70b18887c-candidate.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 75,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795700940.5455759,
+          "finishedEpochSeconds": 1795701015.365647,
+          "requests": 375,
+          "successful": 375,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 375,
+            "minimum": 7.263583,
+            "median": 10.676209,
+            "p95": 61.182458,
+            "maximum": 98.955167
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 375,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "timeline": [
+          {
+            "stage": "update-1",
+            "version": "v2",
+            "submittedEpochSeconds": 1795700955.532587,
+            "verifiedEpochSeconds": 1795700960.1343298,
+            "liveLifecycle": [
+              {
+                "preStop": {
+                  "sleep": {
+                    "seconds": 5
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "stage": "update-2",
+            "version": "v1",
+            "submittedEpochSeconds": 1795700975.5325916,
+            "verifiedEpochSeconds": 1795700981.7298179,
+            "liveLifecycle": [
+              {
+                "preStop": {
+                  "sleep": {
+                    "seconds": 5
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "stage": "update-3",
+            "version": "v2",
+            "submittedEpochSeconds": 1795700995.5325947,
+            "verifiedEpochSeconds": 1795701002.000776,
+            "liveLifecycle": [
+              {
+                "preStop": {
+                  "sleep": {
+                    "seconds": 5
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "originalApplicationsRetained": true,
+    "owned": {
+      "runID": "88b70b18887c",
+      "applications": {},
+      "releases": {}
+    },
+    "scope": "Native direct-Helm source-chart experiment; published v0.1.10 runtime remains unchanged"
+  },
+  "sourceRuntimeCommit": "29216455cfeae52eef803f9987008ecb844d8bb2",
+  "sourceE2ERun": 45832187594,
+  "sourceE2E": {
+    "runID": 45832187594,
+    "sourceCommit": "29216455cfeae52eef803f9987008ecb844d8bb2",
+    "conclusion": "success",
+    "artifactID": 15124058153,
+    "artifactDigest": "sha256:6d5261371f0e4192cad3a436885d9e5f3b64953a91cc5d0cbfc4aa87ea2eb9ea",
+    "tests": 27,
+    "failures": 0,
+    "skips": 0,
+    "privateLANRolloutRequests": 56,
+    "privateLANRolloutErrors": 0,
+    "junitSHA256": "062149f89265107414ae9c48b93903b7ea3eca5b155dd242aacbd2e595b67b87",
+    "rolloutTraceSHA256": "65ca66036e1f0a3c51e192caefbf9b9f91c3f843bbd83e0619894e668c41d98f"
+  },
+  "artifacts": {
+    "lifecycle/environment.json": {
+      "SHA256": "e827e7cdba361c823487f8258b6749306a78f2e9f5c87755beb8cdd822771a02",
+      "expandedSHA256": "e827e7cdba361c823487f8258b6749306a78f2e9f5c87755beb8cdd822771a02",
+      "bytes": 6606
+    },
+    "lifecycle/timings.json": {
+      "SHA256": "ac7a8666f7b29a13e1b39702704e010331627d6f2f16c4af4e47b06b5005c84a",
+      "expandedSHA256": "ac7a8666f7b29a13e1b39702704e010331627d6f2f16c4af4e47b06b5005c84a",
+      "bytes": 5416
+    },
+    "lifecycle/summary.json": {
+      "SHA256": "a609d0499b7f28bc2161ff39c4ed9d227bbb8c307d865ed9e6e78235e5190a21",
+      "expandedSHA256": "a609d0499b7f28bc2161ff39c4ed9d227bbb8c307d865ed9e6e78235e5190a21",
+      "bytes": 1871
+    },
+    "lifecycle/reference-values.json": {
+      "SHA256": "5d3c3ab456795a1a5cee12f2cab7303283d74e868121fab3ab130404644cf5ec",
+      "expandedSHA256": "5d3c3ab456795a1a5cee12f2cab7303283d74e868121fab3ab130404644cf5ec",
+      "bytes": 1351
+    },
+    "lifecycle/operation-events.json": {
+      "SHA256": "3e994b10335626d8a9a7ee706a923cb2765b2ba43ca8ed4a1545c4ffb7a3949c",
+      "expandedSHA256": "3e994b10335626d8a9a7ee706a923cb2765b2ba43ca8ed4a1545c4ffb7a3949c",
+      "bytes": 5816
+    },
+    "resources/go-1/fixture.json": {
+      "SHA256": "48d5c1831550e1e6b4b2ae67ecbe06f8651d14fd4f9c0b9c58b326a9e93fcd92",
+      "expandedSHA256": "48d5c1831550e1e6b4b2ae67ecbe06f8651d14fd4f9c0b9c58b326a9e93fcd92",
+      "bytes": 390
+    },
+    "resources/go-1/environment.json": {
+      "SHA256": "c03a179a122b864a028b09ab6ef1d549af80d3c1d5d12ad2e68130ae29a5284f",
+      "expandedSHA256": "c03a179a122b864a028b09ab6ef1d549af80d3c1d5d12ad2e68130ae29a5284f",
+      "bytes": 7679
+    },
+    "resources/go-1/host/identity-before.json": {
+      "SHA256": "3c9cbd0980aaab76fe0997fbb97b5a2a1291871c3eb8d098b3cedf25ed517f2e",
+      "expandedSHA256": "3c9cbd0980aaab76fe0997fbb97b5a2a1291871c3eb8d098b3cedf25ed517f2e",
+      "bytes": 2230
+    },
+    "resources/go-1/host/summary.json": {
+      "SHA256": "2468b62cd9cc1beb28e957b86a85e6001eb24bd3106e9b669a05032636374d27",
+      "expandedSHA256": "2468b62cd9cc1beb28e957b86a85e6001eb24bd3106e9b669a05032636374d27",
+      "bytes": 785
+    },
+    "resources/go-1/host/samples.jsonl.gz": {
+      "SHA256": "07dda2f733d5dc7002525153cc24b00f038acc5ea7f608e503c296894a229c41",
+      "expandedSHA256": "7ac442811632cfa4ced4a8475f2fab6309098fbad4cbd4fd62cc04dd3e685415",
+      "bytes": 5972
+    },
+    "resources/go-1/client/summary.json": {
+      "SHA256": "e8f999f3e9a4749da5209acf6c756e4aa3c70552df2c91ab836cdbb2a2712b60",
+      "expandedSHA256": "e8f999f3e9a4749da5209acf6c756e4aa3c70552df2c91ab836cdbb2a2712b60",
+      "bytes": 719
+    },
+    "resources/go-1/client/requests.jsonl.gz": {
+      "SHA256": "a0dcb7e12d5dee9cdb8ddfd7dd15d4077c5895d35e60197a28227b5dad378e7c",
+      "expandedSHA256": "5c5c291c35cd3db3237b4f7d1d279f4970b99088470bfff8a7a7a17d4b2c05b6",
+      "bytes": 29293
+    },
+    "resources/nginx-1/fixture.json": {
+      "SHA256": "cfc031f649c9054db1c6cca25ef2d4f1033c03f8f5bf48a0df30b1ee64f10219",
+      "expandedSHA256": "cfc031f649c9054db1c6cca25ef2d4f1033c03f8f5bf48a0df30b1ee64f10219",
+      "bytes": 412
+    },
+    "resources/nginx-1/environment.json": {
+      "SHA256": "2290f9ad7fbd87aa94c31e13206a24a5d5f2c77d345dd7e101f3532516a6978e",
+      "expandedSHA256": "2290f9ad7fbd87aa94c31e13206a24a5d5f2c77d345dd7e101f3532516a6978e",
+      "bytes": 7679
+    },
+    "resources/nginx-1/host/identity-before.json": {
+      "SHA256": "88f5eb4830bed70b36880534954c2413ca69c969bdb97101a56fe82651dbd06f",
+      "expandedSHA256": "88f5eb4830bed70b36880534954c2413ca69c969bdb97101a56fe82651dbd06f",
+      "bytes": 2243
+    },
+    "resources/nginx-1/host/summary.json": {
+      "SHA256": "0128e58471be4771f807e0c4b5995328201b3938c4ea0a40b54b4e1b023cc13e",
+      "expandedSHA256": "0128e58471be4771f807e0c4b5995328201b3938c4ea0a40b54b4e1b023cc13e",
+      "bytes": 798
+    },
+    "resources/nginx-1/host/samples.jsonl.gz": {
+      "SHA256": "276108ff13d36c219c5019721228c68a97a8286b7d2e1063edf613000375f012",
+      "expandedSHA256": "763a6b88d236aa35a4c2841df0ebbc504155ffa0640bb01d152e8f2cc74b51a1",
+      "bytes": 5723
+    },
+    "resources/nginx-1/client/summary.json": {
+      "SHA256": "6dd7b7a058ad773ccbd3a043ed188918f992bd23feda33fc701a6e5cce595917",
+      "expandedSHA256": "6dd7b7a058ad773ccbd3a043ed188918f992bd23feda33fc701a6e5cce595917",
+      "bytes": 709
+    },
+    "resources/nginx-1/client/requests.jsonl.gz": {
+      "SHA256": "a740d1fa95c4fa54aa4cedcd9f3e096c6ff728abd1b8dec5f8f56c5e244c03a5",
+      "expandedSHA256": "3a01d1b223a773d3df3bb3dae8f23f50dd631067a4f792c3f9528f0603f0a82c",
+      "bytes": 27475
+    },
+    "resources/nginx-2/fixture.json": {
+      "SHA256": "d0f82facbcf7dbcd8f10b4947a1a2219a40aaa85c131d14d900d84eb9020cb5b",
+      "expandedSHA256": "d0f82facbcf7dbcd8f10b4947a1a2219a40aaa85c131d14d900d84eb9020cb5b",
+      "bytes": 412
+    },
+    "resources/nginx-2/environment.json": {
+      "SHA256": "3a4367a487a0b4f8f294942f5bc9b6ca5d02850f8c214aebe68bb702a52b946b",
+      "expandedSHA256": "3a4367a487a0b4f8f294942f5bc9b6ca5d02850f8c214aebe68bb702a52b946b",
+      "bytes": 7679
+    },
+    "resources/nginx-2/host/identity-before.json": {
+      "SHA256": "4031d724147f5d47512a1acccc47cb0ea152ebcb0e55f36a4c4550d1e782a859",
+      "expandedSHA256": "4031d724147f5d47512a1acccc47cb0ea152ebcb0e55f36a4c4550d1e782a859",
+      "bytes": 2243
+    },
+    "resources/nginx-2/host/summary.json": {
+      "SHA256": "a952202bbe8d7359390395292f70320c0548d7557156a378b0017cdb3fbf6ade",
+      "expandedSHA256": "a952202bbe8d7359390395292f70320c0548d7557156a378b0017cdb3fbf6ade",
+      "bytes": 798
+    },
+    "resources/nginx-2/host/samples.jsonl.gz": {
+      "SHA256": "3b38b8bf1c9aee678ae08bdf7cb876cde47cb29f35b2dd6cafa88b2319ef108c",
+      "expandedSHA256": "a0233fe94b7628ea101000d83672c92afa9f7b2d642b628c49c4f97e4134f8b5",
+      "bytes": 5664
+    },
+    "resources/nginx-2/client/summary.json": {
+      "SHA256": "9881626af6e8bc3cac2b3c8977da37882be4a37bb30b05f60e183e5c33197489",
+      "expandedSHA256": "9881626af6e8bc3cac2b3c8977da37882be4a37bb30b05f60e183e5c33197489",
+      "bytes": 711
+    },
+    "resources/nginx-2/client/requests.jsonl.gz": {
+      "SHA256": "b8647ac93c4b8122b24f001209246f74f1715a769ddda41c78af17adb6ef590a",
+      "expandedSHA256": "559b7468d9390ce7e1d77cf7535d45f17e40a81630bb7874284458c19a863f81",
+      "bytes": 28242
+    },
+    "resources/go-2/fixture.json": {
+      "SHA256": "0cfdfadf3df4c0b0b636c605bcd68de653da44780213338558b97b50d8316a23",
+      "expandedSHA256": "0cfdfadf3df4c0b0b636c605bcd68de653da44780213338558b97b50d8316a23",
+      "bytes": 390
+    },
+    "resources/go-2/environment.json": {
+      "SHA256": "d4599316da5453f5da82dc4dd6841d0035a6c5345e3f5a8f3d93d1a050ca2016",
+      "expandedSHA256": "d4599316da5453f5da82dc4dd6841d0035a6c5345e3f5a8f3d93d1a050ca2016",
+      "bytes": 7679
+    },
+    "resources/go-2/host/identity-before.json": {
+      "SHA256": "478b8b7c5cd8275530a8cf8f48b566f18057ccc235e633e197eacfd889dbb2d5",
+      "expandedSHA256": "478b8b7c5cd8275530a8cf8f48b566f18057ccc235e633e197eacfd889dbb2d5",
+      "bytes": 2230
+    },
+    "resources/go-2/host/summary.json": {
+      "SHA256": "e05de6167b21eb8328d33ce419b8512605fa77ab9cd6d9358d44ba89f0d4e92e",
+      "expandedSHA256": "e05de6167b21eb8328d33ce419b8512605fa77ab9cd6d9358d44ba89f0d4e92e",
+      "bytes": 785
+    },
+    "resources/go-2/host/samples.jsonl.gz": {
+      "SHA256": "3315d85c9fbc1cee53de311dbae82e3b02b66051d0901f21125318857c6debd4",
+      "expandedSHA256": "f75fe1b6d00b9aa9c79af9b90d30e50ba58aa963de7eea85f24d6c0fb84a4074",
+      "bytes": 5986
+    },
+    "resources/go-2/client/summary.json": {
+      "SHA256": "8a97e031c4ff27af331518806bfbe51279f3decf9f0d56ab42eeaaf5714c8107",
+      "expandedSHA256": "8a97e031c4ff27af331518806bfbe51279f3decf9f0d56ab42eeaaf5714c8107",
+      "bytes": 716
+    },
+    "resources/go-2/client/requests.jsonl.gz": {
+      "SHA256": "abebbbb9df53b0d29a919190cd83ad3cf425a3d18d09548d61dabcc29062c4e4",
+      "expandedSHA256": "634e27c0d2dd0d8a1d43c71c62a194fda5529757ff56d8283703996efd40a039",
+      "bytes": 28811
+    },
+    "resources/go-3/fixture.json": {
+      "SHA256": "1e6e705a010951190e027b1eed1d242eed1a82c0eeecdbf4cd82534339eae8a4",
+      "expandedSHA256": "1e6e705a010951190e027b1eed1d242eed1a82c0eeecdbf4cd82534339eae8a4",
+      "bytes": 390
+    },
+    "resources/go-3/environment.json": {
+      "SHA256": "4a519bb19cec931113115eff11ba554e515a2c2ae2ff1d7f8ab2622bd65fc750",
+      "expandedSHA256": "4a519bb19cec931113115eff11ba554e515a2c2ae2ff1d7f8ab2622bd65fc750",
+      "bytes": 7679
+    },
+    "resources/go-3/host/identity-before.json": {
+      "SHA256": "0bcf0c7b973216d4a9484ed23ab5d86e23765a5444ccd1b86f6ca64077716354",
+      "expandedSHA256": "0bcf0c7b973216d4a9484ed23ab5d86e23765a5444ccd1b86f6ca64077716354",
+      "bytes": 2230
+    },
+    "resources/go-3/host/summary.json": {
+      "SHA256": "04576dd78a2844fd7cd2ad7a7023450c5ff4f26c65538813bced311e1a323c04",
+      "expandedSHA256": "04576dd78a2844fd7cd2ad7a7023450c5ff4f26c65538813bced311e1a323c04",
+      "bytes": 785
+    },
+    "resources/go-3/host/samples.jsonl.gz": {
+      "SHA256": "7f25a118d047040fab7f9570e46bb678a845af98cd39090373284bb9679bbd77",
+      "expandedSHA256": "e6a8d0d2849ae07402bb2b3610fd107e3aba61adde847f4d5cd0692186150dff",
+      "bytes": 5911
+    },
+    "resources/go-3/client/summary.json": {
+      "SHA256": "a6dc1f938e2fca89e5d9ff7588049f57f1e02bf5b97f71c1b4896d201241f927",
+      "expandedSHA256": "a6dc1f938e2fca89e5d9ff7588049f57f1e02bf5b97f71c1b4896d201241f927",
+      "bytes": 717
+    },
+    "resources/go-3/client/requests.jsonl.gz": {
+      "SHA256": "064ab6955096c11d0b91cab54e0f316f958ef1e1fceaecbdda06311c5e094978",
+      "expandedSHA256": "5ceb9bcbd7db89af9da40a057241c2c8a2f71d91681033212dd2d839978ff05f",
+      "bytes": 29422
+    },
+    "resources/nginx-3/fixture.json": {
+      "SHA256": "02646fe8de1abf6468f3efd8880d553033d9281f69ac25ed04e1d0e27f7304aa",
+      "expandedSHA256": "02646fe8de1abf6468f3efd8880d553033d9281f69ac25ed04e1d0e27f7304aa",
+      "bytes": 412
+    },
+    "resources/nginx-3/environment.json": {
+      "SHA256": "f1390579957936400bbdc98c6deaf35dc1ae9e8ff232538a517e073a61f28ee0",
+      "expandedSHA256": "f1390579957936400bbdc98c6deaf35dc1ae9e8ff232538a517e073a61f28ee0",
+      "bytes": 7679
+    },
+    "resources/nginx-3/host/identity-before.json": {
+      "SHA256": "221166208e75d3dfa6c2b56456c164c1c15e2f9d0b9485f4f043cda8d8729ffd",
+      "expandedSHA256": "221166208e75d3dfa6c2b56456c164c1c15e2f9d0b9485f4f043cda8d8729ffd",
+      "bytes": 2243
+    },
+    "resources/nginx-3/host/summary.json": {
+      "SHA256": "597b248cf2ad4fd760c2abc030463843ef1457efe3f7831e93edab75c32f4e41",
+      "expandedSHA256": "597b248cf2ad4fd760c2abc030463843ef1457efe3f7831e93edab75c32f4e41",
+      "bytes": 798
+    },
+    "resources/nginx-3/host/samples.jsonl.gz": {
+      "SHA256": "92e1f1f3dc0371910e880f2bd0bd060f5c7180e3f5098c470912acca0d1a19e9",
+      "expandedSHA256": "f97f113dbe7fc71113344f877e975606f8042368f15b2aaeaa4c3349f921f4ed",
+      "bytes": 5760
+    },
+    "resources/nginx-3/client/summary.json": {
+      "SHA256": "97305f708e42bed9e97111724942c58c8145a8d6643f025833faae9843cd4407",
+      "expandedSHA256": "97305f708e42bed9e97111724942c58c8145a8d6643f025833faae9843cd4407",
+      "bytes": 711
+    },
+    "resources/nginx-3/client/requests.jsonl.gz": {
+      "SHA256": "cd80a9e7af2f10b2093d67b11db519340111f36d3ffe4d7349252584615c5912",
+      "expandedSHA256": "f7a68bed25f52aeb9bc2393544335ff40f060690d5fe5a4abbcb07ff041faea6",
+      "bytes": 28447
+    },
+    "excluded/four-slot/go-1/fixture.json": {
+      "SHA256": "bccdf3cd23b9f7768815584818e4aedcc0748ff6b38e419383e64cc716cd2d7c",
+      "expandedSHA256": "bccdf3cd23b9f7768815584818e4aedcc0748ff6b38e419383e64cc716cd2d7c",
+      "bytes": 390
+    },
+    "excluded/four-slot/go-1/environment.json": {
+      "SHA256": "d99b945a87b560acf44cbac5ca06f3abc247ea9eb04a4a03aaf99cdfd2ff067f",
+      "expandedSHA256": "d99b945a87b560acf44cbac5ca06f3abc247ea9eb04a4a03aaf99cdfd2ff067f",
+      "bytes": 7356
+    },
+    "excluded/four-slot/go-1/host/identity-before.json": {
+      "SHA256": "38c84874a9b349da6e635ca4f2c11b3f8102dab921de3a580ee9b21f6026cf63",
+      "expandedSHA256": "38c84874a9b349da6e635ca4f2c11b3f8102dab921de3a580ee9b21f6026cf63",
+      "bytes": 2230
+    },
+    "excluded/four-slot/go-1/host/summary.json": {
+      "SHA256": "31170aae94ac38b782a9df0dfba3db0bd536a186217afac60836660b6616353c",
+      "expandedSHA256": "31170aae94ac38b782a9df0dfba3db0bd536a186217afac60836660b6616353c",
+      "bytes": 784
+    },
+    "excluded/four-slot/go-1/host/samples.jsonl.gz": {
+      "SHA256": "25daa1a429b0dad610a1b0f502eff916354166f6e31f87ede5e0a50f5ef203a2",
+      "expandedSHA256": "6a99e010e3e30705678783edadc6ddaa2e5c0b4b2fe0c9dbee146c5b2642b90b",
+      "bytes": 5908
+    },
+    "excluded/four-slot/go-1/client/summary.json": {
+      "SHA256": "664c4c78a660a1c82f21b39c05c65c048ff3c5b79a38306c41c2f8cc62821033",
+      "expandedSHA256": "664c4c78a660a1c82f21b39c05c65c048ff3c5b79a38306c41c2f8cc62821033",
+      "bytes": 682
+    },
+    "excluded/four-slot/go-1/client/requests.jsonl.gz": {
+      "SHA256": "992a3990c4fb386535734a079005fb110855535d8aed55235ba84f720be4a095",
+      "expandedSHA256": "ef450c3f90019479d8b18ca6878fcd98b03558241f589df355a3a4e95934b7ea",
+      "bytes": 28658
+    },
+    "excluded/four-slot/nginx-1/fixture.json": {
+      "SHA256": "ebfe97c6d3ae0175bb5464e2cac6b4f2b13e710a21b3d5f728f45cdbaf20d631",
+      "expandedSHA256": "ebfe97c6d3ae0175bb5464e2cac6b4f2b13e710a21b3d5f728f45cdbaf20d631",
+      "bytes": 412
+    },
+    "excluded/four-slot/nginx-1/environment.json": {
+      "SHA256": "beb46d3cdaeeb3de024cee10ee16e1b865f8dc8c58d8ebd84558bce543d4ec0a",
+      "expandedSHA256": "beb46d3cdaeeb3de024cee10ee16e1b865f8dc8c58d8ebd84558bce543d4ec0a",
+      "bytes": 7356
+    },
+    "excluded/four-slot/nginx-1/host/identity-before.json": {
+      "SHA256": "3fc7b8729e63427de7ca10370d62884b12ec3c72189a27783de3c74d20751ba0",
+      "expandedSHA256": "3fc7b8729e63427de7ca10370d62884b12ec3c72189a27783de3c74d20751ba0",
+      "bytes": 2243
+    },
+    "excluded/four-slot/nginx-1/host/summary.json": {
+      "SHA256": "985580b1d4764f2baa6a17af2f7d990f92392e8ca2e964bffc43e478ca28231b",
+      "expandedSHA256": "985580b1d4764f2baa6a17af2f7d990f92392e8ca2e964bffc43e478ca28231b",
+      "bytes": 797
+    },
+    "excluded/four-slot/nginx-1/host/samples.jsonl.gz": {
+      "SHA256": "151e41b5f9b637825c29ec5f06b1c37a960ebe8c49ef14fa3ee8af8e75ca83ce",
+      "expandedSHA256": "fd0800cba7ba21ecdf4e99e0e6ca1ec257c3c4ad0958e5f68a90ef650c5af3ae",
+      "bytes": 5884
+    },
+    "excluded/four-slot/nginx-1/client/summary.json": {
+      "SHA256": "b31bbd799ecae0f94a80d8a744d6e62ef6e0fe9e29c95414fcb388645890ab66",
+      "expandedSHA256": "b31bbd799ecae0f94a80d8a744d6e62ef6e0fe9e29c95414fcb388645890ab66",
+      "bytes": 672
+    },
+    "excluded/four-slot/nginx-1/client/requests.jsonl.gz": {
+      "SHA256": "52820093e38478b4eace471a3c480de38ddba9900aa857c801cb22e48316393d",
+      "expandedSHA256": "413893c2e1196cc3bde2ee8597f1a433b8ae59f6e3fc00e21982f51c666e6f3a",
+      "bytes": 28132
+    },
+    "excluded/four-slot/nginx-2/fixture.json": {
+      "SHA256": "933193a93ab6da6cc28e91e5ac063e85e22fb90f0ad40c78b36e6dff68450ad6",
+      "expandedSHA256": "933193a93ab6da6cc28e91e5ac063e85e22fb90f0ad40c78b36e6dff68450ad6",
+      "bytes": 412
+    },
+    "excluded/four-slot/nginx-2/environment.json": {
+      "SHA256": "aa246699812b415b3c757b344a131a25b001a020c6d67ec222d77f176e9cc043",
+      "expandedSHA256": "aa246699812b415b3c757b344a131a25b001a020c6d67ec222d77f176e9cc043",
+      "bytes": 7356
+    },
+    "excluded/four-slot/nginx-2/host/identity-before.json": {
+      "SHA256": "e103290d31d87e1a64285dcbd6a47ad7097e4baa8db928741085b4357039d648",
+      "expandedSHA256": "e103290d31d87e1a64285dcbd6a47ad7097e4baa8db928741085b4357039d648",
+      "bytes": 2243
+    },
+    "excluded/four-slot/nginx-2/host/summary.json": {
+      "SHA256": "fb07056b1312c6c3274942194e2616755077bb24fbbf0463f08e48b7d0fa000b",
+      "expandedSHA256": "fb07056b1312c6c3274942194e2616755077bb24fbbf0463f08e48b7d0fa000b",
+      "bytes": 798
+    },
+    "excluded/four-slot/nginx-2/host/samples.jsonl.gz": {
+      "SHA256": "db32ea341cb4e67811594a1da4acb3a2db265d39477dd0c7a97d6938ee5030bc",
+      "expandedSHA256": "ce8bd58bd95c1f03380dd6bec31d35aa3956942f52f3019ebbf1529737e93afe",
+      "bytes": 5838
+    },
+    "excluded/four-slot/nginx-2/client/summary.json": {
+      "SHA256": "40a9687506e4569253221eec77dd2436a35d98b5c7c9902e53812756cd9fedae",
+      "expandedSHA256": "40a9687506e4569253221eec77dd2436a35d98b5c7c9902e53812756cd9fedae",
+      "bytes": 675
+    },
+    "excluded/four-slot/nginx-2/client/requests.jsonl.gz": {
+      "SHA256": "b2c11558bffbe6f09b48d102a3067ea7ea7f9c66156fcf8f5ae7eede34697f80",
+      "expandedSHA256": "c74f1e3197df7c8de432c9fc2391ec39a9da9fd3fbe7675f8ff8059e3a70b48f",
+      "bytes": 27718
+    },
+    "excluded/no-client/fixture.json": {
+      "SHA256": "3ef9241d36ce4609b1ca393d9970dc035f672a1d0650a9409de9cdfae0ab2f04",
+      "expandedSHA256": "3ef9241d36ce4609b1ca393d9970dc035f672a1d0650a9409de9cdfae0ab2f04",
+      "bytes": 390
+    },
+    "excluded/no-client/environment.json": {
+      "SHA256": "4949536da24b5ae87e24ed36de86bed69f86c94a9e701d2f19b6ad2093e3bce6",
+      "expandedSHA256": "4949536da24b5ae87e24ed36de86bed69f86c94a9e701d2f19b6ad2093e3bce6",
+      "bytes": 6606
+    },
+    "excluded/no-client/host/identity-before.json": {
+      "SHA256": "f4ee89f7f1d316ecfa8549102db2da5c595402cb50fb188cedad874a54d911d5",
+      "expandedSHA256": "f4ee89f7f1d316ecfa8549102db2da5c595402cb50fb188cedad874a54d911d5",
+      "bytes": 2176
+    },
+    "excluded/no-client/host/summary.json": {
+      "SHA256": "61cec15aa743c71464d72f1d026231b46a65ec7d5129784d09415c9c9e86f7da",
+      "expandedSHA256": "61cec15aa743c71464d72f1d026231b46a65ec7d5129784d09415c9c9e86f7da",
+      "bytes": 785
+    },
+    "excluded/no-client/host/samples.jsonl.gz": {
+      "SHA256": "36400c351a302700d6dde11d8ab33652ee45e6f38512539ed07161f552fdb777",
+      "expandedSHA256": "1253c873c5a465988d39aed3843448dede108461098b829f9dfd3a5c2f32938d",
+      "bytes": 4245
+    },
+    "excluded/late-start/fixture.json": {
+      "SHA256": "c0d2bb4e2d9bc9b73c0901369bc57c06506d8158a62f563faa6343343fcae9fd",
+      "expandedSHA256": "c0d2bb4e2d9bc9b73c0901369bc57c06506d8158a62f563faa6343343fcae9fd",
+      "bytes": 390
+    },
+    "excluded/late-start/environment.json": {
+      "SHA256": "cb0d4da33f83e7ed07e274b0683bf5c9228f6b37e1158b774a5b448be1157c34",
+      "expandedSHA256": "cb0d4da33f83e7ed07e274b0683bf5c9228f6b37e1158b774a5b448be1157c34",
+      "bytes": 7679
+    },
+    "excluded/late-start/host/identity-before.json": {
+      "SHA256": "039b70795e19e3cc9bbeaf139b480dfbd26e7c7b5fc8875a08357f7dbf467ba5",
+      "expandedSHA256": "039b70795e19e3cc9bbeaf139b480dfbd26e7c7b5fc8875a08357f7dbf467ba5",
+      "bytes": 2230
+    },
+    "excluded/late-start/host/summary.json": {
+      "SHA256": "27ce45f883e637bcd0dac65e9a7da275466aff5ae6db34cdcc6ac9f6d9c30cd6",
+      "expandedSHA256": "27ce45f883e637bcd0dac65e9a7da275466aff5ae6db34cdcc6ac9f6d9c30cd6",
+      "bytes": 785
+    },
+    "excluded/late-start/host/samples.jsonl.gz": {
+      "SHA256": "98e71c6982119cfdab5d9235fd2e75f15fb196b3aa2f4ce4daec87ccf4a0a81d",
+      "expandedSHA256": "6d2403f03da6dc0c8341b61c0287b1d2bfbceb802cc1f2811a90bbf011ff65fb",
+      "bytes": 4325
+    },
+    "excluded/late-start/client/summary.json": {
+      "SHA256": "370dcfe1f30fa4d8c24d0978060b886e0cc9fa0b0a547e24dd3fd572f04b51b5",
+      "expandedSHA256": "370dcfe1f30fa4d8c24d0978060b886e0cc9fa0b0a547e24dd3fd572f04b51b5",
+      "bytes": 720
+    },
+    "excluded/late-start/client/requests.jsonl.gz": {
+      "SHA256": "9b1f9184569b016d0e1163328cd380901e505654def923bde96bb1a25c5ae690",
+      "expandedSHA256": "88fb909f45cd3836dfbc9fb1766723f6593ee57729bb730e629f43af4a372bc4",
+      "bytes": 29333
+    },
+    "pulls/cache-before-1.json": {
+      "SHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "expandedSHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "bytes": 3578
+    },
+    "pulls/cache-before-2.json": {
+      "SHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "expandedSHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "bytes": 3578
+    },
+    "pulls/cache-before-3.json": {
+      "SHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "expandedSHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "bytes": 3578
+    },
+    "pulls/content-1-cached.json": {
+      "SHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "expandedSHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "bytes": 987
+    },
+    "pulls/content-1-pull-required.json": {
+      "SHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "expandedSHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "bytes": 2728
+    },
+    "pulls/content-2-cached.json": {
+      "SHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "expandedSHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "bytes": 987
+    },
+    "pulls/content-2-pull-required.json": {
+      "SHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "expandedSHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "bytes": 2728
+    },
+    "pulls/content-3-cached.json": {
+      "SHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "expandedSHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "bytes": 987
+    },
+    "pulls/content-3-pull-required.json": {
+      "SHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "expandedSHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "bytes": 2728
+    },
+    "pulls/environment.json": {
+      "SHA256": "8cca60c7def73e2ed9b82e4ff4613e68c421835bc4103ad41ef96db55a62a765",
+      "expandedSHA256": "8cca60c7def73e2ed9b82e4ff4613e68c421835bc4103ad41ef96db55a62a765",
+      "bytes": 7679
+    },
+    "pulls/owned.json": {
+      "SHA256": "d62b20d64e93f4d52717c7a0af85316dd059b0e85506c761f5ebe5b7e2e49323",
+      "expandedSHA256": "d62b20d64e93f4d52717c7a0af85316dd059b0e85506c761f5ebe5b7e2e49323",
+      "bytes": 70
+    },
+    "pulls/pull-timings.json": {
+      "SHA256": "30359e554a199d7b2c389bc43f5761038bdbe0547dd522d2cddd52a975515581",
+      "expandedSHA256": "30359e554a199d7b2c389bc43f5761038bdbe0547dd522d2cddd52a975515581",
+      "bytes": 30987
+    },
+    "pulls/summary.json": {
+      "SHA256": "4c77299b085b190c062fb3ef97bc1da6abb3b58d14b86e72e1d709876ec7a827",
+      "expandedSHA256": "4c77299b085b190c062fb3ef97bc1da6abb3b58d14b86e72e1d709876ec7a827",
+      "bytes": 32798
+    },
+    "availability/app-summary.json": {
+      "SHA256": "9b7dd4a251b07007c02afa8b4bedcb9ebe737a0993f27f348cb5cb0b21d361f8",
+      "expandedSHA256": "9b7dd4a251b07007c02afa8b4bedcb9ebe737a0993f27f348cb5cb0b21d361f8",
+      "bytes": 737
+    },
+    "availability/complete.json": {
+      "SHA256": "efff5266fcf75f28a3ef8b023bb42bf30277ca9ba6f789815b9d7c41d909bf34",
+      "expandedSHA256": "efff5266fcf75f28a3ef8b023bb42bf30277ca9ba6f789815b9d7c41d909bf34",
+      "bytes": 162
+    },
+    "availability/environment.json": {
+      "SHA256": "829bcb94cd89b6b3fd8e44cedbd658309a5d4cf94ad5acbf2acee5fab1d530e8",
+      "expandedSHA256": "829bcb94cd89b6b3fd8e44cedbd658309a5d4cf94ad5acbf2acee5fab1d530e8",
+      "bytes": 7679
+    },
+    "availability/management-summary.json": {
+      "SHA256": "c9dd538b627ac77e36923f92d9a2c96c6b63f54b3540780afbbd0470879789d4",
+      "expandedSHA256": "c9dd538b627ac77e36923f92d9a2c96c6b63f54b3540780afbbd0470879789d4",
+      "bytes": 710
+    },
+    "availability/owned.json": {
+      "SHA256": "c97d8352f3e6acb5a09798530ff445a790863391fbad373be548ec041f2bb5b7",
+      "expandedSHA256": "c97d8352f3e6acb5a09798530ff445a790863391fbad373be548ec041f2bb5b7",
+      "bytes": 70
+    },
+    "availability/timeline.json": {
+      "SHA256": "6a1de4a4264a05731237d2773166b800dc738bc6047ef2be888799275aad1fea",
+      "expandedSHA256": "6a1de4a4264a05731237d2773166b800dc738bc6047ef2be888799275aad1fea",
+      "bytes": 1014
+    },
+    "availability/client/app/summary.json": {
+      "SHA256": "9b7dd4a251b07007c02afa8b4bedcb9ebe737a0993f27f348cb5cb0b21d361f8",
+      "expandedSHA256": "9b7dd4a251b07007c02afa8b4bedcb9ebe737a0993f27f348cb5cb0b21d361f8",
+      "bytes": 737
+    },
+    "availability/client/app/requests.jsonl.gz": {
+      "SHA256": "7b231470ad5e3b70c4934926181613aa92b15c1b45b5a5f0e62db88465fd0b24",
+      "expandedSHA256": "601072b687169307b0f77081e5656dcbfd713b95056342aeeede0ee1ebc85f3a",
+      "bytes": 8255
+    },
+    "availability/client/management/summary.json": {
+      "SHA256": "c9dd538b627ac77e36923f92d9a2c96c6b63f54b3540780afbbd0470879789d4",
+      "expandedSHA256": "c9dd538b627ac77e36923f92d9a2c96c6b63f54b3540780afbbd0470879789d4",
+      "bytes": 710
+    },
+    "availability/client/management/requests.jsonl.gz": {
+      "SHA256": "d7cc40d73eef2b94633fd694fb089922ed178f18336e9a8be0e86f8493045569",
+      "expandedSHA256": "89015f5be2dad4aecf62f94aa00663a77367abdf80cee486c9313ee8b8c953a6",
+      "bytes": 7998
+    },
+    "clock-offset.json": {
+      "SHA256": "9303c4991e22855b50a4237823a384801a00db03ebe2f884f2602a1347ffbe54",
+      "expandedSHA256": "9303c4991e22855b50a4237823a384801a00db03ebe2f884f2602a1347ffbe54",
+      "bytes": 1148
+    },
+    "resume-check.json": {
+      "SHA256": "2d118d206911aab78741c4358f41632999cd77609e9bfbe9ffd9caab58ca00f0",
+      "expandedSHA256": "2d118d206911aab78741c4358f41632999cd77609e9bfbe9ffd9caab58ca00f0",
+      "bytes": 7939
+    },
+    "resource-plan.json": {
+      "SHA256": "1028a6d28d207934677bc9e0e95f8a9a08fb50665d8fc4e1106f114d5dc0cead",
+      "expandedSHA256": "1028a6d28d207934677bc9e0e95f8a9a08fb50665d8fc4e1106f114d5dc0cead",
+      "bytes": 2636
+    },
+    "collector-lifecycle.tar.gz": {
+      "SHA256": "12e166f040eb044f66600deea8f3a1d6ab8e93d56e2900d08d3131e966d9fcf0",
+      "expandedSHA256": "30351834483036436f5095ed455bd3c51ae33450e80c86a5b9d6e1abca81f6a5",
+      "bytes": 13034
+    },
+    "profile-validation/environment.json": {
+      "SHA256": "31a63bbf0837cb7612152bc66830515f0941a31ae4981ab0401dcbf3ae3a73bc",
+      "expandedSHA256": "31a63bbf0837cb7612152bc66830515f0941a31ae4981ab0401dcbf3ae3a73bc",
+      "bytes": 7731
+    },
+    "profile-validation/owned.json": {
+      "SHA256": "06666385cb7c02831f60821287fb95625d78d237b3fa26f0805f4d7dc6c0d6aa",
+      "expandedSHA256": "06666385cb7c02831f60821287fb95625d78d237b3fa26f0805f4d7dc6c0d6aa",
+      "bytes": 70
+    },
+    "profile-validation/summary.json": {
+      "SHA256": "3444bfbcdceed4c6fa02c3c21c6d26da43ae820e7e620dcb017812ff3c67a4a7",
+      "expandedSHA256": "3444bfbcdceed4c6fa02c3c21c6d26da43ae820e7e620dcb017812ff3c67a4a7",
+      "bytes": 3864
+    },
+    "excluded/initial-route-probe/cleanup.json": {
+      "SHA256": "c2c1b3481fecf8cf70359fb05b439e21ebac44d05757e25b1ce11fd417680e22",
+      "expandedSHA256": "c2c1b3481fecf8cf70359fb05b439e21ebac44d05757e25b1ce11fd417680e22",
+      "bytes": 130
+    },
+    "excluded/initial-route-probe/environment.json": {
+      "SHA256": "e83f4a4131cde4c8943dc2c8bccc5292da84464726e03badb8c98715ab7108ec",
+      "expandedSHA256": "e83f4a4131cde4c8943dc2c8bccc5292da84464726e03badb8c98715ab7108ec",
+      "bytes": 7731
+    },
+    "excluded/initial-route-probe/owned.json": {
+      "SHA256": "b5ab0d55d2d1a5ba68e81bc4196d05f89ec511aac2141ba6882323e0855d5ad4",
+      "expandedSHA256": "b5ab0d55d2d1a5ba68e81bc4196d05f89ec511aac2141ba6882323e0855d5ad4",
+      "bytes": 70
+    },
+    "drain-comparison/candidate-client-summary.json": {
+      "SHA256": "009fd3b17e839f4c896fbadbd0dc7f033c7587bf0b3df2aa314650a8559503dd",
+      "expandedSHA256": "009fd3b17e839f4c896fbadbd0dc7f033c7587bf0b3df2aa314650a8559503dd",
+      "bytes": 717
+    },
+    "drain-comparison/candidate-timeline.json": {
+      "SHA256": "b2a03887c9a4d2c4a5e7ec8aa118b456b430e0db43e4c901482cc6df6edabd2b",
+      "expandedSHA256": "b2a03887c9a4d2c4a5e7ec8aa118b456b430e0db43e4c901482cc6df6edabd2b",
+      "bytes": 859
+    },
+    "drain-comparison/candidate-v1.json": {
+      "SHA256": "9e2108664a3714d5183319870972de3351d66dc2d42c3c4c8efce28fc167fcd3",
+      "expandedSHA256": "9e2108664a3714d5183319870972de3351d66dc2d42c3c4c8efce28fc167fcd3",
+      "bytes": 1408
+    },
+    "drain-comparison/candidate-v2.json": {
+      "SHA256": "619003fc23090f8a6831ac4f75a30a19eadb8629ca90b10d33d83962909f12ec",
+      "expandedSHA256": "619003fc23090f8a6831ac4f75a30a19eadb8629ca90b10d33d83962909f12ec",
+      "bytes": 1408
+    },
+    "drain-comparison/control-client-summary.json": {
+      "SHA256": "dc4fc4689b438663d8e921204b92e548e1a41cde1c872d625f6652fae12ba7f9",
+      "expandedSHA256": "dc4fc4689b438663d8e921204b92e548e1a41cde1c872d625f6652fae12ba7f9",
+      "bytes": 730
+    },
+    "drain-comparison/control-timeline.json": {
+      "SHA256": "959a66ae337d1f04da8e3370c1e1bcbdf338305366aa7bcc60759546911f8b03",
+      "expandedSHA256": "959a66ae337d1f04da8e3370c1e1bcbdf338305366aa7bcc60759546911f8b03",
+      "bytes": 579
+    },
+    "drain-comparison/control-v1.json": {
+      "SHA256": "071c8123ed37cf171b8242f42ebfe2d4859515a3096a6fc10596cb75a55846e0",
+      "expandedSHA256": "071c8123ed37cf171b8242f42ebfe2d4859515a3096a6fc10596cb75a55846e0",
+      "bytes": 1404
+    },
+    "drain-comparison/control-v2.json": {
+      "SHA256": "703d2bedd56d4e22147f83e9451ad4a868af9442a7587295c6ea9123efd13bd1",
+      "expandedSHA256": "703d2bedd56d4e22147f83e9451ad4a868af9442a7587295c6ea9123efd13bd1",
+      "bytes": 1404
+    },
+    "drain-comparison/environment.json": {
+      "SHA256": "bd9ab0e968054571195654afa06031f5edc8741da7cd053a8637a66619e0ce9b",
+      "expandedSHA256": "bd9ab0e968054571195654afa06031f5edc8741da7cd053a8637a66619e0ce9b",
+      "bytes": 7731
+    },
+    "drain-comparison/image-inventory.json": {
+      "SHA256": "ea460bae0aa2323de0721d00d98073d4689822558b9f52b7e7c22b934cee5815",
+      "expandedSHA256": "ea460bae0aa2323de0721d00d98073d4689822558b9f52b7e7c22b934cee5815",
+      "bytes": 2575
+    },
+    "drain-comparison/owned.json": {
+      "SHA256": "150dacb9d7763bfa119d80c2a9efde19b0d5cba6bf8349646e13a1713c7fd99c",
+      "expandedSHA256": "150dacb9d7763bfa119d80c2a9efde19b0d5cba6bf8349646e13a1713c7fd99c",
+      "bytes": 70
+    },
+    "drain-comparison/reference-chart-identity.json": {
+      "SHA256": "221f7cff8f299df849e37c541cd6ac21fa26b05237c0e33d457071f85dc98e3a",
+      "expandedSHA256": "221f7cff8f299df849e37c541cd6ac21fa26b05237c0e33d457071f85dc98e3a",
+      "bytes": 17642
+    },
+    "drain-comparison/reference-values.json": {
+      "SHA256": "23d6748972cf2c968a25d48625be7474a15451b8b1b8ee8a90035840cf54930c",
+      "expandedSHA256": "23d6748972cf2c968a25d48625be7474a15451b8b1b8ee8a90035840cf54930c",
+      "bytes": 1351
+    },
+    "drain-comparison/summary.json": {
+      "SHA256": "1cb980c227266f549bf9d9f84ff4a09fb471df1d902be0aae0e50557af915b29",
+      "expandedSHA256": "1cb980c227266f549bf9d9f84ff4a09fb471df1d902be0aae0e50557af915b29",
+      "bytes": 7855
+    },
+    "drain-comparison/client/control/summary.json": {
+      "SHA256": "dc4fc4689b438663d8e921204b92e548e1a41cde1c872d625f6652fae12ba7f9",
+      "expandedSHA256": "dc4fc4689b438663d8e921204b92e548e1a41cde1c872d625f6652fae12ba7f9",
+      "bytes": 730
+    },
+    "drain-comparison/client/control/requests.jsonl.gz": {
+      "SHA256": "3286d34dd0832b252f3eda56ead4234efb95130def501ab622d0b7d1a1602df2",
+      "expandedSHA256": "27f508c782b4d24f045132e63870757551398a8d3f753ccda15c2eddf992cb00",
+      "bytes": 8252
+    },
+    "drain-comparison/client/candidate/summary.json": {
+      "SHA256": "009fd3b17e839f4c896fbadbd0dc7f033c7587bf0b3df2aa314650a8559503dd",
+      "expandedSHA256": "009fd3b17e839f4c896fbadbd0dc7f033c7587bf0b3df2aa314650a8559503dd",
+      "bytes": 717
+    },
+    "drain-comparison/client/candidate/requests.jsonl.gz": {
+      "SHA256": "513b633aa44928a41428b1935e671e253d6175c399129e6e060dbcc75594c1b9",
+      "expandedSHA256": "c8bd049967a1eb7e2abcb0772ca5d04291b8ce81f5311a4600732e7db262f07a",
+      "bytes": 8144
+    },
+    "excluded/wrong-ingress-class/cleanup.json": {
+      "SHA256": "4233e61704a76a1a278d48dd68caa0df9c58f882137e6b2e87dac38fb66e07a8",
+      "expandedSHA256": "4233e61704a76a1a278d48dd68caa0df9c58f882137e6b2e87dac38fb66e07a8",
+      "bytes": 130
+    },
+    "excluded/wrong-ingress-class/control-v1.json": {
+      "SHA256": "cd491c5ee5ab725967e27b1bc1720ee9c99e9ba1a34efabdb0778b196f90a00e",
+      "expandedSHA256": "cd491c5ee5ab725967e27b1bc1720ee9c99e9ba1a34efabdb0778b196f90a00e",
+      "bytes": 1395
+    },
+    "excluded/wrong-ingress-class/environment.json": {
+      "SHA256": "1f9c2833163fdc74791ec7576c218c7e1f89c6cbeb1185af61eb4e04aa29cb7c",
+      "expandedSHA256": "1f9c2833163fdc74791ec7576c218c7e1f89c6cbeb1185af61eb4e04aa29cb7c",
+      "bytes": 7731
+    },
+    "excluded/wrong-ingress-class/image-inventory.json": {
+      "SHA256": "ea460bae0aa2323de0721d00d98073d4689822558b9f52b7e7c22b934cee5815",
+      "expandedSHA256": "ea460bae0aa2323de0721d00d98073d4689822558b9f52b7e7c22b934cee5815",
+      "bytes": 2575
+    },
+    "excluded/wrong-ingress-class/owned.json": {
+      "SHA256": "6f77ecc96e663e3b8f01c9483d32be1f82f96cfdbe6a1a0872a002ee5273f186",
+      "expandedSHA256": "6f77ecc96e663e3b8f01c9483d32be1f82f96cfdbe6a1a0872a002ee5273f186",
+      "bytes": 70
+    },
+    "excluded/wrong-ingress-class/reference-chart-identity.json": {
+      "SHA256": "221f7cff8f299df849e37c541cd6ac21fa26b05237c0e33d457071f85dc98e3a",
+      "expandedSHA256": "221f7cff8f299df849e37c541cd6ac21fa26b05237c0e33d457071f85dc98e3a",
+      "bytes": 17642
+    },
+    "excluded/wrong-ingress-class/reference-values.json": {
+      "SHA256": "9c47b19be04dccc33af735166c8bca44cfe6195f582f94835f0ba8bcd9044131",
+      "expandedSHA256": "9c47b19be04dccc33af735166c8bca44cfe6195f582f94835f0ba8bcd9044131",
+      "bytes": 1351
+    },
+    "excluded/unbounded-probe/cleanup.json": {
+      "SHA256": "9a32a33c54322dcb4b866211d72989ecca157e884e5f463ed08d9f628efd47ad",
+      "expandedSHA256": "9a32a33c54322dcb4b866211d72989ecca157e884e5f463ed08d9f628efd47ad",
+      "bytes": 130
+    },
+    "excluded/unbounded-probe/control-timeline.json": {
+      "SHA256": "3095a69fcf23bc3e0f2f442f7a0fb2f4f2c6f16371bdea404c682a9cb498ae37",
+      "expandedSHA256": "3095a69fcf23bc3e0f2f442f7a0fb2f4f2c6f16371bdea404c682a9cb498ae37",
+      "bytes": 294
+    },
+    "excluded/unbounded-probe/control-v1.json": {
+      "SHA256": "dfef2134b89d96dc7e186a41a02d912187bc01a0e81e09f27911237d03e5c77c",
+      "expandedSHA256": "dfef2134b89d96dc7e186a41a02d912187bc01a0e81e09f27911237d03e5c77c",
+      "bytes": 1404
+    },
+    "excluded/unbounded-probe/control-v2.json": {
+      "SHA256": "78ab6d2c970fd709fc48ea320a4fef0512440715edf31fbcc9e884936cba494a",
+      "expandedSHA256": "78ab6d2c970fd709fc48ea320a4fef0512440715edf31fbcc9e884936cba494a",
+      "bytes": 1404
+    },
+    "excluded/unbounded-probe/environment.json": {
+      "SHA256": "592ef25775bd7663b5be42dab56de7d456c0940a6c499e05384d2954aae0ef4b",
+      "expandedSHA256": "592ef25775bd7663b5be42dab56de7d456c0940a6c499e05384d2954aae0ef4b",
+      "bytes": 7731
+    },
+    "excluded/unbounded-probe/image-inventory.json": {
+      "SHA256": "ea460bae0aa2323de0721d00d98073d4689822558b9f52b7e7c22b934cee5815",
+      "expandedSHA256": "ea460bae0aa2323de0721d00d98073d4689822558b9f52b7e7c22b934cee5815",
+      "bytes": 2575
+    },
+    "excluded/unbounded-probe/owned.json": {
+      "SHA256": "81b2ab247e0c6e34b178abf65632b98711883717dd9e34d4b60ef77b63969363",
+      "expandedSHA256": "81b2ab247e0c6e34b178abf65632b98711883717dd9e34d4b60ef77b63969363",
+      "bytes": 70
+    },
+    "excluded/unbounded-probe/reference-chart-identity.json": {
+      "SHA256": "221f7cff8f299df849e37c541cd6ac21fa26b05237c0e33d457071f85dc98e3a",
+      "expandedSHA256": "221f7cff8f299df849e37c541cd6ac21fa26b05237c0e33d457071f85dc98e3a",
+      "bytes": 17642
+    },
+    "excluded/unbounded-probe/reference-values.json": {
+      "SHA256": "beb13d7cb05d4923a40bae82efa4aff734764649f9a86d672193a6fa8f59915e",
+      "expandedSHA256": "beb13d7cb05d4923a40bae82efa4aff734764649f9a86d672193a6fa8f59915e",
+      "bytes": 1351
+    },
+    "excluded/unbounded-probe/client/summary.json": {
+      "SHA256": "58393751ca8b207106453b3182e0b0ce7de4dd6664828b2ae7017f5ed8372910",
+      "expandedSHA256": "58393751ca8b207106453b3182e0b0ce7de4dd6664828b2ae7017f5ed8372910",
+      "bytes": 727
+    },
+    "excluded/unbounded-probe/client/requests.jsonl.gz": {
+      "SHA256": "028423d4202476a872ae0b349a7298ef69e54c9d6bcb8a339f572af444ddb3b5",
+      "expandedSHA256": "ba8f23e3e365533a18cfdf8cd5d3a3c07b50433576124032ee8d20c0968b22ee",
+      "bytes": 8096
+    },
+    "collector-orchestration.tar.gz": {
+      "SHA256": "c3aeca1cb1589eb1d7b5a984ae1caab416daffa8bea1443a6cbf8614f6eea666",
+      "expandedSHA256": "a70ff7742d85989d9b152b0222da181ed23e3348cbc3fccaf13023bd75644f86",
+      "bytes": 6708
+    },
+    "source-ci/verified.json": {
+      "SHA256": "85d4fdb306741cff6a28bfbe8c33c8399abb8cd680dc267b485f61fafe84929c",
+      "expandedSHA256": "85d4fdb306741cff6a28bfbe8c33c8399abb8cd680dc267b485f61fafe84929c",
+      "bytes": 530
+    },
+    "source-ci/junit.xml": {
+      "SHA256": "062149f89265107414ae9c48b93903b7ea3eca5b155dd242aacbd2e595b67b87",
+      "expandedSHA256": "062149f89265107414ae9c48b93903b7ea3eca5b155dd242aacbd2e595b67b87",
+      "bytes": 2603
+    },
+    "source-ci/rollout-requests.json": {
+      "SHA256": "65ca66036e1f0a3c51e192caefbf9b9f91c3f843bbd83e0619894e668c41d98f",
+      "expandedSHA256": "65ca66036e1f0a3c51e192caefbf9b9f91c3f843bbd83e0619894e668c41d98f",
+      "bytes": 6089
+    },
+    "final-audit.json": {
+      "SHA256": "d456e52aa18ab974b8abd8639b349374c5b56cc7bed061333b58d3808abe51c7",
+      "expandedSHA256": "d456e52aa18ab974b8abd8639b349374c5b56cc7bed061333b58d3808abe51c7",
+      "bytes": 1251
+    },
+    "temporary-access-cleanup.json": {
+      "SHA256": "fb58686e21d52f37b985864de2bd3c32f0c9a979018c35fab885dcfc06df5bf3",
+      "expandedSHA256": "fb58686e21d52f37b985864de2bd3c32f0c9a979018c35fab885dcfc06df5bf3",
+      "bytes": 173
+    }
+  }
+}

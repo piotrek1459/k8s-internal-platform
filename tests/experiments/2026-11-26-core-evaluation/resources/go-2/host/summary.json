@@ -1,0 +1,18 @@
+{
+  "appID": "app_dd2df43fe1e276da",
+  "startedEpochSeconds": 1795699472.0627587,
+  "finishedEpochSeconds": 1795699582.3089151,
+  "sampleCount": 110,
+  "missingSamples": 0,
+  "stableContainerIdentity": true,
+  "containersAfter": [
+    {
+      "podUID": "06f81c1d-2905-4090-8711-fdc35bff03b7",
+      "containerID": "35dd901c0143ad78fd596288f308118a733279f5ac7869b217984859e43851a0",
+      "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod06f81c1d_2905_4090_8711_fdc35bff03b7.slice/cri-containerd-35dd901c0143ad78fd596288f308118a733279f5ac7869b217984859e43851a0.scope"
+    }
+  ],
+  "evidenceValid": true
+}

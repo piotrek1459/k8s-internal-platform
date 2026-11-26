@@ -1,0 +1,81 @@
+{
+  "acceptance": {
+    "passed": true,
+    "missingScenarios": [],
+    "failedTargets": []
+  },
+  "runID": "49eec167fdfd",
+  "planSHA256": "9cd9af067be9f67192cf4923626a7165003742ee4c0f5d536eb15fde936fa3ed",
+  "methods": {
+    "api": {
+      "delete": {
+        "count": 3,
+        "minimum": 0.771174,
+        "median": 0.77212,
+        "p95": 1.018109,
+        "maximum": 1.018109
+      },
+      "deploy-v1": {
+        "count": 3,
+        "minimum": 4.682151,
+        "median": 4.723836,
+        "p95": 4.812145,
+        "maximum": 4.812145
+      },
+      "unhealthy-v3-and-restoration": {
+        "count": 3,
+        "minimum": 301.70428,
+        "median": 301.902404,
+        "p95": 302.091261,
+        "maximum": 302.091261
+      },
+      "update-v2": {
+        "count": 3,
+        "minimum": 4.950321,
+        "median": 4.954915,
+        "p95": 4.964988,
+        "maximum": 4.964988
+      }
+    },
+    "helm": {
+      "delete": {
+        "count": 3,
+        "minimum": 0.235443,
+        "median": 0.237683,
+        "p95": 0.238732,
+        "maximum": 0.238732
+      },
+      "deploy-v1": {
+        "count": 3,
+        "minimum": 4.548625,
+        "median": 4.550734,
+        "p95": 4.611839,
+        "maximum": 4.611839
+      },
+      "unhealthy-v3-and-restoration": {
+        "count": 3,
+        "minimum": 302.822715,
+        "median": 302.836889,
+        "p95": 302.86041,
+        "maximum": 302.86041
+      },
+      "update-v2": {
+        "count": 3,
+        "minimum": 4.537062,
+        "median": 4.547463,
+        "p95": 4.678141,
+        "maximum": 4.678141
+      }
+    }
+  },
+  "failureScenariosIncluded": true,
+  "humanOperatorTime": null,
+  "humanTrialStatus": "pending",
+  "coreEvaluationComplete": false,
+  "ownedFixturesRemaining": {
+    "runID": "49eec167fdfd",
+    "applications": {},
+    "releases": {}
+  },
+  "originalApplicationsRetained": true
+}

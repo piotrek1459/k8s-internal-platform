@@ -20,7 +20,7 @@ selection of another release's pods. Changing the application ID is a new
 application operation; Kubernetes rejects changes to an existing Deployment's
 immutable selector.
 
-The chart uses stable Kubernetes APIs and declares Kubernetes 1.30 or later as
+The chart uses stable Kubernetes APIs and declares Kubernetes 1.34 or later as
 its API compatibility floor. This range is not evidence of testing on every
 release. The local development scripts pin the K3s and Helm versions used for
 integration verification.
@@ -66,7 +66,7 @@ an application-specific values file is expected to fail.
 | `env` | Map of non-sensitive environment names to string values. |
 | `secretRefs` | Existing secret references of the form `{name, secretName, key}`. The name is the environment variable name. |
 | `imagePullSecrets` | Existing registry secret references of the form `{name}`. |
-| `resources.requests` | Provisional defaults: `cpu: 25m`, `memory: 32Mi`. |
+| `resources.requests` | Measured reference HTTP defaults: `cpu: 25m`, `memory: 48Mi`. |
 | `resources.limits` | Provisional defaults: `cpu: 250m`, `memory: 128Mi`. |
 | `probes.readiness` | Required enabled readiness check; defaults to HTTP `/readyz`. |
 | `probes.startup` | Enabled by default; HTTP `/healthz`, two-second period, 30 failures allowed. |
@@ -200,3 +200,18 @@ Source chart version 0.1.2 permits the dedicated private class. Existing frozen
 0.1.1 chart identities are not silently rewritten; historical-chart retrieval
 and cross-version platform upgrades remain M7 scope. Native validation of the
 next release uses a fresh, explicitly owned test installation.
+
+The [reference evaluation](../../../tests/experiments/2026-11-26-core-evaluation.md)
+records the workload, raw observations and headroom rule for the small stateless
+HTTP profile. These values do not size arbitrary images or databases. The broker
+fallback and chart defaults are checked together; published-default/native
+acceptance remains recorded in [status](../../../docs/status.md).
+
+The application container has a native five-second `preStop.sleep` within the
+30-second termination grace period. This allows endpoint changes to propagate
+before SIGTERM without requiring a shell or sleep binary in the image. The
+remaining 25 seconds are available for application shutdown; applications must
+handle their own in-flight requests. This reduces a measured rollout race and
+is not a universal zero-downtime guarantee. The native action is stable from
+[Kubernetes 1.34](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/kep.yaml);
+the platform's pinned K3s version remains the supported reference.

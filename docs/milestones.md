@@ -38,11 +38,11 @@ Older dated reports remain evidence only for their recorded source and scope.
 
 | Milestone | Completed implementation/evidence | Remaining acceptance or implementation |
 | --- | --- | --- |
-| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | Operator-active-time comparison and measurements supporting M1/M4. The published v0.1.9 installer correction is accepted. |
-| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Measured resource presets. |
+| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | Human operator-active-time comparison and final published profile/rollout validation. The published v0.1.9 installer correction is accepted. |
+| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Published source-chart 0.1.3 profile/draining validation; explicit native profile and source-chart comparison are retained. |
 | M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source crash/restoration/disclosure matrix. | No open listed M2 acceptance item; request-availability evaluation remains M4. |
 | M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source queued/running refresh, native v0.1.7 Secret cleanup/retry and v0.1.8 LAN HTTPS/browser/URL acceptance. | No open listed M3 acceptance item. The installer gate passed in v0.1.9; broader failure/security work remains under M2/M4. |
-| M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | Resource calibration, repeated core evaluation and agreed human active-time trial. |
+| M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | Published profile/draining validation and the agreed human active-time trial; repeated system data is retained. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
 The two former status/restart E2E skips are removed: both are required assertions.
@@ -65,7 +65,7 @@ Manual application deployment remains relevant to the operator-effort baseline.
 - [x] Healthy v1/v2 and deliberately unhealthy v3 are distributed as native ARM64/AMD64 OCI images. **Evidence:** both published release bundles and `release.json`; a registry account is not required.
 - [x] Pinned K3s provisioning on the Pi reaches a Ready node and records version/configuration. **Evidence:** the published `v0.1.2` installer and reboot run. This replaces the earlier manual-K3s-install method, not the manual Helm comparison.
 - [x] A local manual Helm install/update/unhealthy-update/explicit-recovery procedure and results are recorded. **Evidence:** [local baseline](../tests/experiments/2026-10-14-local-m0-m1.md) and `tests/integration/helm-lifecycle.sh`. The dated raw local run was removed; its curated report is historical evidence.
-- [x] Repeat and retain the manual Helm functional baseline on the reference Pi with current pins/images and raw results. **Evidence:** [v0.1.3 Pi baseline](../tests/experiments/2026-11-23-core-acceptance.md#direct-helm-baseline-on-the-pi), exact commands, source/archive hashes, values, responses and history. Operator active time and repeated controlled comparison remain M4 work.
+- [x] Repeat and retain the manual Helm functional baseline on the reference Pi with current pins/images and raw results. **Evidence:** [v0.1.3 Pi baseline](../tests/experiments/2026-11-23-core-acceptance.md#direct-helm-baseline-on-the-pi), exact commands, source/archive hashes, values, responses and history. Operator active time remains M4 work; the current repeated backend comparison is retained in the [evaluation](../tests/experiments/2026-11-26-core-evaluation.md).
 - [x] Verify application access from another LAN device through the intended private route. **Evidence:** published v0.1.8, direct workstation hosts/CA trust, normal browser and actual app HTTPS, source/header/SNI/IPv6 isolation and reinstall/reboot retention. [Native report](../tests/experiments/2026-11-24-v0.1.8-native.md). Router wildcard DNS was not automated.
 - [x] Publish and verify the installer preflight exit-status correction. **Evidence:** unmodified v0.1.9 installer, all read-only preflight variants, fresh installation, normal trusted LAN browser/API flows, original session/identity/config retention across same-version rerun and actual reboot. [Native report](../tests/experiments/2026-11-24-v0.1.9-native.md). The v0.1.8 failure remains historical evidence.
 
@@ -82,7 +82,7 @@ probes, resources, ownership and private routes.
 
 - [x] Deployment and Service render and validate against K3s. **Evidence:** shared chart lint/render/negative matrix, historical server-side dry-run and current real-cluster E2E installation.
 - [x] Readiness, startup and optional liveness probes are configurable; startup/readiness API paths are independent. **Evidence:** chart matrix, probe-mapping regressions and the unhealthy-v3/native restoration workflow.
-- [ ] Replace provisional requests/limits with a measured reference-Pi preset. **Acceptance:** workload, sampling/repetitions and measured values are recorded before the defaults are adopted. Current 25m CPU/32Mi memory requests are not calibrated results. Tracked in issue #16.
+- [x] Replace provisional requests/limits with a measured reference-Pi preset in source. **Evidence:** the [controlled dataset](../tests/experiments/2026-11-26-core-evaluation.md) fixes targets/methods before collection, retains six complete load trials, cold/cached pulls, CPU and lifetime/startup peaks and derives 25m/48Mi requests with 250m/128Mi limits. Explicit native Go/Nginx two-replica checks passed. Published-default validation remains a separate gate below.
 - [x] Managed resources have stable application ownership and release selectors. **Evidence:** rendered/installed Deployment, Service and Ingress label/selector checks.
 - [x] Private routes explicitly select the private entrypoint. **Evidence:** isolated local listener/forged-Host baseline checks. Published v0.1.8 also passed reference-LAN routing and isolation under M0/M3.
 - [x] Healthy install/update and unhealthy failure diagnostics operate on K3s. **Evidence:** disposable real-cluster and published `v0.1.2` Pi workflows.
@@ -90,7 +90,9 @@ probes, resources, ownership and private routes.
 - [x] Verify temporary files using a published installer/release without patching a Deployment manually. **Evidence:** unmodified `v0.1.3` Nginx browser deployment reached Ready and HTTP 200; [native report](../tests/experiments/2026-11-23-core-acceptance.md).
 
 **Completion boundary:** source chart behavior and published compatibility are
-verified, including native v0.1.8 LAN routing. Resource calibration remains outstanding.
+verified, including native LAN routing. Resource calibration and explicit native
+profile checks are retained. Source chart 0.1.3 adds native shutdown delay and
+requires Kubernetes 1.34+; publication/default/draining validation remains open.
 
 ## M2 — Durable backend (core)
 
@@ -133,7 +135,7 @@ configuration/history and diagnostics over a private management path.
 - [x] Single-use expiring bootstrap setup creates the administrator; root navigation selects setup on a fresh installation. **Evidence:** auth service/handler tests, browser setup and native invalid-token/error checks.
 - [x] Login/logout, HttpOnly/SameSite sessions, expiry/revocation and CSRF/mutation checks operate. **Evidence:** auth regressions/E2E; the original native session survived reinstall/reboot.
 - [x] Verify private LAN HTTPS through a published release. **Evidence:** v0.1.8 on the Pi, separate-workstation normal browser CA trust/hosts resolution, Secure host-only cookies, source/listener isolation, initial SSH bootstrap and verified TLS/SSH fallback. [Native report](../tests/experiments/2026-11-24-v0.1.8-native.md). The installer correction passed native v0.1.9 acceptance under M0; M6 public hosting is separate.
-- [x] Application list, image inspection, supported creation fields and Ready/status views operate for Internal exposure. **Evidence:** real browser lifecycle and API response contract checks. Resource defaults remain provisional under M1.
+- [x] Application list, image inspection, supported creation fields and Ready/status views operate for Internal exposure. **Evidence:** real browser lifecycle and API response contract checks. Source defaults use the measured M1 reference profile; published-default validation remains open.
 - [x] Verify the configured LAN application URL through the published private route. **Evidence:** v0.1.8 browser wizard deployment, URL retained after reload, actual separate-workstation HTTPS Nginx/demo content and API update/scale/restart/rollback; hostname and transition guards passed. [Native report](../tests/experiments/2026-11-24-v0.1.8-native.md).
 - [x] Secret metadata/version objects and application Secret-reference submission use the API contract. **Evidence:** write-only API tests, browser reference selection/submission and exact-version rollback.
 - [x] Verify browser Secret creation/version management and credential creation/selection/private-image/invalid-password workflows. **Evidence:** focused real-cluster browser lifecycle/private-registry cases verify exact Secret contents privately, actual private HTTP, deletion guards and physical Kubernetes cleanup. The full 17-case CI suite passed without failures/skips; release/native boundaries remain recorded in the [report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md).
@@ -171,12 +173,13 @@ Application data volumes remain outside this milestone.
 - [x] Validate the recovery/security PR through its unmodified published release on the reference Pi. **Evidence:** v0.1.10 native lifecycle, all three forced restoration/verification failures with six replacements and unchanged failed/frozen evidence, trusted browser recovery, controlled disclosure/file scans, tracked access transitions, original session/identity retention through reinstall/reboot and guarded cleanup. [Report](../tests/experiments/2026-11-25-v0.1.10-native.md). Request-timeout/route-convergence observations remain in the evaluation scope below.
 - [x] Explicit reapply recreates a manually deleted Service from recorded state without changing its image. **Evidence:** real-cluster Service-deletion/reapply E2E.
 - [x] Report owned workload/route drift against frozen intent without automatic overwrite or configuration values. **Evidence:** field/ownership/route unit matrix and real-cluster image/env/resources/probe/replica/Service-port drift, plus explicit Reapply and HTTP verification. Guarded Service-list repair preserves identity/address; pending/foreign ownership remains blocked. See the [source report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md).
-- [ ] Complete the [minimum core evaluation](#minimum-core-evaluation-m4) against the reference manual baseline. **Acceptance:** predefined targets/repetitions, operator steps/active time, timing/resource measurements and environment/raw results are retained. A functional run and its intentional timeout are not a performance dataset. Tracked in issue #16.
+- [ ] Complete the [minimum core evaluation](#minimum-core-evaluation-m4) against the reference manual baseline. **Acceptance:** predefined targets/repetitions, operator steps/active time, timing/resource measurements and environment/raw results are retained. The [repeated system dataset](../tests/experiments/2026-11-26-core-evaluation.md) is retained; human active time/steps and final published-default/draining validation remain open in issue #16.
 
 **Completion boundary:** supported healthy lifecycle and failed-update restoration
 are verified. The new failure/interruption matrix has source-cluster evidence;
-published v0.1.10 native acceptance is complete. Resource calibration, repeated
-system evaluation and the agreed human timed walkthrough remain open. M5–M8 do not replace these core obligations.
+published v0.1.10 native acceptance is complete. The repeated system/resource
+dataset and native source-chart drain comparison are retained. Published new
+default/draining validation and the human timed walkthrough remain open. M5–M8 do not replace these core obligations.
 
 ## M5 — Application persistence and backup (extension)
 
@@ -280,10 +283,11 @@ compatibility passed in v0.1.3.
 
 1. Published v0.1.10 completed the native failure/recovery/security gate in issue #16.
    The final resource/evaluation PR follows, then manual release/native validation.
-2. Use the retained reference-Pi manual functional baseline, calibrate resource
-   defaults and fix evaluation targets/repetitions before collecting comparison data.
-3. Retain the M4 functional/failure/operator/timing/resource dataset with source,
-   versions and raw evidence. Update each relevant checklist from that evidence.
+2. The fixed-plan system/resource dataset, derived profile, explicit native profile
+   checks and old/source-chart request comparison are retained. Complete source
+   checks, then merge/manual release and validate the published defaults/draining.
+3. Perform the agreed human walkthrough; retain actual steps and active/elapsed
+   time. Reconcile final native/data evidence before closing issue #16.
 
 The demo, charts, API, queue, UI and release tooling already exist. This order
 does not require recreating that foundation. M5–M8 remain separate extensions;

@@ -1,0 +1,19 @@
+# Fill the empty task fields during the timed manual task. No secrets belong here.
+appId: ""
+image:
+  repository: platform.local/http-demo
+  digest: ""
+containerPort: 8080
+replicas: 1
+resources:
+  requests: {cpu: 25m, memory: 48Mi}
+  limits: {cpu: 250m, memory: 128Mi}
+probes:
+  startup: {enabled: true, type: tcp, path: /}
+  readiness: {enabled: true, type: http, path: /readyz}
+ingress:
+  enabled: true
+  className: platform-private
+  entrypoint: private
+  hostname: ""
+  tls: {enabled: false, secretName: ""}

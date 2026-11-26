@@ -2,8 +2,15 @@ package helm
 
 import (
 	"context"
+	"encoding/json"
+	"io"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
+
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chartutil"
@@ -28,10 +35,10 @@ func memoryActionConfig(t *testing.T) func(string) (*action.Configuration, error
 		if err != nil {
 			return nil, err
 		}
-		// The chart declares kubeVersion >=1.30; advertise a matching capability so
+		// The chart declares kubeVersion >=1.34; advertise a matching capability so
 		// the in-memory engine validates the chart as it would on the real cluster.
 		caps := chartutil.DefaultCapabilities.Copy()
-		caps.KubeVersion = chartutil.KubeVersion{Version: "v1.33.0", Major: "1", Minor: "33"}
+		caps.KubeVersion = chartutil.KubeVersion{Version: "v1.34.0", Major: "1", Minor: "34"}
 		cfg := &action.Configuration{
 			Releases:       shared,
 			KubeClient:     &kubefake.PrintingKubeClient{Out: testWriter{t}},
@@ -80,6 +87,17 @@ func TestEmbeddedChartLoads(t *testing.T) {
 	}
 	if ch.Schema == nil {
 		t.Fatal("embedded chart is missing values.schema.json")
+	}
+}
+
+func TestOmittedResourcesMatchEmbeddedChartDefaults(t *testing.T) {
+	ch, err := loadEmbeddedChart()
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual := resourceValues(platform.ResourceRequirements{})
+	if !reflect.DeepEqual(actual, ch.Values["resources"]) {
+		t.Fatalf("omitted API resources = %v; embedded chart defaults = %v", actual, ch.Values["resources"])
 	}
 }
 
@@ -150,4 +168,41 @@ func TestBuildValuesInternalExposureHasNoRoute(t *testing.T) {
 func withReplicas(s platform.RevisionSpec, n int) platform.RevisionSpec {
 	s.Replicas = n
 	return s
+}
+
+func TestApplicationDrainDoesNotRequireAnImageBinaryAndLeavesShutdownBudget(t *testing.T) {
+	a, err := NewAdapter("platform-apps", memoryActionConfig(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := a.RenderExecution("app_01", frozenRevision("app_01", baseSpec()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(manifest), 4096)
+	for {
+		var body json.RawMessage
+		if err := decoder.Decode(&body); err == io.EOF {
+			t.Fatal("no Deployment rendered")
+		} else if err != nil {
+			t.Fatal(err)
+		}
+		var deployment appsv1.Deployment
+		if err := json.Unmarshal(body, &deployment); err != nil {
+			t.Fatal(err)
+		}
+		if deployment.Kind != "Deployment" {
+			continue
+		}
+		container := deployment.Spec.Template.Spec.Containers[0]
+		if container.Lifecycle == nil || container.Lifecycle.PreStop == nil || container.Lifecycle.PreStop.Sleep == nil || container.Lifecycle.PreStop.Exec != nil {
+			t.Fatal("draining requires a native sleep hook without an image command")
+		}
+		drain := container.Lifecycle.PreStop.Sleep.Seconds
+		grace := deployment.Spec.Template.Spec.TerminationGracePeriodSeconds
+		if drain <= 0 || grace == nil || *grace-drain < 10 {
+			t.Fatal("drain must leave at least the demonstration server's ten-second shutdown budget")
+		}
+		return
+	}
 }

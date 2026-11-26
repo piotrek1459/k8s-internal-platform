@@ -124,6 +124,7 @@ func (c *Client) CompareManifest(ctx context.Context, appID, manifest string) ([
 			add(prefix+"startupProbe", w.StartupProbe, g.StartupProbe)
 			add(prefix+"readinessProbe", w.ReadinessProbe, g.ReadinessProbe)
 			add(prefix+"livenessProbe", w.LivenessProbe, g.LivenessProbe)
+			add(prefix+"lifecycle", w.Lifecycle, g.Lifecycle)
 			add(prefix+"securityContext", w.SecurityContext, g.SecurityContext)
 			add(prefix+"volumeMounts", w.VolumeMounts, g.VolumeMounts)
 		case "Service":

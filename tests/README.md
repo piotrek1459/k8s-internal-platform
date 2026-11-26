@@ -17,6 +17,7 @@ changing production interfaces solely for test placement.
 | `tests/integration/` | Owned baseline cluster and direct Helm lifecycle experiment. | Explicit local invocation. |
 | `tests/e2e/` | Fresh platform build, API/browser workflows and release-bundle installation. | Nightly, manual and release gate. |
 | `tests/e2e/fixtures/workload/` | Controlled readiness and actual workload-origin requests; standard-library Go test image. | Fixture unit checks on every PR; real use in E2E. |
+| `tests/evaluation/` | Explicit reference-host lifecycle, pull/cache, cgroup/HTTP experiments and human timed walkthrough. | Opt-in Pi/workstation run; evidence regressions on every PR. |
 | `tests/experiments/` | Dated curated evidence and historical reports. | Documentation. |
 
 ## Fast regression checks on every pull request
@@ -259,8 +260,10 @@ published installer, trusted separate-workstation LAN browser/API workflows and
 same-version/reboot retention. The [v0.1.10 native report](experiments/2026-11-25-v0.1.10-native.md) completes
 the published recovery/security gate: forced failure/retry across replacements,
 unchanged failed/frozen evidence, controlled disclosure scans and reinstall/reboot
-retention. Resource calibration, repeated evaluation and the agreed human timed
-walkthrough remain open. Helper failures and unconfirmed request timeouts remain
+retention. The [controlled evaluation](experiments/2026-11-26-core-evaluation.md)
+retains repeated resource/system data, explicit native preset checks and old/source
+chart request traces. Published new-default/draining validation and the human
+timed walkthrough remain open. Helper failures and unconfirmed request timeouts remain
 separate observations rather than passing attempts or claimed fixes.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
@@ -339,7 +342,9 @@ An untrusted CA and unknown SNI are refused. Browser login/deployment and URL
 reload use a controlled leaf-SPKI pin without modifying system trust; management
 cookies must be Secure/HttpOnly/SameSite=Strict and absent on the app hostname.
 The actual app serves HTTP v1, then v2 and rolled-back v1 through its route with
-bounded convergence. App-origin CORS/CSRF attempts cannot revoke the management
+bounded convergence. An independent CA/hostname-verified HTTP/1.1 observer records
+actual requests across update and rollback; every sampled request must succeed,
+and the sanitized trace is retained even on failure. App-origin CORS/CSRF attempts cannot revoke the management
 session. Tracked Internal/LAN/hostname transitions verify actual HTTPS, effective
 URLs and removed-route responses. Reserved/duplicate names, an Internal app, an
 excluded source with forged forwarding headers and IPv6 are negative cases.
@@ -370,3 +375,12 @@ matching `Release.verify`; both log `openssl version`. The
 records why `x509 -checkhost` exit status was insufficient on OpenSSL 3.0 and the
 81-case regression results on OpenSSL 3.0.13 and 3.6.2. Valid private-CA-issued
 leaves remain accepted by installer identity checks without configuring OS trust.
+
+## Reference-host system and human evaluation
+
+The [evaluation guide](evaluation/README.md) defines explicit native commands,
+owned cleanup and retained raw evidence. The [fixed protocol](../docs/evaluation.md)
+separates system timings from the [human walkthrough](evaluation/HUMAN.md).
+No human measurements are inferred from automation. The fast Python suite
+checks incomplete data, invalid statistics, cache classification and fixture
+ownership without contacting or mutating a cluster.

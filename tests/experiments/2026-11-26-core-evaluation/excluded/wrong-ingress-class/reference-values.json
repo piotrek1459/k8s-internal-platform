@@ -1,0 +1,64 @@
+{
+  "appId": "app_7e74f6afaf228706",
+  "containerPort": 8080,
+  "env": {},
+  "image": {
+    "digest": "sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+    "pullPolicy": "IfNotPresent",
+    "repository": "platform.local/http-demo",
+    "tag": ""
+  },
+  "imagePullSecrets": [],
+  "ingress": {
+    "className": "traefik",
+    "enabled": false,
+    "entrypoint": "private",
+    "hostname": "",
+    "tls": {
+      "enabled": false,
+      "secretName": ""
+    }
+  },
+  "probes": {
+    "liveness": {
+      "enabled": false,
+      "failureThreshold": 3,
+      "initialDelaySeconds": 0,
+      "path": "/healthz",
+      "periodSeconds": 10,
+      "timeoutSeconds": 1,
+      "type": "http"
+    },
+    "readiness": {
+      "enabled": true,
+      "failureThreshold": 3,
+      "initialDelaySeconds": 0,
+      "path": "/readyz",
+      "periodSeconds": 5,
+      "timeoutSeconds": 1,
+      "type": "http"
+    },
+    "startup": {
+      "enabled": true,
+      "failureThreshold": 30,
+      "initialDelaySeconds": 0,
+      "path": "/healthz",
+      "periodSeconds": 2,
+      "timeoutSeconds": 1,
+      "type": "http"
+    }
+  },
+  "replicas": 1,
+  "resources": {
+    "limits": {
+      "cpu": "250m",
+      "memory": "128Mi"
+    },
+    "requests": {
+      "cpu": "25m",
+      "memory": "48Mi"
+    }
+  },
+  "restartToken": "",
+  "secretRefs": []
+}

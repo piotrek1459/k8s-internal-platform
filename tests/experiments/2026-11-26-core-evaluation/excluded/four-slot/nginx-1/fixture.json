@@ -1,0 +1,12 @@
+{
+  "appID": "app_e29fa31d1c6d16dd",
+  "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+  "access": {
+    "hostname": "eval-534e9f7095e2-load.apps.home.arpa",
+    "mode": "lan",
+    "revisionId": "rev_fb2cb3a90837e52f",
+    "url": "https://eval-534e9f7095e2-load.apps.home.arpa:8443/"
+  },
+  "workload": "nginx",
+  "repetition": 1
+}

@@ -1,0 +1,18 @@
+{
+  "appID": "app_dfd92eb8453ac791",
+  "startedEpochSeconds": 1795699706.0712857,
+  "finishedEpochSeconds": 1795699816.3025858,
+  "sampleCount": 110,
+  "missingSamples": 0,
+  "stableContainerIdentity": true,
+  "containersAfter": [
+    {
+      "podUID": "8a636152-793c-46cc-9be6-8595c33b3420",
+      "containerID": "dd870ec9ff3a4e497ce9a7566ec67e5fde916207e2f14e72a608b8bb2c5cd04d",
+      "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod8a636152_793c_46cc_9be6_8595c33b3420.slice/cri-containerd-dd870ec9ff3a4e497ce9a7566ec67e5fde916207e2f14e72a608b8bb2c5cd04d.scope"
+    }
+  ],
+  "evidenceValid": true
+}

@@ -105,7 +105,7 @@ func TestDriftComparesIntentWithoutHealthOrAllocatedAddressDefaults(t *testing.T
 }
 
 func TestDriftReportsWorkloadRouteOwnershipAndMissingResourcesWithoutValues(t *testing.T) {
-	for _, scenario := range []string{"image", "env", "resources", "replicas", "probe", "service-port", "missing-service", "ownership", "ingress-host", "ingress-entrypoint"} {
+	for _, scenario := range []string{"image", "env", "resources", "replicas", "probe", "lifecycle", "service-port", "missing-service", "ownership", "ingress-host", "ingress-entrypoint"} {
 		t.Run(scenario, func(t *testing.T) {
 			ctx := context.Background()
 			cs, manifest := driftFixture(t, true)
@@ -125,6 +125,8 @@ func TestDriftReportsWorkloadRouteOwnershipAndMissingResourcesWithoutValues(t *t
 				d.Spec.Replicas = ptrInt32(2)
 			case "probe":
 				d.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path = "/changed"
+			case "lifecycle":
+				d.Spec.Template.Spec.Containers[0].Lifecycle = &corev1.Lifecycle{PreStop: &corev1.LifecycleHandler{Sleep: &corev1.SleepAction{Seconds: 1}}}
 			case "ownership":
 				d.Annotations["meta.helm.sh/release-name"] = "foreign"
 			case "service-port":

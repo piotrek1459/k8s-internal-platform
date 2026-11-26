@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-acfd63b22b9f-availability.apps.home.arpa:8443/version",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 5,
+  "durationSeconds": 75,
+  "warmupSeconds": 0,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795699923.8856268,
+  "finishedEpochSeconds": 1795699998.7032268,
+  "requests": 375,
+  "successful": 367,
+  "successRate": 0.9786666666666667,
+  "latencyMilliseconds": {
+    "count": 367,
+    "minimum": 5.420791,
+    "median": 10.818833,
+    "p95": 30.937334,
+    "maximum": 118.37775
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 375,
+  "complete": true,
+  "targetsPassed": false,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

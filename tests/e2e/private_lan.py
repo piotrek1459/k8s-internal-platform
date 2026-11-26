@@ -1,6 +1,8 @@
 """Actual private TLS traffic on the owned node; native LAN acceptance is separate."""
 import base64
+import contextlib
 import hashlib
+import http.client
 from http.cookies import SimpleCookie
 import json
 from pathlib import Path
@@ -9,9 +11,69 @@ import socket
 import ssl
 import subprocess
 import tempfile
+import threading
 import time
 
 from support import Client, ROOT, free_ports
+
+
+@contextlib.contextmanager
+def observe_rollout_requests(case, folder, hostname, port):
+    """Keep a verified HTTP/1.1 connection active across update and rollback."""
+    context = ssl.create_default_context(cafile=str(folder / 'ca.crt'))
+    stopped, started = threading.Event(), threading.Event()
+    records = []
+
+    class Connection(http.client.HTTPSConnection):
+        def connect(self):
+            raw = socket.create_connection(('127.0.0.1', port), timeout=3)
+            raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            self.sock = context.wrap_socket(raw, server_hostname=hostname)
+
+    def observe():
+        connection = None
+        try:
+            while not stopped.is_set():
+                record = {'epochSeconds': time.time(), 'status': None, 'version': None, 'success': False}
+                try:
+                    if connection is None:
+                        connection = Connection(hostname, port, timeout=3, context=context)
+                    connection.request('GET', '/version')
+                    response = connection.getresponse()
+                    body = response.read(65537)
+                    record['status'] = response.status
+                    if len(body) > 65536:
+                        raise ValueError('Oversized controlled response')
+                    value = json.loads(body)
+                    record['version'] = value.get('version')
+                    record['success'] = response.status == 200 and record['version'] in ('v1', 'v2')
+                except Exception as error:
+                    record['error'] = type(error).__name__
+                    if connection is not None:
+                        connection.close()
+                        connection = None
+                records.append(record)
+                started.set()
+                stopped.wait(.2)
+        finally:
+            if connection is not None:
+                connection.close()
+
+    observer = threading.Thread(target=observe, daemon=True)
+    observer.start()
+    try:
+        case.assertTrue(started.wait(10), 'Rollout request observer did not start')
+        yield
+        # Observe the converged final response too; readiness alone is insufficient.
+        stopped.wait(1)
+    finally:
+        stopped.set()
+        observer.join(timeout=5)
+        (case.e.artifacts / 'private-lan-rollout-requests.json').write_text(json.dumps(records, indent=2) + '\n')
+    case.assertFalse(observer.is_alive(), 'Rollout request observer did not stop')
+    case.assertGreaterEqual(len(records), 5)
+    case.assertEqual({r['version'] for r in records}, {'v1', 'v2'})
+    case.assertTrue(all(r['success'] for r in records), 'Actual HTTPS request failed during update/rollback; inspect the retained trace')
 
 
 class TLSClient(Client):
@@ -243,10 +305,11 @@ def verify_private_lan(case):
                 'exposure':{'mode':'lan','hostname':hostname}})
             wait_version(hostname,'v1')
             previous=client.get('/apps/'+app)['lastSuccessfulRevision']
-            client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
-            wait_version(hostname,'v2')
-            client.mutate('POST','/apps/'+app+'/rollback',{'version':client.get('/apps/'+app)['version'],'revisionId':previous})
-            wait_version(hostname,'v1')
+            with observe_rollout_requests(case, folder, hostname, port):
+                client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
+                wait_version(hostname,'v2')
+                client.mutate('POST','/apps/'+app+'/rollback',{'version':client.get('/apps/'+app)['version'],'revisionId':previous})
+                wait_version(hostname,'v1')
             case.assertEqual(e.resource('ingresses',internal),[])
             case.assertEqual(client.fetch('/version',host='internal.apps.home.arpa')[1],404)
             verify_public_listener_refusal(case)

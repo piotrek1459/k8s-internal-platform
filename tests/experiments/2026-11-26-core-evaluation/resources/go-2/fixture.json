@@ -1,0 +1,12 @@
+{
+  "appID": "app_dd2df43fe1e276da",
+  "image": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+  "access": {
+    "hostname": "eval-7c6d65cc6e27-load.apps.home.arpa",
+    "mode": "lan",
+    "revisionId": "rev_b1eaed700239b26d",
+    "url": "https://eval-7c6d65cc6e27-load.apps.home.arpa:8443/"
+  },
+  "workload": "go",
+  "repetition": 2
+}

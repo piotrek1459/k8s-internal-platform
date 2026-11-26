@@ -19,8 +19,9 @@ workflow are implemented. Their procedures are documented in the
 [installation guide](installation.md) and [release guide](../release/README.md).
 Native Pi installation, LAN browser/API routing and same-version/reboot retention
 have published v0.1.10 evidence, including native failure/retry/disclosure checks.
-Backup/restore upgrades, metrics and controlled resource/evaluation retain
-separate acceptance requirements;
+Repeated system/resource observations and source draining evidence are retained.
+Published-default/draining validation, human operator measurements, backup/restore,
+upgrades and metrics retain separate acceptance requirements;
 local startup or a healthy update does not establish those results.
 
 ## Reference hardware and operating limits
@@ -34,10 +35,11 @@ The platform runs on an administrator's own Linux host. Two targets are in scope
   AMD64, usually with more capacity and a public IP. The platform is portable to
   it; see the [deployment-targets note in architecture.md](architecture.md#deployment-targets-host-agnostic-by-design).
 
-Reference-host resource requirements remain unmeasured. The selected K3s
-release requirements, free storage and measured workload overhead must be
-recorded before host sizing is accepted. Storage upgrade decisions remain
-subject to those measurements.
+The [reference evaluation](../tests/experiments/2026-11-26-core-evaluation.md)
+retains actual host CPU/memory/swap/disk and small HTTP workload observations.
+Source requests are 25m/48Mi and limits 250m/128Mi for this measured profile;
+these values do not size arbitrary workloads or establish a generic minimum host.
+Disk admission and storage-endurance evaluation remain separate requirements.
 [K3s requirements](https://docs.k3s.io/installation/requirements)
 
 The Pi's nominal 32 GB storage capacity is shared by the operating system,

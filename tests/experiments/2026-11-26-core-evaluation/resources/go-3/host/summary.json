@@ -1,0 +1,18 @@
+{
+  "appID": "app_7dc3ee92264ee7fd",
+  "startedEpochSeconds": 1795699588.7799442,
+  "finishedEpochSeconds": 1795699699.0145345,
+  "sampleCount": 110,
+  "missingSamples": 0,
+  "stableContainerIdentity": true,
+  "containersAfter": [
+    {
+      "podUID": "d8ec63d0-887f-4d79-b5b9-129f8cb4a46e",
+      "containerID": "e826c2ba8f16bd468da812f7a5bcae4d73a4fc80187e8a9a165a2d1b9deaa0b3",
+      "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podd8ec63d0_887f_4d79_b5b9_129f8cb4a46e.slice/cri-containerd-e826c2ba8f16bd468da812f7a5bcae4d73a4fc80187e8a9a165a2d1b9deaa0b3.scope"
+    }
+  ],
+  "evidenceValid": true
+}
