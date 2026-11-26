@@ -1,0 +1,277 @@
+{
+  "checkedEpochSeconds": 1795698092.616689,
+  "bootID": "6921e8f3-72db-4613-ad9d-c68a150b205c",
+  "system": {
+    "architecture": "arm64",
+    "capabilities": [
+      "private-ingress",
+      "image-inspection",
+      "configuration-secrets",
+      "registry-credentials",
+      "cluster-observation",
+      "workload-diagnostics",
+      "drift-inspection"
+    ],
+    "clusterReachable": true,
+    "privateNetwork": {
+      "managementHostname": "platform.home.arpa",
+      "applicationDomain": "apps.home.arpa",
+      "httpsPort": 8443
+    },
+    "version": "0.1.10"
+  },
+  "originalApp": {
+    "access": {
+      "hostname": "demo.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_4590764f5d11c69c",
+      "url": "https://demo.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_4590764f5d11c69c",
+    "id": "app_7443b5a8f0851994",
+    "lastSuccessfulRevision": "rev_4590764f5d11c69c",
+    "name": "native-lan-51a170",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 7,
+      "observedAt": "2026-11-26T13:01:19.763527068Z",
+      "stale": false
+    },
+    "version": 12
+  },
+  "actualHTTP": {
+    "version": "v1",
+    "hostname": "app-app-7443b5a8f0851994-54b99b478f-pcznh"
+  },
+  "platformDeploymentUID": "2416d9c9-092b-400f-88eb-11f8a626a129",
+  "applications": [
+    {
+      "access": {
+        "hostname": "eval-4c7459dbef34-load.apps.home.arpa",
+        "mode": "lan",
+        "revisionId": "rev_1abf1d615c1ec1f7",
+        "url": "https://eval-4c7459dbef34-load.apps.home.arpa:8443/"
+      },
+      "activeOperationId": "",
+      "desiredRevision": "rev_1abf1d615c1ec1f7",
+      "id": "app_fb7ec573e46b6d8d",
+      "lastSuccessfulRevision": "rev_1abf1d615c1ec1f7",
+      "name": "eval-4c7459dbef34-load",
+      "status": {
+        "phase": "ready",
+        "desiredReplicas": 1,
+        "readyReplicas": 1,
+        "workloadReady": true,
+        "routeReady": true,
+        "observedGeneration": 1,
+        "observedAt": "2026-11-26T13:01:19.751790657Z",
+        "stale": false
+      },
+      "version": 1
+    },
+    {
+      "access": {
+        "hostname": "demo.apps.home.arpa",
+        "mode": "lan",
+        "revisionId": "rev_4590764f5d11c69c",
+        "url": "https://demo.apps.home.arpa:8443/"
+      },
+      "activeOperationId": "",
+      "desiredRevision": "rev_4590764f5d11c69c",
+      "id": "app_7443b5a8f0851994",
+      "lastSuccessfulRevision": "rev_4590764f5d11c69c",
+      "name": "native-lan-51a170",
+      "status": {
+        "phase": "ready",
+        "desiredReplicas": 1,
+        "readyReplicas": 1,
+        "workloadReady": true,
+        "routeReady": true,
+        "observedGeneration": 7,
+        "observedAt": "2026-11-26T13:01:19.763527068Z",
+        "stale": false
+      },
+      "version": 12
+    }
+  ],
+  "KubernetesPods": [
+    {
+      "namespace": "kube-system",
+      "name": "coredns-7cfb7bc9c7-bnqzn",
+      "uid": "253f61f1-2dfa-4224-8585-85e74fed16a4",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "docker.io/rancher/mirrored-coredns-coredns@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286",
+          "ready": true,
+          "restarts": 2
+        }
+      ]
+    },
+    {
+      "namespace": "kube-system",
+      "name": "local-path-provisioner-77b9867795-hpv7q",
+      "uid": "cb626d2d-2656-4f9a-ab2a-3d69e05e9e85",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "docker.io/rancher/local-path-provisioner@sha256:e757967a5ec338f6a9b371c5a9688bedaa8c3578ea3dd4db329ea0084be0a86f",
+          "ready": true,
+          "restarts": 2
+        }
+      ]
+    },
+    {
+      "namespace": "kube-system",
+      "name": "metrics-server-6dc596dfb8-xb7lt",
+      "uid": "9337389a-c51f-4a02-a286-faa6e4b35443",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "docker.io/rancher/mirrored-metrics-server@sha256:d9862115e7c7881280d3d75ca26bda8ffc0fc213315979575bf23ce9826205c0",
+          "ready": true,
+          "restarts": 2
+        }
+      ]
+    },
+    {
+      "namespace": "platform-apps",
+      "name": "app-app-7443b5a8f0851994-54b99b478f-pcznh",
+      "uid": "1f442a8a-5970-4f46-b2df-21ed1a071a66",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+          "ready": true,
+          "restarts": 2
+        }
+      ]
+    },
+    {
+      "namespace": "platform-apps",
+      "name": "app-app-fb7ec573e46b6d8d-77567b4689-jpx4p",
+      "uid": "fdda388c-8325-46c5-8785-fc0e863a0198",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+          "ready": true,
+          "restarts": 1
+        }
+      ]
+    },
+    {
+      "namespace": "platform-system",
+      "name": "platform-57d7d448cf-x977f",
+      "uid": "f4b5fcce-80ff-4562-bd01-66faa653ac95",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "platform.local/platform-broker@sha256:9e8d6c167b71f150af774e1b6d08025812dc63934e2dcdcbcdc8937eb0487591",
+          "ready": true,
+          "restarts": 2
+        }
+      ]
+    },
+    {
+      "namespace": "platform-system",
+      "name": "platform-private-64d4b496c9-pt9jx",
+      "uid": "d989bd59-bacb-4187-91f4-89f680c1f9a8",
+      "phase": "Running",
+      "containers": [
+        {
+          "imageID": "docker.io/library/traefik@sha256:a6c0194dda77bcb804824580f36fa7edc56e315b1acfe933366c8b52844a78a4",
+          "ready": true,
+          "restarts": 2
+        }
+      ]
+    }
+  ],
+  "lifecycleResult": {
+    "acceptance": {
+      "passed": true,
+      "missingScenarios": [],
+      "failedTargets": []
+    },
+    "runID": "49eec167fdfd",
+    "planSHA256": "9cd9af067be9f67192cf4923626a7165003742ee4c0f5d536eb15fde936fa3ed",
+    "methods": {
+      "api": {
+        "delete": {
+          "count": 3,
+          "minimum": 0.771174,
+          "median": 0.77212,
+          "p95": 1.018109,
+          "maximum": 1.018109
+        },
+        "deploy-v1": {
+          "count": 3,
+          "minimum": 4.682151,
+          "median": 4.723836,
+          "p95": 4.812145,
+          "maximum": 4.812145
+        },
+        "unhealthy-v3-and-restoration": {
+          "count": 3,
+          "minimum": 301.70428,
+          "median": 301.902404,
+          "p95": 302.091261,
+          "maximum": 302.091261
+        },
+        "update-v2": {
+          "count": 3,
+          "minimum": 4.950321,
+          "median": 4.954915,
+          "p95": 4.964988,
+          "maximum": 4.964988
+        }
+      },
+      "helm": {
+        "delete": {
+          "count": 3,
+          "minimum": 0.235443,
+          "median": 0.237683,
+          "p95": 0.238732,
+          "maximum": 0.238732
+        },
+        "deploy-v1": {
+          "count": 3,
+          "minimum": 4.548625,
+          "median": 4.550734,
+          "p95": 4.611839,
+          "maximum": 4.611839
+        },
+        "unhealthy-v3-and-restoration": {
+          "count": 3,
+          "minimum": 302.822715,
+          "median": 302.836889,
+          "p95": 302.86041,
+          "maximum": 302.86041
+        },
+        "update-v2": {
+          "count": 3,
+          "minimum": 4.537062,
+          "median": 4.547463,
+          "p95": 4.678141,
+          "maximum": 4.678141
+        }
+      }
+    },
+    "failureScenariosIncluded": true,
+    "humanOperatorTime": null,
+    "humanTrialStatus": "pending",
+    "coreEvaluationComplete": false,
+    "ownedFixturesRemaining": {
+      "runID": "49eec167fdfd",
+      "applications": {},
+      "releases": {}
+    },
+    "originalApplicationsRetained": true
+  },
+  "interruptedResourceRun": "resources/go-1; missing separate-client observations; excluded"
+}

@@ -1,0 +1,277 @@
+{
+  "cases": [
+    {
+      "condition": "control",
+      "storedChartSHA256": "1319d0e014420dd79c06e87482680664871b98e263b929a5a339b764f998af79",
+      "storedConfig": {
+        "appId": "eval-88b70b18887c-control",
+        "containerPort": 8080,
+        "env": {},
+        "image": {
+          "digest": "sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+          "pullPolicy": "IfNotPresent",
+          "repository": "platform.local/http-demo",
+          "tag": ""
+        },
+        "imagePullSecrets": [],
+        "ingress": {
+          "className": "platform-private",
+          "enabled": true,
+          "entrypoint": "private",
+          "hostname": "eval-88b70b18887c-control.apps.home.arpa",
+          "tls": {
+            "enabled": false,
+            "secretName": ""
+          }
+        },
+        "probes": {
+          "liveness": {
+            "enabled": false,
+            "failureThreshold": 3,
+            "initialDelaySeconds": 0,
+            "path": "/healthz",
+            "periodSeconds": 10,
+            "timeoutSeconds": 1,
+            "type": "http"
+          },
+          "readiness": {
+            "enabled": true,
+            "failureThreshold": 3,
+            "initialDelaySeconds": 0,
+            "path": "/readyz",
+            "periodSeconds": 5,
+            "timeoutSeconds": 1,
+            "type": "http"
+          },
+          "startup": {
+            "enabled": true,
+            "failureThreshold": 30,
+            "initialDelaySeconds": 0,
+            "path": "/healthz",
+            "periodSeconds": 2,
+            "timeoutSeconds": 1,
+            "type": "http"
+          }
+        },
+        "replicas": 1,
+        "resources": {
+          "limits": {
+            "cpu": "250m",
+            "memory": "128Mi"
+          },
+          "requests": {
+            "cpu": "25m",
+            "memory": "48Mi"
+          }
+        },
+        "restartToken": "",
+        "secretRefs": []
+      },
+      "client": {
+        "url": "https://eval-88b70b18887c-control.apps.home.arpa:8443/version",
+        "addressOverride": "192.168.68.227",
+        "certificateVerification": true,
+        "ratePerSecond": 5,
+        "durationSeconds": 75,
+        "warmupSeconds": 0,
+        "maximumOutstandingRequests": 32,
+        "startedEpochSeconds": 1795700845.651114,
+        "finishedEpochSeconds": 1795700920.46194,
+        "requests": 375,
+        "successful": 344,
+        "successRate": 0.9173333333333333,
+        "latencyMilliseconds": {
+          "count": 344,
+          "minimum": 6.814541,
+          "median": 11.304354,
+          "p95": 37.208167,
+          "maximum": 175.163667
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 375,
+        "complete": true,
+        "targetsPassed": false,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "timeline": [
+        {
+          "stage": "update-1",
+          "version": "v2",
+          "submittedEpochSeconds": 1795700860.6350484,
+          "verifiedEpochSeconds": 1795700865.0460262,
+          "liveLifecycle": [
+            null
+          ]
+        },
+        {
+          "stage": "update-2",
+          "version": "v1",
+          "submittedEpochSeconds": 1795700880.6350436,
+          "verifiedEpochSeconds": 1795700888.2388623,
+          "liveLifecycle": [
+            null
+          ]
+        },
+        {
+          "stage": "update-3",
+          "version": "v2",
+          "submittedEpochSeconds": 1795700900.6350405,
+          "verifiedEpochSeconds": 1795700908.2409706,
+          "liveLifecycle": [
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "condition": "candidate",
+      "storedChartSHA256": "518242a085f7ccc6c3d90869483501dd7865dcbda1dc65bd53f3d458504fc2da",
+      "storedConfig": {
+        "appId": "eval-88b70b18887c-candidate",
+        "containerPort": 8080,
+        "env": {},
+        "image": {
+          "digest": "sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+          "pullPolicy": "IfNotPresent",
+          "repository": "platform.local/http-demo",
+          "tag": ""
+        },
+        "imagePullSecrets": [],
+        "ingress": {
+          "className": "platform-private",
+          "enabled": true,
+          "entrypoint": "private",
+          "hostname": "eval-88b70b18887c-candidate.apps.home.arpa",
+          "tls": {
+            "enabled": false,
+            "secretName": ""
+          }
+        },
+        "probes": {
+          "liveness": {
+            "enabled": false,
+            "failureThreshold": 3,
+            "initialDelaySeconds": 0,
+            "path": "/healthz",
+            "periodSeconds": 10,
+            "timeoutSeconds": 1,
+            "type": "http"
+          },
+          "readiness": {
+            "enabled": true,
+            "failureThreshold": 3,
+            "initialDelaySeconds": 0,
+            "path": "/readyz",
+            "periodSeconds": 5,
+            "timeoutSeconds": 1,
+            "type": "http"
+          },
+          "startup": {
+            "enabled": true,
+            "failureThreshold": 30,
+            "initialDelaySeconds": 0,
+            "path": "/healthz",
+            "periodSeconds": 2,
+            "timeoutSeconds": 1,
+            "type": "http"
+          }
+        },
+        "replicas": 1,
+        "resources": {
+          "limits": {
+            "cpu": "250m",
+            "memory": "128Mi"
+          },
+          "requests": {
+            "cpu": "25m",
+            "memory": "48Mi"
+          }
+        },
+        "restartToken": "",
+        "secretRefs": []
+      },
+      "client": {
+        "url": "https://eval-88b70b18887c-candidate.apps.home.arpa:8443/version",
+        "addressOverride": "192.168.68.227",
+        "certificateVerification": true,
+        "ratePerSecond": 5,
+        "durationSeconds": 75,
+        "warmupSeconds": 0,
+        "maximumOutstandingRequests": 32,
+        "startedEpochSeconds": 1795700940.5455759,
+        "finishedEpochSeconds": 1795701015.365647,
+        "requests": 375,
+        "successful": 375,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 375,
+          "minimum": 7.263583,
+          "median": 10.676209,
+          "p95": 61.182458,
+          "maximum": 98.955167
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 375,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "timeline": [
+        {
+          "stage": "update-1",
+          "version": "v2",
+          "submittedEpochSeconds": 1795700955.532587,
+          "verifiedEpochSeconds": 1795700960.1343298,
+          "liveLifecycle": [
+            {
+              "preStop": {
+                "sleep": {
+                  "seconds": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "stage": "update-2",
+          "version": "v1",
+          "submittedEpochSeconds": 1795700975.5325916,
+          "verifiedEpochSeconds": 1795700981.7298179,
+          "liveLifecycle": [
+            {
+              "preStop": {
+                "sleep": {
+                  "seconds": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "stage": "update-3",
+          "version": "v2",
+          "submittedEpochSeconds": 1795700995.5325947,
+          "verifiedEpochSeconds": 1795701002.000776,
+          "liveLifecycle": [
+            {
+              "preStop": {
+                "sleep": {
+                  "seconds": 5
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "originalApplicationsRetained": true,
+  "owned": {
+    "runID": "88b70b18887c",
+    "applications": {},
+    "releases": {}
+  },
+  "scope": "Native direct-Helm source-chart experiment; published v0.1.10 runtime remains unchanged"
+}

@@ -1,0 +1,14 @@
+{
+  "runID": 45832187594,
+  "sourceCommit": "29216455cfeae52eef803f9987008ecb844d8bb2",
+  "conclusion": "success",
+  "artifactID": 15124058153,
+  "artifactDigest": "sha256:6d5261371f0e4192cad3a436885d9e5f3b64953a91cc5d0cbfc4aa87ea2eb9ea",
+  "tests": 27,
+  "failures": 0,
+  "skips": 0,
+  "privateLANRolloutRequests": 56,
+  "privateLANRolloutErrors": 0,
+  "junitSHA256": "062149f89265107414ae9c48b93903b7ea3eca5b155dd242aacbd2e595b67b87",
+  "rolloutTraceSHA256": "65ca66036e1f0a3c51e192caefbf9b9f91c3f843bbd83e0619894e668c41d98f"
+}

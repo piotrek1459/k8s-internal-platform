@@ -1,0 +1,59 @@
+{
+  "appID": "app_2db6c713cd8a214c",
+  "containers": [
+    {
+      "podUID": "54f8dc3d-f3eb-488d-8633-966b35955f3a",
+      "containerID": "3d57efaac5fbdb81ed8992368ba4523cd36e176ed4e754c4368d33026a023ff7",
+      "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod54f8dc3d_f3eb_488d_8633_966b35955f3a.slice/cri-containerd-3d57efaac5fbdb81ed8992368ba4523cd36e176ed4e754c4368d33026a023ff7.scope"
+    }
+  ],
+  "host": {
+    "machine": "aarch64",
+    "kernel": "6.18.60+rpt-rpi-2712",
+    "bootID": "6921e8f3-72db-4613-ad9d-c68a150b205c",
+    "OS": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"\n",
+    "memory": {
+      "MemTotal": 8453816320,
+      "MemAvailable": 7071367168,
+      "SwapTotal": 2147467264,
+      "SwapFree": 2147467264
+    },
+    "disk": {
+      "total": 30201556992,
+      "used": 8677146624,
+      "free": 20219551744
+    },
+    "Kubernetes": {
+      "clientVersion": {
+        "major": "1",
+        "minor": "36",
+        "gitVersion": "v1.36.5+k3s1",
+        "gitCommit": "3dd98cc58ec34991e7e59b93663eee2e26fc1f65",
+        "gitTreeState": "clean",
+        "buildDate": "2026-09-30T16:04:19Z",
+        "goVersion": "go1.26.8",
+        "compiler": "gc",
+        "platform": "linux/arm64"
+      },
+      "kustomizeVersion": "v5.8.1",
+      "serverVersion": {
+        "major": "1",
+        "minor": "36",
+        "emulationMajor": "1",
+        "emulationMinor": "36",
+        "minCompatibilityMajor": "1",
+        "minCompatibilityMinor": "35",
+        "gitVersion": "v1.36.5+k3s1",
+        "gitCommit": "3dd98cc58ec34991e7e59b93663eee2e26fc1f65",
+        "gitTreeState": "clean",
+        "buildDate": "2026-09-30T16:04:19Z",
+        "goVersion": "go1.26.8",
+        "compiler": "gc",
+        "platform": "linux/arm64"
+      }
+    },
+    "Helm": "v3.22.0+g144ca65"
+  }
+}

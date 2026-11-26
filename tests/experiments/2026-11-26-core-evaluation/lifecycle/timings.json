@@ -1,0 +1,263 @@
+[
+  {
+    "method": "api",
+    "repetition": 1,
+    "stage": "deploy-v1",
+    "seconds": 4.682151,
+    "app": "app_30b06954f58e9365",
+    "operation": "op_fcb1f2630ff73eda",
+    "states": [
+      {
+        "seconds": 0.013129,
+        "state": "running"
+      },
+      {
+        "seconds": 4.427048,
+        "state": "succeeded"
+      }
+    ],
+    "cache": "cached"
+  },
+  {
+    "method": "api",
+    "repetition": 1,
+    "stage": "update-v2",
+    "seconds": 4.964988,
+    "operation": "op_bc6a89c675de7363",
+    "cache": "cached"
+  },
+  {
+    "method": "api",
+    "repetition": 1,
+    "stage": "unhealthy-v3-and-restoration",
+    "seconds": 301.70428,
+    "operation": "op_a6d96748ea9c0724",
+    "states": [
+      {
+        "seconds": 0.013626,
+        "state": "running"
+      },
+      {
+        "seconds": 300.67297,
+        "state": "recovering"
+      },
+      {
+        "seconds": 301.460046,
+        "state": "failed"
+      }
+    ],
+    "failurePolicySeconds": 300,
+    "humanIntervention": false
+  },
+  {
+    "method": "api",
+    "repetition": 1,
+    "stage": "delete",
+    "seconds": 0.77212
+  },
+  {
+    "method": "helm",
+    "repetition": 1,
+    "stage": "deploy-v1",
+    "seconds": 4.548625,
+    "release": "eval-49eec167fdfd-helm-1",
+    "chartIdentityEqual": true,
+    "cache": "cached"
+  },
+  {
+    "method": "helm",
+    "repetition": 1,
+    "stage": "update-v2",
+    "seconds": 4.547463,
+    "cache": "cached"
+  },
+  {
+    "method": "helm",
+    "repetition": 1,
+    "stage": "unhealthy-v3-and-restoration",
+    "seconds": 302.836889,
+    "detectionSeconds": 300.498078,
+    "failurePolicySeconds": 300,
+    "humanIntervention": "scripted manual rollback; human active time not measured"
+  },
+  {
+    "method": "helm",
+    "repetition": 1,
+    "stage": "delete",
+    "seconds": 0.235443
+  },
+  {
+    "method": "helm",
+    "repetition": 2,
+    "stage": "deploy-v1",
+    "seconds": 4.611839,
+    "release": "eval-49eec167fdfd-helm-2",
+    "chartIdentityEqual": true,
+    "cache": "cached"
+  },
+  {
+    "method": "helm",
+    "repetition": 2,
+    "stage": "update-v2",
+    "seconds": 4.537062,
+    "cache": "cached"
+  },
+  {
+    "method": "helm",
+    "repetition": 2,
+    "stage": "unhealthy-v3-and-restoration",
+    "seconds": 302.822715,
+    "detectionSeconds": 300.487021,
+    "failurePolicySeconds": 300,
+    "humanIntervention": "scripted manual rollback; human active time not measured"
+  },
+  {
+    "method": "helm",
+    "repetition": 2,
+    "stage": "delete",
+    "seconds": 0.238732
+  },
+  {
+    "method": "api",
+    "repetition": 2,
+    "stage": "deploy-v1",
+    "seconds": 4.812145,
+    "app": "app_93c119193dc0b7cc",
+    "operation": "op_de6ce8a5149aef24",
+    "states": [
+      {
+        "seconds": 0.055668,
+        "state": "running"
+      },
+      {
+        "seconds": 4.538451,
+        "state": "succeeded"
+      }
+    ],
+    "cache": "cached"
+  },
+  {
+    "method": "api",
+    "repetition": 2,
+    "stage": "update-v2",
+    "seconds": 4.950321,
+    "operation": "op_ca58d8861ffac26b",
+    "cache": "cached"
+  },
+  {
+    "method": "api",
+    "repetition": 2,
+    "stage": "unhealthy-v3-and-restoration",
+    "seconds": 301.902404,
+    "operation": "op_1e3fcb6c65977902",
+    "states": [
+      {
+        "seconds": 0.010465,
+        "state": "running"
+      },
+      {
+        "seconds": 300.858328,
+        "state": "recovering"
+      },
+      {
+        "seconds": 301.653656,
+        "state": "failed"
+      }
+    ],
+    "failurePolicySeconds": 300,
+    "humanIntervention": false
+  },
+  {
+    "method": "api",
+    "repetition": 2,
+    "stage": "delete",
+    "seconds": 1.018109
+  },
+  {
+    "method": "api",
+    "repetition": 3,
+    "stage": "deploy-v1",
+    "seconds": 4.723836,
+    "app": "app_c4b40a9627905216",
+    "operation": "op_d27c1120d2a3eb09",
+    "states": [
+      {
+        "seconds": 0.010252,
+        "state": "running"
+      },
+      {
+        "seconds": 4.455723,
+        "state": "succeeded"
+      }
+    ],
+    "cache": "cached"
+  },
+  {
+    "method": "api",
+    "repetition": 3,
+    "stage": "update-v2",
+    "seconds": 4.954915,
+    "operation": "op_25d9babde8dac684",
+    "cache": "cached"
+  },
+  {
+    "method": "api",
+    "repetition": 3,
+    "stage": "unhealthy-v3-and-restoration",
+    "seconds": 302.091261,
+    "operation": "op_6cb4c9d03ee8cc38",
+    "states": [
+      {
+        "seconds": 0.014715,
+        "state": "running"
+      },
+      {
+        "seconds": 300.956281,
+        "state": "recovering"
+      },
+      {
+        "seconds": 301.76246,
+        "state": "failed"
+      }
+    ],
+    "failurePolicySeconds": 300,
+    "humanIntervention": false
+  },
+  {
+    "method": "api",
+    "repetition": 3,
+    "stage": "delete",
+    "seconds": 0.771174
+  },
+  {
+    "method": "helm",
+    "repetition": 3,
+    "stage": "deploy-v1",
+    "seconds": 4.550734,
+    "release": "eval-49eec167fdfd-helm-3",
+    "chartIdentityEqual": true,
+    "cache": "cached"
+  },
+  {
+    "method": "helm",
+    "repetition": 3,
+    "stage": "update-v2",
+    "seconds": 4.678141,
+    "cache": "cached"
+  },
+  {
+    "method": "helm",
+    "repetition": 3,
+    "stage": "unhealthy-v3-and-restoration",
+    "seconds": 302.86041,
+    "detectionSeconds": 300.524172,
+    "failurePolicySeconds": 300,
+    "humanIntervention": "scripted manual rollback; human active time not measured"
+  },
+  {
+    "method": "helm",
+    "repetition": 3,
+    "stage": "delete",
+    "seconds": 0.237683
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "checkedEpochSeconds": 1795704451.299833,
+  "runtimeVersion": "0.1.10",
+  "platformDeploymentUID": "2416d9c9-092b-400f-88eb-11f8a626a129",
+  "originalApp": {
+    "access": {
+      "hostname": "demo.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_4590764f5d11c69c",
+      "url": "https://demo.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_4590764f5d11c69c",
+    "id": "app_7443b5a8f0851994",
+    "lastSuccessfulRevision": "rev_4590764f5d11c69c",
+    "name": "native-lan-51a170",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 7,
+      "observedAt": "2026-11-26T14:47:25.008121646Z",
+      "stale": false
+    },
+    "version": 12
+  },
+  "actualHTTP": {
+    "version": "v1",
+    "hostname": "app-app-7443b5a8f0851994-54b99b478f-pcznh"
+  },
+  "allClusterPodsReady": true,
+  "appDeployments": 1,
+  "appServices": 1,
+  "appRoutes": 1,
+  "appPods": 1,
+  "configurationSecrets": 0,
+  "registryCredentials": 0,
+  "applicationVolumes": 0,
+  "ownedBenchmarkHelmReleases": 0,
+  "bootID": "6921e8f3-72db-4613-ad9d-c68a150b205c",
+  "publishedDefaultValidationPending": true
+}

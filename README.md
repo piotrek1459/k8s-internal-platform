@@ -25,9 +25,12 @@ UI/API deployment, tracked access changes, forced restoration/verification failu
 guarded recovery, controlled disclosure checks and original identity/session
 retention across same-version reinstall and host reboot. The
 [native report](tests/experiments/2026-11-25-v0.1.10-native.md) records accepted
-phases and separate route-convergence/request-timeout observations. Measured
-resource presets and the controlled system/human evaluation remain outstanding
-in [status](docs/status.md). Earlier Secret cleanup/diagnostic evidence retains
+phases and separate route-convergence/request-timeout observations. The
+[controlled evaluation](tests/experiments/2026-11-26-core-evaluation.md) now retains
+repeated system/resource results and a native source-chart rollout comparison.
+Source chart 0.1.3 uses measured 25m/48Mi requests and a native shutdown delay.
+Published-default/draining validation and the [human walkthrough](tests/evaluation/HUMAN.md)
+remain open in [status](docs/status.md). Earlier Secret cleanup/diagnostic evidence retains
 its own release identities in the [verification guide](tests/README.md).
 
 Private HTTPS requires the [configuration and trust setup](docs/private-lan.md).

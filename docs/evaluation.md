@@ -52,8 +52,10 @@ bounded outstanding requests replace four after client saturation caused three
 unsent requests. The invalid attempt is retained. The rate, duration and acceptance
 targets are unchanged; all resource scenarios are repeated under the amended plan.
 
-The initial candidate remains 25m/32Mi requests and 250m/128Mi limits. No measured
-preset is claimed before results exist. A resulting reference profile must retain
+The collection candidate was 25m/32Mi requests and 250m/128Mi limits. The
+[retained results](../tests/experiments/2026-11-26-core-evaluation.md) derive the
+source reference preset of 25m/48Mi requests with unchanged limits. Collection
+plans retain their original candidate values; they are not rewritten after measurement. A resulting reference profile must retain
 headroom above observed peaks, satisfy zero OOM/restarts and state the tested
 workloads/rate. Two small HTTP applications cannot justify sizing arbitrary apps.
 Any proposed change is validated in the following manual-release/native cycle.

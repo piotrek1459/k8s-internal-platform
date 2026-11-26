@@ -1,0 +1,37 @@
+[
+  {
+    "hostEpoch": 1795698347.8842354,
+    "clientBeforeEpoch": 1795698347.841502,
+    "clientAfterEpoch": 1795698347.892545,
+    "offsetHostMinusClient": 0.0172119140625,
+    "uncertaintySeconds": 0.025521516799926758
+  },
+  {
+    "hostEpoch": 1795698347.9363165,
+    "clientBeforeEpoch": 1795698347.8925598,
+    "clientAfterEpoch": 1795698347.944961,
+    "offsetHostMinusClient": 0.017556190490722656,
+    "uncertaintySeconds": 0.02620065212249756
+  },
+  {
+    "hostEpoch": 1795698347.9883773,
+    "clientBeforeEpoch": 1795698347.94497,
+    "clientAfterEpoch": 1795698347.996045,
+    "offsetHostMinusClient": 0.01786971092224121,
+    "uncertaintySeconds": 0.025537610054016113
+  },
+  {
+    "hostEpoch": 1795698348.038506,
+    "clientBeforeEpoch": 1795698347.996057,
+    "clientAfterEpoch": 1795698348.0458272,
+    "offsetHostMinusClient": 0.017563819885253906,
+    "uncertaintySeconds": 0.024885058403015137
+  },
+  {
+    "hostEpoch": 1795698348.1756463,
+    "clientBeforeEpoch": 1795698348.0458372,
+    "clientAfterEpoch": 1795698348.184027,
+    "offsetHostMinusClient": 0.0607142448425293,
+    "uncertaintySeconds": 0.06909489631652832
+  }
+]

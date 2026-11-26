@@ -1,0 +1,260 @@
+[
+  {
+    "operationID": "op_fcb1f2630ff73eda",
+    "stage": "deploy-v1",
+    "repetition": 1,
+    "state": "succeeded",
+    "events": [
+      {
+        "at": "2026-11-25T19:03:20.965370909Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:03:20.975490683Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:03:20.98156915Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:03:25.247401507Z",
+        "stage": "applied"
+      },
+      {
+        "at": "2026-11-25T19:03:25.279589866Z",
+        "stage": "succeeded"
+      }
+    ]
+  },
+  {
+    "operationID": "op_bc6a89c675de7363",
+    "stage": "update-v2",
+    "repetition": 1,
+    "state": "succeeded",
+    "events": [
+      {
+        "at": "2026-11-25T19:03:25.758730331Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:03:25.767722814Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:03:25.77387213Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:03:30.348109055Z",
+        "stage": "applied"
+      },
+      {
+        "at": "2026-11-25T19:03:30.381124119Z",
+        "stage": "succeeded"
+      }
+    ]
+  },
+  {
+    "operationID": "op_a6d96748ea9c0724",
+    "stage": "unhealthy-v3-and-restoration",
+    "repetition": 1,
+    "state": "failed",
+    "events": [
+      {
+        "at": "2026-11-25T19:03:30.724036801Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:03:30.73427518Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:03:30.741055563Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:08:31.320453545Z",
+        "stage": "restoring"
+      },
+      {
+        "at": "2026-11-25T19:08:32.253566633Z",
+        "stage": "restored"
+      }
+    ],
+    "backendFailureDetectionSeconds": 300.579398,
+    "backendVerifiedRestorationSeconds": 0.933113
+  },
+  {
+    "operationID": "op_de6ce8a5149aef24",
+    "stage": "deploy-v1",
+    "repetition": 2,
+    "state": "succeeded",
+    "events": [
+      {
+        "at": "2026-11-25T19:18:57.818637025Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:18:57.897544165Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:18:57.906891937Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:19:02.267968236Z",
+        "stage": "applied"
+      },
+      {
+        "at": "2026-11-25T19:19:02.288444408Z",
+        "stage": "succeeded"
+      }
+    ]
+  },
+  {
+    "operationID": "op_ca58d8861ffac26b",
+    "stage": "update-v2",
+    "repetition": 2,
+    "state": "succeeded",
+    "events": [
+      {
+        "at": "2026-11-25T19:19:02.748395313Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:19:02.758625093Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:19:02.764111082Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:19:07.330980779Z",
+        "stage": "applied"
+      },
+      {
+        "at": "2026-11-25T19:19:07.376549627Z",
+        "stage": "succeeded"
+      }
+    ]
+  },
+  {
+    "operationID": "op_1e3fcb6c65977902",
+    "stage": "unhealthy-v3-and-restoration",
+    "repetition": 2,
+    "state": "failed",
+    "events": [
+      {
+        "at": "2026-11-25T19:19:07.704186082Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:19:07.712617802Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:19:07.716686654Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:24:08.35683038Z",
+        "stage": "restoring"
+      },
+      {
+        "at": "2026-11-25T19:24:09.180814323Z",
+        "stage": "restored"
+      }
+    ],
+    "backendFailureDetectionSeconds": 300.640144,
+    "backendVerifiedRestorationSeconds": 0.823984
+  },
+  {
+    "operationID": "op_d27c1120d2a3eb09",
+    "stage": "deploy-v1",
+    "repetition": 3,
+    "state": "succeeded",
+    "events": [
+      {
+        "at": "2026-11-25T19:24:10.612451783Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:24:10.621251761Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:24:10.628265958Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:24:14.974965723Z",
+        "stage": "applied"
+      },
+      {
+        "at": "2026-11-25T19:24:14.995158533Z",
+        "stage": "succeeded"
+      }
+    ]
+  },
+  {
+    "operationID": "op_25d9babde8dac684",
+    "stage": "update-v2",
+    "repetition": 3,
+    "state": "succeeded",
+    "events": [
+      {
+        "at": "2026-11-25T19:24:15.452406893Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:24:15.460362811Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:24:15.465618468Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:24:20.031886467Z",
+        "stage": "applied"
+      },
+      {
+        "at": "2026-11-25T19:24:20.048783431Z",
+        "stage": "succeeded"
+      }
+    ]
+  },
+  {
+    "operationID": "op_6cb4c9d03ee8cc38",
+    "stage": "unhealthy-v3-and-restoration",
+    "repetition": 3,
+    "state": "failed",
+    "events": [
+      {
+        "at": "2026-11-25T19:24:20.413877824Z",
+        "stage": "queued"
+      },
+      {
+        "at": "2026-11-25T19:24:20.504086938Z",
+        "stage": "running"
+      },
+      {
+        "at": "2026-11-25T19:24:20.512276796Z",
+        "stage": "applying"
+      },
+      {
+        "at": "2026-11-25T19:29:21.264932722Z",
+        "stage": "restoring"
+      },
+      {
+        "at": "2026-11-25T19:29:22.138668147Z",
+        "stage": "restored"
+      }
+    ],
+    "backendFailureDetectionSeconds": 300.752656,
+    "backendVerifiedRestorationSeconds": 0.873736
+  }
+]

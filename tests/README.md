@@ -260,8 +260,10 @@ published installer, trusted separate-workstation LAN browser/API workflows and
 same-version/reboot retention. The [v0.1.10 native report](experiments/2026-11-25-v0.1.10-native.md) completes
 the published recovery/security gate: forced failure/retry across replacements,
 unchanged failed/frozen evidence, controlled disclosure scans and reinstall/reboot
-retention. Resource calibration, repeated evaluation and the agreed human timed
-walkthrough remain open. Helper failures and unconfirmed request timeouts remain
+retention. The [controlled evaluation](experiments/2026-11-26-core-evaluation.md)
+retains repeated resource/system data, explicit native preset checks and old/source
+chart request traces. Published new-default/draining validation and the human
+timed walkthrough remain open. Helper failures and unconfirmed request timeouts remain
 separate observations rather than passing attempts or claimed fixes.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
@@ -340,7 +342,9 @@ An untrusted CA and unknown SNI are refused. Browser login/deployment and URL
 reload use a controlled leaf-SPKI pin without modifying system trust; management
 cookies must be Secure/HttpOnly/SameSite=Strict and absent on the app hostname.
 The actual app serves HTTP v1, then v2 and rolled-back v1 through its route with
-bounded convergence. App-origin CORS/CSRF attempts cannot revoke the management
+bounded convergence. An independent CA/hostname-verified HTTP/1.1 observer records
+actual requests across update and rollback; every sampled request must succeed,
+and the sanitized trace is retained even on failure. App-origin CORS/CSRF attempts cannot revoke the management
 session. Tracked Internal/LAN/hostname transitions verify actual HTTPS, effective
 URLs and removed-route responses. Reserved/duplicate names, an Internal app, an
 excluded source with forged forwarding headers and IPv6 are negative cases.

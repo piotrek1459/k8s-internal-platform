@@ -1,0 +1,47 @@
+[
+  {
+    "stage": "update-1",
+    "version": "v2",
+    "submittedEpochSeconds": 1795700955.532587,
+    "verifiedEpochSeconds": 1795700960.1343298,
+    "liveLifecycle": [
+      {
+        "preStop": {
+          "sleep": {
+            "seconds": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "stage": "update-2",
+    "version": "v1",
+    "submittedEpochSeconds": 1795700975.5325916,
+    "verifiedEpochSeconds": 1795700981.7298179,
+    "liveLifecycle": [
+      {
+        "preStop": {
+          "sleep": {
+            "seconds": 5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "stage": "update-3",
+    "version": "v2",
+    "submittedEpochSeconds": 1795700995.5325947,
+    "verifiedEpochSeconds": 1795701002.000776,
+    "liveLifecycle": [
+      {
+        "preStop": {
+          "sleep": {
+            "seconds": 5
+          }
+        }
+      }
+    ]
+  }
+]

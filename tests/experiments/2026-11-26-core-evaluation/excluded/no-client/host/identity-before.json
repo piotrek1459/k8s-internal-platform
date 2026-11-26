@@ -1,0 +1,58 @@
+{
+  "appID": "app_fb7ec573e46b6d8d",
+  "containers": [
+    {
+      "podUID": "fdda388c-8325-46c5-8785-fc0e863a0198",
+      "containerID": "014bea6f489b96ae81a4b561a314128c36be5d6cab97c28eb6570d2f6a938bb3",
+      "imageID": "platform.local/http-demo@sha256:c431060eb604f5c2362df3beb2cb278bafe0245b1cf73da430cc9b296b0b6097",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podfdda388c_8325_46c5_8785_fc0e863a0198.slice/cri-containerd-014bea6f489b96ae81a4b561a314128c36be5d6cab97c28eb6570d2f6a938bb3.scope"
+    }
+  ],
+  "host": {
+    "machine": "aarch64",
+    "kernel": "6.18.60+rpt-rpi-2712",
+    "OS": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"\n",
+    "memory": {
+      "MemTotal": 8453816320,
+      "MemAvailable": 7156776960,
+      "SwapTotal": 2147467264,
+      "SwapFree": 2147467264
+    },
+    "disk": {
+      "total": 30201556992,
+      "used": 8822104064,
+      "free": 20074594304
+    },
+    "Kubernetes": {
+      "clientVersion": {
+        "major": "1",
+        "minor": "36",
+        "gitVersion": "v1.36.5+k3s1",
+        "gitCommit": "3dd98cc58ec34991e7e59b93663eee2e26fc1f65",
+        "gitTreeState": "clean",
+        "buildDate": "2026-09-30T16:04:19Z",
+        "goVersion": "go1.26.8",
+        "compiler": "gc",
+        "platform": "linux/arm64"
+      },
+      "kustomizeVersion": "v5.8.1",
+      "serverVersion": {
+        "major": "1",
+        "minor": "36",
+        "emulationMajor": "1",
+        "emulationMinor": "36",
+        "minCompatibilityMajor": "1",
+        "minCompatibilityMinor": "35",
+        "gitVersion": "v1.36.5+k3s1",
+        "gitCommit": "3dd98cc58ec34991e7e59b93663eee2e26fc1f65",
+        "gitTreeState": "clean",
+        "buildDate": "2026-09-30T16:04:19Z",
+        "goVersion": "go1.26.8",
+        "compiler": "gc",
+        "platform": "linux/arm64"
+      }
+    },
+    "Helm": "v3.22.0+g144ca65"
+  }
+}

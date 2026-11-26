@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-5311c1efa2d7-load.apps.home.arpa:8443/",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 20,
+  "durationSeconds": 60,
+  "warmupSeconds": 10,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795699736.077875,
+  "finishedEpochSeconds": 1795699806.041474,
+  "requests": 1200,
+  "successful": 1200,
+  "successRate": 1.0,
+  "latencyMilliseconds": {
+    "count": 1200,
+    "minimum": 4.362584,
+    "median": 10.100875,
+    "p95": 80.583625,
+    "maximum": 102.796792
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 1200,
+  "complete": true,
+  "targetsPassed": true,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

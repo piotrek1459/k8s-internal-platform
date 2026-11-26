@@ -1,0 +1,43 @@
+[
+  {
+    "stage": "update-submitted",
+    "epochSeconds": 1795699938.7869272
+  },
+  {
+    "stage": "update-ready",
+    "epochSeconds": 1795699943.78117,
+    "operationID": "op_e4d1e95d1c850067"
+  },
+  {
+    "stage": "broker-delete-submitted",
+    "epochSeconds": 1795699958.8920872,
+    "podUID": "f4b5fcce-80ff-4562-bd01-66faa653ac95"
+  },
+  {
+    "stage": "broker-ready",
+    "epochSeconds": 1795699962.6637688,
+    "replacementPodUID": "67a3259d-9706-4cae-8bd0-c67b66b36ca9",
+    "APIProbeFailures": [
+      {
+        "epochSeconds": 1795699961.0984027,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795699961.4989963,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795699961.8991444,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795699962.2995756,
+        "errorClass": "RuntimeError"
+      }
+    ]
+  },
+  {
+    "stage": "original-session-valid-after-replacement",
+    "epochSeconds": 1795699962.6642225
+  }
+]
