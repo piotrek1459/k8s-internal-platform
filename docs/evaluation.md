@@ -18,7 +18,8 @@ accounts, history and installation data are preserved.
 
 Three repetitions alternate API/manual Helm order. Both methods use the same
 released demo image, first-party chart, values, probes, resource settings and
-readiness/actual-HTTP completion condition. The manual chart is copied from the
+readiness/actual-HTTP completion condition. Application/release IDs and LAN
+hostnames differ by owned fixture; the other workload settings match. The manual chart is copied from the
 release's exact Git source; stored Helm chart/configuration identities are checked
 against the API deployment. Baseline preparation and authentication precede timing.
 Both methods run on the Pi to avoid attributing SSH/client startup overhead to one

@@ -28,8 +28,9 @@ validation checks timestamps, identities, counter continuity and request counts.
 
 ## Cached API versus manual Helm system time
 
-Both methods ran on the Pi with identical released images, stored chart/configuration,
-probes/resources and actual Service-HTTP completion. Three repetitions alternated
+Both methods ran on the Pi with identical released images and stored chart,
+matching non-identity workload values, probes/resources and actual Service-HTTP
+completion. Application/release IDs differ by owned fixture. Three repetitions alternated
 method order. Authentication/preparation preceded timing. These durations exclude
 human decisions and do not measure usability.
 
