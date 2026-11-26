@@ -48,6 +48,12 @@ spec:
         - name: application
           image: {{ include "application.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Allow endpoint/proxy changes to propagate while the old process serves.
+          # Kubelet implements this hook; the image needs no shell/sleep binary.
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}

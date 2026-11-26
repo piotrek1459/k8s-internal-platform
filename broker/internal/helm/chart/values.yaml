@@ -22,11 +22,12 @@ secretRefs: []
 imagePullSecrets: []
 # - name: registry-credentials
 
-# Provisional demonstration settings; Raspberry Pi measurements remain required.
+# Reference small-HTTP profile measured on the Pi; arbitrary images require sizing.
+# Evidence: tests/experiments/2026-11-26-core-evaluation.md
 resources:
   requests:
     cpu: 25m
-    memory: 32Mi
+    memory: 48Mi
   limits:
     cpu: 250m
     memory: 128Mi

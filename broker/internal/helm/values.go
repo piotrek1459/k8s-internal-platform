@@ -114,9 +114,9 @@ func pullSecretValues(credentialID string) []any {
 }
 
 func resourceValues(r platform.ResourceRequirements) map[string]any {
-	// Defaults match the chart's provisional preset when the request omits values,
+	// Defaults match the chart's measured small-HTTP reference profile when omitted,
 	// so Helm's schema (which requires requests/limits) is always satisfied.
-	req := map[string]any{"cpu": orDefault(r.CPURequest, "25m"), "memory": orDefault(r.MemoryRequest, "32Mi")}
+	req := map[string]any{"cpu": orDefault(r.CPURequest, "25m"), "memory": orDefault(r.MemoryRequest, "48Mi")}
 	lim := map[string]any{"cpu": orDefault(r.CPULimit, "250m"), "memory": orDefault(r.MemoryLimit, "128Mi")}
 	return map[string]any{"requests": req, "limits": lim}
 }
