@@ -93,6 +93,9 @@ plan repeats the entire resource matrix with the original rate/targets;
 client saturation, late scheduling, missing responses and unexpected content
 remain failures. This controlled client does not measure browser usability or
 all browser protocols. After sampling, delete the fixture with `cleanup.py`.
+The client flushes raw observations as they complete; interruption leaves a partial
+trace without a passing summary. Existing traces/sampling directories are refused.
+
 Repeat three times for each workload, alternating workload order. Avoid unrelated
 load during this matrix. Retain raw JSONL alongside summaries.
 
@@ -116,6 +119,8 @@ python3 tools/pulls.py "${evaluation_args[@]}" --output pulls-01 \
 
 Three pull-required/cached pairs retain native manifest/config/layer inventories,
 missing compressed layer bytes, unpacked native snapshot-chain identities, Kubernetes pull events and actual image identity.
+The actual runtime snapshotter is verified; both compressed content and unpacked
+native layer-chain snapshots must be absent before a fully cold pull is claimed.
 A missing image reference with all layers present is **not** a fully cold pull;
 fully cold, partial-cache and all-content-cached results remain separate. A reset
 refusal is evidence and must not be bypassed by broad pruning.
@@ -133,3 +138,7 @@ python3 tests/evaluation/human.py --input .local/human.csv --output .local/human
 A paired result requires both methods, distinct order positions and valid active/
 elapsed time and step counts. The supplied observations remain a single
 administrator case study. Automated/backend timings cannot fill the human record.
+
+Curated raw JSONL may be retained as deterministic `.jsonl.gz` files. The analyzer
+reads those when the corresponding plaintext file is absent and hashes the expanded
+bytes, allowing the committed dataset to be recomputed without a cluster.

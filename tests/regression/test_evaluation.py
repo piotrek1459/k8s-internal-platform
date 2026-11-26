@@ -1,6 +1,7 @@
 """Evidence completeness and fixture ownership, without a cluster or credentials."""
 import importlib.util
 import json
+import gzip
 from pathlib import Path
 import sys
 import tempfile
@@ -156,6 +157,10 @@ class EvaluationTests(unittest.TestCase):
             result = analyzer.analyze(host, client, fixture, plan)
             self.assertFalse(result['targetsPassed'])
             self.assertFalse(result['targetChecks']['OOMKills'])
+            raw = (host/'samples.jsonl').read_bytes()
+            (host/'samples.jsonl.gz').write_bytes(gzip.compress(raw))
+            (host/'samples.jsonl').unlink()
+            self.assertFalse(analyzer.analyze(host, client, fixture, plan)['targetsPassed'])
             samples.pop();save()
             with self.assertRaises(ValueError):
                 analyzer.analyze(host, client, fixture, plan)

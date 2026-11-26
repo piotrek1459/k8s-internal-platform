@@ -2,6 +2,7 @@
 """Recompute reference resource/request results from complete raw observations."""
 import argparse
 import hashlib
+import gzip
 import json
 from pathlib import Path
 import urllib.parse
@@ -9,8 +10,13 @@ from common import describe, derive_reference_preset, load_plan, write_json
 from load import summarize
 
 
+def evidence_bytes(path):
+    path = Path(path)
+    return path.read_bytes() if path.exists() else gzip.decompress(Path(str(path) + '.gz').read_bytes())
+
+
 def rows(path):
-    return [json.loads(line) for line in Path(path).read_text().splitlines() if line.strip()]
+    return [json.loads(line) for line in evidence_bytes(path).decode().splitlines() if line.strip()]
 
 
 def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
@@ -26,7 +32,8 @@ def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
         raise ValueError('Load client targeted another application hostname')
     if not host_result['evidenceValid'] or not samples or len(samples) != host_result['sampleCount']:
         raise ValueError('Host evidence is incomplete or container identity changed')
-    if client.get('maximumOutstandingRequests') != plan['maximumOutstandingRequests']:
+    # The initial collector/plan revision fixed four slots without this JSON field.
+    if client.get('maximumOutstandingRequests', 4) != plan.get('maximumOutstandingRequests', 4):
         raise ValueError('Client concurrency differs from the selected plan revision')
     expected = plan['requestRatePerSecond'] * plan['loadedSeconds']
     total = plan['requestRatePerSecond'] * (plan['loadedSeconds'] + plan['warmupSeconds'])
@@ -112,7 +119,7 @@ def analyze(host_folder, client_folder, fixture, plan, clock_offset=0):
             'maximumRestartCount': restarts, 'maximumTemperatureCelsius': max(temperatures),
             'minimumFreeDiskBytes': disk_free, 'derivedReferencePreset': derive_reference_preset(max_cpu, memory_peak),
             'memoryPeakScope': 'Container lifetime including startup; no peak counter reset', 'humanOperatorTime': None,
-            'inputSHA256': {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in
+            'inputSHA256': {str(path): hashlib.sha256(evidence_bytes(path)).hexdigest() for path in
                 [host_folder / 'identity-before.json', host_folder / 'samples.jsonl', host_folder / 'summary.json',
                  client_folder / 'requests.jsonl', client_folder / 'summary.json']}}
 

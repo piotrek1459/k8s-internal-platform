@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import time
+import urllib.error
 from run import Experiment
 from common import write_json, content_state
 
@@ -118,6 +119,33 @@ def run(exp, allow_reset):
             row = {'repetition': repetition, 'requestedCondition': condition, 'content': inventory,
                    'readySeconds': time.monotonic() - start, 'appID': app,
                    'actualImageID': pods[0]['status']['containerStatuses'][0]['imageID']}
+            current = exp.api.get('/apps/' + app)
+            deadline = time.monotonic() + 30
+            probes = []
+            while True:
+                try:
+                    with exp.api.http.open(current['access']['url'], timeout=3) as response:
+                        status, body = response.code, response.read((1 << 20) + 1)
+                    healthy = status == 200 and len(body) <= 1 << 20 and b'Welcome to nginx!' in body
+                except urllib.error.HTTPError as error:
+                    status, healthy = error.code, False
+                    error.close()
+                probes.append({'seconds': time.monotonic() - start, 'status': status, 'expectedContent': healthy})
+                if healthy:
+                    break
+                if time.monotonic() >= deadline:
+                    raise TimeoutError('Public-image HTTPS did not converge to the expected content')
+                time.sleep(.2)
+            row['endToEndHTTPSSeconds'] = time.monotonic() - start
+            row['HTTPSProbes'] = probes
+            # Capture startup peaks even when fresh unpacking is absent from steady-state runs.
+            row['nativeContainerResources'] = []
+            for container in exp.host.containers(app):
+                directory = Path(container['cgroup'])
+                row['nativeContainerResources'].append({**container,
+                    'memoryPeakBytes': int((directory / 'memory.peak').read_text()),
+                    'memoryEvents': dict(line.split() for line in (directory / 'memory.events').read_text().splitlines()),
+                    'CPU': dict(line.split() for line in (directory / 'cpu.stat').read_text().splitlines())})
             events = exp.host.kube('-n', 'platform-apps', 'get', 'events', '--field-selector', 'involvedObject.uid=' + pods[0]['metadata']['uid'])['items']
             row['pullEvents'] = [{'reason': e.get('reason'), 'firstTimestamp': e.get('firstTimestamp'),
                                   'lastTimestamp': e.get('lastTimestamp'), 'count': e.get('count'), 'message': e.get('message')} for e in events]

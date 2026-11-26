@@ -62,8 +62,8 @@ the task. Both digests must already be imported by that release installer.
 | --- | --- |
 | Image | Published ARM64 demo v1, followed by demo v2 |
 | Port/profile/replicas | 8080 / stateless HTTP / 1 |
-| Startup/readiness paths | `/healthz` / `/readyz` |
-| Resources | The selected release's recorded reference profile; explicitly match both methods |
+| Startup/readiness | TCP startup (the current UI omits a startup path) / HTTP `/readyz` |
+| Resources | The selected release's server defaults; explicitly match them in the manual values |
 | Exposure | LAN HTTPS on the existing private listener |
 | Hostname | A different unused `eval-human-TRIAL-METHOD.apps.home.arpa` per method |
 | Verification | `/version` reports v1, then v2; after deletion the removed route returns 404 after bounded convergence |
@@ -101,10 +101,14 @@ curl --cacert "$CA" --resolve "$HOST:8443:192.168.68.227" \
 ```
 
 For the UI task, create the equivalent app through **New application**, enter
-its v1 image/port/health/resources/LAN hostname, wait for Ready and inspect the
+its v1 image/port, readiness path `/readyz` and LAN hostname, wait for Ready and inspect the
 actual `/version` response. Open that application, update the image to v2,
 verify Ready and the response, then delete it and verify its removed URL.
-Use the labels visible in the selected release if wording differs. Authentication,
+The current UI applies server resource defaults and does not expose a resource
+editor or startup-path field. The manual values therefore use those exact resource
+defaults and the same TCP startup probe. The automated backend comparison uses
+explicit HTTP startup/readiness probes for both of its methods; it is a separate
+experiment. Use the labels visible in the selected release if wording differs. Authentication,
 normal browser DNS/CA trust and connection preparation precede both timers.
 Errors, retries and route-convergence waits remain in elapsed time.
 

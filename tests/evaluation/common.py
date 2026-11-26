@@ -26,6 +26,9 @@ def load_plan(path):
         raise ValueError('Operation budget must include failure and restoration')
     if value.get('cacheConditions', {}).get('globalPruneAllowed') is not False:
         raise ValueError('Evaluation must prohibit shared-store pruning')
+    workers = value.get('maximumOutstandingRequests', 4)
+    if type(workers) is not int or not 1 <= workers <= 32:
+        raise ValueError('Client request slots must remain explicitly bounded')
     return value
 
 
