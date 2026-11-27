@@ -1,0 +1,8 @@
+{
+  "appID": "app_b2b3daf64ae0ad74",
+  "service": "app-app-b2b3daf64ae0ad74",
+  "oldPod": "app-app-b2b3daf64ae0ad74-5968b6bfb9-hhwcc",
+  "url": "https://eval-a21a9df86363-diagnose.apps.home.arpa:8443/version",
+  "oldPodUID": "86634bba-e876-4e40-ad6b-4faa0c009c45",
+  "oldPodIP": "10.42.0.65"
+}

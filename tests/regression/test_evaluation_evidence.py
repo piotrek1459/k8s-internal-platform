@@ -104,3 +104,44 @@ class PublishedReferenceEvidenceTests(unittest.TestCase):
         self.assertNotEqual(before['bootID'], after['bootID'])
         for field in report['reinstall']['identicalFields']:
             self.assertEqual(before[field], after[field], field)
+
+
+class RoutingCorrectionEvidenceTests(unittest.TestCase):
+    def test_control_failure_and_candidate_requests_recompute_from_raw_evidence(self):
+        data = ROOT/'tests/experiments/2026-11-27-rollout-routing'
+        report = json.loads(Path(str(data) + '.json').read_text())
+        self.assertTrue(report['publishedReleaseAcceptancePending'])
+        self.assertIsNone(report['humanOperatorTime'])
+        self.assertFalse(report['coreEvaluationComplete'])
+        for name, expected in report['artifacts'].items():
+            with self.subTest(artifact=name):
+                path = data/name
+                self.assertTrue(path.resolve().is_relative_to(data.resolve()))
+                raw = path.read_bytes()
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected['SHA256'])
+                expanded = gzip.decompress(raw) if name.endswith('.gz') else raw
+                self.assertEqual(hashlib.sha256(expanded).hexdigest(), expected['expandedSHA256'])
+        self.assertEqual(len(report['cases']), 5)
+        for case in report['cases']:
+            for policy, expected in case['clients'].items():
+                records = analyzer.rows(data/case['case']/'client'/policy/'requests.jsonl')
+                actual = analyzer.summarize(records, expected_count=275, expected_total=275)
+                for key, value in actual.items():
+                    self.assertEqual(value, expected[key], (case['case'], policy, key))
+                self.assertTrue(actual['complete'])
+                self.assertTrue(actual['clientSchedulingValid'])
+                self.assertEqual(actual['successful'], 230 if case['case'] == 'control-slow' else 275)
+        fixture = json.loads((data/'native-verify/fixture.json').read_text())
+        expected_url = 'http://' + fixture['serviceSpec']['clusterIP'] + ':80'
+        configs = analyzer.rows(data/'native-verify/proxy-services.jsonl')
+        urls = {s['url'] for r in configs for service in r.get('services', []) for s in service['loadBalancer']['servers']}
+        self.assertEqual(urls, {expected_url})
+        control = json.loads((data/'control-slow/fixture.json').read_text())
+        # kubectl logs also contains ordinary startup lines; access records are JSON.
+        raw_access = gzip.decompress((data/'control-slow/proxy-access.jsonl.gz').read_bytes()).decode()
+        access = [json.loads(line) for line in raw_access.splitlines() if line.startswith('{')]
+        failures = [r for r in access if control['oldPodIP'] in r.get('ServiceAddr', '') and r.get('DownstreamStatus') != 200]
+        self.assertEqual(len(failures), 90)
+        audit = json.loads((data/'final-audit.json').read_text())
+        self.assertTrue(audit['passed'])
+        self.assertTrue(audit['originalPrivateTemplateRestored'])

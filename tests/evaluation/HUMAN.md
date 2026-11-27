@@ -1,6 +1,8 @@
 # Human timed walkthrough
 
 Human active time remains **pending** until a completed trial record is supplied.
+The trial is scheduled last, after the rollout correction passes published-release
+acceptance on the reference Pi.
 The CSV template contains no invented measurements. The expected duration is
 approximately 10–15 minutes with the environment prepared; passive image pulls
 or troubleshooting may extend it.

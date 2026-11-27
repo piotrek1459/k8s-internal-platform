@@ -269,6 +269,12 @@ failure and the human timed walkthrough remain open. Artifact integrity, raw
 resource/lifecycle recomputation and preservation of the failed continuity outcome
 run on every PR. Helper failures and unconfirmed request timeouts remain
 separate observations rather than passing attempts or claimed fixes.
+The [routing correction study](experiments/2026-11-27-rollout-routing.md) retains
+Pod/EndpointSlice/process/proxy observations and controlled delayed-provider
+comparisons. The source private HTTPS regression spans update/rollback, actual
+old-Pod retirement and a later observation interval, with endpoint refresh
+delayed to 15 seconds. Candidate/native and source CI evidence still require the
+following published-release Pi acceptance.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native

@@ -138,6 +138,8 @@ spec:
             - --entrypoints.private.forwardedheaders.insecure=false
             - --providers.file.filename=/configuration/dynamic.yaml
             - --providers.kubernetesingress=true
+            # Keep upstream addresses stable while Kubernetes replaces app Pods.
+            - --providers.kubernetesingress.nativelbbydefault=true
             - --providers.kubernetesingress.ingressclass=platform-private
             - --providers.kubernetesingress.namespaces={{ .Release.Namespace }},{{ .Values.appsNamespace }}
             - --providers.kubernetesingress.labelselector=app.kubernetes.io/part-of=k8s-internal-platform

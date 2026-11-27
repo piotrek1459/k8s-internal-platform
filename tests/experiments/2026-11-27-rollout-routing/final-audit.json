@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "runtimeRelease": "0.1.11",
+  "originalApplicationUnchanged": true,
+  "privateDeploymentUID": "cefcecdc-75f0-46aa-9e0f-fbf4ef3d8911",
+  "originalPrivateTemplateRestored": true,
+  "temporaryLoopbackAPIRemoved": true,
+  "retainedApplications": 1,
+  "configurationSecrets": 0,
+  "registryCredentials": 0,
+  "actualHTTPSVersion": "v1"
+}

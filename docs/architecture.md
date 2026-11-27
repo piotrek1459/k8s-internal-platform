@@ -189,7 +189,7 @@ flowchart TB
         end
         Platform["platform-system<br/>Service → Go UI/API"]
         KAPI["Kubernetes API"]
-        PrivateService["platform-apps<br/>Private app Service → pods"]
+        PrivateService["platform-apps<br/>Service ClusterIP → available pods"]
         PublicService["platform-apps<br/>Public app Service → pods"]
 
         Management --> Platform
@@ -203,9 +203,12 @@ flowchart TB
     Internet -->|configured router or tunnel path| PublicApps
 ```
 
-These ingress paths are planned. The current launcher exposes management and
-Internal application access through loopback forwarding; it does not configure
-the private/public listeners shown in this target diagram.
+The Linux installer implements the private paths when explicit LAN configuration
+is supplied. Current source routes the dedicated private controller through
+Service ClusterIPs, so Kubernetes endpoint selection handles Pod replacement.
+The public path remains M6 scope. The local launcher defaults to loopback
+management and Internal application forwarding. Published/source acceptance
+boundaries are recorded in the [LAN guide](private-lan.md#rollout-routing).
 
 The private management and private application paths may share a restricted
 private listener with separate allowed routes. They never inherit the public

@@ -22,6 +22,15 @@ remaining correctness and product requirements.
   [LAN guide](../../../docs/private-lan.md) for DNS/trust, permissions, renewal and
   the published-release acceptance boundary.
 
+The source private controller uses native Kubernetes load balancing: its upstream
+is each Service's stable ClusterIP. Kubernetes handles Pod endpoint changes during
+rollout; the proxy does not need a new backend-address configuration for every Pod
+replacement. The application shutdown hook still permits endpoint convergence and
+in-flight completion. Connection reuse can distribute traffic unevenly across
+replicas; native Service routing does not promise fairness per HTTP request.
+Published v0.1.11 used Pod-address routing and failed native rollout continuity.
+The source correction requires its following manual release and Pi acceptance.
+
 ## Values
 
 | Value | Behavior |

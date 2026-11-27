@@ -27,8 +27,8 @@ HTTP did not meet its zero-error target: 373/375 requests succeeded.
 The [native report](tests/experiments/2026-11-27-v0.1.11-native.md) retains exact release/image identities and raw results.
 The [preceding evaluation](tests/experiments/2026-11-26-core-evaluation.md) records
 the profile derivation and old/source-chart comparison; earlier recovery/security
-acceptance retains its own release identity. Rollout-continuity diagnosis/correction
-and the [human timed walkthrough](tests/evaluation/HUMAN.md) remain open in [status](docs/status.md).
+acceptance retains its own release identity. The source [Service-routing correction](tests/experiments/2026-11-27-rollout-routing.md)
+requires manual release and Pi acceptance; the [human timed walkthrough](tests/evaluation/HUMAN.md) remains open in [status](docs/status.md).
 
 Private HTTPS requires the [configuration and trust setup](docs/private-lan.md).
 Public hosting, application volumes, verified backup restoration and cross-version

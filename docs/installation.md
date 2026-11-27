@@ -26,7 +26,8 @@ unrelated K3s installations are refused; this installer is for a dedicated host.
 Published v0.1.11 passed fresh installation, all applicable read-only `--check`
 variants, normal trusted private LAN browser/API flows, measured defaults and
 same-version retention and automatic reboot recovery. Rolling application HTTP
-failed its zero-error target (373/375); diagnosis and correction remain open.
+failed its zero-error target (373/375). The [source correction](../tests/experiments/2026-11-27-rollout-routing.md)
+requires its following manual release and published Pi acceptance.
 The [native report](../tests/experiments/2026-11-27-v0.1.11-native.md) retains release/source identities, checksums and
 raw evidence. The preceding [v0.1.10 report](../tests/experiments/2026-11-25-v0.1.10-native.md)
 retains the forced restoration/verification and controlled disclosure matrix;

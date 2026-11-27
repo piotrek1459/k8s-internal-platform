@@ -18,7 +18,7 @@ embedded first-party Helm chart.
 | Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Published v0.1.8–v0.1.11 LAN browser/cookie acceptance passed; login throttling/password recovery remain outstanding. |
 | UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Released diagnostics include bounded application logs/events and drift inspection; the complete configuration editor remains planned. LAN selection is enabled only when private ingress is explicitly configured. |
 | Application lifecycle | Digest-pinned deployment, update, scale 2/0/1, restart, reapply, rollback and deletion with retained history. | Replicas on one node do not provide host availability. Application data volumes remain M5 scope. |
-| Resource profile and draining | Published v0.1.11 application chart 0.1.3 and broker defaults use measured 25m/48Mi requests and 250m/128Mi limits. A native five-second preStop sleep allows routing propagation before shutdown; lifecycle drift is reported. | Six joined Pi load trials passed 7,200 steady requests; cold/cached pulls and native explicit-profile checks are retained. Direct-Helm source comparison reduced observed rollout failures from 31/375 to 0/375 across three updates. Published embedded-chart/default checks passed on native Go/Nginx. Rollout continuity failed its zero-error target: 373/375 requests; diagnosis/correction remain open. |
+| Resource profile and draining | Published v0.1.11 application chart 0.1.3 and broker defaults use measured 25m/48Mi requests and 250m/128Mi limits. A native five-second preStop sleep allows routing propagation before shutdown; lifecycle drift is reported. | Six joined Pi load trials passed 7,200 steady requests; cold/cached pulls and native explicit-profile checks are retained. Direct-Helm source comparison reduced observed rollout failures from 31/375 to 0/375 across three updates. Published embedded-chart/default checks passed on native Go/Nginx. Rollout continuity failed its zero-error target: 373/375 requests. The source Service-routing correction in PR #25 has controlled native/source CI evidence; published acceptance remains required. |
 | Temporary files | A Pod-local `/tmp` emptyDir, introduced in chart `0.1.1` and retained through source chart `0.1.3`, provides temporary storage with a 64Mi size limit and non-root filesystem-group access. | Published `v0.1.3` passed unpatched browser deployment of unprivileged Nginx and real HTTP verification on the Pi. The volume is ephemeral; it does not provide M5 persistence. |
 | Execution snapshots | Image digest, exact Secret references, chart version, embedded chart content digest, canonical values hash and stable restart token are recorded before apply. | A different chart artifact is refused; old chart retrieval and rollback across chart changes are not implemented. See the M7 boundary and core acceptance tracker. |
 | Recovery | Interrupted success requires target release identity, matching chart/values and healthy matching live resources. Current source clears failed-candidate fields, restores the prior route/absence and retries restoration without executing a failed candidate again. | Four external crash barriers and the restoration/disclosure matrix have disposable-cluster coverage. Published v0.1.10 passed native failed restoration/verification, guarded retry and disclosure checks; its six broker replacements retained the original session/PVC. Ambiguous/pending state remains blocked. |
@@ -81,7 +81,8 @@ normally trusted LAN browser checks and same-version/reboot retention. Applicati
 rollout continuity failed: 373/375, with one 502 and one timeout before broker
 replacement; client scheduling was valid. No app failures occurred during the
 later broker outage. The exact endpoint/proxy/process cause remains unconfirmed.
-The [native report](../tests/experiments/2026-11-27-v0.1.11-native.md) retains the failed trace. Rollout diagnosis/correction,
+The [native report](../tests/experiments/2026-11-27-v0.1.11-native.md) retains the failed trace. The [controlled routing study](../tests/experiments/2026-11-27-rollout-routing.md)
+records the source correction and native comparisons. Published correction acceptance,
 the human active-time/step trial and final M4 reconciliation remain open.
 Automated timings never supply human measurements. These remain in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16) and the
@@ -207,10 +208,12 @@ reliability. Measurements must record release/source, host, pins and conditions.
 The v0.1.11 native run is complete. Installation/default/lifecycle/load/retention
 passed; application-rollout continuity failed its zero-error target.
 
-1. Diagnose the recorded rollout failures using endpoint/proxy convergence and
-   actual process-shutdown evidence. Prepare a focused fix/regression PR, then
-   administrator merge/manual release and native validation. A longer arbitrary
-   sleep is not a verified correction; retain the original failed trace.
+1. Complete the source Service-routing correction and strengthened regression in
+   [PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25), then
+   administrator merge/manual release and native validation. Controlled Pi
+   endpoint/proxy/process observations and delayed-provider comparisons are retained
+   in the [routing study](../tests/experiments/2026-11-27-rollout-routing.md).
+   Published v0.1.11 remains failed; temporary candidate tests do not close its gate.
 2. Perform the [short timed walkthrough](../tests/evaluation/HUMAN.md) and retain
    actual Helm/UI steps, active/elapsed time, outcomes and equivalent preparation.
 3. Review those results, reconcile the final M4 checklist and close issue #16 when

@@ -255,6 +255,28 @@ suite exercises actual traffic and refuses an untrusted CA. Its browser uses an
 isolated fixture-certificate pin, with CA/hostname validation checked independently;
 it does not install OS trust or establish native second-device browser acceptance.
 
+## Rollout routing
+
+Current source configures `providers.kubernetesIngress.nativeLBByDefault=true`
+on the dedicated private controller. It forwards to the managed Service ClusterIP;
+Kubernetes selects its available endpoints. Pod replacement therefore does not
+require the proxy's backend-address configuration to converge before the old
+process stops. The private class/namespace selection and source/TLS policy also
+apply to this path. See the [Traefik provider option](https://doc.traefik.io/traefik/reference/install-configuration/providers/kubernetes/kubernetes-ingress/).
+
+The five-second application shutdown hook remains useful for Kubernetes endpoint
+propagation and graceful process shutdown. Existing connections may briefly serve
+the previous version during rollout. Native Service balancing operates on
+connections; proxy connection reuse can produce uneven traffic across replicas.
+These finite HTTP tests do not establish a guarantee for arbitrary images,
+long requests or host failure.
+
+Published v0.1.11 used Pod-address routing and returned 373/375 successful requests
+in native rollout acceptance. The [controlled correction study](../tests/experiments/2026-11-27-rollout-routing.md)
+separates the original failed trace, temporary native experiments and source CI
+from the following required manual-release/native gate. The original Pi controller
+configuration is restored after those experiments.
+
 ## SSH fallback, renewal and diagnosis
 
 After enabling Secure cookies, preserve TLS when forwarding administration.

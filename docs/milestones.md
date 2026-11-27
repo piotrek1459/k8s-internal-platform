@@ -40,7 +40,7 @@ Older dated reports remain evidence only for their recorded source and scope.
 | Milestone | Completed implementation/evidence | Remaining acceptance or implementation |
 | --- | --- | --- |
 | M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | No open listed M0 item; the repeated baseline and published v0.1.11 installer checks passed. Human operator comparison remains M4. |
-| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Published defaults passed; rollout continuity failed (373/375). Endpoint/proxy/process diagnosis and correction remain open. |
+| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Published defaults passed; v0.1.11 rollout continuity failed (373/375). The Service-routing correction in PR #25 requires manual release and published Pi acceptance. |
 | M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source crash/restoration/disclosure matrix. | No open listed M2 acceptance item; request-availability evaluation remains M4. |
 | M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source queued/running refresh, native v0.1.7 Secret cleanup/retry and v0.1.8 LAN HTTPS/browser/URL acceptance. | No open listed M3 acceptance item. The installer gate passed in v0.1.9; broader failure/security work remains under M2/M4. |
 | M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | Published rollout continuity (373/375 failed its target), the human active-time/step trial and final evaluation reconciliation; system/default/retention checks passed. |
@@ -94,7 +94,8 @@ probes, resources, ownership and private routes.
 verified, including native LAN routing. Resource calibration and explicit native
 profile checks are retained. Source chart 0.1.3 adds native shutdown delay and
 requires Kubernetes 1.34+. [Published v0.1.11](../tests/experiments/2026-11-27-v0.1.11-native.md) passed default/hook checks,
-but rollout continuity failed (373/375); diagnosis/correction remain open.
+but rollout continuity failed (373/375). The source correction in PR #25 requires
+manual release and published Pi acceptance.
 
 ## M2 — Durable backend (core)
 
@@ -177,14 +178,14 @@ Application data volumes remain outside this milestone.
 - [x] Report owned workload/route drift against frozen intent without automatic overwrite or configuration values. **Evidence:** field/ownership/route unit matrix and real-cluster image/env/resources/probe/replica/Service-port drift, plus explicit Reapply and HTTP verification. Guarded Service-list repair preserves identity/address; pending/foreign ownership remains blocked. See the [source report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md).
 - [x] Retain the predefined targets/repetitions, equivalent cached API/manual Helm system comparison, resource/pull observations, environment identities and raw results. **Evidence:** [calibration dataset](../tests/experiments/2026-11-26-core-evaluation.md) and [v0.1.11 repetition](../tests/experiments/2026-11-27-v0.1.11-native.md).
 - [x] Validate the measured defaults and native hook presence through the unmodified published embedded platform chart on the reference Pi. **Evidence:** v0.1.11 omitted-resource Go/Nginx checks, load/lifecycle, reinstall/reboot and final cleanup audit.
-- [ ] Accept published application-rollout HTTP continuity after diagnosis/correction. **Evidence:** v0.1.11 returned 373/375 (one 502, one timeout) before broker replacement; the later broker outage had no app failures. The zero-error target remains failed and the original trace is retained.
+- [ ] Accept published application-rollout HTTP continuity after correction. **Evidence:** v0.1.11 returned 373/375 (one 502, one timeout) before broker replacement; the later broker outage had no app failures. [PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25) implements Service routing and observes actual Pod retirement with a delayed provider. The [controlled native study](../tests/experiments/2026-11-27-rollout-routing.md) retains observations and comparisons; administrator merge/manual release and published Pi validation remain required. The original failed trace is retained.
 - [ ] Complete the human portion of the [minimum core evaluation](#minimum-core-evaluation-m4). **Acceptance:** actual Helm/UI operator steps and active/elapsed time, outcomes and equivalent task/cache preparation are recorded and reviewed. The [walkthrough](../tests/evaluation/HUMAN.md) is prepared; the CSV remains unfilled.
 
 **Completion boundary:** supported healthy lifecycle and failed-update restoration
 are verified. The new failure/interruption matrix has source-cluster evidence;
 published v0.1.10 native acceptance is complete. The repeated system/resource
 dataset and native source-chart drain comparison are retained. Published v0.1.11 default/hook checks passed, but application-rollout HTTP
-continuity failed. Rollout diagnosis/correction, the human walkthrough and final
+continuity failed. Published acceptance of the source correction, the human walkthrough and final
 evaluation reconciliation remain open. M5–M8 do not replace these core obligations.
 
 ## M5 — Application persistence and backup (extension)
@@ -289,8 +290,8 @@ compatibility passed in v0.1.3.
 
 1. Published v0.1.10 completed native recovery/security acceptance; PR #24 and
    published v0.1.11 passed measured-profile/default/lifecycle/load/retention checks.
-2. Diagnose/correct the native rollout continuity failure through a focused PR,
-   administrator merge/manual release and native validation; retain the failed trace.
+2. Complete source Service-routing correction PR #25, then administrator
+   merge/manual release and native validation; retain the failed v0.1.11 trace.
 3. Perform the agreed human walkthrough and retain actual steps, active/elapsed
    time, outcomes and equivalent preparation. Automation does not supply this record.
 4. Review the results and reconcile final M4 evidence before closing issue #16.
