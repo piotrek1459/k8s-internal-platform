@@ -1,0 +1,55 @@
+[
+  {
+    "stage": "update-submitted",
+    "epochSeconds": 1795771122.5135148
+  },
+  {
+    "stage": "update-ready",
+    "epochSeconds": 1795771127.5017078,
+    "operationID": "op_154e8aacf14db429"
+  },
+  {
+    "stage": "broker-delete-submitted",
+    "epochSeconds": 1795771142.6225016,
+    "podUID": "b218f4e5-cd56-4944-b8e7-ad5f6076e7e5"
+  },
+  {
+    "stage": "broker-ready",
+    "epochSeconds": 1795771147.5984492,
+    "replacementPodUID": "f401fb19-6c77-48c4-9c86-c03f01adb585",
+    "APIProbeFailures": [
+      {
+        "epochSeconds": 1795771144.8514788,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795771145.2343483,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795771145.6333742,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795771146.0369973,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795771146.4367893,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795771146.833266,
+        "errorClass": "RuntimeError"
+      },
+      {
+        "epochSeconds": 1795771147.2342203,
+        "errorClass": "RuntimeError"
+      }
+    ]
+  },
+  {
+    "stage": "original-session-valid-after-replacement",
+    "epochSeconds": 1795771147.5989308
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "check": "Omitted API resources rendered published 25m/48Mi requests, 250m/128Mi limits and native five-second drain; exact ARM64 broker image matched",
+    "epochSeconds": 1795767947.6909606,
+    "app": "app_fe284cf63840b391",
+    "resources": {
+      "requests": {
+        "cpu": "25m",
+        "memory": "48Mi"
+      },
+      "limits": {
+        "cpu": "250m",
+        "memory": "128Mi"
+      }
+    }
+  },
+  {
+    "check": "Published v2 update and stateless scaling 2/0/1 passed",
+    "epochSeconds": 1795767965.8629808
+  },
+  {
+    "check": "Digest-stable restart replaced Pods; explicit rollback restored actual HTTPS v1",
+    "epochSeconds": 1795767976.5306218
+  },
+  {
+    "check": "One healthy owned LAN application retained for repeated evaluation and persistence checks",
+    "epochSeconds": 1795767976.5403194
+  }
+]

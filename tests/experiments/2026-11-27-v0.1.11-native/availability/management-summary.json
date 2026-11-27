@@ -1,0 +1,27 @@
+{
+  "url": "https://platform.home.arpa:8443/readyz",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 5,
+  "durationSeconds": 75,
+  "warmupSeconds": 0,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795771107.618277,
+  "finishedEpochSeconds": 1795771182.439052,
+  "requests": 375,
+  "successful": 352,
+  "successRate": 0.9386666666666666,
+  "latencyMilliseconds": {
+    "count": 352,
+    "minimum": 8.354666,
+    "median": 12.888417,
+    "p95": 94.680958,
+    "maximum": 631.677625
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 375,
+  "complete": true,
+  "targetsPassed": false,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

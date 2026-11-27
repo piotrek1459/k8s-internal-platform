@@ -1,0 +1,123 @@
+{
+  "passed": true,
+  "profile": {
+    "cpuRequest": "25m",
+    "cpuLimit": "250m",
+    "memoryRequest": "48Mi",
+    "memoryLimit": "128Mi"
+  },
+  "validationPlanSHA256": "a0859f7cbb07219dfca94dfb318af5d7bfb4e1f7b49a6ef67b7ce5f492e7333f",
+  "cases": [
+    {
+      "workload": "go",
+      "appID": "app_415262cbeff5e604",
+      "actualHTTPS": 200,
+      "replicas": 2,
+      "resources": {
+        "requests": {
+          "cpu": "25m",
+          "memory": "48Mi"
+        },
+        "limits": {
+          "cpu": "250m",
+          "memory": "128Mi"
+        }
+      },
+      "containers": [
+        {
+          "podUID": "1c519f79-aa9b-469b-83f1-e408174224c3",
+          "containerID": "e6126c78a9b8ca5748db171176eb7850602388fe70923b7d7686c318a98d2ee4",
+          "imageID": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+          "restartCount": 0,
+          "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod1c519f79_aa9b_469b_83f1_e408174224c3.slice/cri-containerd-e6126c78a9b8ca5748db171176eb7850602388fe70923b7d7686c318a98d2ee4.scope",
+          "lifetimeMemoryPeakBytes": 6815744
+        },
+        {
+          "podUID": "9d4d2054-a89f-41ef-9d8b-91da95aaa06c",
+          "containerID": "0e315ce5efadd9039349d50b7f854c66c5d45c4d5454b2edd1e86a64790cc645",
+          "imageID": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+          "restartCount": 0,
+          "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod9d4d2054_a89f_41ef_9d8b_91da95aaa06c.slice/cri-containerd-0e315ce5efadd9039349d50b7f854c66c5d45c4d5454b2edd1e86a64790cc645.scope",
+          "lifetimeMemoryPeakBytes": 6766592
+        }
+      ],
+      "HTTPSProbes": [
+        {
+          "epochSeconds": 1795771200.6451178,
+          "status": 404,
+          "expectedContent": false
+        },
+        {
+          "epochSeconds": 1795771200.932083,
+          "status": 404,
+          "expectedContent": false
+        },
+        {
+          "epochSeconds": 1795771201.1400497,
+          "status": 404,
+          "expectedContent": false
+        },
+        {
+          "epochSeconds": 1795771201.347939,
+          "status": 404,
+          "expectedContent": false
+        },
+        {
+          "epochSeconds": 1795771201.5565157,
+          "status": 200,
+          "expectedContent": true
+        }
+      ]
+    },
+    {
+      "workload": "nginx",
+      "appID": "app_6901f4338f8541de",
+      "actualHTTPS": 200,
+      "replicas": 2,
+      "resources": {
+        "requests": {
+          "cpu": "25m",
+          "memory": "48Mi"
+        },
+        "limits": {
+          "cpu": "250m",
+          "memory": "128Mi"
+        }
+      },
+      "containers": [
+        {
+          "podUID": "498dcc2f-013d-49bd-9c1f-6c5ad6de34fb",
+          "containerID": "184b938518c5dfe1954ad4134d7fedfd66aa4a51f6a1afbbaf85f28372bd05bf",
+          "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+          "restartCount": 0,
+          "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod498dcc2f_013d_49bd_9c1f_6c5ad6de34fb.slice/cri-containerd-184b938518c5dfe1954ad4134d7fedfd66aa4a51f6a1afbbaf85f28372bd05bf.scope",
+          "lifetimeMemoryPeakBytes": 9027584
+        },
+        {
+          "podUID": "45437ba5-e691-42da-b6e3-fa82bf5d6511",
+          "containerID": "2ce777ff986875d082b2aa434717e0842a27b2aa1915bc2767c479c06bd397b4",
+          "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+          "restartCount": 0,
+          "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod45437ba5_e691_42da_b6e3_fa82bf5d6511.slice/cri-containerd-2ce777ff986875d082b2aa434717e0842a27b2aa1915bc2767c479c06bd397b4.scope",
+          "lifetimeMemoryPeakBytes": 9027584
+        }
+      ],
+      "HTTPSProbes": [
+        {
+          "epochSeconds": 1795771213.7554119,
+          "status": 200,
+          "expectedContent": true
+        }
+      ]
+    }
+  ],
+  "originalApplicationsRetained": true,
+  "owned": {
+    "runID": "81c384258d41",
+    "applications": {},
+    "releases": {}
+  },
+  "publishedDefaultValidationPassed": true,
+  "resourcesOmittedAtCreation": true,
+  "nativeSleepSeconds": 5
+}

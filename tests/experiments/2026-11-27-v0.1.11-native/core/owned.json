@@ -1,0 +1,10 @@
+{
+  "runID": "faa8c8a28e70",
+  "applications": {
+    "app_fe284cf63840b391": {
+      "name": "eval-faa8c8a28e70-retained",
+      "operation": "op_79ba2644f68bc59e"
+    }
+  },
+  "releases": {}
+}

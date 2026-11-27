@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "release": "0.1.11",
+  "system": {
+    "architecture": "arm64",
+    "capabilities": [
+      "private-ingress",
+      "image-inspection",
+      "configuration-secrets",
+      "registry-credentials",
+      "cluster-observation",
+      "workload-diagnostics",
+      "drift-inspection"
+    ],
+    "clusterReachable": true,
+    "privateNetwork": {
+      "managementHostname": "platform.home.arpa",
+      "applicationDomain": "apps.home.arpa",
+      "httpsPort": 8443
+    },
+    "version": "0.1.11"
+  },
+  "platformImage": "platform.local/platform-broker@sha256:bf918efbded7810116d33d2eb95673c2e0e98e2753471bee5c57f122c4f663ca",
+  "application": {
+    "access": {
+      "hostname": "demo.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_0aee98e6eb9fd661",
+      "url": "https://demo.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_0aee98e6eb9fd661",
+    "id": "app_fe284cf63840b391",
+    "lastSuccessfulRevision": "rev_0aee98e6eb9fd661",
+    "name": "eval-faa8c8a28e70-retained",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 7,
+      "observedAt": "2026-11-27T09:26:17.438772173Z",
+      "stale": false
+    },
+    "version": 7
+  },
+  "applicationResources": {
+    "deployments": [
+      {
+        "name": "app-app-fe284cf63840b391",
+        "uid": "e58578cd-1cf5-4f18-8734-601a0370865a"
+      }
+    ],
+    "services": [
+      {
+        "name": "app-app-fe284cf63840b391",
+        "uid": "ac82eb00-c7b4-47b4-92a9-2fd4f1ca9d7f"
+      }
+    ],
+    "ingresses": [
+      {
+        "name": "app-app-fe284cf63840b391",
+        "uid": "95a3e6e6-9215-409d-abbd-5f84af7d9a4b"
+      }
+    ],
+    "pods": [
+      {
+        "name": "app-app-fe284cf63840b391-9f5b9cb77-n49m8",
+        "uid": "2d75a5e8-3505-4167-8461-c93447714246"
+      }
+    ]
+  },
+  "retainedApplications": 1,
+  "activeOperations": 0,
+  "configurationSecrets": 0,
+  "registryCredentials": 0,
+  "applicationVolumes": 0,
+  "remainingBenchmarkFixtures": 0,
+  "allNoncompletedPodsReady": true,
+  "actualHTTPSVersion": "v1",
+  "humanTrialStatus": "pending"
+}

@@ -70,7 +70,7 @@ the task. Both digests must already be imported by that release installer.
 | Cache | Exact v1/v2 native digests imported and verified before either task |
 
 A template for the manual file is supplied as
-[human-values.example.yaml](human-values.example.yaml). It reflects the proposed measured profile in this PR; for an older release,
+[human-values.example.yaml](human-values.example.yaml). It reflects the published v0.1.11 measured profile; for an older release,
 adjust the prepared defaults to that release before timing. Editing its empty task
 fields is included in active time. The UI's equivalent name/image/hostname entry
 is also included. Common profile defaults may be prepared for both methods; note

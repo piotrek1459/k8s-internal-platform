@@ -1,0 +1,22 @@
+[
+  {
+    "offsetHostMinusClient": 0.024175405502319336,
+    "uncertaintySeconds": 0.06549406051635742
+  },
+  {
+    "offsetHostMinusClient": 0.00012636184692382812,
+    "uncertaintySeconds": 0.04034256935119629
+  },
+  {
+    "offsetHostMinusClient": -0.01566767692565918,
+    "uncertaintySeconds": 0.02415597438812256
+  },
+  {
+    "offsetHostMinusClient": -0.014969587326049805,
+    "uncertaintySeconds": 0.024695992469787598
+  },
+  {
+    "offsetHostMinusClient": -0.013684749603271484,
+    "uncertaintySeconds": 0.027098536491394043
+  }
+]

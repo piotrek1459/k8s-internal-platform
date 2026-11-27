@@ -59,7 +59,11 @@ source reference preset of 25m/48Mi requests with unchanged limits. Collection
 plans retain their original candidate values; they are not rewritten after measurement. A resulting reference profile must retain
 headroom above observed peaks, satisfy zero OOM/restarts and state the tested
 workloads/rate. Two small HTTP applications cannot justify sizing arbitrary apps.
-Any proposed change is validated in the following manual-release/native cycle.
+The measured defaults and hook presence passed [published v0.1.11 checks](../tests/experiments/2026-11-27-v0.1.11-native.md)
+under a separately retained plan fixed before collection. Application-rollout HTTP
+failed its zero-error target (373/375); this remains a failed result requiring
+diagnosis/correction. The original calibration plan/results are unchanged; human
+measurements remain pending.
 
 ## Targets and interpretation
 

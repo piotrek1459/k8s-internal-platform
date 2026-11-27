@@ -1,0 +1,2884 @@
+{
+  "schemaVersion": 1,
+  "runtimeRelease": "0.1.11",
+  "runtimeCommit": "33d9290849be0ca3fed8a1156cbac942f91557f2",
+  "releaseRun": 45903602211,
+  "releaseE2E": {
+    "tests": 27,
+    "failures": 0,
+    "skips": 0
+  },
+  "ARM64Images": {
+    "platform": "platform.local/platform-broker@sha256:bf918efbded7810116d33d2eb95673c2e0e98e2753471bee5c57f122c4f663ca",
+    "v1": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+    "v2": "platform.local/http-demo@sha256:a83f3f1d6315db2427f48d721bd144a81870160259daef40fe2dc57d91c086a6",
+    "v3": "platform.local/http-demo@sha256:ae87df3129ef8e1c808724e86acbc040c5d2bef8ca41fdb39e1a32c955127ebc"
+  },
+  "resourcePlanSHA256": "1bf64f6f57a1d3f24235c1b04b6f5971d814fd0b8c233fa9a3c6b079ac308809",
+  "clockOffset": {
+    "offsetHostMinusClient": -0.01566767692565918,
+    "uncertaintySeconds": 0.02415597438812256
+  },
+  "clockOffsetsAfterResourceSeries": [
+    {
+      "offsetHostMinusClient": -0.025748491287231445,
+      "uncertaintySeconds": 0.023801565170288086
+    },
+    {
+      "offsetHostMinusClient": -0.027412891387939453,
+      "uncertaintySeconds": 0.0226515531539917
+    },
+    {
+      "offsetHostMinusClient": -0.027380943298339844,
+      "uncertaintySeconds": 0.023076415061950684
+    },
+    {
+      "offsetHostMinusClient": -0.02884840965270996,
+      "uncertaintySeconds": 0.021437883377075195
+    },
+    {
+      "offsetHostMinusClient": -0.02766895294189453,
+      "uncertaintySeconds": 0.02207648754119873
+    }
+  ],
+  "lifecycle": {
+    "acceptance": {
+      "passed": true,
+      "missingScenarios": [],
+      "failedTargets": []
+    },
+    "runID": "531857f237b8",
+    "planSHA256": "1bf64f6f57a1d3f24235c1b04b6f5971d814fd0b8c233fa9a3c6b079ac308809",
+    "methods": {
+      "api": {
+        "delete": {
+          "count": 3,
+          "minimum": 5.632469,
+          "median": 6.239633,
+          "p95": 6.310893,
+          "maximum": 6.310893
+        },
+        "deploy-v1": {
+          "count": 3,
+          "minimum": 4.641785,
+          "median": 4.700467,
+          "p95": 4.718307,
+          "maximum": 4.718307
+        },
+        "unhealthy-v3-and-restoration": {
+          "count": 3,
+          "minimum": 301.705094,
+          "median": 301.812612,
+          "p95": 301.891814,
+          "maximum": 301.891814
+        },
+        "update-v2": {
+          "count": 3,
+          "minimum": 4.985511,
+          "median": 4.991175,
+          "p95": 5.201719,
+          "maximum": 5.201719
+        }
+      },
+      "helm": {
+        "delete": {
+          "count": 3,
+          "minimum": 0.228101,
+          "median": 0.232386,
+          "p95": 0.341012,
+          "maximum": 0.341012
+        },
+        "deploy-v1": {
+          "count": 3,
+          "minimum": 4.523572,
+          "median": 4.527022,
+          "p95": 4.551858,
+          "maximum": 4.551858
+        },
+        "unhealthy-v3-and-restoration": {
+          "count": 3,
+          "minimum": 302.809296,
+          "median": 302.81472,
+          "p95": 302.970633,
+          "maximum": 302.970633
+        },
+        "update-v2": {
+          "count": 3,
+          "minimum": 4.533775,
+          "median": 4.572842,
+          "p95": 4.575513,
+          "maximum": 4.575513
+        }
+      }
+    },
+    "failureScenariosIncluded": true,
+    "humanOperatorTime": null,
+    "humanTrialStatus": "pending",
+    "coreEvaluationComplete": false,
+    "ownedFixturesRemaining": {
+      "runID": "531857f237b8",
+      "applications": {},
+      "releases": {}
+    },
+    "originalApplicationsRetained": true
+  },
+  "resources": [
+    {
+      "appID": "app_db1abc322ab5b248",
+      "image": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+      "clockOffsetSecondsHostMinusClient": -0.01566767692565918,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 5.9845,
+          "median": 11.171125,
+          "p95": 84.053834,
+          "maximum": 103.930958
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.6039998559952126,
+            "maximum": 0.6429981603675069
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 2310144,
+            "median": 3383296.0,
+            "p95": 5455872,
+            "maximum": 5455872
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 6
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 4.350008296982378,
+            "median": 6.131980994283455,
+            "p95": 7.049001680612966,
+            "maximum": 8.210003914834935
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 6455296,
+            "median": 8404992,
+            "p95": 10616832,
+            "maximum": 11042816
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 449
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5025125628140703,
+            "median": 1.5018796992481203,
+            "p95": 3.508771929824561,
+            "maximum": 5.2109181141439205
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1314963456,
+            "median": 1348231168.0,
+            "p95": 1409695744,
+            "maximum": 1409712128
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.5037783375314862,
+            "median": 1.7587939698492463,
+            "p95": 3.4739454094292803,
+            "maximum": 7.5566750629722925
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1309556736,
+            "median": 1315405824,
+            "p95": 1319862272,
+            "maximum": 1320599552
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 11042816,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 45.2,
+      "minimumFreeDiskBytes": 19974975488,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "go-1"
+    },
+    {
+      "appID": "app_ea59414238c9d35f",
+      "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "clockOffsetSecondsHostMinusClient": -0.01566767692565918,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 4.968708,
+          "median": 10.378833499999999,
+          "p95": 81.970167,
+          "maximum": 104.941875
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.4059994192131721,
+            "maximum": 0.44998186899760706
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 6012928,
+            "median": 7651328.0,
+            "p95": 9224192,
+            "maximum": 9224192
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 4
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 3.9480018825539984,
+            "median": 4.679005577809307,
+            "p95": 5.0879915084980585,
+            "maximum": 5.200983879854574
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 7946240,
+            "median": 9273344,
+            "p95": 9814016,
+            "maximum": 10010624
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 440
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5012531328320802,
+            "median": 1.4981296758104738,
+            "p95": 7.94044665012407,
+            "maximum": 8.457711442786069
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1326039040,
+            "median": 1336311808.0,
+            "p95": 1377337344,
+            "maximum": 1380974592
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.759493670886076,
+            "median": 1.7587939698492463,
+            "p95": 2.75,
+            "maximum": 3.7220843672456576
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1323335680,
+            "median": 1325858816,
+            "p95": 1328218112,
+            "maximum": 1328529408
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10305536,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 45.75,
+      "minimumFreeDiskBytes": 19974881280,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "nginx-1"
+    },
+    {
+      "appID": "app_f3877608bbdf53e5",
+      "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "clockOffsetSecondsHostMinusClient": -0.01566767692565918,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 4.726667,
+          "median": 10.254021,
+          "p95": 81.878667,
+          "maximum": 102.314875
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.4289812832892318,
+            "maximum": 0.4320109179394964
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 5849088,
+            "median": 6963200.0,
+            "p95": 9060352,
+            "maximum": 9060352
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 4
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 4.142996048931075,
+            "median": 4.645904740379411,
+            "p95": 5.07200846482736,
+            "maximum": 5.143862644048658
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 7421952,
+            "median": 8896512,
+            "p95": 9830400,
+            "maximum": 9945088
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 426
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5025125628140703,
+            "median": 1.5,
+            "p95": 2.756892230576441,
+            "maximum": 2.756892230576441
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1323237376,
+            "median": 1334140928.0,
+            "p95": 1368915968,
+            "maximum": 1369243648
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 1.0050251256281406,
+            "median": 1.7587939698492463,
+            "p95": 2.9925187032418954,
+            "maximum": 8.521303258145364
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1319993344,
+            "median": 1322434560,
+            "p95": 1325137920,
+            "maximum": 1325432832
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 11468800,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 45.2,
+      "minimumFreeDiskBytes": 19974725632,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "nginx-2"
+    },
+    {
+      "appID": "app_ddac4a8e4d19e0fb",
+      "image": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+      "clockOffsetSecondsHostMinusClient": -0.01566767692565918,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 5.394625,
+          "median": 10.798771,
+          "p95": 81.248458,
+          "maximum": 104.75025
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.5569996016028392,
+            "maximum": 0.5870012595680562
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 2326528,
+            "median": 3440640.0,
+            "p95": 4456448,
+            "maximum": 4489216
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 6
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 5.586010654469785,
+            "median": 6.246991063607602,
+            "p95": 7.014013378168827,
+            "maximum": 7.567998195648624
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 6389760,
+            "median": 8863744,
+            "p95": 11255808,
+            "maximum": 11436032
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 449
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5012531328320802,
+            "median": 1.3784461152882206,
+            "p95": 2.985074626865672,
+            "maximum": 3.25
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1323401216,
+            "median": 1339449344.0,
+            "p95": 1358741504,
+            "maximum": 1360527360
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.7575757575757576,
+            "median": 2.0050125313283207,
+            "p95": 3.25,
+            "maximum": 5.985037406483791
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1318486016,
+            "median": 1323352064,
+            "p95": 1327284224,
+            "maximum": 1327497216
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 11468800,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 46.3,
+      "minimumFreeDiskBytes": 19974512640,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "go-2"
+    },
+    {
+      "appID": "app_1fee953e42217e0b",
+      "image": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+      "clockOffsetSecondsHostMinusClient": -0.01566767692565918,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 5.549292,
+          "median": 10.718313,
+          "p95": 82.090208,
+          "maximum": 102.287459
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.58199986124042,
+            "maximum": 0.5900002813340575
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 2310144,
+            "median": 3407872.0,
+            "p95": 5472256,
+            "maximum": 5472256
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 4
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 5.426990942731714,
+            "median": 6.22999702930592,
+            "p95": 6.71700960875932,
+            "maximum": 7.612012703916771
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 5390336,
+            "median": 8617984,
+            "p95": 10911744,
+            "maximum": 11173888
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 439
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.5012531328320802,
+            "median": 1.5,
+            "p95": 7.231920199501247,
+            "maximum": 7.711442786069652
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1323712512,
+            "median": 1341284352.0,
+            "p95": 1375666176,
+            "maximum": 1378402304
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.5089058524173028,
+            "median": 2.0050125313283207,
+            "p95": 3.0,
+            "maximum": 3.25
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1319714816,
+            "median": 1323843584,
+            "p95": 1326776320,
+            "maximum": 1328005120
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 11255808,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 46.3,
+      "minimumFreeDiskBytes": 19974356992,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "go-3"
+    },
+    {
+      "appID": "app_ce266daa24d287a6",
+      "image": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+      "clockOffsetSecondsHostMinusClient": -0.01566767692565918,
+      "targetsPassed": true,
+      "targetChecks": {
+        "requests": true,
+        "OOMKills": true,
+        "restarts": true,
+        "temperature": true,
+        "diskHeadroom": true
+      },
+      "requests": {
+        "requests": 1200,
+        "successful": 1200,
+        "successRate": 1.0,
+        "latencyMilliseconds": {
+          "count": 1200,
+          "minimum": 5.0335,
+          "median": 10.120416500000001,
+          "p95": 80.356333,
+          "maximum": 103.875333
+        },
+        "clientSchedulingValid": true,
+        "expectedRequests": 1200,
+        "complete": true,
+        "targetsPassed": true,
+        "protocol": "HTTP/1.1",
+        "humanOperatorTime": null
+      },
+      "phases": {
+        "idle": {
+          "cpuMillicores": {
+            "count": 30,
+            "minimum": 0.0,
+            "median": 0.0,
+            "p95": 0.38300200892548475,
+            "maximum": 0.46100230814182064
+          },
+          "memoryCurrentBytes": {
+            "count": 30,
+            "minimum": 5849088,
+            "median": 6938624.0,
+            "p95": 9060352,
+            "maximum": 9060352
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 2
+        },
+        "loaded": {
+          "cpuMillicores": {
+            "count": 59,
+            "minimum": 4.082,
+            "median": 4.67000111341503,
+            "p95": 5.122995114331136,
+            "maximum": 5.197983889152871
+          },
+          "memoryCurrentBytes": {
+            "count": 59,
+            "minimum": 7045120,
+            "median": 8945664,
+            "p95": 9781248,
+            "maximum": 9977856
+          },
+          "throttledMicroseconds": 0,
+          "throttledPeriods": 0,
+          "periods": 433
+        }
+      },
+      "hostPhases": {
+        "idle": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 30,
+            "minimum": 0.25125628140703515,
+            "median": 1.2515664160401,
+            "p95": 6.982543640897756,
+            "maximum": 7.6923076923076925
+          },
+          "unavailableMemoryBytes": {
+            "count": 30,
+            "minimum": 1323253760,
+            "median": 1339064320.0,
+            "p95": 1359888384,
+            "maximum": 1361379328
+          },
+          "usedSwapBytes": {
+            "count": 30,
+            "minimum": 0,
+            "median": 0.0,
+            "p95": 0,
+            "maximum": 0
+          }
+        },
+        "loaded": {
+          "cpuBusyPercentAcrossAllCores": {
+            "count": 59,
+            "minimum": 0.5050505050505051,
+            "median": 1.7632241813602014,
+            "p95": 2.9925187032418954,
+            "maximum": 3.2338308457711444
+          },
+          "unavailableMemoryBytes": {
+            "count": 59,
+            "minimum": 1321795584,
+            "median": 1323843584,
+            "p95": 1326989312,
+            "maximum": 1327726592
+          },
+          "usedSwapBytes": {
+            "count": 59,
+            "minimum": 0,
+            "median": 0,
+            "p95": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "hostScope": "Whole host including K3s, platform, retained demo and collectors; not broker-only RSS",
+      "maximumLifetimeContainerMemoryPeakBytes": 10059776,
+      "maximumOOMKills": 0,
+      "maximumRestartCount": 0,
+      "maximumTemperatureCelsius": 45.75,
+      "minimumFreeDiskBytes": 19974262784,
+      "derivedReferencePreset": {
+        "cpuRequest": "25m",
+        "cpuLimit": "250m",
+        "memoryRequest": "32Mi",
+        "memoryLimit": "128Mi"
+      },
+      "memoryPeakScope": "Container lifetime including startup; no peak counter reset",
+      "humanOperatorTime": null,
+      "case": "nginx-3"
+    }
+  ],
+  "coldAndCachedPulls": {
+    "runs": [
+      {
+        "repetition": 1,
+        "requestedCondition": "pull-required",
+        "content": {
+          "condition": "compressed-content-absent",
+          "missingContent": [
+            {
+              "digest": "sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+              "size": 6791,
+              "kind": "index-or-manifest"
+            },
+            {
+              "digest": "sha256:4d831b13e3a78d153ba888f43a784a519944cb8f65a0fad07219a42e5db59456",
+              "size": 2614,
+              "kind": "manifest"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.config.v1+json",
+              "digest": "sha256:cdccc05ccd31521e39450b201be8f452d5688a98cd5527c4a01d710052f11c69",
+              "size": 14031,
+              "kind": "config"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+              "size": 4187659,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+              "size": 4678026,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+              "size": 2795,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+              "size": 628,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+              "size": 967,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+              "size": 405,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+              "size": 1203,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+              "size": 1399,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+              "size": 17065846,
+              "kind": "layer"
+            }
+          ],
+          "fullyColdPullProven": false,
+          "snapshotInventoryMeasured": true,
+          "cachedNativeChainIDs": [
+            "sha256:04dfa01844a0f9de7ff41283faa7ec0af5ab1a82e6239a78858e69963097c13c",
+            "sha256:0ec31686a791bf17248c7420f0bd82227da6c54715adb87433f5c1732ce49071",
+            "sha256:1b349a3334531b575b01d409540dd8aca14ef29abddacd50f36643d7c949db4b",
+            "sha256:519fe884539e33bfb6a0443f5ef8483f81edc00c0508a9efa57f8b826a9523dc",
+            "sha256:6c03c80d0cb80766f5fc8f445c7e7642536ab2e094db3634033188d63fadba5f",
+            "sha256:c1c14a94fbdccd1f63e2f2a6d4824e62e524d3644d47d77844e2e45e34306d3d",
+            "sha256:ce92c881469bb0b0c50a75334ab0b68da336a67c283dcfa141710db36e860665",
+            "sha256:eb6859292c16aa10cc347e73f907681efe309315a5ef211a882c5133fa2f8c80",
+            "sha256:fd3ed05a9674c536ddc200474a25cc4b8e316cd57493aedf5e7b6454c7e7e433"
+          ],
+          "missingLayerBytes": 25938928,
+          "totalLayerBytes": 25938928,
+          "presentDescriptors": 0,
+          "totalDescriptors": 12
+        },
+        "readySeconds": 6.835539227991831,
+        "appID": "app_451d3d9719373ab5",
+        "actualImageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+        "endToEndHTTPSSeconds": 6.852746302000014,
+        "HTTPSProbes": [
+          {
+            "seconds": 6.8527441899932455,
+            "status": 200,
+            "expectedContent": true
+          }
+        ],
+        "nativeContainerResources": [
+          {
+            "podUID": "a9c5450c-9006-46aa-865f-c0219e61ef12",
+            "containerID": "a81edcff23b6558f562a4eb3fec94d23025accb93401a8c45231014b380617d8",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-poda9c5450c_9006_46aa_865f_c0219e61ef12.slice/cri-containerd-a81edcff23b6558f562a4eb3fec94d23025accb93401a8c45231014b380617d8.scope",
+            "memoryPeakBytes": 8978432,
+            "memoryEvents": {
+              "low": "0",
+              "high": "0",
+              "max": "0",
+              "oom": "0",
+              "oom_kill": "0",
+              "oom_group_kill": "0"
+            },
+            "CPU": {
+              "usage_usec": "36419",
+              "user_usec": "20232",
+              "system_usec": "16186",
+              "nice_usec": "0",
+              "nr_periods": "5",
+              "nr_throttled": "1",
+              "throttled_usec": "61353",
+              "nr_bursts": "0",
+              "burst_usec": "0"
+            }
+          }
+        ],
+        "pullEvents": [
+          {
+            "reason": "Scheduled",
+            "firstTimestamp": null,
+            "lastTimestamp": null,
+            "count": null,
+            "message": "Successfully assigned platform-apps/app-app-451d3d9719373ab5-5fc5bfbfd9-l22nt to k8s-platform"
+          },
+          {
+            "reason": "Pulling",
+            "firstTimestamp": "2026-11-27T09:16:26Z",
+            "lastTimestamp": "2026-11-27T09:16:26Z",
+            "count": 1,
+            "message": "Pulling image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\""
+          },
+          {
+            "reason": "Pulled",
+            "firstTimestamp": "2026-11-27T09:16:28Z",
+            "lastTimestamp": "2026-11-27T09:16:28Z",
+            "count": 1,
+            "message": "Successfully pulled image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\" in 2.223s (2.223s including waiting). Image size: 25962364 bytes."
+          },
+          {
+            "reason": "Created",
+            "firstTimestamp": "2026-11-27T09:16:28Z",
+            "lastTimestamp": "2026-11-27T09:16:28Z",
+            "count": 1,
+            "message": "Container created"
+          },
+          {
+            "reason": "Started",
+            "firstTimestamp": "2026-11-27T09:16:28Z",
+            "lastTimestamp": "2026-11-27T09:16:28Z",
+            "count": 1,
+            "message": "Container started"
+          }
+        ]
+      },
+      {
+        "repetition": 1,
+        "requestedCondition": "cached",
+        "content": {
+          "condition": "partial-cache",
+          "missingContent": [
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+              "size": 4187659,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+              "size": 4678026,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+              "size": 2795,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+              "size": 628,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+              "size": 967,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+              "size": 405,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+              "size": 1203,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+              "size": 1399,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+              "size": 17065846,
+              "kind": "layer"
+            }
+          ],
+          "fullyColdPullProven": false,
+          "snapshotInventoryMeasured": true,
+          "cachedNativeChainIDs": [
+            "sha256:04dfa01844a0f9de7ff41283faa7ec0af5ab1a82e6239a78858e69963097c13c",
+            "sha256:0ec31686a791bf17248c7420f0bd82227da6c54715adb87433f5c1732ce49071",
+            "sha256:1b349a3334531b575b01d409540dd8aca14ef29abddacd50f36643d7c949db4b",
+            "sha256:519fe884539e33bfb6a0443f5ef8483f81edc00c0508a9efa57f8b826a9523dc",
+            "sha256:6c03c80d0cb80766f5fc8f445c7e7642536ab2e094db3634033188d63fadba5f",
+            "sha256:c1c14a94fbdccd1f63e2f2a6d4824e62e524d3644d47d77844e2e45e34306d3d",
+            "sha256:ce92c881469bb0b0c50a75334ab0b68da336a67c283dcfa141710db36e860665",
+            "sha256:eb6859292c16aa10cc347e73f907681efe309315a5ef211a882c5133fa2f8c80",
+            "sha256:fd3ed05a9674c536ddc200474a25cc4b8e316cd57493aedf5e7b6454c7e7e433"
+          ],
+          "missingLayerBytes": 25938928,
+          "totalLayerBytes": 25938928,
+          "presentDescriptors": 3,
+          "totalDescriptors": 12
+        },
+        "readySeconds": 4.542991716996767,
+        "appID": "app_20738106019c59a4",
+        "actualImageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+        "endToEndHTTPSSeconds": 4.560301161007374,
+        "HTTPSProbes": [
+          {
+            "seconds": 4.560298939002678,
+            "status": 200,
+            "expectedContent": true
+          }
+        ],
+        "nativeContainerResources": [
+          {
+            "podUID": "0c6d451f-2422-44ae-84ea-8ff60b936133",
+            "containerID": "f7a8f774b8a4f1c9b5534c419bd482bbf659db40489df1547c2b4a6e42b060d8",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod0c6d451f_2422_44ae_84ea_8ff60b936133.slice/cri-containerd-f7a8f774b8a4f1c9b5534c419bd482bbf659db40489df1547c2b4a6e42b060d8.scope",
+            "memoryPeakBytes": 8962048,
+            "memoryEvents": {
+              "low": "0",
+              "high": "0",
+              "max": "0",
+              "oom": "0",
+              "oom_kill": "0",
+              "oom_group_kill": "0"
+            },
+            "CPU": {
+              "usage_usec": "36204",
+              "user_usec": "9672",
+              "system_usec": "26532",
+              "nice_usec": "0",
+              "nr_periods": "5",
+              "nr_throttled": "1",
+              "throttled_usec": "13713",
+              "nr_bursts": "0",
+              "burst_usec": "0"
+            }
+          }
+        ],
+        "pullEvents": [
+          {
+            "reason": "Scheduled",
+            "firstTimestamp": null,
+            "lastTimestamp": null,
+            "count": null,
+            "message": "Successfully assigned platform-apps/app-app-20738106019c59a4-7757697cc7-ghhgg to k8s-platform"
+          },
+          {
+            "reason": "Pulled",
+            "firstTimestamp": "2026-11-27T09:16:41Z",
+            "lastTimestamp": "2026-11-27T09:16:41Z",
+            "count": 1,
+            "message": "Container image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\" already present on machine and can be accessed by the pod"
+          },
+          {
+            "reason": "Created",
+            "firstTimestamp": "2026-11-27T09:16:41Z",
+            "lastTimestamp": "2026-11-27T09:16:41Z",
+            "count": 1,
+            "message": "Container created"
+          },
+          {
+            "reason": "Started",
+            "firstTimestamp": "2026-11-27T09:16:41Z",
+            "lastTimestamp": "2026-11-27T09:16:41Z",
+            "count": 1,
+            "message": "Container started"
+          }
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestedCondition": "pull-required",
+        "content": {
+          "condition": "fully-cold-content-and-snapshots",
+          "missingContent": [
+            {
+              "digest": "sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+              "size": 6791,
+              "kind": "index-or-manifest"
+            },
+            {
+              "digest": "sha256:4d831b13e3a78d153ba888f43a784a519944cb8f65a0fad07219a42e5db59456",
+              "size": 2614,
+              "kind": "manifest"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.config.v1+json",
+              "digest": "sha256:cdccc05ccd31521e39450b201be8f452d5688a98cd5527c4a01d710052f11c69",
+              "size": 14031,
+              "kind": "config"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+              "size": 4187659,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+              "size": 4678026,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+              "size": 2795,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+              "size": 628,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+              "size": 967,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+              "size": 405,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+              "size": 1203,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+              "size": 1399,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+              "size": 17065846,
+              "kind": "layer"
+            }
+          ],
+          "fullyColdPullProven": true,
+          "snapshotInventoryMeasured": true,
+          "cachedNativeChainIDs": [],
+          "missingLayerBytes": 25938928,
+          "totalLayerBytes": 25938928,
+          "presentDescriptors": 0,
+          "totalDescriptors": 12
+        },
+        "readySeconds": 8.737456788003328,
+        "appID": "app_10c8a1419d750d1b",
+        "actualImageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+        "endToEndHTTPSSeconds": 8.754714452996268,
+        "HTTPSProbes": [
+          {
+            "seconds": 8.754712713009212,
+            "status": 200,
+            "expectedContent": true
+          }
+        ],
+        "nativeContainerResources": [
+          {
+            "podUID": "827da01b-9862-4527-b436-243d63754d76",
+            "containerID": "98ff9d74c3943dedc1009efe3d038347d5316479d86b5de75b101fb3de393512",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod827da01b_9862_4527_b436_243d63754d76.slice/cri-containerd-98ff9d74c3943dedc1009efe3d038347d5316479d86b5de75b101fb3de393512.scope",
+            "memoryPeakBytes": 9240576,
+            "memoryEvents": {
+              "low": "0",
+              "high": "0",
+              "max": "0",
+              "oom": "0",
+              "oom_kill": "0",
+              "oom_group_kill": "0"
+            },
+            "CPU": {
+              "usage_usec": "34873",
+              "user_usec": "21795",
+              "system_usec": "13077",
+              "nice_usec": "0",
+              "nr_periods": "7",
+              "nr_throttled": "0",
+              "throttled_usec": "0",
+              "nr_bursts": "0",
+              "burst_usec": "0"
+            }
+          }
+        ],
+        "pullEvents": [
+          {
+            "reason": "Scheduled",
+            "firstTimestamp": null,
+            "lastTimestamp": null,
+            "count": null,
+            "message": "Successfully assigned platform-apps/app-app-10c8a1419d750d1b-695cdcf4bf-blmqh to k8s-platform"
+          },
+          {
+            "reason": "Pulling",
+            "firstTimestamp": "2026-11-27T09:16:59Z",
+            "lastTimestamp": "2026-11-27T09:16:59Z",
+            "count": 1,
+            "message": "Pulling image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\""
+          },
+          {
+            "reason": "Pulled",
+            "firstTimestamp": "2026-11-27T09:17:03Z",
+            "lastTimestamp": "2026-11-27T09:17:03Z",
+            "count": 1,
+            "message": "Successfully pulled image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\" in 4.227s (4.227s including waiting). Image size: 25962364 bytes."
+          },
+          {
+            "reason": "Created",
+            "firstTimestamp": "2026-11-27T09:17:03Z",
+            "lastTimestamp": "2026-11-27T09:17:03Z",
+            "count": 1,
+            "message": "Container created"
+          },
+          {
+            "reason": "Started",
+            "firstTimestamp": "2026-11-27T09:17:03Z",
+            "lastTimestamp": "2026-11-27T09:17:03Z",
+            "count": 1,
+            "message": "Container started"
+          }
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestedCondition": "cached",
+        "content": {
+          "condition": "all-content-cached",
+          "missingContent": [],
+          "fullyColdPullProven": false,
+          "snapshotInventoryMeasured": true,
+          "cachedNativeChainIDs": [
+            "sha256:04dfa01844a0f9de7ff41283faa7ec0af5ab1a82e6239a78858e69963097c13c",
+            "sha256:0ec31686a791bf17248c7420f0bd82227da6c54715adb87433f5c1732ce49071",
+            "sha256:1b349a3334531b575b01d409540dd8aca14ef29abddacd50f36643d7c949db4b",
+            "sha256:519fe884539e33bfb6a0443f5ef8483f81edc00c0508a9efa57f8b826a9523dc",
+            "sha256:6c03c80d0cb80766f5fc8f445c7e7642536ab2e094db3634033188d63fadba5f",
+            "sha256:c1c14a94fbdccd1f63e2f2a6d4824e62e524d3644d47d77844e2e45e34306d3d",
+            "sha256:ce92c881469bb0b0c50a75334ab0b68da336a67c283dcfa141710db36e860665",
+            "sha256:eb6859292c16aa10cc347e73f907681efe309315a5ef211a882c5133fa2f8c80",
+            "sha256:fd3ed05a9674c536ddc200474a25cc4b8e316cd57493aedf5e7b6454c7e7e433"
+          ],
+          "missingLayerBytes": 0,
+          "totalLayerBytes": 25938928,
+          "presentDescriptors": 12,
+          "totalDescriptors": 12
+        },
+        "readySeconds": 4.762962749999133,
+        "appID": "app_75e8eb0174974db5",
+        "actualImageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+        "endToEndHTTPSSeconds": 4.785162318003131,
+        "HTTPSProbes": [
+          {
+            "seconds": 4.785160337007255,
+            "status": 200,
+            "expectedContent": true
+          }
+        ],
+        "nativeContainerResources": [
+          {
+            "podUID": "a3ae3aae-5291-4818-bb03-1fdeffd6afe0",
+            "containerID": "f2891b399135d2db5ec50a1cd94cd4a0e76688213674cf9cd93b3c122a9454d3",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-poda3ae3aae_5291_4818_bb03_1fdeffd6afe0.slice/cri-containerd-f2891b399135d2db5ec50a1cd94cd4a0e76688213674cf9cd93b3c122a9454d3.scope",
+            "memoryPeakBytes": 9060352,
+            "memoryEvents": {
+              "low": "0",
+              "high": "0",
+              "max": "0",
+              "oom": "0",
+              "oom_kill": "0",
+              "oom_group_kill": "0"
+            },
+            "CPU": {
+              "usage_usec": "36044",
+              "user_usec": "15734",
+              "system_usec": "20309",
+              "nice_usec": "0",
+              "nr_periods": "7",
+              "nr_throttled": "1",
+              "throttled_usec": "20677",
+              "nr_bursts": "0",
+              "burst_usec": "0"
+            }
+          }
+        ],
+        "pullEvents": [
+          {
+            "reason": "Scheduled",
+            "firstTimestamp": null,
+            "lastTimestamp": null,
+            "count": null,
+            "message": "Successfully assigned platform-apps/app-app-75e8eb0174974db5-9ff68bf89-9ld6g to k8s-platform"
+          },
+          {
+            "reason": "Pulled",
+            "firstTimestamp": "2026-11-27T09:17:17Z",
+            "lastTimestamp": "2026-11-27T09:17:17Z",
+            "count": 1,
+            "message": "Container image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\" already present on machine and can be accessed by the pod"
+          },
+          {
+            "reason": "Created",
+            "firstTimestamp": "2026-11-27T09:17:17Z",
+            "lastTimestamp": "2026-11-27T09:17:17Z",
+            "count": 1,
+            "message": "Container created"
+          },
+          {
+            "reason": "Started",
+            "firstTimestamp": "2026-11-27T09:17:17Z",
+            "lastTimestamp": "2026-11-27T09:17:17Z",
+            "count": 1,
+            "message": "Container started"
+          }
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestedCondition": "pull-required",
+        "content": {
+          "condition": "fully-cold-content-and-snapshots",
+          "missingContent": [
+            {
+              "digest": "sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+              "size": 6791,
+              "kind": "index-or-manifest"
+            },
+            {
+              "digest": "sha256:4d831b13e3a78d153ba888f43a784a519944cb8f65a0fad07219a42e5db59456",
+              "size": 2614,
+              "kind": "manifest"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.config.v1+json",
+              "digest": "sha256:cdccc05ccd31521e39450b201be8f452d5688a98cd5527c4a01d710052f11c69",
+              "size": 14031,
+              "kind": "config"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a9986cd6f37dbddae7862a6d4be71683472e7c2ea708e87db14f8a6393c00f00",
+              "size": 4187659,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:04fa1e646fc97344378ab2eb27f5f0852434040a869ff95bc43a1220130d44a8",
+              "size": 4678026,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0cd2dfaf53a01dcbc38db4079c57ebb5dbe55514dfa8676e4acb2bf5ea5c1b4b",
+              "size": 2795,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a13b501623601157699cbc90849b0c6c89c00d01ccaf41f038157454b44c2c9a",
+              "size": 628,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:994fbca5f9709061dd661875713a4b3a9d99c95e7e19dc69637bcf0d006d096e",
+              "size": 967,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:0bb23ae5b1cbe347d32f65dbfa5168914afa9e796c0be55100910ed18c81f0e8",
+              "size": 405,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:aa7a6bd1f4f9ee9d27eba246dd6416b3e83678b36073ea6dad5fa8e66983e3fc",
+              "size": 1203,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:a2d67277492f6fe66ab03ee8415148a2f58f62ce6dc794658e6c982d84ab0c32",
+              "size": 1399,
+              "kind": "layer"
+            },
+            {
+              "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+              "digest": "sha256:9d39ace23ce6f88c7870aa6e33ddd632c42be9171e29ee1caa6c3f7800f87ba0",
+              "size": 17065846,
+              "kind": "layer"
+            }
+          ],
+          "fullyColdPullProven": true,
+          "snapshotInventoryMeasured": true,
+          "cachedNativeChainIDs": [],
+          "missingLayerBytes": 25938928,
+          "totalLayerBytes": 25938928,
+          "presentDescriptors": 0,
+          "totalDescriptors": 12
+        },
+        "readySeconds": 8.748287683993112,
+        "appID": "app_8b65b3ae290740ad",
+        "actualImageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+        "endToEndHTTPSSeconds": 8.765302721003536,
+        "HTTPSProbes": [
+          {
+            "seconds": 8.765301350998925,
+            "status": 200,
+            "expectedContent": true
+          }
+        ],
+        "nativeContainerResources": [
+          {
+            "podUID": "1a2cc505-4b3c-4244-a111-afefd139f931",
+            "containerID": "19f6cd6c162af3cec0483bdab347edca089dbe0d35c6dff19180e49771c07fed",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod1a2cc505_4b3c_4244_a111_afefd139f931.slice/cri-containerd-19f6cd6c162af3cec0483bdab347edca089dbe0d35c6dff19180e49771c07fed.scope",
+            "memoryPeakBytes": 8781824,
+            "memoryEvents": {
+              "low": "0",
+              "high": "0",
+              "max": "0",
+              "oom": "0",
+              "oom_kill": "0",
+              "oom_group_kill": "0"
+            },
+            "CPU": {
+              "usage_usec": "35710",
+              "user_usec": "31247",
+              "system_usec": "4463",
+              "nice_usec": "0",
+              "nr_periods": "5",
+              "nr_throttled": "0",
+              "throttled_usec": "0",
+              "nr_bursts": "0",
+              "burst_usec": "0"
+            }
+          }
+        ],
+        "pullEvents": [
+          {
+            "reason": "Scheduled",
+            "firstTimestamp": null,
+            "lastTimestamp": null,
+            "count": null,
+            "message": "Successfully assigned platform-apps/app-app-8b65b3ae290740ad-67dbfd97f7-srtzq to k8s-platform"
+          },
+          {
+            "reason": "Pulling",
+            "firstTimestamp": "2026-11-27T09:17:35Z",
+            "lastTimestamp": "2026-11-27T09:17:35Z",
+            "count": 1,
+            "message": "Pulling image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\""
+          },
+          {
+            "reason": "Pulled",
+            "firstTimestamp": "2026-11-27T09:17:40Z",
+            "lastTimestamp": "2026-11-27T09:17:40Z",
+            "count": 1,
+            "message": "Successfully pulled image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\" in 4.525s (4.525s including waiting). Image size: 25962364 bytes."
+          },
+          {
+            "reason": "Created",
+            "firstTimestamp": "2026-11-27T09:17:40Z",
+            "lastTimestamp": "2026-11-27T09:17:40Z",
+            "count": 1,
+            "message": "Container created"
+          },
+          {
+            "reason": "Started",
+            "firstTimestamp": "2026-11-27T09:17:40Z",
+            "lastTimestamp": "2026-11-27T09:17:40Z",
+            "count": 1,
+            "message": "Container started"
+          }
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestedCondition": "cached",
+        "content": {
+          "condition": "all-content-cached",
+          "missingContent": [],
+          "fullyColdPullProven": false,
+          "snapshotInventoryMeasured": true,
+          "cachedNativeChainIDs": [
+            "sha256:04dfa01844a0f9de7ff41283faa7ec0af5ab1a82e6239a78858e69963097c13c",
+            "sha256:0ec31686a791bf17248c7420f0bd82227da6c54715adb87433f5c1732ce49071",
+            "sha256:1b349a3334531b575b01d409540dd8aca14ef29abddacd50f36643d7c949db4b",
+            "sha256:519fe884539e33bfb6a0443f5ef8483f81edc00c0508a9efa57f8b826a9523dc",
+            "sha256:6c03c80d0cb80766f5fc8f445c7e7642536ab2e094db3634033188d63fadba5f",
+            "sha256:c1c14a94fbdccd1f63e2f2a6d4824e62e524d3644d47d77844e2e45e34306d3d",
+            "sha256:ce92c881469bb0b0c50a75334ab0b68da336a67c283dcfa141710db36e860665",
+            "sha256:eb6859292c16aa10cc347e73f907681efe309315a5ef211a882c5133fa2f8c80",
+            "sha256:fd3ed05a9674c536ddc200474a25cc4b8e316cd57493aedf5e7b6454c7e7e433"
+          ],
+          "missingLayerBytes": 0,
+          "totalLayerBytes": 25938928,
+          "presentDescriptors": 12,
+          "totalDescriptors": 12
+        },
+        "readySeconds": 4.813630063988967,
+        "appID": "app_bb2090021ccb8564",
+        "actualImageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+        "endToEndHTTPSSeconds": 5.190646401999402,
+        "HTTPSProbes": [
+          {
+            "seconds": 4.981952319998527,
+            "status": 404,
+            "expectedContent": false
+          },
+          {
+            "seconds": 5.190644623988192,
+            "status": 200,
+            "expectedContent": true
+          }
+        ],
+        "nativeContainerResources": [
+          {
+            "podUID": "ed0db773-6ba3-4f51-a688-b41b95c2f20a",
+            "containerID": "0b35a499e82d079886f4465394b355dc6617d3d4a19752ee70d4c7aea2862622",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-poded0db773_6ba3_4f51_a688_b41b95c2f20a.slice/cri-containerd-0b35a499e82d079886f4465394b355dc6617d3d4a19752ee70d4c7aea2862622.scope",
+            "memoryPeakBytes": 9142272,
+            "memoryEvents": {
+              "low": "0",
+              "high": "0",
+              "max": "0",
+              "oom": "0",
+              "oom_kill": "0",
+              "oom_group_kill": "0"
+            },
+            "CPU": {
+              "usage_usec": "36568",
+              "user_usec": "16252",
+              "system_usec": "20315",
+              "nice_usec": "0",
+              "nr_periods": "5",
+              "nr_throttled": "0",
+              "throttled_usec": "0",
+              "nr_bursts": "0",
+              "burst_usec": "0"
+            }
+          }
+        ],
+        "pullEvents": [
+          {
+            "reason": "Scheduled",
+            "firstTimestamp": null,
+            "lastTimestamp": null,
+            "count": null,
+            "message": "Successfully assigned platform-apps/app-app-bb2090021ccb8564-7d9b69b4f-6v7wt to k8s-platform"
+          },
+          {
+            "reason": "Pulled",
+            "firstTimestamp": "2026-11-27T09:17:54Z",
+            "lastTimestamp": "2026-11-27T09:17:54Z",
+            "count": 1,
+            "message": "Container image \"index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03\" already present on machine and can be accessed by the pod"
+          },
+          {
+            "reason": "Created",
+            "firstTimestamp": "2026-11-27T09:17:54Z",
+            "lastTimestamp": "2026-11-27T09:17:54Z",
+            "count": 1,
+            "message": "Container created"
+          },
+          {
+            "reason": "Started",
+            "firstTimestamp": "2026-11-27T09:17:54Z",
+            "lastTimestamp": "2026-11-27T09:17:54Z",
+            "count": 1,
+            "message": "Container started"
+          }
+        ]
+      }
+    ],
+    "originalApplicationsRetained": true,
+    "humanOperatorTime": null,
+    "globalPruneUsed": false
+  },
+  "requestContinuity": {
+    "url": "https://eval-a091d53c91d9-availability.apps.home.arpa:8443/version",
+    "addressOverride": "192.168.68.227",
+    "certificateVerification": true,
+    "ratePerSecond": 5,
+    "durationSeconds": 75,
+    "warmupSeconds": 0,
+    "maximumOutstandingRequests": 32,
+    "startedEpochSeconds": 1795771107.61825,
+    "finishedEpochSeconds": 1795771182.430915,
+    "requests": 375,
+    "successful": 373,
+    "successRate": 0.9946666666666667,
+    "latencyMilliseconds": {
+      "count": 373,
+      "minimum": 6.024875,
+      "median": 11.606416,
+      "p95": 88.850125,
+      "maximum": 153.866834
+    },
+    "clientSchedulingValid": true,
+    "expectedRequests": 375,
+    "complete": true,
+    "targetsPassed": false,
+    "protocol": "HTTP/1.1",
+    "humanOperatorTime": null
+  },
+  "publishedDefaultValidation": {
+    "passed": true,
+    "profile": {
+      "cpuRequest": "25m",
+      "cpuLimit": "250m",
+      "memoryRequest": "48Mi",
+      "memoryLimit": "128Mi"
+    },
+    "validationPlanSHA256": "a0859f7cbb07219dfca94dfb318af5d7bfb4e1f7b49a6ef67b7ce5f492e7333f",
+    "cases": [
+      {
+        "workload": "go",
+        "appID": "app_415262cbeff5e604",
+        "actualHTTPS": 200,
+        "replicas": 2,
+        "resources": {
+          "requests": {
+            "cpu": "25m",
+            "memory": "48Mi"
+          },
+          "limits": {
+            "cpu": "250m",
+            "memory": "128Mi"
+          }
+        },
+        "containers": [
+          {
+            "podUID": "1c519f79-aa9b-469b-83f1-e408174224c3",
+            "containerID": "e6126c78a9b8ca5748db171176eb7850602388fe70923b7d7686c318a98d2ee4",
+            "imageID": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod1c519f79_aa9b_469b_83f1_e408174224c3.slice/cri-containerd-e6126c78a9b8ca5748db171176eb7850602388fe70923b7d7686c318a98d2ee4.scope",
+            "lifetimeMemoryPeakBytes": 6815744
+          },
+          {
+            "podUID": "9d4d2054-a89f-41ef-9d8b-91da95aaa06c",
+            "containerID": "0e315ce5efadd9039349d50b7f854c66c5d45c4d5454b2edd1e86a64790cc645",
+            "imageID": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod9d4d2054_a89f_41ef_9d8b_91da95aaa06c.slice/cri-containerd-0e315ce5efadd9039349d50b7f854c66c5d45c4d5454b2edd1e86a64790cc645.scope",
+            "lifetimeMemoryPeakBytes": 6766592
+          }
+        ],
+        "HTTPSProbes": [
+          {
+            "epochSeconds": 1795771200.6451178,
+            "status": 404,
+            "expectedContent": false
+          },
+          {
+            "epochSeconds": 1795771200.932083,
+            "status": 404,
+            "expectedContent": false
+          },
+          {
+            "epochSeconds": 1795771201.1400497,
+            "status": 404,
+            "expectedContent": false
+          },
+          {
+            "epochSeconds": 1795771201.347939,
+            "status": 404,
+            "expectedContent": false
+          },
+          {
+            "epochSeconds": 1795771201.5565157,
+            "status": 200,
+            "expectedContent": true
+          }
+        ]
+      },
+      {
+        "workload": "nginx",
+        "appID": "app_6901f4338f8541de",
+        "actualHTTPS": 200,
+        "replicas": 2,
+        "resources": {
+          "requests": {
+            "cpu": "25m",
+            "memory": "48Mi"
+          },
+          "limits": {
+            "cpu": "250m",
+            "memory": "128Mi"
+          }
+        },
+        "containers": [
+          {
+            "podUID": "498dcc2f-013d-49bd-9c1f-6c5ad6de34fb",
+            "containerID": "184b938518c5dfe1954ad4134d7fedfd66aa4a51f6a1afbbaf85f28372bd05bf",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod498dcc2f_013d_49bd_9c1f_6c5ad6de34fb.slice/cri-containerd-184b938518c5dfe1954ad4134d7fedfd66aa4a51f6a1afbbaf85f28372bd05bf.scope",
+            "lifetimeMemoryPeakBytes": 9027584
+          },
+          {
+            "podUID": "45437ba5-e691-42da-b6e3-fa82bf5d6511",
+            "containerID": "2ce777ff986875d082b2aa434717e0842a27b2aa1915bc2767c479c06bd397b4",
+            "imageID": "docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+            "restartCount": 0,
+            "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod45437ba5_e691_42da_b6e3_fa82bf5d6511.slice/cri-containerd-2ce777ff986875d082b2aa434717e0842a27b2aa1915bc2767c479c06bd397b4.scope",
+            "lifetimeMemoryPeakBytes": 9027584
+          }
+        ],
+        "HTTPSProbes": [
+          {
+            "epochSeconds": 1795771213.7554119,
+            "status": 200,
+            "expectedContent": true
+          }
+        ]
+      }
+    ],
+    "originalApplicationsRetained": true,
+    "owned": {
+      "runID": "81c384258d41",
+      "applications": {},
+      "releases": {}
+    },
+    "publishedDefaultValidationPassed": true,
+    "resourcesOmittedAtCreation": true,
+    "nativeSleepSeconds": 5
+  },
+  "reinstall": {
+    "passed": true,
+    "sameVersionInstallerExit": 0,
+    "installedCheckExit": 0,
+    "lanConfigArgumentOmitted": true,
+    "identicalFields": [
+      "pvc",
+      "pv",
+      "administrator",
+      "criticalTables",
+      "liveApplications",
+      "platformDeployment",
+      "deployments",
+      "services",
+      "ingresses",
+      "tlsSecrets",
+      "lanConfigurationSHA256"
+    ],
+    "bootIDUnchanged": true
+  },
+  "reboot": {
+    "directVerifiedHTTPS": true,
+    "outageObserved": true,
+    "readyAfterMonitorSeconds": 69.679,
+    "secondsAfterFirstUnavailable": 61.345,
+    "SSHOrManualServiceStartBeforeReady": false,
+    "observations": [
+      {
+        "seconds": 0.035,
+        "ready": true
+      },
+      {
+        "seconds": 0.593,
+        "ready": true
+      },
+      {
+        "seconds": 1.138,
+        "ready": true
+      },
+      {
+        "seconds": 1.681,
+        "ready": true
+      },
+      {
+        "seconds": 2.232,
+        "ready": true
+      },
+      {
+        "seconds": 2.773,
+        "ready": true
+      },
+      {
+        "seconds": 3.314,
+        "ready": true
+      },
+      {
+        "seconds": 3.861,
+        "ready": true
+      },
+      {
+        "seconds": 4.403,
+        "ready": true
+      },
+      {
+        "seconds": 4.95,
+        "ready": true
+      },
+      {
+        "seconds": 5.489,
+        "ready": true
+      },
+      {
+        "seconds": 6.12,
+        "ready": true
+      },
+      {
+        "seconds": 6.663,
+        "ready": true
+      },
+      {
+        "seconds": 7.212,
+        "ready": true
+      },
+      {
+        "seconds": 7.754,
+        "ready": true
+      },
+      {
+        "seconds": 8.334,
+        "ready": false
+      },
+      {
+        "seconds": 8.983,
+        "ready": false
+      },
+      {
+        "seconds": 9.632,
+        "ready": false
+      },
+      {
+        "seconds": 10.305,
+        "ready": false
+      },
+      {
+        "seconds": 13.808,
+        "ready": false
+      },
+      {
+        "seconds": 17.313,
+        "ready": false
+      },
+      {
+        "seconds": 20.821,
+        "ready": false
+      },
+      {
+        "seconds": 24.326,
+        "ready": false
+      },
+      {
+        "seconds": 27.834,
+        "ready": false
+      },
+      {
+        "seconds": 31.342,
+        "ready": false
+      },
+      {
+        "seconds": 34.846,
+        "ready": false
+      },
+      {
+        "seconds": 35.494,
+        "ready": false
+      },
+      {
+        "seconds": 36.142,
+        "ready": false
+      },
+      {
+        "seconds": 36.792,
+        "ready": false
+      },
+      {
+        "seconds": 37.434,
+        "ready": false
+      },
+      {
+        "seconds": 38.086,
+        "ready": false
+      },
+      {
+        "seconds": 38.735,
+        "ready": false
+      },
+      {
+        "seconds": 39.386,
+        "ready": false
+      },
+      {
+        "seconds": 40.038,
+        "ready": false
+      },
+      {
+        "seconds": 40.715,
+        "ready": false
+      },
+      {
+        "seconds": 41.365,
+        "ready": false
+      },
+      {
+        "seconds": 42.014,
+        "ready": false
+      },
+      {
+        "seconds": 42.671,
+        "ready": false
+      },
+      {
+        "seconds": 43.331,
+        "ready": false
+      },
+      {
+        "seconds": 43.979,
+        "ready": false
+      },
+      {
+        "seconds": 44.632,
+        "ready": false
+      },
+      {
+        "seconds": 45.289,
+        "ready": false
+      },
+      {
+        "seconds": 45.956,
+        "ready": false
+      },
+      {
+        "seconds": 46.613,
+        "ready": false
+      },
+      {
+        "seconds": 47.268,
+        "ready": false
+      },
+      {
+        "seconds": 47.915,
+        "ready": false
+      },
+      {
+        "seconds": 48.573,
+        "ready": false
+      },
+      {
+        "seconds": 49.224,
+        "ready": false
+      },
+      {
+        "seconds": 49.872,
+        "ready": false
+      },
+      {
+        "seconds": 50.523,
+        "ready": false
+      },
+      {
+        "seconds": 51.199,
+        "ready": false
+      },
+      {
+        "seconds": 51.856,
+        "ready": false
+      },
+      {
+        "seconds": 52.506,
+        "ready": false
+      },
+      {
+        "seconds": 53.162,
+        "ready": false
+      },
+      {
+        "seconds": 53.822,
+        "ready": false
+      },
+      {
+        "seconds": 54.475,
+        "ready": false
+      },
+      {
+        "seconds": 55.132,
+        "ready": false
+      },
+      {
+        "seconds": 55.92,
+        "ready": false
+      },
+      {
+        "seconds": 56.576,
+        "ready": false
+      },
+      {
+        "seconds": 57.234,
+        "ready": false
+      },
+      {
+        "seconds": 57.892,
+        "ready": false
+      },
+      {
+        "seconds": 58.545,
+        "ready": false
+      },
+      {
+        "seconds": 59.193,
+        "ready": false
+      },
+      {
+        "seconds": 59.851,
+        "ready": false
+      },
+      {
+        "seconds": 60.508,
+        "ready": false
+      },
+      {
+        "seconds": 61.156,
+        "ready": false
+      },
+      {
+        "seconds": 61.722,
+        "ready": false
+      },
+      {
+        "seconds": 62.329,
+        "ready": false
+      },
+      {
+        "seconds": 62.951,
+        "ready": false
+      },
+      {
+        "seconds": 63.551,
+        "ready": false
+      },
+      {
+        "seconds": 64.101,
+        "ready": false
+      },
+      {
+        "seconds": 64.642,
+        "ready": false
+      },
+      {
+        "seconds": 65.185,
+        "ready": false
+      },
+      {
+        "seconds": 65.722,
+        "ready": false
+      },
+      {
+        "seconds": 66.265,
+        "ready": false
+      },
+      {
+        "seconds": 66.807,
+        "ready": false
+      },
+      {
+        "seconds": 67.343,
+        "ready": false
+      },
+      {
+        "seconds": 67.978,
+        "ready": false
+      },
+      {
+        "seconds": 68.527,
+        "ready": false
+      },
+      {
+        "seconds": 69.136,
+        "ready": false
+      },
+      {
+        "seconds": 69.679,
+        "ready": true
+      }
+    ]
+  },
+  "operatorTime": null,
+  "humanTrialStatus": "pending",
+  "coreEvaluationComplete": false,
+  "publishedDefaultValidationPending": false,
+  "publishedRolloutContinuityPassed": false,
+  "nativeAcceptancePassed": false,
+  "failedGates": [
+    "application-rollout-request-continuity"
+  ],
+  "pendingGates": [
+    "human-timed-Helm-UI-walkthrough"
+  ],
+  "artifacts": {
+    "lifecycle/environment.json": {
+      "SHA256": "53f70c6252f4b2e5a2bd26409d549d1d57acab0f398461f1359c4d27cb31dd5b",
+      "expandedSHA256": "53f70c6252f4b2e5a2bd26409d549d1d57acab0f398461f1359c4d27cb31dd5b",
+      "bytes": 7900
+    },
+    "lifecycle/eval-531857f237b8-helm-1-v1.json": {
+      "SHA256": "9548ff47e379e743d2df280ca2de5bdd915e9db8e747f6f92f48ea70c6eebd7f",
+      "expandedSHA256": "9548ff47e379e743d2df280ca2de5bdd915e9db8e747f6f92f48ea70c6eebd7f",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-1-v2.json": {
+      "SHA256": "c03ece573a0556e95beba1d9ac78c8bec435c1b8f8900622f8c2b1b6824f0cb8",
+      "expandedSHA256": "c03ece573a0556e95beba1d9ac78c8bec435c1b8f8900622f8c2b1b6824f0cb8",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-1-v3.json": {
+      "SHA256": "968fc4d1c6b531b05e6ebc701d733d6569dc00d8f79bdf4714d1da9c843b51bb",
+      "expandedSHA256": "968fc4d1c6b531b05e6ebc701d733d6569dc00d8f79bdf4714d1da9c843b51bb",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-2-v1.json": {
+      "SHA256": "0a14d8ad4e1a584959939f0b68917640c39b6367ec369875ee399886005c21cf",
+      "expandedSHA256": "0a14d8ad4e1a584959939f0b68917640c39b6367ec369875ee399886005c21cf",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-2-v2.json": {
+      "SHA256": "bb6cc8102a06edacfa1b95b1d8ce659f1402d8925860c7a56ce57ca265c43943",
+      "expandedSHA256": "bb6cc8102a06edacfa1b95b1d8ce659f1402d8925860c7a56ce57ca265c43943",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-2-v3.json": {
+      "SHA256": "0ff9418a854c121554cb5d9cecec04de1ec2087ac017ec34b624b81071898ffa",
+      "expandedSHA256": "0ff9418a854c121554cb5d9cecec04de1ec2087ac017ec34b624b81071898ffa",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-3-v1.json": {
+      "SHA256": "f0bbcb432f67131c603976d2800b8e4e5115d4d902d170ec5489faf41f0c109e",
+      "expandedSHA256": "f0bbcb432f67131c603976d2800b8e4e5115d4d902d170ec5489faf41f0c109e",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-3-v2.json": {
+      "SHA256": "5991b167bf9b0ba6bb4954ffd2c3862098087209f8ec266272feda8d008a86eb",
+      "expandedSHA256": "5991b167bf9b0ba6bb4954ffd2c3862098087209f8ec266272feda8d008a86eb",
+      "bytes": 1355
+    },
+    "lifecycle/eval-531857f237b8-helm-3-v3.json": {
+      "SHA256": "7ab73e3cb934c0d56919d2b7c3804e69991a828b7904b328d6c80dca2260d6a2",
+      "expandedSHA256": "7ab73e3cb934c0d56919d2b7c3804e69991a828b7904b328d6c80dca2260d6a2",
+      "bytes": 1355
+    },
+    "lifecycle/image-inventory.json": {
+      "SHA256": "305c3c502528cc6fce2150e39621933add523c32e4759dc0a85b39c70ee834c7",
+      "expandedSHA256": "305c3c502528cc6fce2150e39621933add523c32e4759dc0a85b39c70ee834c7",
+      "bytes": 2575
+    },
+    "lifecycle/operation-events.json": {
+      "SHA256": "10c226da333acea68b16557803ab5f68ca7877a743671990c054638cbd1e7243",
+      "expandedSHA256": "10c226da333acea68b16557803ab5f68ca7877a743671990c054638cbd1e7243",
+      "bytes": 5809
+    },
+    "lifecycle/owned.json": {
+      "SHA256": "9f6a30fff7c85274e099cc4a17278314722012e205bbe65d3b552a4069664e04",
+      "expandedSHA256": "9f6a30fff7c85274e099cc4a17278314722012e205bbe65d3b552a4069664e04",
+      "bytes": 70
+    },
+    "lifecycle/reference-chart-identity.json": {
+      "SHA256": "a9cff3b06fda8c4a3a0b140800cd7fc8993fc561b4e506f97eca031ad8d3ff75",
+      "expandedSHA256": "a9cff3b06fda8c4a3a0b140800cd7fc8993fc561b4e506f97eca031ad8d3ff75",
+      "bytes": 17982
+    },
+    "lifecycle/reference-values.json": {
+      "SHA256": "0bc2f41069e5993515e2728c8b29cdb65c01bab5e53704b51189bd2c7690651e",
+      "expandedSHA256": "0bc2f41069e5993515e2728c8b29cdb65c01bab5e53704b51189bd2c7690651e",
+      "bytes": 1351
+    },
+    "lifecycle/summary.json": {
+      "SHA256": "9d3bef766e2477c4e76d919254d1b987d1dd856b130434012e1813e8c3d57c78",
+      "expandedSHA256": "9d3bef766e2477c4e76d919254d1b987d1dd856b130434012e1813e8c3d57c78",
+      "bytes": 1874
+    },
+    "lifecycle/timings.json": {
+      "SHA256": "f680af6f02b891205ef92e037b5eddf167e7957dd0dd0fd989922a9912b0a051",
+      "expandedSHA256": "f680af6f02b891205ef92e037b5eddf167e7957dd0dd0fd989922a9912b0a051",
+      "bytes": 5414
+    },
+    "pulls/cache-before-1.json": {
+      "SHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "expandedSHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "bytes": 3578
+    },
+    "pulls/cache-before-2.json": {
+      "SHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "expandedSHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "bytes": 3578
+    },
+    "pulls/cache-before-3.json": {
+      "SHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "expandedSHA256": "43f82f0aef99234fa597b73737ec901e5317da3dddf9c48bba4e7ecb66cd187b",
+      "bytes": 3578
+    },
+    "pulls/content-1-cached.json": {
+      "SHA256": "0b6d7353cf6c4f09ac49fa3f441879e68f86522682e20894875614a8aef24ffd",
+      "expandedSHA256": "0b6d7353cf6c4f09ac49fa3f441879e68f86522682e20894875614a8aef24ffd",
+      "bytes": 2905
+    },
+    "pulls/content-1-pull-required.json": {
+      "SHA256": "040fb7f49275758d4e37e05f46e8e3a04c22e0d47ab9b61b71e118289db5be69",
+      "expandedSHA256": "040fb7f49275758d4e37e05f46e8e3a04c22e0d47ab9b61b71e118289db5be69",
+      "bytes": 3435
+    },
+    "pulls/content-2-cached.json": {
+      "SHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "expandedSHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "bytes": 987
+    },
+    "pulls/content-2-pull-required.json": {
+      "SHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "expandedSHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "bytes": 2728
+    },
+    "pulls/content-3-cached.json": {
+      "SHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "expandedSHA256": "dd90da0b645036352e3328a2f5cbedc7529b467ae689687052172be5952f1335",
+      "bytes": 987
+    },
+    "pulls/content-3-pull-required.json": {
+      "SHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "expandedSHA256": "76532629c150c5d182153cd690c6a1f726717550773e24ca3ffb84cf3fe835ff",
+      "bytes": 2728
+    },
+    "pulls/environment.json": {
+      "SHA256": "d080047ef661c169bfb5c613e1647a623c4386a3432f7733613bff5b58f1a92e",
+      "expandedSHA256": "d080047ef661c169bfb5c613e1647a623c4386a3432f7733613bff5b58f1a92e",
+      "bytes": 7900
+    },
+    "pulls/owned.json": {
+      "SHA256": "7047e4e2bc0f2857b3a2ec33077c541d902290319f2f39ae73e6e9d6ab8a157c",
+      "expandedSHA256": "7047e4e2bc0f2857b3a2ec33077c541d902290319f2f39ae73e6e9d6ab8a157c",
+      "bytes": 70
+    },
+    "pulls/pull-timings.json": {
+      "SHA256": "62805d175f912e2e37b4c57383d4480ef9507e728e44ce77a29ed93be48fe3ed",
+      "expandedSHA256": "62805d175f912e2e37b4c57383d4480ef9507e728e44ce77a29ed93be48fe3ed",
+      "bytes": 32318
+    },
+    "pulls/summary.json": {
+      "SHA256": "19b521f26bd6bf0fb796da09d9cc19dfc0daff7b9287c34a8fdd849e9842670a",
+      "expandedSHA256": "19b521f26bd6bf0fb796da09d9cc19dfc0daff7b9287c34a8fdd849e9842670a",
+      "bytes": 34119
+    },
+    "availability/app-summary.json": {
+      "SHA256": "2303f3e04b5b435e069aa417e89f370afe53326b706385db0ae8d5f75c811350",
+      "expandedSHA256": "2303f3e04b5b435e069aa417e89f370afe53326b706385db0ae8d5f75c811350",
+      "bytes": 735
+    },
+    "availability/complete.json": {
+      "SHA256": "2b887320694cff3f163d0e6168502e3b78cfd6b6e228288f8447812003ec2f44",
+      "expandedSHA256": "2b887320694cff3f163d0e6168502e3b78cfd6b6e228288f8447812003ec2f44",
+      "bytes": 162
+    },
+    "availability/environment.json": {
+      "SHA256": "f1c8ce2e1d9290250c88dcdc94affe8e63ad87f0f9a39be29b5ad757ad96d50d",
+      "expandedSHA256": "f1c8ce2e1d9290250c88dcdc94affe8e63ad87f0f9a39be29b5ad757ad96d50d",
+      "bytes": 7900
+    },
+    "availability/management-summary.json": {
+      "SHA256": "5b596685fd79bef13b94f9eb73b9eb16736d1c4c0184b5ea8fc65470de04165c",
+      "expandedSHA256": "5b596685fd79bef13b94f9eb73b9eb16736d1c4c0184b5ea8fc65470de04165c",
+      "bytes": 708
+    },
+    "availability/owned.json": {
+      "SHA256": "198be87c2869eac2938bd6fcbbb26abeb94f6dba70aa88abe1de2566d425fc13",
+      "expandedSHA256": "198be87c2869eac2938bd6fcbbb26abeb94f6dba70aa88abe1de2566d425fc13",
+      "bytes": 70
+    },
+    "availability/timeline.json": {
+      "SHA256": "96275ae1e7f87336328ec669192f8b171464a001b307ef32f37b219d2177aebd",
+      "expandedSHA256": "96275ae1e7f87336328ec669192f8b171464a001b307ef32f37b219d2177aebd",
+      "bytes": 1309
+    },
+    "defaults/environment.json": {
+      "SHA256": "ed2a452ee5b7bc9e11c0347e66bc4293636afd867a99a8f1da7214d6cba16b16",
+      "expandedSHA256": "ed2a452ee5b7bc9e11c0347e66bc4293636afd867a99a8f1da7214d6cba16b16",
+      "bytes": 7802
+    },
+    "defaults/owned.json": {
+      "SHA256": "aeee2f14be0571826c66ff5f54764efd426d893f5e25ab7a3f69084c6b07d30f",
+      "expandedSHA256": "aeee2f14be0571826c66ff5f54764efd426d893f5e25ab7a3f69084c6b07d30f",
+      "bytes": 70
+    },
+    "defaults/summary.json": {
+      "SHA256": "1e199fbc9e2758eca398dcfd9d9ee7965b61f8a618b02b68c01edb0cbac58611",
+      "expandedSHA256": "1e199fbc9e2758eca398dcfd9d9ee7965b61f8a618b02b68c01edb0cbac58611",
+      "bytes": 4435
+    },
+    "core/checks.json": {
+      "SHA256": "8aaeb216c5bea11fc439f416e7358b602d0a367aa56ad345ef90f2b4b4908c2e",
+      "expandedSHA256": "8aaeb216c5bea11fc439f416e7358b602d0a367aa56ad345ef90f2b4b4908c2e",
+      "bytes": 837
+    },
+    "core/environment.json": {
+      "SHA256": "6fc03729a770568c4df6f694546c2082f937904a480329c2363ad57195d48e8a",
+      "expandedSHA256": "6fc03729a770568c4df6f694546c2082f937904a480329c2363ad57195d48e8a",
+      "bytes": 7823
+    },
+    "core/owned.json": {
+      "SHA256": "53fc746aa76058b75e73e63340a96f3a0f380bdc807b36ebbfdeb2d2fab5d887",
+      "expandedSHA256": "53fc746aa76058b75e73e63340a96f3a0f380bdc807b36ebbfdeb2d2fab5d887",
+      "bytes": 194
+    },
+    "resources/go-1/fixture.json": {
+      "SHA256": "f459b7458c0d47a3da32f7db6539a3d5d269653a78ad615a05a0e5a48f200da4",
+      "expandedSHA256": "f459b7458c0d47a3da32f7db6539a3d5d269653a78ad615a05a0e5a48f200da4",
+      "bytes": 390
+    },
+    "resources/go-1/environment.json": {
+      "SHA256": "c881cd985b7a94f77caa778d678e4185c6a08fa2f7002cac5875419399d918c8",
+      "expandedSHA256": "c881cd985b7a94f77caa778d678e4185c6a08fa2f7002cac5875419399d918c8",
+      "bytes": 7900
+    },
+    "resources/go-1/host/identity-before.json": {
+      "SHA256": "60edc5060bd6e0bf10306994248fa8ae2d4639105062dbfaef8ab5e042079223",
+      "expandedSHA256": "60edc5060bd6e0bf10306994248fa8ae2d4639105062dbfaef8ab5e042079223",
+      "bytes": 2230
+    },
+    "resources/go-1/host/summary.json": {
+      "SHA256": "1ff84a346a9567c777d7aaf0f2864e276043a7ab6210bb4a795119a681cfdef1",
+      "expandedSHA256": "1ff84a346a9567c777d7aaf0f2864e276043a7ab6210bb4a795119a681cfdef1",
+      "bytes": 785
+    },
+    "resources/go-1/host/samples.jsonl.gz": {
+      "SHA256": "52b6ac2aa9b9c8cfc6dacf96803050511ccccaac8cb85b3980e42f0f1974a9cb",
+      "expandedSHA256": "922c07fd6de6a781ea3df30d9446dff3558b1f2529300459e4ed3b0d2f0844ee",
+      "bytes": 5960
+    },
+    "resources/go-1/client/summary.json": {
+      "SHA256": "570dc544d90fa48fd9e2c5e5749e03deb81565519a7764c8205528e609a4903c",
+      "expandedSHA256": "570dc544d90fa48fd9e2c5e5749e03deb81565519a7764c8205528e609a4903c",
+      "bytes": 716
+    },
+    "resources/go-1/client/requests.jsonl.gz": {
+      "SHA256": "a0691a4b68240cc4a84cb93b9c05d58dc17ff56fda1fb77b83f5ccb481bb84af",
+      "expandedSHA256": "15379ee99ae152c8b410a08199d96ec579769abd6952fbb552ab46fe736f9fc4",
+      "bytes": 28809
+    },
+    "resources/nginx-1/fixture.json": {
+      "SHA256": "b3ff20bc26330a007857f524b65d7e0cfc16295fc89f8bbafe9644ca6b5f0378",
+      "expandedSHA256": "b3ff20bc26330a007857f524b65d7e0cfc16295fc89f8bbafe9644ca6b5f0378",
+      "bytes": 412
+    },
+    "resources/nginx-1/environment.json": {
+      "SHA256": "f276c59755d737ab13b2e6731fc2f306a7241cd619f51d1011576c7b834dd929",
+      "expandedSHA256": "f276c59755d737ab13b2e6731fc2f306a7241cd619f51d1011576c7b834dd929",
+      "bytes": 7900
+    },
+    "resources/nginx-1/host/identity-before.json": {
+      "SHA256": "01d845e03d7c3369bd128aa5ba37126d0bd41d83a949c6670e01727166189ca0",
+      "expandedSHA256": "01d845e03d7c3369bd128aa5ba37126d0bd41d83a949c6670e01727166189ca0",
+      "bytes": 2243
+    },
+    "resources/nginx-1/host/summary.json": {
+      "SHA256": "51100c4dbfd6cb0e7e6d064e48c818c23aa0d4adb654251ee5684c4c677bddfe",
+      "expandedSHA256": "51100c4dbfd6cb0e7e6d064e48c818c23aa0d4adb654251ee5684c4c677bddfe",
+      "bytes": 798
+    },
+    "resources/nginx-1/host/samples.jsonl.gz": {
+      "SHA256": "91e915792df6f1a8fac9ca66bb657bb6c39f547273140f1194ef10175173a77a",
+      "expandedSHA256": "d72a1378834d063d2d3fd8204d6ec54889ffb54b1205c50faffc0f04adc2b6eb",
+      "bytes": 5639
+    },
+    "resources/nginx-1/client/summary.json": {
+      "SHA256": "593068056fb4eb811651686f2b1402671c1c9cd30f376f2d34477084ff79db9b",
+      "expandedSHA256": "593068056fb4eb811651686f2b1402671c1c9cd30f376f2d34477084ff79db9b",
+      "bytes": 721
+    },
+    "resources/nginx-1/client/requests.jsonl.gz": {
+      "SHA256": "4092ce1f1bb410f51598f1d90cf5b5eb3b8406b6bd964f12f05bf1420dfd897b",
+      "expandedSHA256": "fdd9d66f2cbc1d3152f31ba730767857939a3e1fe87cbb2a1e92a63d02bd0892",
+      "bytes": 27761
+    },
+    "resources/nginx-2/fixture.json": {
+      "SHA256": "84435168599d8e7542da8d70ed2708d90fd9a24f29e55d074acd6443ab7080ea",
+      "expandedSHA256": "84435168599d8e7542da8d70ed2708d90fd9a24f29e55d074acd6443ab7080ea",
+      "bytes": 412
+    },
+    "resources/nginx-2/environment.json": {
+      "SHA256": "42a418d4ec7f93686965a4ee09402bf0ecb66b1b2eca68e04242520c68bd8983",
+      "expandedSHA256": "42a418d4ec7f93686965a4ee09402bf0ecb66b1b2eca68e04242520c68bd8983",
+      "bytes": 7900
+    },
+    "resources/nginx-2/host/identity-before.json": {
+      "SHA256": "caaa38e13db961b26772ab298916b15860998098bb059acbb1af6eaac4dfb2d7",
+      "expandedSHA256": "caaa38e13db961b26772ab298916b15860998098bb059acbb1af6eaac4dfb2d7",
+      "bytes": 2243
+    },
+    "resources/nginx-2/host/summary.json": {
+      "SHA256": "f7181a1e1d8f21834dc12968a084752b1f5bbdbd6b3b79f4b592c3ab73289651",
+      "expandedSHA256": "f7181a1e1d8f21834dc12968a084752b1f5bbdbd6b3b79f4b592c3ab73289651",
+      "bytes": 795
+    },
+    "resources/nginx-2/host/samples.jsonl.gz": {
+      "SHA256": "c00eb4c6314195f37ff9eae11d305520d63a644504bf19eb7f72e20b5f4683dc",
+      "expandedSHA256": "6b0cf2c4bbc59948a1b78509bd39dae955974b7c6a50a0416dc7b53445a8e3d5",
+      "bytes": 5817
+    },
+    "resources/nginx-2/client/summary.json": {
+      "SHA256": "33ba1d740f52f744917678c3d6ad286d4439d3fbfe5ae150de10bcf733399442",
+      "expandedSHA256": "33ba1d740f52f744917678c3d6ad286d4439d3fbfe5ae150de10bcf733399442",
+      "bytes": 711
+    },
+    "resources/nginx-2/client/requests.jsonl.gz": {
+      "SHA256": "2717fb8ab8dbceffad1c09a1d5fc7389929e6c5ffae00b88d2f04707b6fc61e7",
+      "expandedSHA256": "ee5d6a7e81f90268fd24c7be973efcdf8df78a491f9053ab41e89fdf5fb50f83",
+      "bytes": 27868
+    },
+    "resources/go-2/fixture.json": {
+      "SHA256": "7b0a5c630eecda1652972fbee03d65c5a79d86663ce6c9b73c33d49540a42c0e",
+      "expandedSHA256": "7b0a5c630eecda1652972fbee03d65c5a79d86663ce6c9b73c33d49540a42c0e",
+      "bytes": 390
+    },
+    "resources/go-2/environment.json": {
+      "SHA256": "df8a7c055a0efcb38c548cdb1e0c4473ee9a7b021fab89c3323a7377545d3c34",
+      "expandedSHA256": "df8a7c055a0efcb38c548cdb1e0c4473ee9a7b021fab89c3323a7377545d3c34",
+      "bytes": 7900
+    },
+    "resources/go-2/host/identity-before.json": {
+      "SHA256": "66f2f991b8032181cb3635228e93f083329814306e9f2fe79b7172dd96422b22",
+      "expandedSHA256": "66f2f991b8032181cb3635228e93f083329814306e9f2fe79b7172dd96422b22",
+      "bytes": 2230
+    },
+    "resources/go-2/host/summary.json": {
+      "SHA256": "33565af3a9d92b67d0bf06cffc99953005680ed6c3b2f48274392fbe7a35c4bc",
+      "expandedSHA256": "33565af3a9d92b67d0bf06cffc99953005680ed6c3b2f48274392fbe7a35c4bc",
+      "bytes": 784
+    },
+    "resources/go-2/host/samples.jsonl.gz": {
+      "SHA256": "ee88854dbd835a940e0789d8f9600d492b9f769214d4cc5b6712ba26f04880ed",
+      "expandedSHA256": "a38f13fed0ce9d0dd7e077203a7ee38e6bb50a6f737b07f7ec453ac4409e298a",
+      "bytes": 6025
+    },
+    "resources/go-2/client/summary.json": {
+      "SHA256": "19479ece7c54d37dd41c763d9bd53f580b0c23e0911bbb905d44e461725a6884",
+      "expandedSHA256": "19479ece7c54d37dd41c763d9bd53f580b0c23e0911bbb905d44e461725a6884",
+      "bytes": 717
+    },
+    "resources/go-2/client/requests.jsonl.gz": {
+      "SHA256": "2297c35eb78d94e75a5032fb7b328a9f2a50e5cf9c7e98bb9d715eba9a7b9f88",
+      "expandedSHA256": "9a7ddb2d6344fd329c09c837598ad2eb3f35bab8dc15be515d1a8d05c86fccc5",
+      "bytes": 28606
+    },
+    "resources/go-3/fixture.json": {
+      "SHA256": "68479e236e27cfb5a0345286e1c504801140789ac0fc9a4228571952e94c4d52",
+      "expandedSHA256": "68479e236e27cfb5a0345286e1c504801140789ac0fc9a4228571952e94c4d52",
+      "bytes": 390
+    },
+    "resources/go-3/environment.json": {
+      "SHA256": "31a5dde19ff531dce143d8cac14b434c0110a492c05cb2edfa1edb948e048b2e",
+      "expandedSHA256": "31a5dde19ff531dce143d8cac14b434c0110a492c05cb2edfa1edb948e048b2e",
+      "bytes": 7900
+    },
+    "resources/go-3/host/identity-before.json": {
+      "SHA256": "5ad2de1520c1d901cb56f07dad3c12f5ef2301b097483276e1b5bc0ef82e1500",
+      "expandedSHA256": "5ad2de1520c1d901cb56f07dad3c12f5ef2301b097483276e1b5bc0ef82e1500",
+      "bytes": 2230
+    },
+    "resources/go-3/host/summary.json": {
+      "SHA256": "820c95d721ab5d3bac1b97c121b09c2bdc83464d4e0bb17b26eebbb782a27573",
+      "expandedSHA256": "820c95d721ab5d3bac1b97c121b09c2bdc83464d4e0bb17b26eebbb782a27573",
+      "bytes": 785
+    },
+    "resources/go-3/host/samples.jsonl.gz": {
+      "SHA256": "e878ec19e834dd5b29b23fef6f33186a48094672eef7b6a1617820243574968d",
+      "expandedSHA256": "f0da2ba73233b7ab9e154c0f10aba206eae8729280baaa1d84e5a4e309348e30",
+      "bytes": 5963
+    },
+    "resources/go-3/client/summary.json": {
+      "SHA256": "cb72bdf49caf4d10fa1fd4c77256d9f96e1dca6bac488ad40e7486c4f3c0bd09",
+      "expandedSHA256": "cb72bdf49caf4d10fa1fd4c77256d9f96e1dca6bac488ad40e7486c4f3c0bd09",
+      "bytes": 718
+    },
+    "resources/go-3/client/requests.jsonl.gz": {
+      "SHA256": "6c83207ab4836d845265b3baac042779c01812a1a795331f2f5f779ab4b2445e",
+      "expandedSHA256": "d3529a1a31841fadee35c9eec265e771f8354f1d75428d9062fe8b9958efa80b",
+      "bytes": 28212
+    },
+    "resources/nginx-3/fixture.json": {
+      "SHA256": "6e1ba51c71031eb25109e612b67a2b2e96c240da01ad2413e83d9a23695e573c",
+      "expandedSHA256": "6e1ba51c71031eb25109e612b67a2b2e96c240da01ad2413e83d9a23695e573c",
+      "bytes": 412
+    },
+    "resources/nginx-3/environment.json": {
+      "SHA256": "878f7717e8d0a53ae0b43f03dad71fe7924cf22b1829e9d65c9b85b397a4cc5e",
+      "expandedSHA256": "878f7717e8d0a53ae0b43f03dad71fe7924cf22b1829e9d65c9b85b397a4cc5e",
+      "bytes": 7900
+    },
+    "resources/nginx-3/host/identity-before.json": {
+      "SHA256": "6ed24c1b16e870a9b040c0fe2a63cbdea186cdde729e88644ca61cabbb413dd7",
+      "expandedSHA256": "6ed24c1b16e870a9b040c0fe2a63cbdea186cdde729e88644ca61cabbb413dd7",
+      "bytes": 2243
+    },
+    "resources/nginx-3/host/summary.json": {
+      "SHA256": "b6a02de653443302b78cefa2ee93d320fa9b3b9c8690ba659e46eba072216466",
+      "expandedSHA256": "b6a02de653443302b78cefa2ee93d320fa9b3b9c8690ba659e46eba072216466",
+      "bytes": 797
+    },
+    "resources/nginx-3/host/samples.jsonl.gz": {
+      "SHA256": "940be4881ed421e1a02a03c7a3888fdae37daf599ff6202e6d1e34b699b1fa32",
+      "expandedSHA256": "e63db42fc4a93a858288be3823e25ca24835e78fd147f2d26e77f7b5eded215b",
+      "bytes": 5679
+    },
+    "resources/nginx-3/client/summary.json": {
+      "SHA256": "50ba01c15302bcc11d4cdee56822f6c1444d90072893fe9b2b9944624542d494",
+      "expandedSHA256": "50ba01c15302bcc11d4cdee56822f6c1444d90072893fe9b2b9944624542d494",
+      "bytes": 719
+    },
+    "resources/nginx-3/client/requests.jsonl.gz": {
+      "SHA256": "3bc08a9a8a14ae93153ebe5026cc0f105dcbbb95ce3c358dd0a5ebb7a063dd64",
+      "expandedSHA256": "f34732d4e094856f0b6ee9e8d5af548132d01db3f98a9ca2f44cf72dd0d60218",
+      "bytes": 27858
+    },
+    "availability/client/app/summary.json": {
+      "SHA256": "2303f3e04b5b435e069aa417e89f370afe53326b706385db0ae8d5f75c811350",
+      "expandedSHA256": "2303f3e04b5b435e069aa417e89f370afe53326b706385db0ae8d5f75c811350",
+      "bytes": 735
+    },
+    "availability/client/app/requests.jsonl.gz": {
+      "SHA256": "764f7f452281ff7eb98690254e8a568918e3c83d107f688f6221cc97c010d445",
+      "expandedSHA256": "e064a923333256bb8cca7f48c04f8762668433f75829d6f54faeb5e30881b9a9",
+      "bytes": 8100
+    },
+    "availability/client/management/summary.json": {
+      "SHA256": "5b596685fd79bef13b94f9eb73b9eb16736d1c4c0184b5ea8fc65470de04165c",
+      "expandedSHA256": "5b596685fd79bef13b94f9eb73b9eb16736d1c4c0184b5ea8fc65470de04165c",
+      "bytes": 708
+    },
+    "availability/client/management/requests.jsonl.gz": {
+      "SHA256": "2fc2082ab58a79cfe84ba93217bb0a68ad39805ac8a697f7d3ab0267cc6e15f1",
+      "expandedSHA256": "207bf2d1257f178783cf4b688b92bc41ae616785889f331da18976173a5758df",
+      "bytes": 7859
+    },
+    "retention/kube-before-retention.json": {
+      "SHA256": "dbf056e25dd133060ab44474c0725d95e69a17cf6b7475235f3ec3f67da06b01",
+      "expandedSHA256": "dbf056e25dd133060ab44474c0725d95e69a17cf6b7475235f3ec3f67da06b01",
+      "bytes": 13362
+    },
+    "retention/kube-after-reinstall.json": {
+      "SHA256": "f06353022810ac0cc428c52b3aff677b9e57e233da33b0444fc8816666052a83",
+      "expandedSHA256": "f06353022810ac0cc428c52b3aff677b9e57e233da33b0444fc8816666052a83",
+      "bytes": 13400
+    },
+    "retention/kube-after-reboot.json": {
+      "SHA256": "eae619811100c349513fea3d077808dee5f0f2c95f759611d5fcf939adaf1e4b",
+      "expandedSHA256": "eae619811100c349513fea3d077808dee5f0f2c95f759611d5fcf939adaf1e4b",
+      "bytes": 13400
+    },
+    "retention/reinstall-result.json": {
+      "SHA256": "753c21a7db0f1048634a582b45e9c6622951be40f1cc879cf8c61e596300a0a6",
+      "expandedSHA256": "753c21a7db0f1048634a582b45e9c6622951be40f1cc879cf8c61e596300a0a6",
+      "bytes": 385
+    },
+    "retention/final-audit.json": {
+      "SHA256": "dcf23cd8b545f288161f426f26e6bb8550e0e642374693d439d865d447131f46",
+      "expandedSHA256": "dcf23cd8b545f288161f426f26e6bb8550e0e642374693d439d865d447131f46",
+      "bytes": 2209
+    },
+    "retention/retained-app.json": {
+      "SHA256": "5dde07dd7c5c92c03c528968aecfea949f3c0ba853da399fc4d4b6a39ac3724d",
+      "expandedSHA256": "5dde07dd7c5c92c03c528968aecfea949f3c0ba853da399fc4d4b6a39ac3724d",
+      "bytes": 1628
+    },
+    "retention/temporary-listeners-cleanup.json": {
+      "SHA256": "9bb3b78ecf4013db89706103f6a74b1aa542f79b13714117ae45a2e6933421f0",
+      "expandedSHA256": "9bb3b78ecf4013db89706103f6a74b1aa542f79b13714117ae45a2e6933421f0",
+      "bytes": 171
+    },
+    "retention/rollout-diagnostics.json": {
+      "SHA256": "285bdb9db9b4166ef75cc46d03965c294675d0a72af9969ae2f534ff2d0e7a8b",
+      "expandedSHA256": "285bdb9db9b4166ef75cc46d03965c294675d0a72af9969ae2f534ff2d0e7a8b",
+      "bytes": 17605
+    },
+    "retention/automatic-reboot-readiness.json": {
+      "SHA256": "0830491f5a5bd97be5fdb7f139210f135c57e6f6b5c8b339ca20d813d2fb7c3b",
+      "expandedSHA256": "0830491f5a5bd97be5fdb7f139210f135c57e6f6b5c8b339ca20d813d2fb7c3b",
+      "bytes": 4953
+    },
+    "installation/installation-results.json": {
+      "SHA256": "96223be60fc5c2ec8f02fb45dd0043724111797b104eaa436e24b8e81dc0c119",
+      "expandedSHA256": "96223be60fc5c2ec8f02fb45dd0043724111797b104eaa436e24b8e81dc0c119",
+      "bytes": 1839
+    },
+    "installation/prior-inventory.json": {
+      "SHA256": "a7b825ee3e4acf81c73c8ff0e3380c6eadfe88b754b4a1c1a0a8e568ba8bd54d",
+      "expandedSHA256": "a7b825ee3e4acf81c73c8ff0e3380c6eadfe88b754b4a1c1a0a8e568ba8bd54d",
+      "bytes": 72535
+    },
+    "installation/archive-sha256.txt": {
+      "SHA256": "f7f39105bcf6d5533813a5c718a72f8b9f15deef80038ac6e7009bd492a24d03",
+      "expandedSHA256": "f7f39105bcf6d5533813a5c718a72f8b9f15deef80038ac6e7009bd492a24d03",
+      "bytes": 90
+    },
+    "collector-corrections.json": {
+      "SHA256": "dc23a6340656e07644d71a0bcb69be3416e609861a3a1bcd1f2b7242b8e10eb1",
+      "expandedSHA256": "dc23a6340656e07644d71a0bcb69be3416e609861a3a1bcd1f2b7242b8e10eb1",
+      "bytes": 624
+    },
+    "browser/lan-browser.json": {
+      "SHA256": "fe143ee6ef18dfde56759466967e8e5d7052f8dded6fb51ca7b5f87ac07e3621",
+      "expandedSHA256": "fe143ee6ef18dfde56759466967e8e5d7052f8dded6fb51ca7b5f87ac07e3621",
+      "bytes": 557
+    },
+    "browser/lan-reinstall.json": {
+      "SHA256": "fa298b4e3caed976cb4a030d35bf8d71df4736ea306c29a653278bc5bef16d11",
+      "expandedSHA256": "fa298b4e3caed976cb4a030d35bf8d71df4736ea306c29a653278bc5bef16d11",
+      "bytes": 294
+    },
+    "browser/lan-reboot.json": {
+      "SHA256": "6415b576057408cf33d6cd6aa3cf7d6355433b565c3067d3da1cf09f6ee190dd",
+      "expandedSHA256": "6415b576057408cf33d6cd6aa3cf7d6355433b565c3067d3da1cf09f6ee190dd",
+      "bytes": 291
+    },
+    "browser/lan-cleanup.json": {
+      "SHA256": "b1cd31e969281e71c95b42046cf2b46c5efcb22ff07be40edbb92e9de69c5c05",
+      "expandedSHA256": "b1cd31e969281e71c95b42046cf2b46c5efcb22ff07be40edbb92e9de69c5c05",
+      "bytes": 406
+    },
+    "resource-plan.json": {
+      "SHA256": "0115d3798e8750f45d478adbc8842c510b8b06629c62ce952f1c75788fafdb8c",
+      "expandedSHA256": "0115d3798e8750f45d478adbc8842c510b8b06629c62ce952f1c75788fafdb8c",
+      "bytes": 2770
+    },
+    "clock-offset.json": {
+      "SHA256": "305294dfaddb41155b3de095c51a10108f63fad7f1bf8cbe6ec594966fb734de",
+      "expandedSHA256": "305294dfaddb41155b3de095c51a10108f63fad7f1bf8cbe6ec594966fb734de",
+      "bytes": 539
+    },
+    "clock-offset-after.json": {
+      "SHA256": "d05bc304611cdc7c9bb58b9464c28e5a22536c9c5a2bfb61b7f546c836e4aca2",
+      "expandedSHA256": "d05bc304611cdc7c9bb58b9464c28e5a22536c9c5a2bfb61b7f546c836e4aca2",
+      "bytes": 538
+    },
+    "release-ci/published-asset-checksums.json": {
+      "SHA256": "a2e270a741d58302cdec30fdbfa326cdcdbf18ce62d8097427e4d45b1ee7657e",
+      "expandedSHA256": "a2e270a741d58302cdec30fdbfa326cdcdbf18ce62d8097427e4d45b1ee7657e",
+      "bytes": 717
+    },
+    "release-ci/verified.json": {
+      "SHA256": "9e3cba3b954b84f22fcbad601c1aeabc68dc2e2253e80ce87a59464be3f3f933",
+      "expandedSHA256": "9e3cba3b954b84f22fcbad601c1aeabc68dc2e2253e80ce87a59464be3f3f933",
+      "bytes": 277
+    },
+    "retention/temporary-access-cleanup.json": {
+      "SHA256": "48a5aa3e3b836a8053cdcfde51adfd5b6726347b54b3d34c56c25b119da7b6b3",
+      "expandedSHA256": "48a5aa3e3b836a8053cdcfde51adfd5b6726347b54b3d34c56c25b119da7b6b3",
+      "bytes": 451
+    },
+    "browser/lan-before-retention.json": {
+      "SHA256": "14a4bd61ac2711bec50934eca354ebd9deeb011a87d1ea617eac67636e99a2d3",
+      "expandedSHA256": "14a4bd61ac2711bec50934eca354ebd9deeb011a87d1ea617eac67636e99a2d3",
+      "bytes": 5056
+    },
+    "browser/lan-after-reinstall.json": {
+      "SHA256": "9b30609549de95767c0cea95179ebb8d2d5ae0aa0974b3530304c58c217fb769",
+      "expandedSHA256": "9b30609549de95767c0cea95179ebb8d2d5ae0aa0974b3530304c58c217fb769",
+      "bytes": 5056
+    },
+    "browser/lan-after-reboot.json": {
+      "SHA256": "d2746313ee30c265e6c05837abd1c678e95d4aa637a851bfc3a015c714b28f4c",
+      "expandedSHA256": "d2746313ee30c265e6c05837abd1c678e95d4aa637a851bfc3a015c714b28f4c",
+      "bytes": 5056
+    },
+    "release-ci/junit.xml": {
+      "SHA256": "3f5edb3fed258f4f01ee5504c746de582d68b5ccad3338e1ba9f041ccd97b7ef",
+      "expandedSHA256": "3f5edb3fed258f4f01ee5504c746de582d68b5ccad3338e1ba9f041ccd97b7ef",
+      "bytes": 2603
+    },
+    "release-ci/rollout-requests.json": {
+      "SHA256": "72cd7249e9824304b4201637b28a7e0e9a10b2f9db7d64af3b87b90c27de7977",
+      "expandedSHA256": "72cd7249e9824304b4201637b28a7e0e9a10b2f9db7d64af3b87b90c27de7977",
+      "bytes": 6204
+    },
+    "collector.tar.gz": {
+      "SHA256": "a51b54c0fdb347d0fafa20cce5a899e069c5122e2c4724b0beb2e5d69e860158",
+      "expandedSHA256": "bf2dece5738ab318c4a4973719d6d612c7fefa9e6ac09f2b8969ac7e133ad578",
+      "bytes": 34185
+    }
+  }
+}

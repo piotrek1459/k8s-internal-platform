@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "sameVersionInstallerExit": 0,
+  "installedCheckExit": 0,
+  "lanConfigArgumentOmitted": true,
+  "identicalFields": [
+    "pvc",
+    "pv",
+    "administrator",
+    "criticalTables",
+    "liveApplications",
+    "platformDeployment",
+    "deployments",
+    "services",
+    "ingresses",
+    "tlsSecrets",
+    "lanConfigurationSHA256"
+  ],
+  "bootIDUnchanged": true
+}

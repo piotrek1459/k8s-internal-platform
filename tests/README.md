@@ -218,7 +218,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.10 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.11 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -262,8 +262,12 @@ the published recovery/security gate: forced failure/retry across replacements,
 unchanged failed/frozen evidence, controlled disclosure scans and reinstall/reboot
 retention. The [controlled evaluation](experiments/2026-11-26-core-evaluation.md)
 retains repeated resource/system data, explicit native preset checks and old/source
-chart request traces. Published new-default/draining validation and the human
-timed walkthrough remain open. Helper failures and unconfirmed request timeouts remain
+chart request traces. The [v0.1.11 report](experiments/2026-11-27-v0.1.11-native.md)
+records published defaults, repeated lifecycle/load, trusted browser and retention
+checks, and the failed application-rollout continuity target (373/375). That
+failure and the human timed walkthrough remain open. Artifact integrity, raw
+resource/lifecycle recomputation and preservation of the failed continuity outcome
+run on every PR. Helper failures and unconfirmed request timeouts remain
 separate observations rather than passing attempts or claimed fixes.
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.

@@ -1,0 +1,14 @@
+{
+  "runtimePatched": false,
+  "requestTraceExcluded": false,
+  "corrections": [
+    {
+      "helper": "load-client.py",
+      "issue": "The initial wrapper imported remote.remote; this SSH helper exposes command. The import failed before any load samples. The corrected wrapper completed all six scheduled cases."
+    },
+    {
+      "helper": "final-audit.py",
+      "issue": "The initial reader expected null activeOperationId; OpenAPI and the live API use an empty string. The retained app was Ready at version 7. The reader was corrected to match the documented contract; both source versions are retained."
+    }
+  ]
+}

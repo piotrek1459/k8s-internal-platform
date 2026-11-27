@@ -1,6 +1,6 @@
 # Linux installation
 
-The examples below use `v0.1.10`. Select a version available through the
+The examples below use `v0.1.11`. Select a version available through the
 [manual release workflow](../release/README.md). The downloaded guide contains
 commands rendered for its selected release version.
 
@@ -23,15 +23,14 @@ upgrade or restoration test.
 The [implementation status](status.md) records the remaining boundaries. Existing
 unrelated K3s installations are refused; this installer is for a dedicated host.
 
-Published v0.1.10 passed fresh installation, private LAN HTTPS and normally trusted
-browser deployment, same-version retention and automatic reboot recovery. All
-published read-only `--check` variants returned 0, correcting v0.1.8's exit-status
-defect. The [v0.1.10 report](../tests/experiments/2026-11-25-v0.1.10-native.md)
-records accepted phases and separate rollout-adjacent browser timeout observations;
-those observations do not establish interruption-free rolling HTTP service.
-The new native report also verifies forced restoration/verification failure,
-tracked access changes, controlled disclosure failures and supported recovery
-through the unmodified published release.
+Published v0.1.11 passed fresh installation, all applicable read-only `--check`
+variants, normal trusted private LAN browser/API flows, measured defaults and
+same-version retention and automatic reboot recovery. Rolling application HTTP
+failed its zero-error target (373/375); diagnosis and correction remain open.
+The [native report](../tests/experiments/2026-11-27-v0.1.11-native.md) retains release/source identities, checksums and
+raw evidence. The preceding [v0.1.10 report](../tests/experiments/2026-11-25-v0.1.10-native.md)
+retains the forced restoration/verification and controlled disclosure matrix;
+its earlier route/login observations remain historical evidence.
 
 ## 1. Prepare the host
 
@@ -54,7 +53,7 @@ If the installer reports missing memory cgroups, an explicit preparation step is
 available after the installer has been downloaded and verified:
 
 ```bash
-sudo bash install.sh --version v0.1.10 --prepare-host
+sudo bash install.sh --version v0.1.11 --prepare-host
 # Exit status 20 means that the boot file was prepared and a reboot is required.
 sudo reboot
 # Reconnect over SSH, then rerun --check and the normal installation.
@@ -76,11 +75,11 @@ Run on the Pi/server as the normal SSH user:
 ```bash
 mkdir -p ~/platform-v0.1.10
 cd ~/platform-v0.1.10
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.10/install.sh
-curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.10/SHA256SUMS
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.11/install.sh
+curl --proto '=https' --tlsv1.2 -fLO https://github.com/piotrek1459/k8s-internal-platform/releases/download/v0.1.11/SHA256SUMS
 awk '$2 == "install.sh"' SHA256SUMS | sha256sum -c -
 less install.sh
-sudo bash install.sh --version v0.1.10 --check
+sudo bash install.sh --version v0.1.11 --check
 ```
 
 The checksum detects a damaged download. Both files are obtained from the same
@@ -90,7 +89,7 @@ GitHub release; this is not an independent signature or offline trust root.
 ## 3. Install
 
 ```bash
-sudo bash install.sh --version v0.1.10
+sudo bash install.sh --version v0.1.11
 ```
 
 The architecture is detected automatically. The matching bundle is downloaded and
@@ -120,8 +119,8 @@ uninstall, host reset or application-data deletion is performed.
 A bundle downloaded separately can be used with:
 
 ```bash
-sudo bash install.sh --version v0.1.10 \
-  --bundle platform-v0.1.10-linux-arm64.tar.gz --checksum SHA256SUMS
+sudo bash install.sh --version v0.1.11 \
+  --bundle platform-v0.1.11-linux-arm64.tar.gz --checksum SHA256SUMS
 ```
 
 Use `linux-amd64` on AMD64. This option still downloads K3s and Helm as needed;

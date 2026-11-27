@@ -29,6 +29,13 @@ actual execution. Copy the tooling and fixed plan to the Pi; record their source
 commit/file hashes before executing. Authenticate and inspect background workloads
 before timing.
 
+The committed `plan.json` preserves the original v0.1.10 calibration candidate.
+For a new release, prepare a separate plan before collection with its exact
+`referenceRelease` and intended resource profile; retain and hash that copy with
+the results. The accepted v0.1.11 copy is
+[`resource-plan.json`](../experiments/2026-11-27-v0.1.11-native/resource-plan.json).
+Historical plans/results must not be rewritten to make them match a newer release.
+
 In a privileged Pi shell, from the copied evaluation directory:
 
 ```bash

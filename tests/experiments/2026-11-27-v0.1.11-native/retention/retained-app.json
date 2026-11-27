@@ -1,0 +1,62 @@
+{
+  "app": "app_fe284cf63840b391",
+  "application": {
+    "access": {
+      "hostname": "demo.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_0aee98e6eb9fd661",
+      "url": "https://demo.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_0aee98e6eb9fd661",
+    "id": "app_fe284cf63840b391",
+    "lastSuccessfulRevision": "rev_0aee98e6eb9fd661",
+    "name": "eval-faa8c8a28e70-retained",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 7,
+      "observedAt": "2026-11-27T08:26:15.878837471Z",
+      "stale": false
+    },
+    "version": 7
+  },
+  "resources": {
+    "requests": {
+      "cpu": "25m",
+      "memory": "48Mi"
+    },
+    "limits": {
+      "cpu": "250m",
+      "memory": "128Mi"
+    }
+  },
+  "coreChecks": [
+    {
+      "check": "Omitted API resources rendered published 25m/48Mi requests, 250m/128Mi limits and native five-second drain; exact ARM64 broker image matched",
+      "epochSeconds": 1795767947.6909606,
+      "app": "app_fe284cf63840b391",
+      "resources": {
+        "requests": {
+          "cpu": "25m",
+          "memory": "48Mi"
+        },
+        "limits": {
+          "cpu": "250m",
+          "memory": "128Mi"
+        }
+      }
+    },
+    {
+      "check": "Published v2 update and stateless scaling 2/0/1 passed",
+      "epochSeconds": 1795767965.8629808
+    },
+    {
+      "check": "Digest-stable restart replaced Pods; explicit rollback restored actual HTTPS v1",
+      "epochSeconds": 1795767976.5306218
+    }
+  ]
+}

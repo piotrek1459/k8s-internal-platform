@@ -1,0 +1,26 @@
+[
+  {
+    "name": "install.sh",
+    "digest": "sha256:27273632deba469c0775de9a6865d9467bc1f54dcdc02ace95e41abc2afe1591",
+    "APIAssetID": 797976441,
+    "bytes": 21141
+  },
+  {
+    "name": "INSTALL.md",
+    "digest": "sha256:b5fc8ce81cacdef6823e6e6fe3cfebfdd3d6eb0eb1e54f6437371101330bd8dd",
+    "APIAssetID": 797976443,
+    "bytes": 12580
+  },
+  {
+    "name": "SHA256SUMS",
+    "digest": "sha256:fe13a4fe1af68b701fc1af311272f516c6449f58b0d3ce4f9cdda022f13bfb95",
+    "APIAssetID": 797976473,
+    "bytes": 437
+  },
+  {
+    "name": "platform-v0.1.11-linux-arm64.tar.gz",
+    "digest": "sha256:cac506a5d3f7f39c27a1286daee308d4c2fe95f009f63f40641a9195fcbf8c41",
+    "APIAssetID": 797976446,
+    "bytes": 25522258
+  }
+]

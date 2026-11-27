@@ -12,7 +12,7 @@ observability are in [operations.md](operations.md).
 The Go broker, SQLite store, embedded application chart, Svelte administrator UI
 and k3d development workflow are implemented. Published native ARM64 installation
 and trusted private LAN HTTPS UI/API/application access have reference-Pi
-acceptance through v0.1.10. The platform and managed apps share one cluster;
+acceptance through v0.1.11. The platform and managed apps share one cluster;
 Internal Services and loopback development forwarding remain supported. The
 [status report](status.md) records versioned evidence and remaining boundaries.
 

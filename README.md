@@ -17,21 +17,18 @@ prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes ARM64/AMD64 bundles,
-the dedicated Linux installer and initial SSH access. Its `v0.1.10` commands
+the dedicated Linux installer and initial SSH access. Its `v0.1.11` commands
 are version examples; the downloaded guide matches the selected release.
 
-Published v0.1.10 passed reference-Pi installation/preflight, trusted private LAN
-UI/API deployment, tracked access changes, forced restoration/verification failure,
-guarded recovery, controlled disclosure checks and original identity/session
-retention across same-version reinstall and host reboot. The
-[native report](tests/experiments/2026-11-25-v0.1.10-native.md) records accepted
-phases and separate route-convergence/request-timeout observations. The
-[controlled evaluation](tests/experiments/2026-11-26-core-evaluation.md) now retains
-repeated system/resource results and a native source-chart rollout comparison.
-Source chart 0.1.3 uses measured 25m/48Mi requests and a native shutdown delay.
-Published-default/draining validation and the [human walkthrough](tests/evaluation/HUMAN.md)
-remain open in [status](docs/status.md). Earlier Secret cleanup/diagnostic evidence retains
-its own release identities in the [verification guide](tests/README.md).
+Published v0.1.11 passed reference-Pi installation/preflight, normally trusted LAN
+browser/API workflows, measured resource defaults, repeated lifecycle/recovery,
+load checks, same-version retention and automatic reboot recovery. Rolling app
+HTTP did not meet its zero-error target: 373/375 requests succeeded.
+The [native report](tests/experiments/2026-11-27-v0.1.11-native.md) retains exact release/image identities and raw results.
+The [preceding evaluation](tests/experiments/2026-11-26-core-evaluation.md) records
+the profile derivation and old/source-chart comparison; earlier recovery/security
+acceptance retains its own release identity. Rollout-continuity diagnosis/correction
+and the [human timed walkthrough](tests/evaluation/HUMAN.md) remain open in [status](docs/status.md).
 
 Private HTTPS requires the [configuration and trust setup](docs/private-lan.md).
 Public hosting, application volumes, verified backup restoration and cross-version

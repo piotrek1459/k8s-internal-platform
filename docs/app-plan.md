@@ -1,8 +1,8 @@
 # Application platform plan (index)
 
-Updated: 2026-11-26. Status: the published core functional/recovery/security
+Updated: 2026-11-27. Status: the published core functional/recovery/security
 workflows have reference-Pi acceptance and repeated system/resource data is retained;
-published new-default/draining validation and the human trial retain completion gates. This document accompanies
+published v0.1.11 default checks passed; rollout continuity and the human trial remain open. This document accompanies
 [project-outline.md](project-outline.md), which preserves the original thesis
 scope and supplied university requirements. The plan records target requirements and does not contain thesis chapters.
 [Implementation status and next work](status.md) records current capabilities,
@@ -11,7 +11,9 @@ verification evidence and known gaps.
 The broker, Svelte UI, application/platform charts and unified local workflow are
 implemented. Native installation, trusted LAN UI/API workflows, guarded recovery,
 controlled disclosure checks and reinstall/reboot retention have published
-v0.1.10 evidence. The
+v0.1.10 evidence. The newer [v0.1.11 report](../tests/experiments/2026-11-27-v0.1.11-native.md) accepts measured defaults,
+repeated system measurements and reinstall/reboot retention, and retains the failed
+application-rollout continuity trace (373/375). The
 [local development guide](local-development.md) covers current execution and the
 separate manual Helm baseline. The [milestone audit](milestones.md) separates
 accepted M2/M3 workflows from the remaining M0/M1/M4 evaluation requirements.

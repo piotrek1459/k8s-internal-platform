@@ -1,0 +1,10 @@
+{
+  "runID": 45903602211,
+  "source": "33d9290849be0ca3fed8a1156cbac942f91557f2",
+  "artifactID": 15157193315,
+  "digest": "sha256:a2c8cad4ce180dff230b62081a36cbdf7ea22deeedd3a9d15f0fcc566eff76e4",
+  "tests": 27,
+  "failures": 0,
+  "skips": 0,
+  "verifiedRolloutRequests": 57
+}

@@ -19,8 +19,9 @@ workflow are implemented. Their procedures are documented in the
 [installation guide](installation.md) and [release guide](../release/README.md).
 Native Pi installation, LAN browser/API routing and same-version/reboot retention
 have published v0.1.10 evidence, including native failure/retry/disclosure checks.
-Repeated system/resource observations and source draining evidence are retained.
-Published-default/draining validation, human operator measurements, backup/restore,
+Published v0.1.11 also passed [native default/system/retention checks](../tests/experiments/2026-11-27-v0.1.11-native.md),
+but application-rollout continuity failed (373/375); diagnosis/correction remain open.
+Human operator measurements, backup/restore,
 upgrades and metrics retain separate acceptance requirements;
 local startup or a healthy update does not establish those results.
 

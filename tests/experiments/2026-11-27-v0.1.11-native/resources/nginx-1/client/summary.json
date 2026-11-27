@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-a01aacaca376-load.apps.home.arpa:8443/",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 20,
+  "durationSeconds": 60,
+  "warmupSeconds": 10,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795770402.911099,
+  "finishedEpochSeconds": 1795770472.8739982,
+  "requests": 1200,
+  "successful": 1200,
+  "successRate": 1.0,
+  "latencyMilliseconds": {
+    "count": 1200,
+    "minimum": 4.968708,
+    "median": 10.378833499999999,
+    "p95": 81.970167,
+    "maximum": 104.941875
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 1200,
+  "complete": true,
+  "targetsPassed": true,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

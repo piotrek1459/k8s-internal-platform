@@ -1,0 +1,440 @@
+{
+  "bootID": "cce5c755-2181-43e1-8556-9cb6e2a796e5",
+  "pvc": {
+    "name": "platform-metadata",
+    "namespace": "platform-system",
+    "uid": "7baec4f2-caf8-4b8e-be4e-6230b00e2526",
+    "creationTimestamp": "2026-11-27T08:21:35Z"
+  },
+  "pv": {
+    "name": "pvc-7baec4f2-caf8-4b8e-be4e-6230b00e2526",
+    "namespace": null,
+    "uid": "5f4bf325-610c-490f-96bf-a74cd4286832",
+    "creationTimestamp": "2026-11-27T08:21:54Z"
+  },
+  "administrator": [
+    [
+      "admin_fa92602f0553d46f",
+      "2026-11-27T08:22:38.416780347Z",
+      "2026-11-27T08:22:38.416780347Z"
+    ]
+  ],
+  "criticalTables": {
+    "applications": {
+      "count": 21,
+      "SHA256": "5865daec9abab9243a644cc82b71c22c1732a0bbdc7a925bd78616a25d5b62f1"
+    },
+    "revisions": {
+      "count": 54,
+      "SHA256": "7a58f68f6d13e1d91b5ffd166199c5504acaa5be58d3575560e51d96cbdbe44c"
+    },
+    "operations": {
+      "count": 54,
+      "SHA256": "35d47d7fd269854e1382255f2261858805c17e4ac7ab37472d07f5581467836b"
+    },
+    "operation_events": {
+      "count": 250,
+      "SHA256": "a8b9bb26de3e9099fbe3cf64fa1712237c9b168d545156274e5a4b5759c7f81c"
+    }
+  },
+  "activeOperations": 0,
+  "liveApplications": [
+    [
+      "app_fe284cf63840b391",
+      "eval-faa8c8a28e70-retained",
+      7,
+      "rev_0aee98e6eb9fd661"
+    ]
+  ],
+  "configurationSecrets": 0,
+  "registryCredentials": 0,
+  "applicationVolumes": 0,
+  "platformDeployment": {
+    "metadata": {
+      "name": "platform",
+      "namespace": "platform-system",
+      "uid": "57d7caeb-6f59-4e44-bad3-2badd5a73cff",
+      "creationTimestamp": "2026-11-27T08:21:35Z"
+    },
+    "spec": {
+      "progressDeadlineSeconds": 600,
+      "replicas": 1,
+      "revisionHistoryLimit": 10,
+      "selector": {
+        "matchLabels": {
+          "app.kubernetes.io/instance": "platform",
+          "app.kubernetes.io/name": "platform"
+        }
+      },
+      "strategy": {
+        "type": "Recreate"
+      },
+      "template": {
+        "metadata": {
+          "labels": {
+            "app.kubernetes.io/instance": "platform",
+            "app.kubernetes.io/managed-by": "Helm",
+            "app.kubernetes.io/name": "platform",
+            "app.kubernetes.io/part-of": "k8s-internal-platform",
+            "helm.sh/chart": "platform-0.1.11"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": true,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "PLATFORM_LISTEN",
+                  "value": "0.0.0.0:8080"
+                },
+                {
+                  "name": "PLATFORM_DB",
+                  "value": "/var/lib/platform/platform.db"
+                },
+                {
+                  "name": "PLATFORM_APPS_NAMESPACE",
+                  "value": "platform-apps"
+                },
+                {
+                  "name": "PLATFORM_PRIVATE_INGRESS_ENABLED",
+                  "value": "true"
+                },
+                {
+                  "name": "PLATFORM_SECURE_COOKIES",
+                  "value": "true"
+                },
+                {
+                  "name": "PLATFORM_PRIVATE_MANAGEMENT_HOSTNAME",
+                  "value": "platform.home.arpa"
+                },
+                {
+                  "name": "PLATFORM_PRIVATE_APPLICATION_DOMAIN",
+                  "value": "apps.home.arpa"
+                },
+                {
+                  "name": "PLATFORM_PRIVATE_HTTPS_PORT",
+                  "value": "8443"
+                }
+              ],
+              "image": "platform.local/platform-broker@sha256:bf918efbded7810116d33d2eb95673c2e0e98e2753471bee5c57f122c4f663ca",
+              "imagePullPolicy": "Never",
+              "livenessProbe": {
+                "failureThreshold": 3,
+                "httpGet": {
+                  "path": "/healthz",
+                  "port": "http",
+                  "scheme": "HTTP"
+                },
+                "periodSeconds": 20,
+                "successThreshold": 1,
+                "timeoutSeconds": 1
+              },
+              "name": "broker",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ],
+              "readinessProbe": {
+                "failureThreshold": 3,
+                "httpGet": {
+                  "path": "/readyz",
+                  "port": "http",
+                  "scheme": "HTTP"
+                },
+                "periodSeconds": 10,
+                "successThreshold": 1,
+                "timeoutSeconds": 1
+              },
+              "resources": {
+                "limits": {
+                  "cpu": "500m",
+                  "memory": "256Mi"
+                },
+                "requests": {
+                  "cpu": "50m",
+                  "memory": "64Mi"
+                }
+              },
+              "securityContext": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                  "drop": [
+                    "ALL"
+                  ]
+                },
+                "readOnlyRootFilesystem": true
+              },
+              "terminationMessagePath": "/dev/termination-log",
+              "terminationMessagePolicy": "File",
+              "volumeMounts": [
+                {
+                  "mountPath": "/var/lib/platform",
+                  "name": "metadata"
+                }
+              ]
+            }
+          ],
+          "dnsPolicy": "ClusterFirst",
+          "restartPolicy": "Always",
+          "schedulerName": "default-scheduler",
+          "securityContext": {
+            "fsGroup": 65532,
+            "runAsGroup": 65532,
+            "runAsNonRoot": true,
+            "runAsUser": 65532,
+            "seccompProfile": {
+              "type": "RuntimeDefault"
+            }
+          },
+          "serviceAccount": "platform-broker",
+          "serviceAccountName": "platform-broker",
+          "terminationGracePeriodSeconds": 30,
+          "volumes": [
+            {
+              "name": "metadata",
+              "persistentVolumeClaim": {
+                "claimName": "platform-metadata"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "platformPods": [
+    {
+      "metadata": {
+        "name": "platform-865f6984f7-cvwwl",
+        "namespace": "platform-system",
+        "uid": "f401fb19-6c77-48c4-9c86-c03f01adb585",
+        "creationTimestamp": "2026-11-27T09:19:02Z"
+      },
+      "image": "platform.local/platform-broker@sha256:bf918efbded7810116d33d2eb95673c2e0e98e2753471bee5c57f122c4f663ca",
+      "imageID": "platform.local/platform-broker@sha256:bf918efbded7810116d33d2eb95673c2e0e98e2753471bee5c57f122c4f663ca",
+      "ready": true,
+      "deleting": false
+    }
+  ],
+  "deployments": [
+    {
+      "metadata": {
+        "name": "app-app-fe284cf63840b391",
+        "namespace": "platform-apps",
+        "uid": "e58578cd-1cf5-4f18-8734-601a0370865a",
+        "creationTimestamp": "2026-11-27T08:25:42Z"
+      },
+      "spec": {
+        "progressDeadlineSeconds": 180,
+        "replicas": 1,
+        "revisionHistoryLimit": 3,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/instance": "app-app-fe284cf63840b391",
+            "platform.local/app-id": "app_fe284cf63840b391"
+          }
+        },
+        "strategy": {
+          "rollingUpdate": {
+            "maxSurge": 1,
+            "maxUnavailable": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/instance": "app-app-fe284cf63840b391",
+              "app.kubernetes.io/managed-by": "Helm",
+              "app.kubernetes.io/name": "application",
+              "app.kubernetes.io/part-of": "k8s-internal-platform",
+              "helm.sh/chart": "application-0.1.3",
+              "platform.local/app-id": "app_fe284cf63840b391"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "containers": [
+              {
+                "image": "platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974",
+                "imagePullPolicy": "IfNotPresent",
+                "lifecycle": {
+                  "preStop": {
+                    "sleep": {
+                      "seconds": 5
+                    }
+                  }
+                },
+                "name": "application",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "name": "http",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/readyz",
+                    "port": "http",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 5,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {
+                  "limits": {
+                    "cpu": "250m",
+                    "memory": "128Mi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "48Mi"
+                  }
+                },
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "readOnlyRootFilesystem": true
+                },
+                "startupProbe": {
+                  "failureThreshold": 30,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "http",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 2,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/tmp",
+                    "name": "temporary-files"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "enableServiceLinks": false,
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "fsGroup": 2000,
+              "fsGroupChangePolicy": "OnRootMismatch",
+              "runAsNonRoot": true,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {
+                  "sizeLimit": "64Mi"
+                },
+                "name": "temporary-files"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "services": [
+    {
+      "metadata": {
+        "name": "app-app-fe284cf63840b391",
+        "namespace": "platform-apps",
+        "uid": "ac82eb00-c7b4-47b4-92a9-2fd4f1ca9d7f",
+        "creationTimestamp": "2026-11-27T08:25:42Z"
+      },
+      "spec": {
+        "clusterIP": "10.43.141.218",
+        "clusterIPs": [
+          "10.43.141.218"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/instance": "app-app-fe284cf63840b391",
+          "platform.local/app-id": "app_fe284cf63840b391"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      }
+    }
+  ],
+  "ingresses": [
+    {
+      "metadata": {
+        "name": "app-app-fe284cf63840b391",
+        "namespace": "platform-apps",
+        "uid": "95a3e6e6-9215-409d-abbd-5f84af7d9a4b",
+        "creationTimestamp": "2026-11-27T08:25:42Z"
+      },
+      "spec": {
+        "ingressClassName": "platform-private",
+        "rules": [
+          {
+            "host": "demo.apps.home.arpa",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "app-app-fe284cf63840b391",
+                      "port": {
+                        "name": "http"
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tlsSecrets": [
+    {
+      "name": "platform-private-tls",
+      "namespace": "platform-system",
+      "uid": "c7dcec8e-195f-4138-b7e2-d7fb59642585",
+      "creationTimestamp": "2026-11-27T08:23:39Z",
+      "dataSHA256": "006fc8498dbfe917c52f6175585cb6ba45c430f4463e484bcb7688cca4f56b90"
+    }
+  ],
+  "helmPlatformRevisions": [
+    "sh.helm.release.v1.platform.v1",
+    "sh.helm.release.v1.platform.v2",
+    "sh.helm.release.v1.platform.v3"
+  ],
+  "lanConfigurationSHA256": "539436f493ed0faa26d554ba4dafca36e3f2e8e67d232b78459512e9334fdb87"
+}

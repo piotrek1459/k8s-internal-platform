@@ -52,3 +52,55 @@ class ReferenceEvidenceTests(unittest.TestCase):
         self.assertLess(cases['control']['client']['successRate'], 1)
         self.assertEqual(cases['candidate']['client']['successRate'], 1)
         self.assertEqual(len(cases['candidate']['timeline']), 3)
+
+
+class PublishedReferenceEvidenceTests(unittest.TestCase):
+    def test_v0111_artifacts_and_six_joined_load_results(self):
+        data = ROOT/'tests/experiments/2026-11-27-v0.1.11-native'
+        report = json.loads(Path(str(data) + '.json').read_text())
+        plan = common.load_plan(data/'resource-plan.json')
+        self.assertEqual(report['runtimeRelease'], '0.1.11')
+        self.assertEqual(report['resourcePlanSHA256'], common.canonical_hash(plan))
+        self.assertFalse(report['publishedDefaultValidationPending'])
+        self.assertTrue(report['publishedDefaultValidation']['resourcesOmittedAtCreation'])
+        self.assertEqual(report['publishedDefaultValidation']['nativeSleepSeconds'], 5)
+        self.assertIsNone(report['operatorTime'])
+        self.assertFalse(report['coreEvaluationComplete'])
+        for name, expected in report['artifacts'].items():
+            with self.subTest(artifact=name):
+                path = data/name
+                self.assertTrue(path.resolve().is_relative_to(data.resolve()))
+                raw = path.read_bytes()
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected['SHA256'])
+                expanded = gzip.decompress(raw) if name.endswith('.gz') else raw
+                self.assertEqual(hashlib.sha256(expanded).hexdigest(), expected['expandedSHA256'])
+        self.assertEqual(len(report['resources']), 6)
+        for expected in report['resources']:
+            folder = data/'resources'/expected['case']
+            actual = analyzer.analyze(folder/'host', folder/'client', json.loads((folder/'fixture.json').read_text()),
+                                      plan, report['clockOffset']['offsetHostMinusClient'])
+            actual.pop('inputSHA256'); actual['case'] = expected['case']
+            self.assertEqual(actual, expected)
+            self.assertTrue(actual['targetsPassed'])
+        timings = json.loads((data/'lifecycle/timings.json').read_text())
+        self.assertEqual(common.lifecycle_acceptance(timings, plan, True), report['lifecycle']['acceptance'])
+        requests = analyzer.rows(data/'availability/client/app/requests.jsonl')
+        self.assertEqual(len(requests), 375)
+        self.assertEqual(sum(row['success'] for row in requests), 373)
+        failures = [row for row in requests if not row['success']]
+        self.assertEqual([row['status'] for row in failures], [502, None])
+        self.assertFalse(report['publishedRolloutContinuityPassed'])
+        timeline = json.loads((data/'availability/timeline.json').read_text())
+        broker_start = next(row['epochSeconds'] for row in timeline if row['stage'] == 'broker-delete-submitted')
+        self.assertTrue(all(row['startedEpochSeconds'] + row['latencyMilliseconds']/1000 < broker_start for row in failures))
+        continuity = report['requestContinuity']
+        self.assertTrue(continuity['complete'])
+        self.assertTrue(continuity['clientSchedulingValid'])
+        self.assertEqual(continuity['successful'], 373)
+        self.assertFalse(continuity['targetsPassed'])
+        self.assertEqual(continuity['requests'], 375)
+        before = json.loads((data/'retention/kube-before-retention.json').read_text())
+        after = json.loads((data/'retention/kube-after-reboot.json').read_text())
+        self.assertNotEqual(before['bootID'], after['bootID'])
+        for field in report['reinstall']['identicalFields']:
+            self.assertEqual(before[field], after[field], field)

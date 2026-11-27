@@ -1,0 +1,44 @@
+{
+  "logs": {
+    "fresh-check.log": {
+      "SHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    },
+    "installed-check.log": {
+      "SHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    },
+    "lan-check.log": {
+      "SHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    },
+    "same-version-check.log": {
+      "SHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    },
+    "rebooted-check.log": {
+      "SHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    },
+    "fresh-install.log": {
+      "SHA256": "b6b5bd7c5ea41dd5cd2241df8bd3864af0156b72cf6ac403ca3ac24a9810ac4c",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    },
+    "same-version-install.log": {
+      "SHA256": "7e5dec80575c0c4b083c21e203dc377a941d8732734ae3123c945df2f944165c",
+      "exitStatus": 0,
+      "provenance": "Exit observed during this acceptance session; raw log retained privately"
+    }
+  },
+  "crossVersionReplacementPreflightExit": 1,
+  "runtimePatched": false,
+  "freshInstall": true,
+  "upgradeTested": false,
+  "archiveRestorationTested": false
+}

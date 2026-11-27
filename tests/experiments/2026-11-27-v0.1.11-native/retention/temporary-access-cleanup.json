@@ -1,0 +1,15 @@
+{
+  "SSHMasterClosed": true,
+  "rootTTYClosed": true,
+  "temporaryLocalForwardListeners": 0,
+  "savedAPIBrowserSessionsRevoked": true,
+  "savedCookieFilesRemoved": true,
+  "temporaryRemoteCredentialCopiesRemoved": [
+    "access.json",
+    "old-access.json"
+  ],
+  "temporaryClientCredentialCopyRemoved": true,
+  "temporaryIdleSleepInhibitorStopped": true,
+  "canonicalPrivateAccessStateRetained": true,
+  "installationRetainedWithHealthyDemo": true
+}

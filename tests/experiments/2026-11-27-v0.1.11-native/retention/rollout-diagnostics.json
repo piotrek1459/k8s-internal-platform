@@ -1,0 +1,516 @@
+{
+  "appID": "app_51412a2a625b76b4",
+  "name": "eval-a091d53c91d9-availability",
+  "applicationEvents": [
+    {
+      "action": "Binding",
+      "apiVersion": "v1",
+      "eventTime": "2026-11-27T09:18:08.523561Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+        "namespace": "platform-apps",
+        "resourceVersion": "4097",
+        "uid": "bcba68ab-a73e-4a5f-a5e7-94e78d801061"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "Successfully assigned platform-apps/app-app-51412a2a625b76b4-55b6c96d6f-x7mdx to k8s-platform",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:08Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx.18ebdc4a655d2601",
+        "namespace": "platform-apps",
+        "resourceVersion": "4103",
+        "uid": "3de4aea3-1de5-449b-a616-9b8402916912"
+      },
+      "reason": "Scheduled",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-k8s-platform",
+      "source": {},
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:09Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+        "namespace": "platform-apps",
+        "resourceVersion": "4099",
+        "uid": "bcba68ab-a73e-4a5f-a5e7-94e78d801061"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:09Z",
+      "message": "Container image \"platform.local/http-demo@sha256:62162c21678ef48de764be5303a841a1105a42b5fac620d3080d7dcd394a8974\" already present on machine and can be accessed by the pod",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:09Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx.18ebdc4a891d1811",
+        "namespace": "platform-apps",
+        "resourceVersion": "4105",
+        "uid": "771b3b70-7ebc-45bd-903d-ebd5a8ba6f9c"
+      },
+      "reason": "Pulled",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:09Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+        "namespace": "platform-apps",
+        "resourceVersion": "4099",
+        "uid": "bcba68ab-a73e-4a5f-a5e7-94e78d801061"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:09Z",
+      "message": "Container created",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:09Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx.18ebdc4a8c4e951b",
+        "namespace": "platform-apps",
+        "resourceVersion": "4107",
+        "uid": "ea9e8b92-3015-4b05-bdc2-a6cb06128dea"
+      },
+      "reason": "Created",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:09Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+        "namespace": "platform-apps",
+        "resourceVersion": "4099",
+        "uid": "bcba68ab-a73e-4a5f-a5e7-94e78d801061"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:09Z",
+      "message": "Container started",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:09Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx.18ebdc4a90a0cb9d",
+        "namespace": "platform-apps",
+        "resourceVersion": "4108",
+        "uid": "64b43f29-30fa-4d04-9d32-a028c2e7c9d1"
+      },
+      "reason": "Started",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:46Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+        "namespace": "platform-apps",
+        "resourceVersion": "4099",
+        "uid": "bcba68ab-a73e-4a5f-a5e7-94e78d801061"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:46Z",
+      "message": "Stopping container application",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:46Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f-x7mdx.18ebdc5343a82ab7",
+        "namespace": "platform-apps",
+        "resourceVersion": "4169",
+        "uid": "62da79b0-a799-40f6-a663-4f91eb6d2bdf"
+      },
+      "reason": "Killing",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:08Z",
+      "involvedObject": {
+        "apiVersion": "apps/v1",
+        "kind": "ReplicaSet",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f",
+        "namespace": "platform-apps",
+        "resourceVersion": "4092",
+        "uid": "fd8391bb-0e73-4448-904a-0ba7be2cea46"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:08Z",
+      "message": "Created pod: app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:08Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f.18ebdc4a63ed6002",
+        "namespace": "platform-apps",
+        "resourceVersion": "4098",
+        "uid": "5d3dfe20-3739-48c5-8f23-7d6aefae3a61"
+      },
+      "reason": "SuccessfulCreate",
+      "reportingComponent": "replicaset-controller",
+      "reportingInstance": "",
+      "source": {
+        "component": "replicaset-controller"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:46Z",
+      "involvedObject": {
+        "apiVersion": "apps/v1",
+        "kind": "ReplicaSet",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f",
+        "namespace": "platform-apps",
+        "resourceVersion": "4162",
+        "uid": "fd8391bb-0e73-4448-904a-0ba7be2cea46"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:46Z",
+      "message": "Deleted pod: app-app-51412a2a625b76b4-55b6c96d6f-x7mdx",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:46Z",
+        "name": "app-app-51412a2a625b76b4-55b6c96d6f.18ebdc53438b802e",
+        "namespace": "platform-apps",
+        "resourceVersion": "4166",
+        "uid": "7465e49f-9f63-4e6e-a2b2-233974e0a8c3"
+      },
+      "reason": "SuccessfulDelete",
+      "reportingComponent": "replicaset-controller",
+      "reportingInstance": "",
+      "source": {
+        "component": "replicaset-controller"
+      },
+      "type": "Normal"
+    },
+    {
+      "action": "Binding",
+      "apiVersion": "v1",
+      "eventTime": "2026-11-27T09:18:43.449915Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s",
+        "namespace": "platform-apps",
+        "resourceVersion": "4139",
+        "uid": "6bf45f6b-472b-49d9-b7ef-7b28f310cdf8"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "Successfully assigned platform-apps/app-app-51412a2a625b76b4-bfdd4f757-jrd6s to k8s-platform",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:43Z",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s.18ebdc528722fa7c",
+        "namespace": "platform-apps",
+        "resourceVersion": "4144",
+        "uid": "7347c0ab-466a-48ff-b7d9-232f329baae8"
+      },
+      "reason": "Scheduled",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-k8s-platform",
+      "source": {},
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:43Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s",
+        "namespace": "platform-apps",
+        "resourceVersion": "4143",
+        "uid": "6bf45f6b-472b-49d9-b7ef-7b28f310cdf8"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:43Z",
+      "message": "Container image \"platform.local/http-demo@sha256:a83f3f1d6315db2427f48d721bd144a81870160259daef40fe2dc57d91c086a6\" already present on machine and can be accessed by the pod",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:44Z",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s.18ebdc52a7ca0bd9",
+        "namespace": "platform-apps",
+        "resourceVersion": "4148",
+        "uid": "90b76cfe-de4e-4b86-b5e9-1ecc4af7438b"
+      },
+      "reason": "Pulled",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:44Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s",
+        "namespace": "platform-apps",
+        "resourceVersion": "4143",
+        "uid": "6bf45f6b-472b-49d9-b7ef-7b28f310cdf8"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:44Z",
+      "message": "Container created",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:44Z",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s.18ebdc52aa95bac7",
+        "namespace": "platform-apps",
+        "resourceVersion": "4150",
+        "uid": "6e68fb35-001a-4fcd-ae3d-dfaee86a70e5"
+      },
+      "reason": "Created",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:44Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s",
+        "namespace": "platform-apps",
+        "resourceVersion": "4143",
+        "uid": "6bf45f6b-472b-49d9-b7ef-7b28f310cdf8"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:44Z",
+      "message": "Container started",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:44Z",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s.18ebdc52aed0fe14",
+        "namespace": "platform-apps",
+        "resourceVersion": "4151",
+        "uid": "c9f21036-1c5d-41a8-ae2c-8f4e2042a8af"
+      },
+      "reason": "Started",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:19:47Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{application}",
+        "kind": "Pod",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s",
+        "namespace": "platform-apps",
+        "resourceVersion": "4143",
+        "uid": "6bf45f6b-472b-49d9-b7ef-7b28f310cdf8"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:19:47Z",
+      "message": "Stopping container application",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:19:47Z",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757-jrd6s.18ebdc6179b68045",
+        "namespace": "platform-apps",
+        "resourceVersion": "4253",
+        "uid": "552ab03e-0138-44df-be9e-474f8c83dd4f"
+      },
+      "reason": "Killing",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "k8s-platform",
+      "source": {
+        "component": "kubelet",
+        "host": "k8s-platform"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:43Z",
+      "involvedObject": {
+        "apiVersion": "apps/v1",
+        "kind": "ReplicaSet",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757",
+        "namespace": "platform-apps",
+        "resourceVersion": "4135",
+        "uid": "6de81375-c768-4d32-9ceb-b4ca93769699"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:43Z",
+      "message": "Created pod: app-app-51412a2a625b76b4-bfdd4f757-jrd6s",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:43Z",
+        "name": "app-app-51412a2a625b76b4-bfdd4f757.18ebdc52868db66e",
+        "namespace": "platform-apps",
+        "resourceVersion": "4140",
+        "uid": "05679ced-272f-4637-98dc-08e4d3500e2c"
+      },
+      "reason": "SuccessfulCreate",
+      "reportingComponent": "replicaset-controller",
+      "reportingInstance": "",
+      "source": {
+        "component": "replicaset-controller"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:08Z",
+      "involvedObject": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "name": "app-app-51412a2a625b76b4",
+        "namespace": "platform-apps",
+        "resourceVersion": "4089",
+        "uid": "60a646b3-a063-4e53-b62e-30496ef1e760"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:08Z",
+      "message": "Scaled up replica set app-app-51412a2a625b76b4-55b6c96d6f from 0 to 1",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:08Z",
+        "name": "app-app-51412a2a625b76b4.18ebdc4a5d444193",
+        "namespace": "platform-apps",
+        "resourceVersion": "4093",
+        "uid": "4e1266ca-e1d7-4500-90a7-915cc4e11f24"
+      },
+      "reason": "ScalingReplicaSet",
+      "reportingComponent": "deployment-controller",
+      "reportingInstance": "",
+      "source": {
+        "component": "deployment-controller"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:43Z",
+      "involvedObject": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "name": "app-app-51412a2a625b76b4",
+        "namespace": "platform-apps",
+        "resourceVersion": "4134",
+        "uid": "60a646b3-a063-4e53-b62e-30496ef1e760"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:43Z",
+      "message": "Scaled up replica set app-app-51412a2a625b76b4-bfdd4f757 from 0 to 1",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:43Z",
+        "name": "app-app-51412a2a625b76b4.18ebdc5285ec1be4",
+        "namespace": "platform-apps",
+        "resourceVersion": "4136",
+        "uid": "98855669-f9b4-4fe9-b619-8b51bf8b6ec2"
+      },
+      "reason": "ScalingReplicaSet",
+      "reportingComponent": "deployment-controller",
+      "reportingInstance": "",
+      "source": {
+        "component": "deployment-controller"
+      },
+      "type": "Normal"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-11-27T09:18:46Z",
+      "involvedObject": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "name": "app-app-51412a2a625b76b4",
+        "namespace": "platform-apps",
+        "resourceVersion": "4146",
+        "uid": "60a646b3-a063-4e53-b62e-30496ef1e760"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-11-27T09:18:46Z",
+      "message": "Scaled down replica set app-app-51412a2a625b76b4-55b6c96d6f from 1 to 0",
+      "metadata": {
+        "creationTimestamp": "2026-11-27T09:18:46Z",
+        "name": "app-app-51412a2a625b76b4.18ebdc5343210eb8",
+        "namespace": "platform-apps",
+        "resourceVersion": "4163",
+        "uid": "367b9c18-b865-4c86-a01f-1aceb56179c2"
+      },
+      "reason": "ScalingReplicaSet",
+      "reportingComponent": "deployment-controller",
+      "reportingInstance": "",
+      "source": {
+        "component": "deployment-controller"
+      },
+      "type": "Normal"
+    }
+  ],
+  "causeConfirmed": false,
+  "note": "Read-only surviving events collected after the failed original trace; no endpoint watch or proxy backend trace was captured during rollout"
+}
