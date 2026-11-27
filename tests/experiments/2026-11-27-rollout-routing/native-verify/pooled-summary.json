@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-3cf9fb3e05f4-diagnose.apps.home.arpa:8443/version",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 5,
+  "durationSeconds": 55,
+  "warmupSeconds": 0,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795780026.923627,
+  "finishedEpochSeconds": 1795780081.7428758,
+  "requests": 275,
+  "successful": 275,
+  "successRate": 1.0,
+  "latencyMilliseconds": {
+    "count": 275,
+    "minimum": 5.848791,
+    "median": 10.612375,
+    "p95": 79.321875,
+    "maximum": 120.561083
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 275,
+  "complete": true,
+  "targetsPassed": true,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

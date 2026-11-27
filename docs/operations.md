@@ -20,7 +20,8 @@ workflow are implemented. Their procedures are documented in the
 Native Pi installation, LAN browser/API routing and same-version/reboot retention
 have published v0.1.10 evidence, including native failure/retry/disclosure checks.
 Published v0.1.11 also passed [native default/system/retention checks](../tests/experiments/2026-11-27-v0.1.11-native.md),
-but application-rollout continuity failed (373/375); diagnosis/correction remain open.
+but application-rollout continuity failed (373/375). The [source routing correction](../tests/experiments/2026-11-27-rollout-routing.md)
+requires manual release and published Pi acceptance.
 Human operator measurements, backup/restore,
 upgrades and metrics retain separate acceptance requirements;
 local startup or a healthy update does not establish those results.

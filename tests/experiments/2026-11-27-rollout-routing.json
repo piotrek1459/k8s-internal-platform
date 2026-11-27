@@ -1,0 +1,808 @@
+{
+  "schemaVersion": 1,
+  "runtimeRelease": "0.1.11",
+  "runtimeCommit": "33d9290849be0ca3fed8a1156cbac942f91557f2",
+  "sourceFixCommit": "826b92e45cf5730c52a1e1b37d3159c1fff5fc21",
+  "sourcePR": 25,
+  "pinnedProxy": "3.7.19",
+  "candidateSetting": "--providers.kubernetesingress.nativelbbydefault=true",
+  "originalTraceUnchanged": "2026-11-27-v0.1.11-native/availability",
+  "cases": [
+    {
+      "case": "diagnosis-01",
+      "nativeServiceRouting": false,
+      "endpointRefreshDelaySeconds": 0,
+      "clients": {
+        "pooled": {
+          "url": "https://eval-fee6b4f44afd-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779292.087966,
+          "finishedEpochSeconds": 1795779346.904112,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 5.350417,
+            "median": 10.849041,
+            "p95": 83.820042,
+            "maximum": 115.54975
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "fresh": {
+          "url": "https://eval-fee6b4f44afd-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779292.087975,
+          "finishedEpochSeconds": 1795779346.927704,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 25.169375,
+            "median": 34.09125,
+            "p95": 120.381583,
+            "maximum": 219.490125
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        }
+      },
+      "allRequestsSucceeded": true
+    },
+    {
+      "case": "control-slow",
+      "nativeServiceRouting": false,
+      "endpointRefreshDelaySeconds": 15,
+      "clients": {
+        "pooled": {
+          "url": "https://eval-5fa4d0000dd8-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779519.314945,
+          "finishedEpochSeconds": 1795779574.131586,
+          "requests": 275,
+          "successful": 230,
+          "successRate": 0.8363636363636363,
+          "latencyMilliseconds": {
+            "count": 230,
+            "minimum": 5.39275,
+            "median": 10.9618745,
+            "p95": 88.402,
+            "maximum": 178.732875
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": false,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "fresh": {
+          "url": "https://eval-5fa4d0000dd8-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779519.314945,
+          "finishedEpochSeconds": 1795779574.149531,
+          "requests": 275,
+          "successful": 230,
+          "successRate": 0.8363636363636363,
+          "latencyMilliseconds": {
+            "count": 230,
+            "minimum": 25.107542,
+            "median": 33.3964795,
+            "p95": 121.446709,
+            "maximum": 180.993042
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": false,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        }
+      },
+      "allRequestsSucceeded": false
+    },
+    {
+      "case": "native-slow",
+      "nativeServiceRouting": true,
+      "endpointRefreshDelaySeconds": 15,
+      "clients": {
+        "pooled": {
+          "url": "https://eval-a0cd16ca34a0-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779650.109115,
+          "finishedEpochSeconds": 1795779705.09985,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 5.75525,
+            "median": 11.15275,
+            "p95": 135.008125,
+            "maximum": 411.182084
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "fresh": {
+          "url": "https://eval-a0cd16ca34a0-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779650.109115,
+          "finishedEpochSeconds": 1795779705.121532,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 23.747292,
+            "median": 34.989333,
+            "p95": 162.487042,
+            "maximum": 435.168583
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        }
+      },
+      "allRequestsSucceeded": true
+    },
+    {
+      "case": "native-cycle",
+      "nativeServiceRouting": true,
+      "endpointRefreshDelaySeconds": 0,
+      "clients": {
+        "pooled": {
+          "url": "https://eval-a21a9df86363-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779799.0701382,
+          "finishedEpochSeconds": 1795779853.8848808,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 5.432542,
+            "median": 10.989125,
+            "p95": 79.05375,
+            "maximum": 100.231791
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "fresh": {
+          "url": "https://eval-a21a9df86363-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795779799.070107,
+          "finishedEpochSeconds": 1795779853.9124281,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 25.766958,
+            "median": 33.238792,
+            "p95": 121.8775,
+            "maximum": 167.92175
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        }
+      },
+      "allRequestsSucceeded": true
+    },
+    {
+      "case": "native-verify",
+      "nativeServiceRouting": true,
+      "endpointRefreshDelaySeconds": 15,
+      "clients": {
+        "pooled": {
+          "url": "https://eval-3cf9fb3e05f4-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795780026.923627,
+          "finishedEpochSeconds": 1795780081.7428758,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 5.848791,
+            "median": 10.612375,
+            "p95": 79.321875,
+            "maximum": 120.561083
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        },
+        "fresh": {
+          "url": "https://eval-3cf9fb3e05f4-diagnose.apps.home.arpa:8443/version",
+          "addressOverride": "192.168.68.227",
+          "certificateVerification": true,
+          "ratePerSecond": 5,
+          "durationSeconds": 55,
+          "warmupSeconds": 0,
+          "maximumOutstandingRequests": 32,
+          "startedEpochSeconds": 1795780026.923611,
+          "finishedEpochSeconds": 1795780081.867507,
+          "requests": 275,
+          "successful": 275,
+          "successRate": 1.0,
+          "latencyMilliseconds": {
+            "count": 275,
+            "minimum": 25.024042,
+            "median": 33.550209,
+            "p95": 116.675625,
+            "maximum": 134.646334
+          },
+          "clientSchedulingValid": true,
+          "expectedRequests": 275,
+          "complete": true,
+          "targetsPassed": true,
+          "protocol": "HTTP/1.1",
+          "humanOperatorTime": null
+        }
+      },
+      "allRequestsSucceeded": true
+    }
+  ],
+  "defaultTimingObservation": {
+    "endpointMarkedTerminatingEpoch": 1795779305.3385108,
+    "proxyFenceObservedEpoch": 1795779310.0204287,
+    "processStoppingEpoch": 1795779310.230774,
+    "observedFenceDelaySeconds": 4.681917905807495,
+    "observedFenceToStopMarginSeconds": 0.21034526824951172,
+    "configurationSamplingSeconds": 0.1
+  },
+  "delayedControlFailedOldBackendAccessLogs": 90,
+  "verifiedNativeServiceURL": "http://10.43.201.25:80",
+  "candidateRequests": 1650,
+  "candidateSuccessful": 1650,
+  "publishedReleaseAcceptancePending": true,
+  "humanOperatorTime": null,
+  "coreEvaluationComplete": false,
+  "temporaryProxyConfigurationRestored": true,
+  "sourceE2E": {
+    "runID": 45993196980,
+    "source": "826b92e45cf5730c52a1e1b37d3159c1fff5fc21",
+    "artifactID": 15195419489,
+    "artifactDigest": "sha256:30aa1e7851cb5e59a8de3c01309856a149df413be6b41dd678a4b6f01d017b98",
+    "tests": 27,
+    "failures": 0,
+    "skips": 0,
+    "rolloutRequests": 116,
+    "rolloutErrors": 0,
+    "conclusion": "success",
+    "workflowURL": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45993196980"
+  },
+  "artifacts": {
+    "diagnosis-01/client/pooled/requests.jsonl.gz": {
+      "SHA256": "1862e6cd678c8452e0a94c754fcc9d97181aa376e79c1eed4ba3c6365cf9091b",
+      "expandedSHA256": "c7c65e038327e6b9667472c01c4ca9b1346f0471f350dd7670ad98c3afc14263",
+      "bytes": 6047
+    },
+    "diagnosis-01/client/pooled/summary.json": {
+      "SHA256": "3501221fa68bdb34ba557e7fd3c70ed71114be9a9bcd2fef459d6bf17571c33a",
+      "expandedSHA256": "3501221fa68bdb34ba557e7fd3c70ed71114be9a9bcd2fef459d6bf17571c33a",
+      "bytes": 715
+    },
+    "diagnosis-01/client/fresh/requests.jsonl.gz": {
+      "SHA256": "559518c1676af088f5ff48078e99033ea52de95b152b7aacccfa0159d3ed8c2e",
+      "expandedSHA256": "181d7771f0a92540acb7664c4818095f570da759efba313bf40e622a09684dfa",
+      "bytes": 6113
+    },
+    "diagnosis-01/client/fresh/summary.json": {
+      "SHA256": "0bb587983ce465c72247b9fba6c960255b7d25fc80ab5cb98bcb369e9e1d8857",
+      "expandedSHA256": "0bb587983ce465c72247b9fba6c960255b7d25fc80ab5cb98bcb369e9e1d8857",
+      "bytes": 717
+    },
+    "diagnosis-01/endpointslices.jsonl.gz": {
+      "SHA256": "3461c516e31ea69243a4d7b72817a22238138a0dbd726eb24643ad04cd9e1cbf",
+      "expandedSHA256": "59b644c4289dd8c0d69aba982efd52a9cd379d2879f3f9a5ac285f8529be91d1",
+      "bytes": 533
+    },
+    "diagnosis-01/fixture.json": {
+      "SHA256": "af3ee503736a6a0e8b653b12f72e684c641cde052271782b01cad7fd3bfb6b4b",
+      "expandedSHA256": "af3ee503736a6a0e8b653b12f72e684c641cde052271782b01cad7fd3bfb6b4b",
+      "bytes": 293
+    },
+    "diagnosis-01/fresh-summary.json": {
+      "SHA256": "0bb587983ce465c72247b9fba6c960255b7d25fc80ab5cb98bcb369e9e1d8857",
+      "expandedSHA256": "0bb587983ce465c72247b9fba6c960255b7d25fc80ab5cb98bcb369e9e1d8857",
+      "bytes": 717
+    },
+    "diagnosis-01/old-process.jsonl.gz": {
+      "SHA256": "5e5404c8316a3aa78962f7375f922a838e6abaf78b016ca0e83535d612362e27",
+      "expandedSHA256": "b5e69f43e04e8bac2a00185058c577b692debe5e38a37795c322021eb39b2161",
+      "bytes": 1571
+    },
+    "diagnosis-01/owned.json": {
+      "SHA256": "9a248b34cd8018b47f9af923e109d21f77de922489512a4bd8dc463b75ae0334",
+      "expandedSHA256": "9a248b34cd8018b47f9af923e109d21f77de922489512a4bd8dc463b75ae0334",
+      "bytes": 75
+    },
+    "diagnosis-01/pods.jsonl.gz": {
+      "SHA256": "4d9d31915c46c7e55fcd0a05d5d1be4b5759824464cd6cf1ae6cd67d0655df8c",
+      "expandedSHA256": "43bd87cc2c9ea9ec6aee0608757918b7ff10230d445ce56bd54a9926b33a88e2",
+      "bytes": 1643
+    },
+    "diagnosis-01/pooled-summary.json": {
+      "SHA256": "3501221fa68bdb34ba557e7fd3c70ed71114be9a9bcd2fef459d6bf17571c33a",
+      "expandedSHA256": "3501221fa68bdb34ba557e7fd3c70ed71114be9a9bcd2fef459d6bf17571c33a",
+      "bytes": 715
+    },
+    "diagnosis-01/proxy-control.json": {
+      "SHA256": "27277e2191b1172c81e7a9b75d1960b6ba2f9d5a05c15046895dc2641853e427",
+      "expandedSHA256": "27277e2191b1172c81e7a9b75d1960b6ba2f9d5a05c15046895dc2641853e427",
+      "bytes": 8679
+    },
+    "diagnosis-01/proxy-services.jsonl.gz": {
+      "SHA256": "6d558baebca0123b93000727c245476a1ccd81a48c15c789a88dbf449abe2329",
+      "expandedSHA256": "ec1913118c3120bb23555eb107cca421cc2369920df6be3f978fbd42d9eec195",
+      "bytes": 6586
+    },
+    "diagnosis-01/timeline.json": {
+      "SHA256": "99e58fd10db1d52f972db0a81c1f26f0170d704a56cd40e76a722cb870a6eeb0",
+      "expandedSHA256": "99e58fd10db1d52f972db0a81c1f26f0170d704a56cd40e76a722cb870a6eeb0",
+      "bytes": 120
+    },
+    "control-slow/client/pooled/requests.jsonl.gz": {
+      "SHA256": "3a340dbca096ce6934365074c34500d51d478c51fabd4816cba62863e496ee05",
+      "expandedSHA256": "40b147a5d346b92d12c037d450bdd330d2ac5ab9483295b8cdbeef61043eb66e",
+      "bytes": 6141
+    },
+    "control-slow/client/pooled/summary.json": {
+      "SHA256": "0333d1ba168f575a078430eda3aa01ac33e2803b0d04d1a6a0dd823bd41f2b15",
+      "expandedSHA256": "0333d1ba168f575a078430eda3aa01ac33e2803b0d04d1a6a0dd823bd41f2b15",
+      "bytes": 729
+    },
+    "control-slow/client/fresh/requests.jsonl.gz": {
+      "SHA256": "34b456bb72280101447a250082d201c32c5fd051eb69f24333397c659e76367e",
+      "expandedSHA256": "6642709c60383d078a5f6a2ebf3b9ec07edbb62ce573a4d5c0509bcf924366b7",
+      "bytes": 6247
+    },
+    "control-slow/client/fresh/summary.json": {
+      "SHA256": "c3157fced26f41730eb5b4c6d3269623dcfbbaf0bbdfee7bc084453081445b7a",
+      "expandedSHA256": "c3157fced26f41730eb5b4c6d3269623dcfbbaf0bbdfee7bc084453081445b7a",
+      "bytes": 735
+    },
+    "control-slow/collector-source.py": {
+      "SHA256": "51d27eadebebfd93eeb9bbf1f55b3692682711d0198c1e1c158c38651b0d2603",
+      "expandedSHA256": "51d27eadebebfd93eeb9bbf1f55b3692682711d0198c1e1c158c38651b0d2603",
+      "bytes": 8245
+    },
+    "control-slow/endpointslices.jsonl.gz": {
+      "SHA256": "329fe7deeab4283fc6b7b147b3a82f6f4af30f6852780117d480d3dc505384da",
+      "expandedSHA256": "6b63ff17a71acf562083c53c271861b8c3771324f61b2768fa5dfb0faa451442",
+      "bytes": 533
+    },
+    "control-slow/fixture.json": {
+      "SHA256": "d14345909fc41b4308566a8bf2bf71e235b55f26a7cc018591332a9250a3d1a8",
+      "expandedSHA256": "d14345909fc41b4308566a8bf2bf71e235b55f26a7cc018591332a9250a3d1a8",
+      "bytes": 294
+    },
+    "control-slow/fresh-summary.json": {
+      "SHA256": "c3157fced26f41730eb5b4c6d3269623dcfbbaf0bbdfee7bc084453081445b7a",
+      "expandedSHA256": "c3157fced26f41730eb5b4c6d3269623dcfbbaf0bbdfee7bc084453081445b7a",
+      "bytes": 735
+    },
+    "control-slow/old-process.jsonl.gz": {
+      "SHA256": "12c8419fe5c66658c94f7ba0cc75f715d80d9b1451fabcf70b2b7821949f70c2",
+      "expandedSHA256": "82cec99a1f7ff2dc1893922681845419605dee28fe1071e81ee47ce97c34a830",
+      "bytes": 1813
+    },
+    "control-slow/owned.json": {
+      "SHA256": "f68cde3b7c16763b204ca059c428c6c1179e0225f3a18c93425e590176ee998f",
+      "expandedSHA256": "f68cde3b7c16763b204ca059c428c6c1179e0225f3a18c93425e590176ee998f",
+      "bytes": 75
+    },
+    "control-slow/pods.jsonl.gz": {
+      "SHA256": "fc5ae637a5ad40da79d15f7931af2e622db93b5490efc0f3ea04faa99f710396",
+      "expandedSHA256": "ab8218393991ec97f05c06ac33820177dc7cb1bbc39493627547f29109766b3d",
+      "bytes": 1638
+    },
+    "control-slow/pooled-summary.json": {
+      "SHA256": "0333d1ba168f575a078430eda3aa01ac33e2803b0d04d1a6a0dd823bd41f2b15",
+      "expandedSHA256": "0333d1ba168f575a078430eda3aa01ac33e2803b0d04d1a6a0dd823bd41f2b15",
+      "bytes": 729
+    },
+    "control-slow/proxy-access.jsonl.gz": {
+      "SHA256": "8d5fb1693fdb4a3c92fb5ff8fa6eafcd6b7b8ae87fd559eeadb2a58efd678925",
+      "expandedSHA256": "a91ec85c5107c46fd495bc17a38db4bee25e2e7b04fc5f061219104323dd773c",
+      "bytes": 9175
+    },
+    "control-slow/proxy-control.json": {
+      "SHA256": "67265bd0b7a2974b937d84442ee83c8b8cf70deb01e45a5236aba43a4fd04ee2",
+      "expandedSHA256": "67265bd0b7a2974b937d84442ee83c8b8cf70deb01e45a5236aba43a4fd04ee2",
+      "bytes": 8745
+    },
+    "control-slow/proxy-services.jsonl.gz": {
+      "SHA256": "47ef112816d47deef3e6952791997eeba364ca73f0940e59a64b625ddbe18ec9",
+      "expandedSHA256": "03a3f8e0829deb37a2295eb94321ce86136bfe6f44c817c13966d092f76fb8fd",
+      "bytes": 6562
+    },
+    "control-slow/timeline.json": {
+      "SHA256": "9b54b4a0fbaafb77b85c665e7e7cb8cdf6182780708aee247fc2cdb6290e18ca",
+      "expandedSHA256": "9b54b4a0fbaafb77b85c665e7e7cb8cdf6182780708aee247fc2cdb6290e18ca",
+      "bytes": 120
+    },
+    "native-slow/client/pooled/requests.jsonl.gz": {
+      "SHA256": "91c238809e31e2d1be1601e36c64a91c297ce584e0ce1c826db260bac6d2e755",
+      "expandedSHA256": "4b1d9c511d791321b6d5db06e89b6468a799d8c8ef15aaf5a845ca4705da769d",
+      "bytes": 6011
+    },
+    "native-slow/client/pooled/summary.json": {
+      "SHA256": "778e63883ac60e4eee8c0adc39b7d8ee25d9568369d9537345bc2fec3b324afb",
+      "expandedSHA256": "778e63883ac60e4eee8c0adc39b7d8ee25d9568369d9537345bc2fec3b324afb",
+      "bytes": 714
+    },
+    "native-slow/client/fresh/requests.jsonl.gz": {
+      "SHA256": "5c486a4feca32baf993315ae28dc5dada26fa33a2029f8096eb437bc140b2806",
+      "expandedSHA256": "78eb83baae8bd51fc23d086859047299820378f6c9c075f50e370ae473c659f2",
+      "bytes": 6107
+    },
+    "native-slow/client/fresh/summary.json": {
+      "SHA256": "5c095a87c9d29847545be6f15390c3b4656d7d149d5d6b61377bbbfd5088a01e",
+      "expandedSHA256": "5c095a87c9d29847545be6f15390c3b4656d7d149d5d6b61377bbbfd5088a01e",
+      "bytes": 718
+    },
+    "native-slow/collector-source.py": {
+      "SHA256": "b62213c61fbeda37092991f0a7dfd9a27516114954b3dc408509003513b96971",
+      "expandedSHA256": "b62213c61fbeda37092991f0a7dfd9a27516114954b3dc408509003513b96971",
+      "bytes": 8860
+    },
+    "native-slow/endpointslices.jsonl.gz": {
+      "SHA256": "99314d4daf98ce745605799dbf9f4ff4ee4b2c651c737c548aab840c6070914c",
+      "expandedSHA256": "e5632c4a3023cbe06619ea5a1e6c53f6895f4fe767e5733bb88769860e7d5041",
+      "bytes": 525
+    },
+    "native-slow/fixture.json": {
+      "SHA256": "dd64341684c6ae8173352d4501723465c97edbc1cb3a97c5ac21c7a7fd2aa4bf",
+      "expandedSHA256": "dd64341684c6ae8173352d4501723465c97edbc1cb3a97c5ac21c7a7fd2aa4bf",
+      "bytes": 294
+    },
+    "native-slow/fresh-summary.json": {
+      "SHA256": "5c095a87c9d29847545be6f15390c3b4656d7d149d5d6b61377bbbfd5088a01e",
+      "expandedSHA256": "5c095a87c9d29847545be6f15390c3b4656d7d149d5d6b61377bbbfd5088a01e",
+      "bytes": 718
+    },
+    "native-slow/old-process.jsonl.gz": {
+      "SHA256": "b20bcf7e5922cd6bea83d40a1f53cca218c8bf5c7d1bdae8f33a8d782569cc53",
+      "expandedSHA256": "fa202112eff20a7c00d3e411ea868818639e0e9901162b9495ef268355783b0a",
+      "bytes": 1831
+    },
+    "native-slow/owned.json": {
+      "SHA256": "1fe19231a23936552f5e1813b2fed607dfb599ba5e967463f56ec7063db3cf9d",
+      "expandedSHA256": "1fe19231a23936552f5e1813b2fed607dfb599ba5e967463f56ec7063db3cf9d",
+      "bytes": 75
+    },
+    "native-slow/pods.jsonl.gz": {
+      "SHA256": "fa86b2548d0679220000e49320e7bfe13f24908cf3b2f65c4f3f62e2098f3499",
+      "expandedSHA256": "4a13f19723dbf21efc3fb226b837dd43850e1e6f280b92deee93c634d2326f55",
+      "bytes": 1673
+    },
+    "native-slow/pooled-summary.json": {
+      "SHA256": "778e63883ac60e4eee8c0adc39b7d8ee25d9568369d9537345bc2fec3b324afb",
+      "expandedSHA256": "778e63883ac60e4eee8c0adc39b7d8ee25d9568369d9537345bc2fec3b324afb",
+      "bytes": 714
+    },
+    "native-slow/proxy-access.jsonl.gz": {
+      "SHA256": "4e8f6bd2d1051eaf5275296f7018c5b355fdb2dbaf8845945dd948c4b402dc29",
+      "expandedSHA256": "a2abf700f848483ef90c16bd3a7ec7d64967e7079f448310ad747932c4d806d0",
+      "bytes": 8694
+    },
+    "native-slow/proxy-control.json": {
+      "SHA256": "fd975ffdf5e244626613bb08ad56898c341a4c37c1f4106e233d664d2a1bb052",
+      "expandedSHA256": "fd975ffdf5e244626613bb08ad56898c341a4c37c1f4106e233d664d2a1bb052",
+      "bytes": 8813
+    },
+    "native-slow/proxy-services.jsonl.gz": {
+      "SHA256": "f1f6b536481de3d39f3a9a27a24f2f301511e12b386df71a9968aeaabf11f180",
+      "expandedSHA256": "e356299b7445c3e34ceab847c3a5b204527e1f28801e3e2dc6d925bae7b49430",
+      "bytes": 6506
+    },
+    "native-slow/timeline.json": {
+      "SHA256": "bf2ba4e4694c6b6e35b5aaf0cc22f82e535f690c00fdf71ef3dcad0dee256f70",
+      "expandedSHA256": "bf2ba4e4694c6b6e35b5aaf0cc22f82e535f690c00fdf71ef3dcad0dee256f70",
+      "bytes": 121
+    },
+    "native-cycle/client/pooled/requests.jsonl.gz": {
+      "SHA256": "097fe143111c05062254395b93e659d38de9bfa8eab867cc40603bd5264e3533",
+      "expandedSHA256": "60a1e3450267dc640d33d1eb56ac8ec2f5e4e180491cea55141232e8205c0e13",
+      "bytes": 6100
+    },
+    "native-cycle/client/pooled/summary.json": {
+      "SHA256": "b96ebb50d929069895b9d08ae3d3684aa7039f0486345778fbcee1cf0f0b60c6",
+      "expandedSHA256": "b96ebb50d929069895b9d08ae3d3684aa7039f0486345778fbcee1cf0f0b60c6",
+      "bytes": 717
+    },
+    "native-cycle/client/fresh/requests.jsonl.gz": {
+      "SHA256": "516da918855797ddfa0790e582b8435ac148c3d727746fabf66239e5f672f0fe",
+      "expandedSHA256": "3fd83c77ea9a39b078d58dee7f982b2d6095db66fa0ac0c74f83b8a074cf815c",
+      "bytes": 6152
+    },
+    "native-cycle/client/fresh/summary.json": {
+      "SHA256": "066408b1e5460eaf86cb8dcbe37af8b48fcf1bf514f76386934b7957c6aba9fb",
+      "expandedSHA256": "066408b1e5460eaf86cb8dcbe37af8b48fcf1bf514f76386934b7957c6aba9fb",
+      "bytes": 716
+    },
+    "native-cycle/collector-source.py": {
+      "SHA256": "62b672d2a088bdf6f507ac3ffa23021901828ab73226af3b67df63cd3b518c01",
+      "expandedSHA256": "62b672d2a088bdf6f507ac3ffa23021901828ab73226af3b67df63cd3b518c01",
+      "bytes": 9529
+    },
+    "native-cycle/endpointslices.jsonl.gz": {
+      "SHA256": "e8fba3512fb60dd62a2445cfbf9266378b208d31dec46c1699cb13045b8df022",
+      "expandedSHA256": "7d006cf53e23e7d01f92ade671557093a7b9671a4847b4c1584259f78fe63161",
+      "bytes": 767
+    },
+    "native-cycle/fixture.json": {
+      "SHA256": "95e4e22d7418f7911386ac769d0cbd912a57977c8f9cdc7e118d4e23ca5e638b",
+      "expandedSHA256": "95e4e22d7418f7911386ac769d0cbd912a57977c8f9cdc7e118d4e23ca5e638b",
+      "bytes": 294
+    },
+    "native-cycle/fresh-summary.json": {
+      "SHA256": "066408b1e5460eaf86cb8dcbe37af8b48fcf1bf514f76386934b7957c6aba9fb",
+      "expandedSHA256": "066408b1e5460eaf86cb8dcbe37af8b48fcf1bf514f76386934b7957c6aba9fb",
+      "bytes": 716
+    },
+    "native-cycle/old-process.jsonl.gz": {
+      "SHA256": "dc52c0b81a4e34e1cf58b9d3b014e123d7dd14cebc7de2b8b0e0f13897c7c566",
+      "expandedSHA256": "38ff9f22ba9fc254fad60820ebfc4b09410195a391b31255653a06de621726e5",
+      "bytes": 1771
+    },
+    "native-cycle/owned.json": {
+      "SHA256": "cbc0198d1a3ec1cb25caf6e4f2498bdd09d832db4064b48ff51aaab41c192e30",
+      "expandedSHA256": "cbc0198d1a3ec1cb25caf6e4f2498bdd09d832db4064b48ff51aaab41c192e30",
+      "bytes": 75
+    },
+    "native-cycle/pods.jsonl.gz": {
+      "SHA256": "857003f7133936e5023a8d9ed2bf5d65b77746fd22ff93302da80a68ff0fdefa",
+      "expandedSHA256": "575c7a3d39513348af9d63816f98d1c44a7a12bef63fe5092f918fc81b316d0b",
+      "bytes": 2783
+    },
+    "native-cycle/pooled-summary.json": {
+      "SHA256": "b96ebb50d929069895b9d08ae3d3684aa7039f0486345778fbcee1cf0f0b60c6",
+      "expandedSHA256": "b96ebb50d929069895b9d08ae3d3684aa7039f0486345778fbcee1cf0f0b60c6",
+      "bytes": 717
+    },
+    "native-cycle/proxy-access.jsonl.gz": {
+      "SHA256": "68832980cbc72a9f49ac9d2ef7b5fe3bf532894da7c9b3c88801a8cd2df8e85e",
+      "expandedSHA256": "dac71b5659a18d857b9481af3bbb99bf22f53c2f4889ebae00b7048a5b769741",
+      "bytes": 8813
+    },
+    "native-cycle/proxy-control.json": {
+      "SHA256": "267fbe5e7c13cf2dbd04f21c6c4a955b3272cb7b68987d0eecaf8ca9ff30deee",
+      "expandedSHA256": "267fbe5e7c13cf2dbd04f21c6c4a955b3272cb7b68987d0eecaf8ca9ff30deee",
+      "bytes": 8747
+    },
+    "native-cycle/proxy-services.jsonl.gz": {
+      "SHA256": "fa106616e9ba131f4d3d3986672c435746ccb2e8108f851136aa60ac0c00a782",
+      "expandedSHA256": "1c8be88257a371d41e934bcadf3fe549f59f1c8e8b3124eec843f3be21664ed8",
+      "bytes": 6230
+    },
+    "native-cycle/timeline.json": {
+      "SHA256": "9f980175479d42a85adf5b21d687b45c511420b33c6b96e37cb39d8e8b549834",
+      "expandedSHA256": "9f980175479d42a85adf5b21d687b45c511420b33c6b96e37cb39d8e8b549834",
+      "bytes": 452
+    },
+    "native-verify/client/pooled/requests.jsonl.gz": {
+      "SHA256": "3246ef71d329071bc31c2bdc0476044bab77b887c6093618e2ec3ca2f9c8fea6",
+      "expandedSHA256": "f706cc43a21be293d51451a4761a1d45e188ca29c891e60f22c8683fecba13f7",
+      "bytes": 6224
+    },
+    "native-verify/client/pooled/summary.json": {
+      "SHA256": "981dfa4f9b74f6d1c65cc046a7ac61339e5ce10d419dec16df16c031beba7a49",
+      "expandedSHA256": "981dfa4f9b74f6d1c65cc046a7ac61339e5ce10d419dec16df16c031beba7a49",
+      "bytes": 717
+    },
+    "native-verify/client/fresh/requests.jsonl.gz": {
+      "SHA256": "d6c180f6a56901db635ccbe7a5a5812ab763cabde88622729bace10ef19f564a",
+      "expandedSHA256": "5d6ef0f04acd9a8300869d0c589a33cad5390a8e5c6b0c1af843e8c50eb9d0f7",
+      "bytes": 6290
+    },
+    "native-verify/client/fresh/summary.json": {
+      "SHA256": "55a7d626c5a639ae776aeab01d4ccd1b942569e2498c8bde64cd34dd8c576d3e",
+      "expandedSHA256": "55a7d626c5a639ae776aeab01d4ccd1b942569e2498c8bde64cd34dd8c576d3e",
+      "bytes": 718
+    },
+    "native-verify/collector-source.py": {
+      "SHA256": "a1a8391eeece128eeb136210cc35286fe3b98e06403b732315242ccec1955e87",
+      "expandedSHA256": "a1a8391eeece128eeb136210cc35286fe3b98e06403b732315242ccec1955e87",
+      "bytes": 9599
+    },
+    "native-verify/endpointslices.jsonl.gz": {
+      "SHA256": "8515d0c22b075d707ec1c58296bf20d3afff16278cef461131ded9189066e207",
+      "expandedSHA256": "755aafab93d7463460c52ee9ad45710e8652bae0b04097e3ae9259481da1b3e2",
+      "bytes": 768
+    },
+    "native-verify/fixture.json": {
+      "SHA256": "96b5c931bf9f4171ebba6cbd20b55efd99198d6751ca5572747adda95e923ab8",
+      "expandedSHA256": "96b5c931bf9f4171ebba6cbd20b55efd99198d6751ca5572747adda95e923ab8",
+      "bytes": 907
+    },
+    "native-verify/fresh-summary.json": {
+      "SHA256": "55a7d626c5a639ae776aeab01d4ccd1b942569e2498c8bde64cd34dd8c576d3e",
+      "expandedSHA256": "55a7d626c5a639ae776aeab01d4ccd1b942569e2498c8bde64cd34dd8c576d3e",
+      "bytes": 718
+    },
+    "native-verify/old-process.jsonl.gz": {
+      "SHA256": "babbaecc32b9499829c0c892d16030137e3d7357733b3446b2ca2658151f7ba9",
+      "expandedSHA256": "d8c863966f07e00bdc5d88b729b177d6ec96c62049ccfe5f28bf5552f4ca0fe3",
+      "bytes": 1863
+    },
+    "native-verify/owned.json": {
+      "SHA256": "debc4180daa8149ecb961b9609f8cea5d2da2c1f75016cda131f2163e90fc791",
+      "expandedSHA256": "debc4180daa8149ecb961b9609f8cea5d2da2c1f75016cda131f2163e90fc791",
+      "bytes": 75
+    },
+    "native-verify/pods.jsonl.gz": {
+      "SHA256": "7791aa1890b1d5d080f1b22376cae17c9109aef7f7bddab70ad2ea924ba7073a",
+      "expandedSHA256": "58a611d3bb72a7fb1752385b52a4468a5a5bb8711c1b3f3f3c0ab60229bb4fd2",
+      "bytes": 2738
+    },
+    "native-verify/pooled-summary.json": {
+      "SHA256": "981dfa4f9b74f6d1c65cc046a7ac61339e5ce10d419dec16df16c031beba7a49",
+      "expandedSHA256": "981dfa4f9b74f6d1c65cc046a7ac61339e5ce10d419dec16df16c031beba7a49",
+      "bytes": 717
+    },
+    "native-verify/proxy-access.jsonl.gz": {
+      "SHA256": "9df6ce0baf015aad6e1176980b35c6793a6b02c523e4bcd16e3d0474ef4e20bb",
+      "expandedSHA256": "e19c8dc3b04e0f133d6bbaa05b2c0283b1a3ab2c9858b5553b52009b2258a641",
+      "bytes": 9469
+    },
+    "native-verify/proxy-control.json": {
+      "SHA256": "fd975ffdf5e244626613bb08ad56898c341a4c37c1f4106e233d664d2a1bb052",
+      "expandedSHA256": "fd975ffdf5e244626613bb08ad56898c341a4c37c1f4106e233d664d2a1bb052",
+      "bytes": 8813
+    },
+    "native-verify/proxy-services.jsonl.gz": {
+      "SHA256": "3ce986eb07858cb9d315622dddf1602ee7b7d62339eb06d805e46da97c68b461",
+      "expandedSHA256": "e0c642b2d4a279a596962385430c781bc5ebc5ea12616924a423b3aa10106456",
+      "bytes": 6266
+    },
+    "native-verify/timeline.json": {
+      "SHA256": "17fdc3fe0b492756d3a82738603f02f363c4c071c078856f1a76f59ca036e790",
+      "expandedSHA256": "17fdc3fe0b492756d3a82738603f02f363c4c071c078856f1a76f59ca036e790",
+      "bytes": 450
+    },
+    "before.json": {
+      "SHA256": "1d67bca809f2a45fb2cc640f929fbb44e10242780462c28954e0a199bad4ae6b",
+      "expandedSHA256": "1d67bca809f2a45fb2cc640f929fbb44e10242780462c28954e0a199bad4ae6b",
+      "bytes": 5419
+    },
+    "final-audit.json": {
+      "SHA256": "e4c8504bd9382a02c9d9f032bcc68e83595f68434f959fe561820785d929352d",
+      "expandedSHA256": "e4c8504bd9382a02c9d9f032bcc68e83595f68434f959fe561820785d929352d",
+      "bytes": 355
+    },
+    "diagnosis-cleanup.json": {
+      "SHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "expandedSHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "bytes": 110
+    },
+    "control-slow-cleanup.json": {
+      "SHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "expandedSHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "bytes": 110
+    },
+    "native-slow-cleanup.json": {
+      "SHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "expandedSHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "bytes": 110
+    },
+    "native-cycle-cleanup.json": {
+      "SHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "expandedSHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "bytes": 110
+    },
+    "native-verify-cleanup.json": {
+      "SHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "expandedSHA256": "48339960868fc9a5756e2b2c496987ccf9b5c948d893b695e52f8287220e2dac",
+      "bytes": 110
+    },
+    "access-cleanup.json": {
+      "SHA256": "6d64d8595643774495f4ec9b1d33835d006a68b583661a7bf0109dc56e6f44af",
+      "expandedSHA256": "6d64d8595643774495f4ec9b1d33835d006a68b583661a7bf0109dc56e6f44af",
+      "bytes": 206
+    },
+    "collector/client.py": {
+      "SHA256": "13bed93be3acdac08a06beee28f8270963cf68cb9ec4fb8f0105b620eb5a78fc",
+      "expandedSHA256": "13bed93be3acdac08a06beee28f8270963cf68cb9ec4fb8f0105b620eb5a78fc",
+      "bytes": 1836
+    },
+    "collector/diagnose.py": {
+      "SHA256": "a1a8391eeece128eeb136210cc35286fe3b98e06403b732315242ccec1955e87",
+      "expandedSHA256": "a1a8391eeece128eeb136210cc35286fe3b98e06403b732315242ccec1955e87",
+      "bytes": 9599
+    },
+    "source-ci/verified.json": {
+      "SHA256": "684cdcbb75343234087725f80830eb8d3598fd6adb3e549ca4ed3203aa17520c",
+      "expandedSHA256": "684cdcbb75343234087725f80830eb8d3598fd6adb3e549ca4ed3203aa17520c",
+      "bytes": 426
+    },
+    "source-ci/junit.xml": {
+      "SHA256": "21718333faf3a4b1997126175938364a4b7762deb949fc7f0fd6bee2d59a1444",
+      "expandedSHA256": "21718333faf3a4b1997126175938364a4b7762deb949fc7f0fd6bee2d59a1444",
+      "bytes": 2604
+    },
+    "source-ci/rollout-requests.json": {
+      "SHA256": "3d1164038c8e729502e00f750f732d858a1eba415b8f247c737d6ea70e1cad0e",
+      "expandedSHA256": "3d1164038c8e729502e00f750f732d858a1eba415b8f247c737d6ea70e1cad0e",
+      "bytes": 19693
+    }
+  }
+}

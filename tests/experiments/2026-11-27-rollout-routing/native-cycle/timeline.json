@@ -1,0 +1,19 @@
+{
+  "updateSubmitted": 1795779808.9779003,
+  "updateReady": 1795779813.9378464,
+  "operationID": "op_b393bb8864a7bd7c",
+  "steps": [
+    {
+      "action": "rollback",
+      "submitted": 1795779823.9778965,
+      "ready": 1795779828.957655,
+      "operationID": "op_9fe03d1192e2dfd9"
+    },
+    {
+      "action": "restart",
+      "submitted": 1795779838.9778936,
+      "ready": 1795779843.9791982,
+      "operationID": "op_eaaa6ed61daa1105"
+    }
+  ]
+}

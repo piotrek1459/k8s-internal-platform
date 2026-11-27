@@ -8,6 +8,11 @@ scope and supplied university requirements. The plan records target requirements
 [Implementation status and next work](status.md) records current capabilities,
 verification evidence and known gaps.
 
+The source rollout correction is tracked in
+[PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25). Its controlled
+native comparisons and stronger source regression precede administrator
+merge/manual release and published Pi validation. The human comparison remains last.
+
 The broker, Svelte UI, application/platform charts and unified local workflow are
 implemented. Native installation, trusted LAN UI/API workflows, guarded recovery,
 controlled disclosure checks and reinstall/reboot retention have published

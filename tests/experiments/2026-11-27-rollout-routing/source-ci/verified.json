@@ -1,0 +1,13 @@
+{
+  "runID": 45993196980,
+  "source": "826b92e45cf5730c52a1e1b37d3159c1fff5fc21",
+  "artifactID": 15195419489,
+  "artifactDigest": "sha256:30aa1e7851cb5e59a8de3c01309856a149df413be6b41dd678a4b6f01d017b98",
+  "tests": 27,
+  "failures": 0,
+  "skips": 0,
+  "rolloutRequests": 116,
+  "rolloutErrors": 0,
+  "conclusion": "success",
+  "workflowURL": "https://github.com/piotrek1459/k8s-internal-platform/actions/runs/45993196980"
+}

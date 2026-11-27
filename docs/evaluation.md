@@ -61,8 +61,8 @@ headroom above observed peaks, satisfy zero OOM/restarts and state the tested
 workloads/rate. Two small HTTP applications cannot justify sizing arbitrary apps.
 The measured defaults and hook presence passed [published v0.1.11 checks](../tests/experiments/2026-11-27-v0.1.11-native.md)
 under a separately retained plan fixed before collection. Application-rollout HTTP
-failed its zero-error target (373/375); this remains a failed result requiring
-diagnosis/correction. The original calibration plan/results are unchanged; human
+failed its zero-error target (373/375). The [source routing correction](../tests/experiments/2026-11-27-rollout-routing.md)
+retains controlled native comparisons and source CI; published acceptance remains required. The original calibration plan/results are unchanged; human
 measurements remain pending.
 
 ## Targets and interpretation

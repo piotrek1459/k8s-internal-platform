@@ -1,0 +1,174 @@
+{
+  "platformUID": "57d7caeb-6f59-4e44-bad3-2badd5a73cff",
+  "privateUID": "cefcecdc-75f0-46aa-9e0f-fbf4ef3d8911",
+  "privateTemplate": {
+    "metadata": {
+      "annotations": {
+        "platform.local/config": "ffaa13c834d32a5149d61e34b74b142748c23b1e9c96a1fb19f86d9cf4a7b31d"
+      },
+      "labels": {
+        "app.kubernetes.io/instance": "platform",
+        "app.kubernetes.io/name": "platform-private"
+      }
+    },
+    "spec": {
+      "containers": [
+        {
+          "args": [
+            "--global.checknewversion=false",
+            "--global.sendanonymoususage=false",
+            "--api.dashboard=false",
+            "--entrypoints.private.address=192.168.68.227:8443",
+            "--entrypoints.private.http.tls=true",
+            "--entrypoints.private.http.middlewares=private-source@file",
+            "--entrypoints.private.forwardedheaders.insecure=false",
+            "--providers.file.filename=/configuration/dynamic.yaml",
+            "--providers.kubernetesingress=true",
+            "--providers.kubernetesingress.ingressclass=platform-private",
+            "--providers.kubernetesingress.namespaces=platform-system,platform-apps",
+            "--providers.kubernetesingress.labelselector=app.kubernetes.io/part-of=k8s-internal-platform",
+            "--entrypoints.health.address=127.0.0.1:9000",
+            "--ping=true",
+            "--ping.entrypoint=health"
+          ],
+          "image": "docker.io/library/traefik@sha256:a6c0194dda77bcb804824580f36fa7edc56e315b1acfe933366c8b52844a78a4",
+          "imagePullPolicy": "IfNotPresent",
+          "livenessProbe": {
+            "failureThreshold": 3,
+            "httpGet": {
+              "host": "127.0.0.1",
+              "path": "/ping",
+              "port": 9000,
+              "scheme": "HTTP"
+            },
+            "periodSeconds": 20,
+            "successThreshold": 1,
+            "timeoutSeconds": 1
+          },
+          "name": "ingress",
+          "readinessProbe": {
+            "failureThreshold": 3,
+            "httpGet": {
+              "host": "127.0.0.1",
+              "path": "/ping",
+              "port": 9000,
+              "scheme": "HTTP"
+            },
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 1
+          },
+          "resources": {
+            "limits": {
+              "cpu": "250m",
+              "memory": "192Mi"
+            },
+            "requests": {
+              "cpu": "25m",
+              "memory": "64Mi"
+            }
+          },
+          "securityContext": {
+            "allowPrivilegeEscalation": false,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "readOnlyRootFilesystem": true
+          },
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "volumeMounts": [
+            {
+              "mountPath": "/configuration",
+              "name": "configuration",
+              "readOnly": true
+            },
+            {
+              "mountPath": "/certificates",
+              "name": "certificates",
+              "readOnly": true
+            }
+          ]
+        }
+      ],
+      "dnsPolicy": "ClusterFirstWithHostNet",
+      "hostNetwork": true,
+      "restartPolicy": "Always",
+      "schedulerName": "default-scheduler",
+      "securityContext": {
+        "fsGroup": 65532,
+        "runAsGroup": 65532,
+        "runAsNonRoot": true,
+        "runAsUser": 65532,
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      },
+      "serviceAccount": "platform-private",
+      "serviceAccountName": "platform-private",
+      "terminationGracePeriodSeconds": 30,
+      "volumes": [
+        {
+          "configMap": {
+            "defaultMode": 420,
+            "name": "platform-private"
+          },
+          "name": "configuration"
+        },
+        {
+          "name": "certificates",
+          "secret": {
+            "defaultMode": 288,
+            "secretName": "platform-private-tls"
+          }
+        }
+      ]
+    }
+  },
+  "privateContainerVersion": "Version:      3.7.19\nCodename:     langres\nGo version:   go1.27.4\nBuilt:        2026-11-13T09:24:59Z\nOS/Arch:      linux/arm64\n",
+  "retainedApp": {
+    "access": {
+      "hostname": "demo.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_0aee98e6eb9fd661",
+      "url": "https://demo.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_0aee98e6eb9fd661",
+    "id": "app_fe284cf63840b391",
+    "lastSuccessfulRevision": "rev_0aee98e6eb9fd661",
+    "name": "eval-faa8c8a28e70-retained",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 7,
+      "observedAt": "2026-11-27T11:26:02.43701401Z",
+      "stale": false
+    },
+    "version": 7
+  },
+  "system": {
+    "architecture": "arm64",
+    "capabilities": [
+      "private-ingress",
+      "image-inspection",
+      "configuration-secrets",
+      "registry-credentials",
+      "cluster-observation",
+      "workload-diagnostics",
+      "drift-inspection"
+    ],
+    "clusterReachable": true,
+    "privateNetwork": {
+      "managementHostname": "platform.home.arpa",
+      "applicationDomain": "apps.home.arpa",
+      "httpsPort": 8443
+    },
+    "version": "0.1.11"
+  }
+}
