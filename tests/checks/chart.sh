@@ -75,7 +75,18 @@ if [[ -d "$platform_chart" ]]; then
     lan_options=(--set privateLAN.enabled=true --set-string privateLAN.address=192.168.68.227
         --set-string 'privateLAN.allowedCIDRs[0]=192.168.68.0/24'
         --set privateLAN.managementHostname=platform.home.arpa,privateLAN.applicationDomain=apps.home.arpa)
-    "$PLATFORM_HELM" template platform "$platform_chart" --namespace platform-system --set image.tag=dev "${lan_options[@]}" >/dev/null
+    "$PLATFORM_HELM" template platform "$platform_chart" --namespace platform-system --set image.tag=dev "${lan_options[@]}" |
+        python3 -c '
+import sys, yaml
+objects = list(yaml.safe_load_all(sys.stdin))
+controller = next(o for o in objects if o["kind"] == "Deployment" and o["metadata"]["name"] == "platform-private")
+args = controller["spec"]["template"]["spec"]["containers"][0]["args"]
+assert args.count("--providers.kubernetesingress.nativelbbydefault=true") == 1
+assert "--providers.kubernetesingress.ingressclass=platform-private" in args
+assert "--providers.kubernetesingress.namespaces=platform-system,platform-apps" in args
+assert not any(a.startswith(("--api.insecure=", "--providers.kubernetesingress.throttleduration=")) for a in args)
+print("Private controller uses native Service routing within its class/namespace scope.")
+'
     for invalid in 'privateLAN.address=0.0.0.0' 'privateLAN.address=::' 'privateLAN.address=192.168.1.999' \
         'privateLAN.allowedCIDRs[0]=0.0.0.0/0' 'privateLAN.allowedCIDRs[0]=192.168.0.0/8' \
         'privateLAN.httpsPort=443' 'privateLAN.managementHostname=apps.home.arpa' \

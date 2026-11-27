@@ -46,6 +46,7 @@ def observe_rollout_requests(case, folder, hostname, port):
                         raise ValueError('Oversized controlled response')
                     value = json.loads(body)
                     record['version'] = value.get('version')
+                    record['hostname'] = value.get('hostname')
                     record['success'] = response.status == 200 and record['version'] in ('v1', 'v2')
                 except Exception as error:
                     record['error'] = type(error).__name__
@@ -74,6 +75,61 @@ def observe_rollout_requests(case, folder, hostname, port):
     case.assertGreaterEqual(len(records), 5)
     case.assertEqual({r['version'] for r in records}, {'v1', 'v2'})
     case.assertTrue(all(r['success'] for r in records), 'Actual HTTPS request failed during update/rollback; inspect the retained trace')
+
+
+@contextlib.contextmanager
+def delayed_endpoint_provider(case):
+    """Delay proxy endpoint refresh beyond app shutdown; restore the owned template."""
+    e = case.e
+    def deployment():
+        return json.loads(e.kubectl('-n', 'platform-system', 'get', 'deployment', 'platform-private', '-o', 'json').stdout)
+    original = deployment()
+    uid = original['metadata']['uid']
+    template = original['spec']['template']
+    args = template['spec']['containers'][0]['args']
+    case.assertIn('--providers.kubernetesingress.nativelbbydefault=true', args)
+    case.assertFalse(any(a.startswith('--providers.kubernetesingress.throttleduration=') for a in args))
+    delayed = json.loads(json.dumps(template))
+    delayed['spec']['containers'][0]['args'].append('--providers.kubernetesingress.throttleduration=15s')
+
+    def replace(expected, target):
+        live = deployment()
+        case.assertEqual(live['metadata']['uid'], uid)
+        case.assertEqual(live['spec']['template'], expected)
+        patch = [{'op': 'test', 'path': '/metadata/uid', 'value': uid},
+                 {'op': 'test', 'path': '/metadata/resourceVersion', 'value': live['metadata']['resourceVersion']},
+                 {'op': 'replace', 'path': '/spec/template', 'value': target}]
+        e.kubectl('-n', 'platform-system', 'patch', 'deployment', 'platform-private', '--type=json', '-p', json.dumps(patch))
+        e.kubectl('-n', 'platform-system', 'rollout', 'status', 'deployment/platform-private', '--timeout=120s')
+
+    changed = False
+    try:
+        # Set the cleanup guard before mutation so rollout failures also restore it.
+        changed = True
+        replace(template, delayed)
+        e.record('Delayed the owned private endpoint provider to 15s; native Service routing remains enabled')
+        yield
+    finally:
+        if changed:
+            live = deployment()
+            # An apply failure may have left the original template in place.
+            if live['spec']['template'] == delayed:
+                replace(delayed, template)
+            else:
+                case.assertEqual(live['metadata']['uid'], uid)
+                case.assertEqual(live['spec']['template'], template)
+
+
+def wait_retired_pods(case, app, previous):
+    """Include shutdown and a post-retirement interval in the live HTTP trace."""
+    deadline = time.monotonic() + 90
+    while time.monotonic() < deadline:
+        current = {p['metadata']['uid'] for p in case.e.resource('pods', app)}
+        if previous.isdisjoint(current):
+            time.sleep(2)
+            return
+        time.sleep(.25)
+    raise AssertionError('Previous rollout Pods remain after the retirement budget')
 
 
 class TLSClient(Client):
@@ -305,11 +361,17 @@ def verify_private_lan(case):
                 'exposure':{'mode':'lan','hostname':hostname}})
             wait_version(hostname,'v1')
             previous=client.get('/apps/'+app)['lastSuccessfulRevision']
-            with observe_rollout_requests(case, folder, hostname, port):
-                client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
-                wait_version(hostname,'v2')
-                client.mutate('POST','/apps/'+app+'/rollback',{'version':client.get('/apps/'+app)['version'],'revisionId':previous})
+            with delayed_endpoint_provider(case):
                 wait_version(hostname,'v1')
+                with observe_rollout_requests(case, folder, hostname, port):
+                    old = {p['metadata']['uid'] for p in e.resource('pods', app)}
+                    client.mutate('PATCH','/apps/'+app,{'version':client.get('/apps/'+app)['version'],'image':e.image('v2')})
+                    wait_version(hostname,'v2')
+                    wait_retired_pods(case, app, old)
+                    old = {p['metadata']['uid'] for p in e.resource('pods', app)}
+                    client.mutate('POST','/apps/'+app+'/rollback',{'version':client.get('/apps/'+app)['version'],'revisionId':previous})
+                    wait_version(hostname,'v1')
+                    wait_retired_pods(case, app, old)
             case.assertEqual(e.resource('ingresses',internal),[])
             case.assertEqual(client.fetch('/version',host='internal.apps.home.arpa')[1],404)
             verify_public_listener_refusal(case)

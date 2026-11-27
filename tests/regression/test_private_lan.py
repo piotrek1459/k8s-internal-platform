@@ -7,12 +7,13 @@ import subprocess
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import Mock, patch
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 INSTALLER = ROOT / 'installer/install.sh'
 sys.path.insert(0,str(ROOT/'tests/e2e'))
-from private_lan import TLSClient
+from private_lan import TLSClient, wait_retired_pods
 
 
 def config():
@@ -21,6 +22,21 @@ def config():
 
 
 class PrivateLANTests(unittest.TestCase):
+    def test_rollout_observation_waits_for_terminating_old_pods(self):
+        old = {'metadata': {'uid': 'old', 'deletionTimestamp': '2026-11-27T12:00:00Z'}}
+        new = {'metadata': {'uid': 'new'}}
+        case = SimpleNamespace(e=SimpleNamespace(resource=Mock(side_effect=[[old, new], [new]])))
+        with patch('private_lan.time.sleep') as sleep:
+            wait_retired_pods(case, 'owned-app', {'old'})
+        self.assertEqual(case.e.resource.call_count, 2)
+        self.assertEqual([call.args[0] for call in sleep.call_args_list], [.25, 2])
+
+    def test_rollout_observation_refuses_a_pod_that_never_retires(self):
+        case = SimpleNamespace(e=SimpleNamespace(resource=Mock(return_value=[{'metadata': {'uid': 'old'}}])))
+        with patch('private_lan.time.monotonic', side_effect=[0, 0, 100]), patch('private_lan.time.sleep'):
+            with self.assertRaisesRegex(AssertionError, 'retirement budget'):
+                wait_retired_pods(case, 'owned-app', {'old'})
+
     def test_lan_setup_refuses_a_bundle_without_listener_support(self):
         with tempfile.TemporaryDirectory() as directory:
             folder=Path(directory);tool=folder/'helm'
