@@ -2,16 +2,14 @@
 
 Updated: 2026-11-27. Status: the published core functional/recovery/security
 workflows have reference-Pi acceptance and repeated system/resource data is retained;
-published v0.1.11 default checks passed; rollout continuity and the human trial remain open. This document accompanies
+published v0.1.12 accepted the rollout correction; the human trial is the final M4 gate. This document accompanies
 [project-outline.md](project-outline.md), which preserves the original thesis
 scope and supplied university requirements. The plan records target requirements and does not contain thesis chapters.
 [Implementation status and next work](status.md) records current capabilities,
 verification evidence and known gaps.
 
-The source rollout correction is tracked in
-[PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25). Its controlled
-native comparisons and stronger source regression precede administrator
-merge/manual release and published Pi validation. The human comparison remains last.
+The rollout correction from PR #25 passed [published v0.1.12 Pi acceptance](../tests/experiments/2026-11-27-v0.1.12-native.md).
+The human comparison remains last before final core reconciliation/issue closure.
 
 The broker, Svelte UI, application/platform charts and unified local workflow are
 implemented. Native installation, trusted LAN UI/API workflows, guarded recovery,

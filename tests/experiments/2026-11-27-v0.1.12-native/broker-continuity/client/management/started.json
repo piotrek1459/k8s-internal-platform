@@ -1,0 +1,5 @@
+{
+  "startedEpochSeconds": 1795787550.745037,
+  "expectedRequestsIncludingWarmup": 375,
+  "url": "https://platform.home.arpa:8443/readyz"
+}

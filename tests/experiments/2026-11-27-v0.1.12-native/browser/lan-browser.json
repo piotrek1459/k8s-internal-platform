@@ -1,0 +1,15 @@
+[
+  {
+    "check": "Direct LAN Chromium rejected the untrusted CA before any trust import"
+  },
+  {
+    "check": "Public CA imported into isolated Chromium NSS trust store; no certificate-ignore or SPKI flags"
+  },
+  {
+    "check": "Direct LAN CA-verified HTTPS login and ARM64 release identity; unauthenticated system read refused"
+  },
+  {
+    "check": "Normally trusted Chromium login, host-only Secure/HttpOnly/Strict cookie, persisted app link, CORS/CSRF refusal and full Nginx UI deployment/HTTPS/deletion passed",
+    "browser": "156.0.8078.4"
+  }
+]

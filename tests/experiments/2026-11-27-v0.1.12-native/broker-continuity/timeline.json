@@ -1,0 +1,16 @@
+[
+  {
+    "stage": "update-ready",
+    "epochSeconds": 1795787570.6473346
+  },
+  {
+    "stage": "broker-delete-submitted",
+    "epochSeconds": 1795787585.7501934,
+    "oldPodUID": "d4b0bd28-5455-40a2-ad75-1055198ad5e2"
+  },
+  {
+    "stage": "broker-ready-original-session-valid",
+    "epochSeconds": 1795787588.0136406,
+    "newPodUID": "7632b4dc-8926-4eea-b341-7c1dee2b3ee4"
+  }
+]

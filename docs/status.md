@@ -14,15 +14,15 @@ embedded first-party Helm chart.
 | Area | Implemented behavior | Acceptance boundary |
 | --- | --- | --- |
 | Distribution | Manually dispatched releases pin a selected branch HEAD, run regression/E2E gates and publish ARM64/AMD64 OCI bundles, installer, guide and checksums. Normal publication is the default. | Native Raspberry Pi results are recorded separately; native AMD64 host acceptance and cross-version upgrades remain outstanding. |
-| Installation | Published v0.1.11 passed fresh Pi installation, all published preflight variants, lifecycle, LAN enablement, same-version retention and reboot. The installer provisions pinned K3s/Helm and native OCI digests. | The v0.1.8 preflight exit-status defect is corrected and accepted through published v0.1.9. Only verified owned test state was archived/reset; upgrades/restoration remain unverified. |
-| Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Published v0.1.8–v0.1.11 LAN browser/cookie acceptance passed; login throttling/password recovery remain outstanding. |
+| Installation | Published v0.1.12 passed fresh Pi installation, all published preflight variants, lifecycle, LAN enablement, same-version retention and reboot. The installer provisions pinned K3s/Helm and native OCI digests. | The v0.1.8 preflight exit-status defect is corrected and accepted through published v0.1.9. Only verified owned test state was archived/reset; upgrades/restoration remain unverified. |
+| Authentication | Single-administrator setup, expiring bootstrap token, Argon2id password hashing, hashed sessions, logout and mutation-header checks. Root navigation selects setup on a fresh installation. | Published v0.1.8–v0.1.12 LAN browser/cookie acceptance passed; login throttling/password recovery remain outstanding. |
 | UI/API | CamelCase workload status, nested error messages, object-shaped Secret versions, Secret-reference submission, lifecycle/history screens and recovery retry. | Released diagnostics include bounded application logs/events and drift inspection; the complete configuration editor remains planned. LAN selection is enabled only when private ingress is explicitly configured. |
 | Application lifecycle | Digest-pinned deployment, update, scale 2/0/1, restart, reapply, rollback and deletion with retained history. | Replicas on one node do not provide host availability. Application data volumes remain M5 scope. |
-| Resource profile and draining | Published v0.1.11 application chart 0.1.3 and broker defaults use measured 25m/48Mi requests and 250m/128Mi limits. A native five-second preStop sleep allows routing propagation before shutdown; lifecycle drift is reported. | Six joined Pi load trials passed 7,200 steady requests; cold/cached pulls and native explicit-profile checks are retained. Direct-Helm source comparison reduced observed rollout failures from 31/375 to 0/375 across three updates. Published embedded-chart/default checks passed on native Go/Nginx. Rollout continuity failed its zero-error target: 373/375 requests. The source Service-routing correction in PR #25 has controlled native/source CI evidence; published acceptance remains required. |
+| Resource profile and draining | Published v0.1.12 application chart 0.1.3 and broker defaults use measured 25m/48Mi requests and 250m/128Mi limits. A native five-second preStop sleep allows routing propagation before shutdown; lifecycle drift is reported. | Six joined Pi load trials passed 7,200 steady requests; cold/cached pulls and native explicit-profile checks are retained. Direct-Helm source comparison reduced observed rollout failures from 31/375 to 0/375 across three updates. Published embedded-chart/default checks passed on native Go/Nginx. The Service-routing correction passed [published v0.1.12](../tests/experiments/2026-11-27-v0.1.12-native.md) with 2,400/2,400 rollout/broker-outage app requests. The old v0.1.11 failure remains retained. |
 | Temporary files | A Pod-local `/tmp` emptyDir, introduced in chart `0.1.1` and retained through source chart `0.1.3`, provides temporary storage with a 64Mi size limit and non-root filesystem-group access. | Published `v0.1.3` passed unpatched browser deployment of unprivileged Nginx and real HTTP verification on the Pi. The volume is ephemeral; it does not provide M5 persistence. |
 | Execution snapshots | Image digest, exact Secret references, chart version, embedded chart content digest, canonical values hash and stable restart token are recorded before apply. | A different chart artifact is refused; old chart retrieval and rollback across chart changes are not implemented. See the M7 boundary and core acceptance tracker. |
 | Recovery | Interrupted success requires target release identity, matching chart/values and healthy matching live resources. Current source clears failed-candidate fields, restores the prior route/absence and retries restoration without executing a failed candidate again. | Four external crash barriers and the restoration/disclosure matrix have disposable-cluster coverage. Published v0.1.10 passed native failed restoration/verification, guarded retry and disclosure checks; its six broker replacements retained the original session/PVC. Ambiguous/pending state remains blocked. |
-| Configuration Secrets | From v0.1.6: immutable versions, exact references, durable deletion reservations, UID/ownership-guarded physical removal and retry. Published v0.1.7 verified browser creation/versioning, reference refusal, deleted-history cleanup and partial retry across actual broker replacement on the Pi. | Complete negative-path disclosure and historical orphan collection remain separate. Original v0.1.7 session/PVC/history survived the native retry and reinstall/reboot checks. |
+| Configuration Secrets | From v0.1.6: immutable versions, exact references, durable deletion reservations, UID/ownership-guarded physical removal and retry. Published v0.1.7 verified browser creation/versioning, reference refusal, deleted-history cleanup and partial retry across actual broker replacement on the Pi. | Controlled negative-path disclosure passed published v0.1.10; historical orphan collection remains separate. Original v0.1.7 session/PVC/history survived the native retry and reinstall/reboot checks. |
 | Registry credentials | Immutable Kubernetes Docker configuration Secrets support inspection and kubelet pulls. SQLite contains metadata only. Credentials are registry-scoped and deletion is guarded by active/rollback references. | Password creation does not itself verify registry access. Credential rotation and external registry-provider variations require separate acceptance. |
 | Diagnostics | Published v0.1.7 verified bounded owned logs/events, managed-Secret masking, escaped text and field-only drift on the Pi. Current source covers controlled disclosure failures including failed Helm storage writes. | Current-resource reads are not a durable archive. Audit browsing, capacity and metrics remain open; controlled disclosure paths passed published native v0.1.10 acceptance. |
 | Networking | Default SSH/ClusterIP access; published v0.1.8 private LAN HTTPS binds an explicit IPv4 address, enforces actual-source CIDRs and uses an existing TLS Secret. | Separate-workstation hosts/CA trust, normal browser/UI/API HTTPS, cookies, forged-header/listener isolation and reinstall/reboot retention passed. Router wildcard-DNS automation and M6 public routing are separate. Built-in Traefik/ServiceLB remain disabled. |
@@ -75,15 +75,15 @@ comparison (three rollouts, 375/375 requests). This does not retrospectively pas
 the v0.1.10 trace or establish a cause for the older login timeout. Initial route
 404s remain subject to bounded convergence; Pod readiness is not gateway acknowledgement.
 
-Published v0.1.11 passed default checks, six repeated API/manual lifecycle trials,
-six independently joined load cases (7,200/7,200), pull/cache observations,
-normally trusted LAN browser checks and same-version/reboot retention. Application
-rollout continuity failed: 373/375, with one 502 and one timeout before broker
-replacement; client scheduling was valid. No app failures occurred during the
-later broker outage. The exact endpoint/proxy/process cause remains unconfirmed.
-The [native report](../tests/experiments/2026-11-27-v0.1.11-native.md) retains the failed trace. The [controlled routing study](../tests/experiments/2026-11-27-rollout-routing.md)
-records the source correction and native comparisons. Published correction acceptance,
-the human active-time/step trial and final M4 reconciliation remain open.
+Published v0.1.12 completed the routing correction: three update/rollback/restart
+trials and the broker-outage case passed 2,400/2,400 app requests, steady Go/Nginx
+load passed 2,400/2,400 and unhealthy-update observation passed 660/660 while v2
+was restored after the real 300-second deadline. Trusted browser, omitted-resource
+defaults and original session/identity/configuration retention through same-version
+rerun and reboot passed. The [native report](../tests/experiments/2026-11-27-v0.1.12-native.md) retains all results.
+The original v0.1.11 trace remains failed; the controlled source study does not
+retroactively establish its exact internal timing or explain older login timeouts.
+Only the human active-time/step trial and final M4 reconciliation remain open.
 Automated timings never supply human measurements. These remain in
 [issue #16](https://github.com/piotrek1459/k8s-internal-platform/issues/16) and the
 [audited checklists](milestones.md). Public routing, application volumes,
@@ -91,6 +91,10 @@ verified backup/restore and upgrades retain separate boundaries.
 
 ## Verification available
 
+- The [v0.1.12 native report](../tests/experiments/2026-11-27-v0.1.12-native.md) accepts the unmodified published routing
+  correction, repeated lifecycle/HTTP, load, failure restoration and retention.
+  Release E2E passed 27/0/0 with 115 verified HTTPS observations. The human
+  comparison remains pending.
 - The [v0.1.11 native report](../tests/experiments/2026-11-27-v0.1.11-native.md) records unmodified published installation,
   omitted-resource default checks, embedded-chart request continuity, repeated
   measurements, retained identities/sessions across reinstall/reboot and cleanup.
@@ -205,20 +209,16 @@ reliability. Measurements must record release/source, host, pins and conditions.
 
 ## Next implementation order
 
-The v0.1.11 native run is complete. Installation/default/lifecycle/load/retention
-passed; application-rollout continuity failed its zero-error target.
+Published v0.1.12 completed the rollout correction and native acceptance cycle.
+No listed M0–M3 implementation/acceptance item remains open. The human comparison
+is the final M4 requirement.
 
-1. Complete the source Service-routing correction and strengthened regression in
-   [PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25), then
-   administrator merge/manual release and native validation. Controlled Pi
-   endpoint/proxy/process observations and delayed-provider comparisons are retained
-   in the [routing study](../tests/experiments/2026-11-27-rollout-routing.md).
-   Published v0.1.11 remains failed; temporary candidate tests do not close its gate.
-2. Perform the [short timed walkthrough](../tests/evaluation/HUMAN.md) and retain
-   actual Helm/UI steps, active/elapsed time, outcomes and equivalent preparation.
-3. Review those results, reconcile the final M4 checklist and close issue #16 when
-   all criteria pass. Prepare the agreed core demonstration and summary afterward.
-4. Proceed to application volumes/verified backup restoration (M5), public hosting
-   (M6) and upgrades/extended observability under their separate criteria.
+1. Complete the [timed Helm/UI walkthrough](../tests/evaluation/HUMAN.md) using the
+   prepared v0.1.12 brief. Retain actual steps, active/elapsed time, outcomes and
+   equivalent task/cache preparation; automated durations do not supply this record.
+2. Review the record, reconcile final M4 evidence and close issue #16 when all
+   criteria are met. Prepare the agreed core demonstration and summary afterward.
+3. Proceed to application volumes/verified backup restoration (M5), public hosting
+   (M6), upgrades and extended observability under their separate criteria.
 
 The [milestone checklists](milestones.md) retain the complete project plan.

@@ -1,0 +1,108 @@
+{
+  "passed": true,
+  "clients": {
+    "pooled": {
+      "url": "https://eval-a7f93e976515-broker.apps.home.arpa:8443/version",
+      "addressOverride": "192.168.68.227",
+      "certificateVerification": true,
+      "ratePerSecond": 5,
+      "durationSeconds": 75,
+      "warmupSeconds": 0,
+      "maximumOutstandingRequests": 32,
+      "startedEpochSeconds": 1795787550.745025,
+      "finishedEpochSeconds": 1795787625.560975,
+      "requests": 375,
+      "successful": 375,
+      "successRate": 1.0,
+      "latencyMilliseconds": {
+        "count": 375,
+        "minimum": 4.786458,
+        "median": 11.100083,
+        "p95": 97.99725,
+        "maximum": 177.204666
+      },
+      "clientSchedulingValid": true,
+      "expectedRequests": 375,
+      "complete": true,
+      "targetsPassed": true,
+      "protocol": "HTTP/1.1",
+      "humanOperatorTime": null
+    },
+    "fresh": {
+      "url": "https://eval-a7f93e976515-broker.apps.home.arpa:8443/version",
+      "addressOverride": "192.168.68.227",
+      "certificateVerification": true,
+      "ratePerSecond": 5,
+      "durationSeconds": 75,
+      "warmupSeconds": 0,
+      "maximumOutstandingRequests": 32,
+      "startedEpochSeconds": 1795787550.745058,
+      "finishedEpochSeconds": 1795787625.585053,
+      "requests": 375,
+      "successful": 375,
+      "successRate": 1.0,
+      "latencyMilliseconds": {
+        "count": 375,
+        "minimum": 25.905041,
+        "median": 36.834125,
+        "p95": 158.930709,
+        "maximum": 385.307125
+      },
+      "clientSchedulingValid": true,
+      "expectedRequests": 375,
+      "complete": true,
+      "targetsPassed": true,
+      "protocol": "HTTP/1.1",
+      "humanOperatorTime": null
+    },
+    "management": {
+      "url": "https://platform.home.arpa:8443/readyz",
+      "addressOverride": "192.168.68.227",
+      "certificateVerification": true,
+      "ratePerSecond": 5,
+      "durationSeconds": 75,
+      "warmupSeconds": 0,
+      "maximumOutstandingRequests": 32,
+      "startedEpochSeconds": 1795787550.745037,
+      "finishedEpochSeconds": 1795787625.6680472,
+      "requests": 375,
+      "successful": 367,
+      "successRate": 0.9786666666666667,
+      "latencyMilliseconds": {
+        "count": 367,
+        "minimum": 6.507875,
+        "median": 17.037916,
+        "p95": 162.89175,
+        "maximum": 1720.962542
+      },
+      "clientSchedulingValid": true,
+      "expectedRequests": 375,
+      "complete": true,
+      "targetsPassed": false,
+      "protocol": "HTTP/1.1",
+      "humanOperatorTime": null
+    }
+  },
+  "timeline": [
+    {
+      "stage": "update-ready",
+      "epochSeconds": 1795787570.6473346
+    },
+    {
+      "stage": "broker-delete-submitted",
+      "epochSeconds": 1795787585.7501934,
+      "oldPodUID": "d4b0bd28-5455-40a2-ad75-1055198ad5e2"
+    },
+    {
+      "stage": "broker-ready-original-session-valid",
+      "epochSeconds": 1795787588.0136406,
+      "newPodUID": "7632b4dc-8926-4eea-b341-7c1dee2b3ee4"
+    }
+  ],
+  "originalApplicationsRetained": true,
+  "owned": {
+    "runID": "a7f93e976515",
+    "applications": {},
+    "releases": {}
+  }
+}

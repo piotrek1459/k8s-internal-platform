@@ -1,0 +1,58 @@
+{
+  "passed": true,
+  "clients": {
+    "pooled": {
+      "url": "https://eval-5a82bfd70d29-steady.apps.home.arpa:8443/version",
+      "addressOverride": "192.168.68.227",
+      "certificateVerification": true,
+      "ratePerSecond": 20,
+      "durationSeconds": 60,
+      "warmupSeconds": 10,
+      "maximumOutstandingRequests": 32,
+      "startedEpochSeconds": 1795787653.358731,
+      "finishedEpochSeconds": 1795787723.3238468,
+      "requests": 1200,
+      "successful": 1200,
+      "successRate": 1.0,
+      "latencyMilliseconds": {
+        "count": 1200,
+        "minimum": 6.918375,
+        "median": 10.849083,
+        "p95": 14.685041,
+        "maximum": 26.932583
+      },
+      "clientSchedulingValid": true,
+      "expectedRequests": 1200,
+      "complete": true,
+      "targetsPassed": true,
+      "protocol": "HTTP/1.1",
+      "humanOperatorTime": null
+    }
+  },
+  "containersBefore": [
+    {
+      "podUID": "6771c13d-67b2-4644-9d66-42af79114488",
+      "containerID": "17c52f5c68d17cf4b709c4b12ce9e4eb19d08595427b6e32109f97fe20e2cc94",
+      "imageID": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod6771c13d_67b2_4644_9d66_42af79114488.slice/cri-containerd-17c52f5c68d17cf4b709c4b12ce9e4eb19d08595427b6e32109f97fe20e2cc94.scope"
+    }
+  ],
+  "containersAfter": [
+    {
+      "podUID": "6771c13d-67b2-4644-9d66-42af79114488",
+      "containerID": "17c52f5c68d17cf4b709c4b12ce9e4eb19d08595427b6e32109f97fe20e2cc94",
+      "imageID": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+      "restartCount": 0,
+      "cgroup": "/sys/fs/cgroup/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod6771c13d_67b2_4644_9d66_42af79114488.slice/cri-containerd-17c52f5c68d17cf4b709c4b12ce9e4eb19d08595427b6e32109f97fe20e2cc94.scope",
+      "memoryPeakBytes": 11206656,
+      "oomKills": "0"
+    }
+  ],
+  "originalApplicationsRetained": true,
+  "owned": {
+    "runID": "5a82bfd70d29",
+    "applications": {},
+    "releases": {}
+  }
+}

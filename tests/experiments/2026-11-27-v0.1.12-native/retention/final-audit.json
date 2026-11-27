@@ -1,0 +1,107 @@
+{
+  "passed": true,
+  "release": "0.1.12",
+  "privateController": {
+    "deploymentUID": "e31d7270-eb23-47f4-9eb2-7d67d7a99bd0",
+    "podUID": "15368bb7-f62d-4c92-8780-6913c55297ed",
+    "image": "docker.io/library/traefik@sha256:a6c0194dda77bcb804824580f36fa7edc56e315b1acfe933366c8b52844a78a4",
+    "imageID": "docker.io/library/traefik@sha256:a6c0194dda77bcb804824580f36fa7edc56e315b1acfe933366c8b52844a78a4",
+    "arguments": [
+      "--global.checknewversion=false",
+      "--global.sendanonymoususage=false",
+      "--api.dashboard=false",
+      "--entrypoints.private.address=192.168.68.227:8443",
+      "--entrypoints.private.http.tls=true",
+      "--entrypoints.private.http.middlewares=private-source@file",
+      "--entrypoints.private.forwardedheaders.insecure=false",
+      "--providers.file.filename=/configuration/dynamic.yaml",
+      "--providers.kubernetesingress=true",
+      "--providers.kubernetesingress.nativelbbydefault=true",
+      "--providers.kubernetesingress.ingressclass=platform-private",
+      "--providers.kubernetesingress.namespaces=platform-system,platform-apps",
+      "--providers.kubernetesingress.labelselector=app.kubernetes.io/part-of=k8s-internal-platform",
+      "--entrypoints.health.address=127.0.0.1:9000",
+      "--ping=true",
+      "--ping.entrypoint=health"
+    ]
+  },
+  "system": {
+    "architecture": "arm64",
+    "capabilities": [
+      "private-ingress",
+      "image-inspection",
+      "configuration-secrets",
+      "registry-credentials",
+      "cluster-observation",
+      "workload-diagnostics",
+      "drift-inspection"
+    ],
+    "clusterReachable": true,
+    "privateNetwork": {
+      "managementHostname": "platform.home.arpa",
+      "applicationDomain": "apps.home.arpa",
+      "httpsPort": 8443
+    },
+    "version": "0.1.12"
+  },
+  "platformImage": "platform.local/platform-broker@sha256:ccc8f212afeeebddb9d0b85643f508178e06deb105b0bedaf2758933657be095",
+  "application": {
+    "access": {
+      "hostname": "demo.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_b63fa577585ce113",
+      "url": "https://demo.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_b63fa577585ce113",
+    "id": "app_56fa8b215c8b0b0a",
+    "lastSuccessfulRevision": "rev_b63fa577585ce113",
+    "name": "eval-42c2b507c4b8-retained",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 7,
+      "observedAt": "2026-11-27T14:09:23.521781599Z",
+      "stale": false
+    },
+    "version": 7
+  },
+  "applicationResources": {
+    "deployments": [
+      {
+        "name": "app-app-56fa8b215c8b0b0a",
+        "uid": "3dc018e1-047b-49a0-85e3-28a757734058"
+      }
+    ],
+    "services": [
+      {
+        "name": "app-app-56fa8b215c8b0b0a",
+        "uid": "8b0baac2-d7ad-4dce-b335-a5d6f1aac770"
+      }
+    ],
+    "ingresses": [
+      {
+        "name": "app-app-56fa8b215c8b0b0a",
+        "uid": "cf81377f-8df8-4f47-a38a-ea7f53e3a536"
+      }
+    ],
+    "pods": [
+      {
+        "name": "app-app-56fa8b215c8b0b0a-759f776c95-vwlx7",
+        "uid": "42f6c20a-c9dd-4496-b227-fd08991d5ba7"
+      }
+    ]
+  },
+  "retainedApplications": 1,
+  "activeOperations": 0,
+  "configurationSecrets": 0,
+  "registryCredentials": 0,
+  "applicationVolumes": 0,
+  "remainingBenchmarkFixtures": 0,
+  "allNoncompletedPodsReady": true,
+  "actualHTTPSVersion": "v1",
+  "humanTrialStatus": "pending"
+}

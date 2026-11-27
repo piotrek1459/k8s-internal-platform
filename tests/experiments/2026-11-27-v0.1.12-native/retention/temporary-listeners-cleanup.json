@@ -1,0 +1,12 @@
+[
+  {
+    "name": "kube-proxy",
+    "PID": 26708,
+    "guardedStop": true
+  },
+  {
+    "name": "platform-forward",
+    "PID": 26709,
+    "guardedStop": true
+  }
+]

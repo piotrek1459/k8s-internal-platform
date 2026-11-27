@@ -218,7 +218,7 @@ E2E dependencies and Chromium installed:
 
 ```bash
 python3 tests/e2e/native.py --url http://127.0.0.1:8080 \
-  --kubernetes-url http://127.0.0.1:18001 --version v0.1.11 \
+  --kubernetes-url http://127.0.0.1:18001 --version v0.1.12 \
   --release-manifest .local/pi/release.json --state .local/pi/access.json \
   --artifacts .local/pi/acceptance --setup
 ```
@@ -264,8 +264,8 @@ retention. The [controlled evaluation](experiments/2026-11-26-core-evaluation.md
 retains repeated resource/system data, explicit native preset checks and old/source
 chart request traces. The [v0.1.11 report](experiments/2026-11-27-v0.1.11-native.md)
 records published defaults, repeated lifecycle/load, trusted browser and retention
-checks, and the failed application-rollout continuity target (373/375). That
-failure and the human timed walkthrough remain open. Artifact integrity, raw
+checks, and the failed application-rollout continuity target (373/375). The [v0.1.12 report](experiments/2026-11-27-v0.1.12-native.md) accepts the published
+routing correction; the human timed walkthrough remains open. Artifact integrity, raw
 resource/lifecycle recomputation and preservation of the failed continuity outcome
 run on every PR. Helper failures and unconfirmed request timeouts remain
 separate observations rather than passing attempts or claimed fixes.
@@ -273,8 +273,8 @@ The [routing correction study](experiments/2026-11-27-rollout-routing.md) retain
 Pod/EndpointSlice/process/proxy observations and controlled delayed-provider
 comparisons. The source private HTTPS regression spans update/rollback, actual
 old-Pod retirement and a later observation interval, with endpoint refresh
-delayed to 15 seconds. Candidate/native and source CI evidence still require the
-following published-release Pi acceptance.
+delayed to 15 seconds. Candidate/native and source CI evidence are followed by the separate
+[published v0.1.12 acceptance](experiments/2026-11-27-v0.1.12-native.md).
 The [v0.1.4/diagnostics report](experiments/2026-11-23-v0.1.4-and-diagnostics.md)
 retains its earlier release and separate source diagnostic acceptance.
 The [v0.1.3 report](experiments/2026-11-23-core-acceptance.md) records the native

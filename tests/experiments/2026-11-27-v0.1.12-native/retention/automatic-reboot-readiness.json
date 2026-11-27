@@ -1,0 +1,353 @@
+{
+  "directVerifiedHTTPS": true,
+  "outageObserved": true,
+  "readyAfterMonitorSeconds": 73.253,
+  "secondsAfterFirstUnavailable": 63.701,
+  "SSHOrManualServiceStartBeforeReady": false,
+  "observations": [
+    {
+      "seconds": 0.032,
+      "ready": true
+    },
+    {
+      "seconds": 0.581,
+      "ready": true
+    },
+    {
+      "seconds": 1.128,
+      "ready": true
+    },
+    {
+      "seconds": 1.675,
+      "ready": true
+    },
+    {
+      "seconds": 2.222,
+      "ready": true
+    },
+    {
+      "seconds": 2.859,
+      "ready": true
+    },
+    {
+      "seconds": 3.407,
+      "ready": true
+    },
+    {
+      "seconds": 3.953,
+      "ready": true
+    },
+    {
+      "seconds": 4.505,
+      "ready": true
+    },
+    {
+      "seconds": 5.053,
+      "ready": true
+    },
+    {
+      "seconds": 5.609,
+      "ready": true
+    },
+    {
+      "seconds": 6.154,
+      "ready": true
+    },
+    {
+      "seconds": 6.711,
+      "ready": true
+    },
+    {
+      "seconds": 7.257,
+      "ready": true
+    },
+    {
+      "seconds": 7.8,
+      "ready": true
+    },
+    {
+      "seconds": 8.344,
+      "ready": true
+    },
+    {
+      "seconds": 8.891,
+      "ready": true
+    },
+    {
+      "seconds": 9.552,
+      "ready": false
+    },
+    {
+      "seconds": 10.215,
+      "ready": false
+    },
+    {
+      "seconds": 10.878,
+      "ready": false
+    },
+    {
+      "seconds": 11.537,
+      "ready": false
+    },
+    {
+      "seconds": 15.04,
+      "ready": false
+    },
+    {
+      "seconds": 18.548,
+      "ready": false
+    },
+    {
+      "seconds": 22.053,
+      "ready": false
+    },
+    {
+      "seconds": 25.556,
+      "ready": false
+    },
+    {
+      "seconds": 29.064,
+      "ready": false
+    },
+    {
+      "seconds": 32.569,
+      "ready": false
+    },
+    {
+      "seconds": 36.077,
+      "ready": false
+    },
+    {
+      "seconds": 37.033,
+      "ready": false
+    },
+    {
+      "seconds": 37.697,
+      "ready": false
+    },
+    {
+      "seconds": 38.357,
+      "ready": false
+    },
+    {
+      "seconds": 39.031,
+      "ready": false
+    },
+    {
+      "seconds": 39.695,
+      "ready": false
+    },
+    {
+      "seconds": 40.353,
+      "ready": false
+    },
+    {
+      "seconds": 41.018,
+      "ready": false
+    },
+    {
+      "seconds": 41.682,
+      "ready": false
+    },
+    {
+      "seconds": 42.345,
+      "ready": false
+    },
+    {
+      "seconds": 43.004,
+      "ready": false
+    },
+    {
+      "seconds": 43.751,
+      "ready": false
+    },
+    {
+      "seconds": 44.414,
+      "ready": false
+    },
+    {
+      "seconds": 45.077,
+      "ready": false
+    },
+    {
+      "seconds": 45.738,
+      "ready": false
+    },
+    {
+      "seconds": 46.402,
+      "ready": false
+    },
+    {
+      "seconds": 47.066,
+      "ready": false
+    },
+    {
+      "seconds": 47.732,
+      "ready": false
+    },
+    {
+      "seconds": 48.468,
+      "ready": false
+    },
+    {
+      "seconds": 49.131,
+      "ready": false
+    },
+    {
+      "seconds": 49.794,
+      "ready": false
+    },
+    {
+      "seconds": 50.46,
+      "ready": false
+    },
+    {
+      "seconds": 51.126,
+      "ready": false
+    },
+    {
+      "seconds": 51.791,
+      "ready": false
+    },
+    {
+      "seconds": 52.453,
+      "ready": false
+    },
+    {
+      "seconds": 53.183,
+      "ready": false
+    },
+    {
+      "seconds": 53.848,
+      "ready": false
+    },
+    {
+      "seconds": 54.508,
+      "ready": false
+    },
+    {
+      "seconds": 55.171,
+      "ready": false
+    },
+    {
+      "seconds": 55.834,
+      "ready": false
+    },
+    {
+      "seconds": 56.501,
+      "ready": false
+    },
+    {
+      "seconds": 57.163,
+      "ready": false
+    },
+    {
+      "seconds": 57.909,
+      "ready": false
+    },
+    {
+      "seconds": 58.573,
+      "ready": false
+    },
+    {
+      "seconds": 59.236,
+      "ready": false
+    },
+    {
+      "seconds": 59.898,
+      "ready": false
+    },
+    {
+      "seconds": 60.559,
+      "ready": false
+    },
+    {
+      "seconds": 61.221,
+      "ready": false
+    },
+    {
+      "seconds": 61.886,
+      "ready": false
+    },
+    {
+      "seconds": 62.619,
+      "ready": false
+    },
+    {
+      "seconds": 63.282,
+      "ready": false
+    },
+    {
+      "seconds": 63.946,
+      "ready": false
+    },
+    {
+      "seconds": 64.475,
+      "ready": false
+    },
+    {
+      "seconds": 64.999,
+      "ready": false
+    },
+    {
+      "seconds": 65.523,
+      "ready": false
+    },
+    {
+      "seconds": 66.131,
+      "ready": false
+    },
+    {
+      "seconds": 66.668,
+      "ready": false
+    },
+    {
+      "seconds": 67.206,
+      "ready": false
+    },
+    {
+      "seconds": 67.751,
+      "ready": false
+    },
+    {
+      "seconds": 68.291,
+      "ready": false
+    },
+    {
+      "seconds": 68.918,
+      "ready": false
+    },
+    {
+      "seconds": 69.466,
+      "ready": false
+    },
+    {
+      "seconds": 70.006,
+      "ready": false
+    },
+    {
+      "seconds": 70.546,
+      "ready": false
+    },
+    {
+      "seconds": 71.096,
+      "ready": false
+    },
+    {
+      "seconds": 71.637,
+      "ready": false
+    },
+    {
+      "seconds": 72.171,
+      "ready": false
+    },
+    {
+      "seconds": 72.715,
+      "ready": false
+    },
+    {
+      "seconds": 73.253,
+      "ready": true
+    }
+  ]
+}

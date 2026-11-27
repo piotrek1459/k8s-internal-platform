@@ -1,0 +1,61 @@
+{
+  "appID": "app_8a32a9152e4be17e",
+  "url": "https://eval-5a82bfd70d29-steady.apps.home.arpa:8443/version",
+  "application": {
+    "access": {
+      "hostname": "eval-5a82bfd70d29-steady.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_202ad1be76e5afa0",
+      "url": "https://eval-5a82bfd70d29-steady.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_202ad1be76e5afa0",
+    "id": "app_8a32a9152e4be17e",
+    "lastSuccessfulRevision": "rev_202ad1be76e5afa0",
+    "name": "eval-5a82bfd70d29-steady",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 1,
+      "observedAt": "2026-11-27T13:54:00.630534876Z",
+      "stale": false
+    },
+    "version": 1
+  },
+  "serviceUID": "2bb15474-c91f-49de-b023-85f8e968a8f4",
+  "serviceSpec": {
+    "clusterIP": "10.43.53.133",
+    "clusterIPs": [
+      "10.43.53.133"
+    ],
+    "internalTrafficPolicy": "Cluster",
+    "ipFamilies": [
+      "IPv4"
+    ],
+    "ipFamilyPolicy": "SingleStack",
+    "ports": [
+      {
+        "name": "http",
+        "port": 80,
+        "protocol": "TCP",
+        "targetPort": "http"
+      }
+    ],
+    "selector": {
+      "app.kubernetes.io/instance": "app-app-8a32a9152e4be17e",
+      "platform.local/app-id": "app_8a32a9152e4be17e"
+    },
+    "sessionAffinity": "None",
+    "type": "ClusterIP"
+  },
+  "initialHTTPS": [
+    {
+      "epochSeconds": 1795787640.831354,
+      "status": 200,
+      "expected": true
+    }
+  ]
+}

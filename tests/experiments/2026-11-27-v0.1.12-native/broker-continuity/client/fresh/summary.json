@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-a7f93e976515-broker.apps.home.arpa:8443/version",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 5,
+  "durationSeconds": 75,
+  "warmupSeconds": 0,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795787550.745058,
+  "finishedEpochSeconds": 1795787625.585053,
+  "requests": 375,
+  "successful": 375,
+  "successRate": 1.0,
+  "latencyMilliseconds": {
+    "count": 375,
+    "minimum": 25.905041,
+    "median": 36.834125,
+    "p95": 158.930709,
+    "maximum": 385.307125
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 375,
+  "complete": true,
+  "targetsPassed": true,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

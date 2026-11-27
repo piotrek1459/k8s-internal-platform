@@ -1,0 +1,61 @@
+{
+  "appID": "app_305f777d2424a7ce",
+  "url": "https://eval-32ba212e6fdb-routing.apps.home.arpa:8443/version",
+  "application": {
+    "access": {
+      "hostname": "eval-32ba212e6fdb-routing.apps.home.arpa",
+      "mode": "lan",
+      "revisionId": "rev_c9cb5b051f6f8ef7",
+      "url": "https://eval-32ba212e6fdb-routing.apps.home.arpa:8443/"
+    },
+    "activeOperationId": "",
+    "desiredRevision": "rev_c9cb5b051f6f8ef7",
+    "id": "app_305f777d2424a7ce",
+    "lastSuccessfulRevision": "rev_c9cb5b051f6f8ef7",
+    "name": "eval-32ba212e6fdb-routing",
+    "status": {
+      "phase": "ready",
+      "desiredReplicas": 1,
+      "readyReplicas": 1,
+      "workloadReady": true,
+      "routeReady": true,
+      "observedGeneration": 1,
+      "observedAt": "2026-11-27T13:49:32.837677586Z",
+      "stale": false
+    },
+    "version": 1
+  },
+  "serviceUID": "0617c43a-c8af-4a3f-a275-73a38cec8b44",
+  "serviceSpec": {
+    "clusterIP": "10.43.22.20",
+    "clusterIPs": [
+      "10.43.22.20"
+    ],
+    "internalTrafficPolicy": "Cluster",
+    "ipFamilies": [
+      "IPv4"
+    ],
+    "ipFamilyPolicy": "SingleStack",
+    "ports": [
+      {
+        "name": "http",
+        "port": 80,
+        "protocol": "TCP",
+        "targetPort": "http"
+      }
+    ],
+    "selector": {
+      "app.kubernetes.io/instance": "app-app-305f777d2424a7ce",
+      "platform.local/app-id": "app_305f777d2424a7ce"
+    },
+    "sessionAffinity": "None",
+    "type": "ClusterIP"
+  },
+  "initialHTTPS": [
+    {
+      "epochSeconds": 1795787373.1771772,
+      "status": 200,
+      "expected": true
+    }
+  ]
+}

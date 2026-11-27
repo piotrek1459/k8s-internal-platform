@@ -1,0 +1,137 @@
+{
+  "system": {
+    "architecture": "arm64",
+    "capabilities": [
+      "private-ingress",
+      "image-inspection",
+      "configuration-secrets",
+      "registry-credentials",
+      "cluster-observation",
+      "workload-diagnostics",
+      "drift-inspection"
+    ],
+    "clusterReachable": true,
+    "privateNetwork": {
+      "managementHostname": "platform.home.arpa",
+      "applicationDomain": "apps.home.arpa",
+      "httpsPort": 8443
+    },
+    "version": "0.1.12"
+  },
+  "apps": {
+    "app_56fa8b215c8b0b0a": {
+      "access": {
+        "hostname": "demo.apps.home.arpa",
+        "mode": "lan",
+        "revisionId": "rev_b63fa577585ce113",
+        "url": "https://demo.apps.home.arpa:8443/"
+      },
+      "activeOperationId": "",
+      "desiredRevision": "rev_b63fa577585ce113",
+      "id": "app_56fa8b215c8b0b0a",
+      "lastSuccessfulRevision": "rev_b63fa577585ce113",
+      "name": "eval-42c2b507c4b8-retained",
+      "status": {
+        "phase": "ready",
+        "desiredReplicas": 1,
+        "readyReplicas": 1,
+        "workloadReady": true,
+        "routeReady": true,
+        "observedGeneration": 7,
+        "observedAt": "2026-11-27T14:07:38.52079094Z",
+        "stale": false
+      },
+      "version": 7
+    }
+  },
+  "revisions": {
+    "app_56fa8b215c8b0b0a": {
+      "items": [
+        {
+          "createdAt": "2026-11-27T13:45:34.141095363Z",
+          "frozenAt": "2026-11-27T13:45:01.555845625Z",
+          "frozenImage": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+          "id": "rev_b63fa577585ce113",
+          "number": 7,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+            "replicas": 1
+          }
+        },
+        {
+          "createdAt": "2026-11-27T13:45:29.00940925Z",
+          "frozenAt": "2026-11-27T13:45:29.021083245Z",
+          "frozenImage": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+          "id": "rev_9907b1663e15fc54",
+          "number": 6,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+            "replicas": 1
+          }
+        },
+        {
+          "createdAt": "2026-11-27T13:45:23.699227471Z",
+          "frozenAt": "2026-11-27T13:45:23.729604032Z",
+          "frozenImage": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+          "id": "rev_43db31fb7a5a583e",
+          "number": 5,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+            "replicas": 1
+          }
+        },
+        {
+          "createdAt": "2026-11-27T13:45:22.72185943Z",
+          "frozenAt": "2026-11-27T13:45:22.74080207Z",
+          "frozenImage": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+          "id": "rev_29a8f61b70b00f02",
+          "number": 4,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+            "replicas": 0
+          }
+        },
+        {
+          "createdAt": "2026-11-27T13:45:15.523219971Z",
+          "frozenAt": "2026-11-27T13:45:17.623380707Z",
+          "frozenImage": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+          "id": "rev_5d3ad790bd9023f5",
+          "number": 3,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+            "replicas": 2
+          }
+        },
+        {
+          "createdAt": "2026-11-27T13:45:06.456380578Z",
+          "frozenAt": "2026-11-27T13:45:06.467091129Z",
+          "frozenImage": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+          "id": "rev_78bbb425a13d9309",
+          "number": 2,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+            "replicas": 1
+          }
+        },
+        {
+          "createdAt": "2026-11-27T13:45:01.542489871Z",
+          "frozenAt": "2026-11-27T13:45:01.555845625Z",
+          "frozenImage": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+          "id": "rev_fbcbe24664281119",
+          "number": 1,
+          "result": "succeeded",
+          "spec": {
+            "image": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+            "replicas": 1
+          }
+        }
+      ]
+    }
+  }
+}

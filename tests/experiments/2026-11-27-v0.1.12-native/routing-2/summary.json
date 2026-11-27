@@ -1,0 +1,118 @@
+{
+  "passed": true,
+  "clients": {
+    "pooled": {
+      "url": "https://eval-32ba212e6fdb-routing.apps.home.arpa:8443/version",
+      "addressOverride": "192.168.68.227",
+      "certificateVerification": true,
+      "ratePerSecond": 5,
+      "durationSeconds": 55,
+      "warmupSeconds": 0,
+      "maximumOutstandingRequests": 32,
+      "startedEpochSeconds": 1795787385.5375628,
+      "finishedEpochSeconds": 1795787440.35096,
+      "requests": 275,
+      "successful": 275,
+      "successRate": 1.0,
+      "latencyMilliseconds": {
+        "count": 275,
+        "minimum": 5.826166,
+        "median": 10.905958,
+        "p95": 83.693625,
+        "maximum": 103.035458
+      },
+      "clientSchedulingValid": true,
+      "expectedRequests": 275,
+      "complete": true,
+      "targetsPassed": true,
+      "protocol": "HTTP/1.1",
+      "humanOperatorTime": null
+    },
+    "fresh": {
+      "url": "https://eval-32ba212e6fdb-routing.apps.home.arpa:8443/version",
+      "addressOverride": "192.168.68.227",
+      "certificateVerification": true,
+      "ratePerSecond": 5,
+      "durationSeconds": 55,
+      "warmupSeconds": 0,
+      "maximumOutstandingRequests": 32,
+      "startedEpochSeconds": 1795787385.537545,
+      "finishedEpochSeconds": 1795787440.3717701,
+      "requests": 275,
+      "successful": 275,
+      "successRate": 1.0,
+      "latencyMilliseconds": {
+        "count": 275,
+        "minimum": 24.256916,
+        "median": 34.881875,
+        "p95": 122.150542,
+        "maximum": 127.742791
+      },
+      "clientSchedulingValid": true,
+      "expectedRequests": 275,
+      "complete": true,
+      "targetsPassed": true,
+      "protocol": "HTTP/1.1",
+      "humanOperatorTime": null
+    }
+  },
+  "actions": [
+    {
+      "action": "update",
+      "submitted": 1795787395.5589674,
+      "oldPodUIDs": [
+        "eff83ad8-5e59-480a-87c9-fa79c2c63e36"
+      ],
+      "ready": 1795787400.5347483,
+      "operationID": "op_515b560841a05c25",
+      "retired": 1795787404.9858599,
+      "HTTPS": [
+        {
+          "epochSeconds": 1795787404.9942074,
+          "status": 200,
+          "expected": true
+        }
+      ]
+    },
+    {
+      "action": "rollback",
+      "submitted": 1795787410.5527987,
+      "oldPodUIDs": [
+        "09a941ec-b95c-4a95-8bcf-0b5e7b6d57ed"
+      ],
+      "ready": 1795787415.625567,
+      "operationID": "op_831f87b1f19f31de",
+      "retired": 1795787421.147569,
+      "HTTPS": [
+        {
+          "epochSeconds": 1795787421.1558433,
+          "status": 200,
+          "expected": true
+        }
+      ]
+    },
+    {
+      "action": "restart",
+      "submitted": 1795787425.5588963,
+      "oldPodUIDs": [
+        "d1a530c5-4a98-49bf-bfcd-6c94a2a1d484"
+      ],
+      "ready": 1795787430.5882316,
+      "operationID": "op_f84f210f379962c6",
+      "retired": 1795787435.053489,
+      "HTTPS": [
+        {
+          "epochSeconds": 1795787435.0618246,
+          "status": 200,
+          "expected": true
+        }
+      ]
+    }
+  ],
+  "originalApplicationsRetained": true,
+  "owned": {
+    "runID": "32ba212e6fdb",
+    "applications": {},
+    "releases": {}
+  }
+}

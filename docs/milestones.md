@@ -39,11 +39,11 @@ Older dated reports remain evidence only for their recorded source and scope.
 
 | Milestone | Completed implementation/evidence | Remaining acceptance or implementation |
 | --- | --- | --- |
-| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | No open listed M0 item; the repeated baseline and published v0.1.11 installer checks passed. Human operator comparison remains M4. |
-| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Published defaults passed; v0.1.11 rollout continuity failed (373/375). The Service-routing correction in PR #25 requires manual release and published Pi acceptance. |
-| M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source crash/restoration/disclosure matrix. | No open listed M2 acceptance item; request-availability evaluation remains M4. |
-| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source queued/running refresh, native v0.1.7 Secret cleanup/retry and v0.1.8 LAN HTTPS/browser/URL acceptance. | No open listed M3 acceptance item. The installer gate passed in v0.1.9; broader failure/security work remains under M2/M4. |
-| M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | Published rollout continuity (373/375 failed its target), the human active-time/step trial and final evaluation reconciliation; system/default/retention checks passed. |
+| M0 | Reference hardware/OS/storage records, pinned native K3s, published ARM64/AMD64 demo bundles, reference-Pi manual Helm functional baseline and v0.1.8 separate-workstation LAN access. | No open listed M0 item; the repeated baseline and published v0.1.12 installer checks passed. Human operator comparison remains M4. |
+| M1 | Workload/Service/ownership/probe/private-entrypoint chart, healthy/unhealthy workflows, v0.1.3 temporary-files compatibility and v0.1.8 reference-LAN routing. | Published defaults passed; v0.1.11 rollout continuity failed (373/375). The Service-routing correction passed published v0.1.12 native acceptance; no open listed M1 item. |
+| M2 | Validated API, atomic migrations/acceptance, serial worker, frozen snapshots, configuration Secrets and native persistence; source crash/restoration/disclosure matrix. | No open listed M2 acceptance item; published recovery/disclosure and request-continuity gates passed. |
+| M3 | Released setup/auth/forms/history/Secret and credential management/logs/events; source queued/running refresh, native v0.1.7 Secret cleanup/retry and v0.1.8 LAN HTTPS/browser/URL acceptance. | No open listed M3 acceptance item; published installer, browser and controlled failure/security gates passed. |
+| M4 | Healthy lifecycle, verified unhealthy-update restoration, blocked first-deployment removal, drift/repair and source interruption/failed-compensation matrix. | The human active-time/step trial and final evaluation reconciliation; published v0.1.12 accepted routing/system/default/retention checks. |
 | M5–M8 | Native installer/release distribution portions of M7 are implemented and the Pi core install/reinstall/reboot run passed. | Application data/backup, public hosting, supported upgrades/automation and extended monitoring retain their separate requirements. |
 
 The two former status/restart E2E skips are removed: both are required assertions.
@@ -94,8 +94,7 @@ probes, resources, ownership and private routes.
 verified, including native LAN routing. Resource calibration and explicit native
 profile checks are retained. Source chart 0.1.3 adds native shutdown delay and
 requires Kubernetes 1.34+. [Published v0.1.11](../tests/experiments/2026-11-27-v0.1.11-native.md) passed default/hook checks,
-but rollout continuity failed (373/375). The source correction in PR #25 requires
-manual release and published Pi acceptance.
+but rollout continuity failed (373/375). The correction passed [published v0.1.12 native acceptance](../tests/experiments/2026-11-27-v0.1.12-native.md).
 
 ## M2 — Durable backend (core)
 
@@ -144,7 +143,7 @@ configuration/history and diagnostics over a private management path.
 - [x] Verify browser Secret creation/version management and credential creation/selection/private-image/invalid-password workflows. **Evidence:** focused real-cluster browser lifecycle/private-registry cases verify exact Secret contents privately, actual private HTTP, deletion guards and physical Kubernetes cleanup. The full 17-case CI suite passed without failures/skips; release/native boundaries remain recorded in the [report](../tests/experiments/2026-11-23-v0.1.5-secret-lifecycle.md).
 - [x] Natively verify the Secret cleanup correction introduced in v0.1.6. **Evidence:** published v0.1.7 passed referenced API/browser refusal, physical version removal after dependent-app deletion and controlled partial cleanup across actual broker replacement. Original session/PVC and reservation survived; unresolved ownership was refused, guarded fixture repair enabled browser retry, values/metadata were removed and history remained. Original v0.1.7 identities/HTTP also survived reinstall/reboot. [Report](../tests/experiments/2026-11-23-v0.1.7-native.md). v0.1.6 itself was not run natively.
 - [x] Application details include observed status, revision history and operation progress/events. **Evidence:** handler contracts and browser update/history/rollback workflows.
-- [x] Add bounded application log/event reads and escaped browser rendering. **Evidence:** handler/ownership/redaction regressions and the focused real-cluster fixture test; namespace/UID chains, cross-app/copied-label rejection, real sensitive fixture masking and hostile-text escaping are verified. Full disclosure acceptance remains separately open.
+- [x] Add bounded application log/event reads and escaped browser rendering. **Evidence:** handler/ownership/redaction regressions and the focused real-cluster fixture test; namespace/UID chains, cross-app/copied-label rejection, real sensitive fixture masking and hostile-text escaping are verified. The controlled disclosure matrix also passed source and published v0.1.10 acceptance under M2/M4.
 - [x] Registry credentials are stored in Kubernetes and support real private inspection/pulls; ordinary responses remain metadata-only and invalid credentials fail. **Evidence:** registry/credential regressions and authenticated-registry E2E. Full private browser flow remains above.
 - [x] A completed operation can be reloaded from its persisted state. **Evidence:** browser operation-page refresh.
 - [x] Refresh/navigate while an operation is deliberately queued behind a pending install, then recover its persisted progress after broker replacement without resubmission. **Evidence:** browser submission count, one revision and actual HTTP checks in `test_95_pending_first_install_and_queued_browser_resume`.
@@ -178,14 +177,14 @@ Application data volumes remain outside this milestone.
 - [x] Report owned workload/route drift against frozen intent without automatic overwrite or configuration values. **Evidence:** field/ownership/route unit matrix and real-cluster image/env/resources/probe/replica/Service-port drift, plus explicit Reapply and HTTP verification. Guarded Service-list repair preserves identity/address; pending/foreign ownership remains blocked. See the [source report](../tests/experiments/2026-11-23-v0.1.4-and-diagnostics.md).
 - [x] Retain the predefined targets/repetitions, equivalent cached API/manual Helm system comparison, resource/pull observations, environment identities and raw results. **Evidence:** [calibration dataset](../tests/experiments/2026-11-26-core-evaluation.md) and [v0.1.11 repetition](../tests/experiments/2026-11-27-v0.1.11-native.md).
 - [x] Validate the measured defaults and native hook presence through the unmodified published embedded platform chart on the reference Pi. **Evidence:** v0.1.11 omitted-resource Go/Nginx checks, load/lifecycle, reinstall/reboot and final cleanup audit.
-- [ ] Accept published application-rollout HTTP continuity after correction. **Evidence:** v0.1.11 returned 373/375 (one 502, one timeout) before broker replacement; the later broker outage had no app failures. [PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25) implements Service routing and observes actual Pod retirement with a delayed provider. The [controlled native study](../tests/experiments/2026-11-27-rollout-routing.md) retains observations and comparisons; administrator merge/manual release and published Pi validation remain required. The original failed trace is retained.
+- [x] Accept published application-rollout HTTP continuity after correction. **Evidence:** unmodified v0.1.12 passed three update/rollback/restart trials plus broker replacement (2,400/2,400 app requests), steady Go/Nginx load, unhealthy-update restoration and same-version/reboot retention. [Native report](../tests/experiments/2026-11-27-v0.1.12-native.md). The failed v0.1.11 and controlled Pod-address traces remain retained.
 - [ ] Complete the human portion of the [minimum core evaluation](#minimum-core-evaluation-m4). **Acceptance:** actual Helm/UI operator steps and active/elapsed time, outcomes and equivalent task/cache preparation are recorded and reviewed. The [walkthrough](../tests/evaluation/HUMAN.md) is prepared; the CSV remains unfilled.
 
 **Completion boundary:** supported healthy lifecycle and failed-update restoration
 are verified. The new failure/interruption matrix has source-cluster evidence;
 published v0.1.10 native acceptance is complete. The repeated system/resource
-dataset and native source-chart drain comparison are retained. Published v0.1.11 default/hook checks passed, but application-rollout HTTP
-continuity failed. Published acceptance of the source correction, the human walkthrough and final
+dataset and native source-chart drain comparison are retained. Published v0.1.12 accepted the default/Service-routing correction and native
+lifecycle/load/restoration/retention checks. The human walkthrough and final
 evaluation reconciliation remain open. M5–M8 do not replace these core obligations.
 
 ## M5 — Application persistence and backup (extension)
@@ -288,14 +287,12 @@ observability overhead, supplementing the mandatory core evaluation.
 The LAN/installer cycle passed published v0.1.9 native acceptance; temporary-files
 compatibility passed in v0.1.3.
 
-1. Published v0.1.10 completed native recovery/security acceptance; PR #24 and
-   published v0.1.11 passed measured-profile/default/lifecycle/load/retention checks.
-2. Complete source Service-routing correction PR #25, then administrator
-   merge/manual release and native validation; retain the failed v0.1.11 trace.
-3. Perform the agreed human walkthrough and retain actual steps, active/elapsed
+1. The published recovery/security, measured-profile and routing cycles through
+   v0.1.12 are accepted, with their source/native results retained separately.
+2. Perform the agreed human walkthrough last and retain actual steps, active/elapsed
    time, outcomes and equivalent preparation. Automation does not supply this record.
-4. Review the results and reconcile final M4 evidence before closing issue #16.
-   The agreed core demonstration and summary follow; M5–M8 remain separate.
+3. Review that record and reconcile final M4 evidence before closing issue #16.
+   The core demonstration and summary follow; M5–M8 remain separate.
 
 The demo, charts, API, queue, UI and release tooling already exist. This order
 does not require recreating that foundation. M5–M8 remain separate extensions;

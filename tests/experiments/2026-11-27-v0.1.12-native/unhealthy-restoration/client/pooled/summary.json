@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-70bcd993473f-failure.apps.home.arpa:8443/version",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 1,
+  "durationSeconds": 330,
+  "warmupSeconds": 0,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795787849.3179688,
+  "finishedEpochSeconds": 1795788178.330938,
+  "requests": 330,
+  "successful": 330,
+  "successRate": 1.0,
+  "latencyMilliseconds": {
+    "count": 330,
+    "minimum": 5.605167,
+    "median": 12.400604000000001,
+    "p95": 86.735542,
+    "maximum": 158.842125
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 330,
+  "complete": true,
+  "targetsPassed": true,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

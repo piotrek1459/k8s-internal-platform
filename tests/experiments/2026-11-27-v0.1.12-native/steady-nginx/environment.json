@@ -1,0 +1,230 @@
+{
+  "runID": "83ef92609674",
+  "plan": {
+    "schemaVersion": 1,
+    "referenceRelease": "0.1.12",
+    "repetitions": 3,
+    "sampleIntervalSeconds": 1,
+    "idleSeconds": 30,
+    "loadedSeconds": 60,
+    "warmupSeconds": 10,
+    "requestRatePerSecond": 20,
+    "requestTimeoutSeconds": 3,
+    "healthyDeadlineSeconds": 120,
+    "helmFailureTimeoutSeconds": 300,
+    "operationDeadlineSeconds": 390,
+    "targets": {
+      "cachedDeploySeconds": 30,
+      "cachedUpdateSeconds": 30,
+      "recoveryAfterFailureSeconds": 60,
+      "loadedRequestSuccessRate": 1.0,
+      "loadedP95Milliseconds": 500,
+      "temperatureCeilingCelsius": 80,
+      "minimumFreeDiskBytes": 6442450944,
+      "maximumContainerRestarts": 0,
+      "maximumOOMKills": 0
+    },
+    "methodOrder": [
+      [
+        "api",
+        "helm"
+      ],
+      [
+        "helm",
+        "api"
+      ],
+      [
+        "api",
+        "helm"
+      ]
+    ],
+    "resourceCandidate": {
+      "cpuRequest": "25m",
+      "cpuLimit": "250m",
+      "memoryRequest": "48Mi",
+      "memoryLimit": "128Mi"
+    },
+    "cacheConditions": {
+      "bundledDemo": "cached; exact imported digests verified before timing",
+      "publicImage": "pull-required and cached series recorded separately; content-cache reuse must be disclosed",
+      "globalPruneAllowed": false,
+      "cacheResetRequiresExplicitOptIn": true
+    },
+    "operatorTime": "human trial pending; automated command/request durations are system timings only",
+    "claims": {
+      "singleReferenceHost": true,
+      "genericWorkloadSizing": false,
+      "highAvailability": false,
+      "humanUsabilityFromAutomation": false
+    },
+    "presetDerivation": {
+      "cpuRequest": "2 x maximum steady loaded CPU, rounded up to 25m, minimum 25m",
+      "cpuLimit": "2 x derived request, rounded up to 250m, minimum 250m",
+      "memoryRequest": "2 x maximum lifetime container memory peak, rounded up to 16Mi, minimum 32Mi",
+      "memoryLimit": "2 x derived memory request, rounded up to 64Mi, minimum 128Mi",
+      "scope": "Only measured small stateless HTTP workloads; throttling/limits can censor demand and must be reported"
+    },
+    "publicImage": "index.docker.io/nginxinc/nginx-unprivileged@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03",
+    "availabilityProbe": {
+      "ratePerSecond": 5,
+      "durationSeconds": 75,
+      "updateAfterSeconds": 15,
+      "steadyScope": "separate from lifecycle timings; all observed errors retained"
+    },
+    "maximumOutstandingRequests": 32,
+    "collectorAmendment": "Resource series v2: four request slots caused three unsent observations during a ~334 ms response burst; original invalid run retained. Request rate, duration and acceptance targets are unchanged. All resource scenarios are repeated with 32 bounded slots.",
+    "validationScope": "Unmodified published installer and native Service-routing acceptance; three update/rollback/restart traffic trials, original broker-replacement trace, steady Go/Nginx load and one unhealthy restoration, then same-version/reboot retention; human trial remains last",
+    "publishedAcceptance": {
+      "routing": {
+        "repetitions": 3,
+        "durationSeconds": 55,
+        "requestsPerSecondPerClient": 5,
+        "clients": [
+          "pooled",
+          "fresh"
+        ],
+        "actionsAtSeconds": {
+          "update": 10,
+          "rollback": 25,
+          "restart": 40
+        },
+        "successRateTarget": 1.0
+      },
+      "brokerReplacement": {
+        "durationSeconds": 75,
+        "updateAtSeconds": 15,
+        "brokerReplacementAtSeconds": 35,
+        "appRequestsPerSecondPerClient": 5,
+        "managementOutageExpected": true
+      },
+      "steadyLoad": {
+        "workloads": [
+          "go",
+          "nginx"
+        ],
+        "seconds": 60,
+        "warmupSeconds": 10,
+        "requestsPerSecond": 20,
+        "successRateTarget": 1.0,
+        "p95Milliseconds": 500
+      },
+      "unhealthyRestoration": {
+        "failurePolicySeconds": 300,
+        "afterFailureBudgetSeconds": 60,
+        "observationSeconds": 330,
+        "requestsPerSecondPerClient": 1,
+        "expectedServedVersion": "v2"
+      },
+      "proxyRuntimeOverrides": false,
+      "humanOperatorTime": null
+    }
+  },
+  "planSHA256": "38242641a089c8dabaf30a6d0b7bc53cb649a8356e2ddfb972a991ce6abe4147",
+  "release": {
+    "version": "0.1.12",
+    "commit": "0fcf7134d905cccfa33b67bd5cbd571d3d409418",
+    "preview": false,
+    "targets": {
+      "amd64": {
+        "version": "0.1.12",
+        "architecture": "amd64",
+        "images": {
+          "platform": "platform.local/platform-broker@sha256:e59efbb2d25070b572f694423603195c1194bd85d150e991d9542c56bef7b183",
+          "v1": "platform.local/http-demo@sha256:1921e29f564419fc2e889fe1c578363e1a584a75e6ed142694f6ca7edc26f1b5",
+          "v2": "platform.local/http-demo@sha256:e7164f6eb48f7f4452007213c588d32a42a9b6f3e40dc4653f58ae23ab278966",
+          "v3": "platform.local/http-demo@sha256:f43496a1e80d9f74d5d87380687b8e29952497fdb4b3b6f2a7d2148b9df50a84"
+        },
+        "k3s": "v1.36.5+k3s1",
+        "helm": "v3.22.0"
+      },
+      "arm64": {
+        "version": "0.1.12",
+        "architecture": "arm64",
+        "images": {
+          "platform": "platform.local/platform-broker@sha256:ccc8f212afeeebddb9d0b85643f508178e06deb105b0bedaf2758933657be095",
+          "v1": "platform.local/http-demo@sha256:bddcdacee47b103a3bff2fdafaee60573032d13128baf0cf9206cccc21d02f3a",
+          "v2": "platform.local/http-demo@sha256:22654ae5a8b2835d5a6df28ce48b64daa32b8f32da7d11284ec93c9205b37e3f",
+          "v3": "platform.local/http-demo@sha256:e194fedc81821331d3d817832248ab6f5c26126a4ed3633e0b09632d4e54d567"
+        },
+        "k3s": "v1.36.5+k3s1",
+        "helm": "v3.22.0"
+      }
+    }
+  },
+  "platformDeploymentUID": "12941d7b-1901-405f-9113-2f087929df89",
+  "host": {
+    "machine": "aarch64",
+    "kernel": "6.18.60+rpt-rpi-2712",
+    "bootID": "cce5c755-2181-43e1-8556-9cb6e2a796e5",
+    "OS": "PRETTY_NAME=\"Debian GNU/Linux 13 (trixie)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"13\"\nVERSION=\"13 (trixie)\"\nVERSION_CODENAME=trixie\nDEBIAN_VERSION_FULL=13.7\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"\n",
+    "memory": {
+      "MemTotal": 8453816320,
+      "MemAvailable": 7067729920,
+      "SwapTotal": 2147467264,
+      "SwapFree": 2147467264
+    },
+    "disk": {
+      "total": 30201556992,
+      "used": 9028022272,
+      "free": 19868676096
+    },
+    "Kubernetes": {
+      "clientVersion": {
+        "major": "1",
+        "minor": "36",
+        "gitVersion": "v1.36.5+k3s1",
+        "gitCommit": "3dd98cc58ec34991e7e59b93663eee2e26fc1f65",
+        "gitTreeState": "clean",
+        "buildDate": "2026-09-30T16:04:19Z",
+        "goVersion": "go1.26.8",
+        "compiler": "gc",
+        "platform": "linux/arm64"
+      },
+      "kustomizeVersion": "v5.8.1",
+      "serverVersion": {
+        "major": "1",
+        "minor": "36",
+        "emulationMajor": "1",
+        "emulationMinor": "36",
+        "minCompatibilityMajor": "1",
+        "minCompatibilityMinor": "35",
+        "gitVersion": "v1.36.5+k3s1",
+        "gitCommit": "3dd98cc58ec34991e7e59b93663eee2e26fc1f65",
+        "gitTreeState": "clean",
+        "buildDate": "2026-09-30T16:04:19Z",
+        "goVersion": "go1.26.8",
+        "compiler": "gc",
+        "platform": "linux/arm64"
+      }
+    },
+    "Helm": "v3.22.0+g144ca65"
+  },
+  "originalApplications": {
+    "app_56fa8b215c8b0b0a": [
+      7,
+      "rev_b63fa577585ce113"
+    ]
+  },
+  "humanOperatorTime": null,
+  "collectorSHA256": {
+    "analyze.py": "29198fa36efcfac0cd86cf127527f858154dce71e3fac6d66dbf3d3b54057bf6",
+    "api.py": "63c1b7786a7d6e2529e9386a3c914de8c60da15cc2a6e4a6fd18ced59027f635",
+    "cleanup.py": "19a9fa6eea4f54a30af55bd01dbc7ce6ff14f3be5b78cf30cb72ce8c7c3f436b",
+    "common.py": "65f9f5a6088e78157a75b58d22af0d2135d93f9e3307a4d5a1c41abaa5868c92",
+    "host.py": "712b1a6bc6e44cff9f43acca9c422369200742d9cfd2fb2b90cc98f3c7da5879",
+    "human.py": "96f2b7558e1c607e2a74891e3d7ad62acc8b90e25cac1f183ea5509636446d28",
+    "load.py": "7882b0635632f7b4c64d434e362df9b3cd563ede20c772d680ec71a15f190f44",
+    "pulls.py": "d281644f6d20c9a896c1771ee158ddd7a06dfa4128a6e7721082309ce187855d",
+    "run.py": "e5d90e952b22c2a92d5fde99e05b838768fdc1d4968a0052d79e4816f7c1ceff"
+  },
+  "chartInputSHA256": {
+    ".helmignore": "1585a01b3ab89848c1f259a7c766a51237963d270e6a227cdf1c012d11eb0ee2",
+    "Chart.yaml": "ee3207f8f621b5dc402a0bbdc55adb5833dc252f3e9a6192e8c2641dab5f6c44",
+    "templates/_helpers.tpl": "1b2c21d77cb495ea5ddb56321696ceac0681091f16d697a7c9035788e5a52554",
+    "templates/deployment.yaml": "b396b6c80dce8bbf81d60957bfd0341d0d0162fc3756ee158bf1ffe6980d1961",
+    "templates/ingress.yaml": "4fd686c7385d4e804929e67568cdd97566d1c3f890db79d18f75eefe4eb76b98",
+    "templates/service.yaml": "012e723815a97fe853a98051e9492e0f8f0b15fa0c76e5b72be2b72d43c81c1e",
+    "values.schema.json": "7fd81807b9c612f8a4f0bc50e2e2426cf5167dc82b0cc245d680c1edb4bb6adc",
+    "values.yaml": "44c7302887bdf48b10b6be69832404f5368dab59b3ff5a3b3d1b488927e6ca2b"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "runID": 46004014402,
+  "source": "0fcf7134d905cccfa33b67bd5cbd571d3d409418",
+  "conclusion": "success",
+  "artifactID": 15202492029,
+  "artifactDigest": "sha256:9fc0dfb88d897164fa558c5cab4942d6200670e2ece61161d47be18dfc78464c",
+  "tests": 27,
+  "failures": 0,
+  "skips": 0,
+  "rolloutRequests": 115,
+  "rolloutErrors": 0
+}

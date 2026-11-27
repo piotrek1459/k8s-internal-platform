@@ -1,0 +1,32 @@
+[
+  {
+    "name": "INSTALL.md",
+    "SHA256": "sha256:9dbb86bc175b8c1b3265836bc1cfe3a9f85057b5b763fe321203fe812221450d",
+    "assetID": 800600181,
+    "bytes": 12819
+  },
+  {
+    "name": "install.sh",
+    "SHA256": "sha256:383ec3f2d64da3423f6513d16e2afce517079b2b2d547df80471a994c03341f3",
+    "assetID": 800600180,
+    "bytes": 21141
+  },
+  {
+    "name": "platform-v0.1.12-linux-arm64.tar.gz",
+    "SHA256": "sha256:57a5b3421d442655b1dc76fca38e06ae3dd3b7ef6855c2d1ed4edb518773852d",
+    "assetID": 800600179,
+    "bytes": 25522791
+  },
+  {
+    "name": "release.json",
+    "SHA256": "sha256:a27e21a9f9a951de1551adb86356f64b90a3a513bcd542cfb73645a110c65160",
+    "assetID": 800600177,
+    "bytes": 1375
+  },
+  {
+    "name": "SHA256SUMS",
+    "SHA256": "sha256:e049892f043cd8d53a097bba082385bb638fdfa94f5b2e52c85942fe2e15cd62",
+    "assetID": 800600212,
+    "bytes": 437
+  }
+]

@@ -12,7 +12,7 @@ observability are in [operations.md](operations.md).
 The Go broker, SQLite store, embedded application chart, Svelte administrator UI
 and k3d development workflow are implemented. Published native ARM64 installation
 and trusted private LAN HTTPS UI/API/application access have reference-Pi
-acceptance through v0.1.11. The platform and managed apps share one cluster;
+acceptance through v0.1.12. The platform and managed apps share one cluster;
 Internal Services and loopback development forwarding remain supported. The
 [status report](status.md) records versioned evidence and remaining boundaries.
 
@@ -204,7 +204,7 @@ flowchart TB
 ```
 
 The Linux installer implements the private paths when explicit LAN configuration
-is supplied. Current source routes the dedicated private controller through
+is supplied. Published v0.1.12 routes the dedicated private controller through
 Service ClusterIPs, so Kubernetes endpoint selection handles Pod replacement.
 The public path remains M6 scope. The local launcher defaults to loopback
 management and Internal application forwarding. Published/source acceptance

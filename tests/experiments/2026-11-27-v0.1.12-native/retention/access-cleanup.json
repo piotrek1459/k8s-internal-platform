@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "temporarySSHMasterClosed": true,
+  "temporaryLocalForwards": {
+    "8080": "no listener",
+    "18001": "no listener"
+  },
+  "temporaryPiProxiesStoppedBeforeTraffic": true,
+  "canonicalPrivateAccessRetained": true,
+  "duplicateAccessAndInputArchiveRemoved": true,
+  "savedSessionsRevoked": true,
+  "savedCookieFilesRemoved": true,
+  "caffeinateStopped": true,
+  "remoteTemporaryCredentialFilesRemoved": true,
+  "privatePreviousInstallationArchivePreserved": true
+}

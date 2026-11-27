@@ -1,0 +1,27 @@
+{
+  "url": "https://eval-059c141f53fd-routing.apps.home.arpa:8443/version",
+  "addressOverride": "192.168.68.227",
+  "certificateVerification": true,
+  "ratePerSecond": 5,
+  "durationSeconds": 55,
+  "warmupSeconds": 0,
+  "maximumOutstandingRequests": 32,
+  "startedEpochSeconds": 1795787302.84179,
+  "finishedEpochSeconds": 1795787357.67447,
+  "requests": 275,
+  "successful": 275,
+  "successRate": 1.0,
+  "latencyMilliseconds": {
+    "count": 275,
+    "minimum": 5.61225,
+    "median": 10.777792,
+    "p95": 84.534083,
+    "maximum": 156.077917
+  },
+  "clientSchedulingValid": true,
+  "expectedRequests": 275,
+  "complete": true,
+  "targetsPassed": true,
+  "protocol": "HTTP/1.1",
+  "humanOperatorTime": null
+}

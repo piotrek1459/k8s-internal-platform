@@ -5,8 +5,11 @@ instead of rebuilding a Pod-address upstream list for each replacement.
 [PR #25](https://github.com/piotrek1459/k8s-internal-platform/pull/25) contains the
 setting and stronger rollout regression. The [machine summary](2026-11-27-rollout-routing.json)
 and hashed raw artifacts retain every controlled result.
-**A following manual release and published Pi validation remain required.**
-The human walkthrough remains last; no human measurements are inferred here.
+At collection, a following manual release and published Pi validation were required.
+The subsequent [v0.1.12 native report](2026-11-27-v0.1.12-native.md) accepts that
+published correction separately. This study's controls, results and machine
+summary retain their original source/candidate scope. The human walkthrough
+remains last; no human measurements are inferred here.
 
 ## Observed failure and mechanism
 

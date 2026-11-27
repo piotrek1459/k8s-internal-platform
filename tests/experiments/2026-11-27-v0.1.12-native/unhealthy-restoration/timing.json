@@ -1,0 +1,20 @@
+{
+  "submitted": 1795787859.2242613,
+  "restored": 1795788161.1383867,
+  "failurePolicySeconds": 300,
+  "elapsedSeconds": 301.9141254425049,
+  "states": [
+    {
+      "seconds": 0.067575,
+      "state": "running"
+    },
+    {
+      "seconds": 301.10392,
+      "state": "recovering"
+    },
+    {
+      "seconds": 301.881512,
+      "state": "failed"
+    }
+  ]
+}

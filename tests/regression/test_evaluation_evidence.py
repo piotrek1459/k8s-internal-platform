@@ -145,3 +145,84 @@ class RoutingCorrectionEvidenceTests(unittest.TestCase):
         audit = json.loads((data/'final-audit.json').read_text())
         self.assertTrue(audit['passed'])
         self.assertTrue(audit['originalPrivateTemplateRestored'])
+
+
+class PublishedV0112EvidenceTests(unittest.TestCase):
+    def test_published_acceptance_recomputes_without_supplying_human_results(self):
+        data = ROOT/'tests/experiments/2026-11-27-v0.1.12-native'
+        report = json.loads(Path(str(data) + '.json').read_text())
+        self.assertEqual(report['runtimeRelease'], '0.1.12')
+        self.assertTrue(report['publishedNativeAcceptancePassed'])
+        self.assertTrue(report['publishedRolloutContinuityPassed'])
+        self.assertIsNone(report['humanOperatorTime'])
+        self.assertFalse(report['coreEvaluationComplete'])
+        for name, expected in report['artifacts'].items():
+            with self.subTest(artifact=name):
+                path = data/name
+                self.assertTrue(path.resolve().is_relative_to(data.resolve()))
+                raw = path.read_bytes()
+                self.assertEqual(len(raw), expected['bytes'])
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected['SHA256'])
+                expanded = gzip.decompress(raw) if name.endswith('.gz') else raw
+                self.assertEqual(hashlib.sha256(expanded).hexdigest(), expected['expandedSHA256'])
+        self.assertEqual(len(report['cases']), 7)
+        counts = {'rollout': 0, 'steady': 0, 'restoration': 0}
+        for case in report['cases']:
+            folder = data/case['case']
+            policy = json.loads((folder/'private-policy.json').read_text())['arguments']
+            self.assertEqual(policy.count('--providers.kubernetesingress.nativelbbydefault=true'), 1)
+            self.assertFalse(any(arg.startswith(('--api.insecure=', '--providers.kubernetesingress.throttleduration=')) for arg in policy))
+            summary = json.loads((folder/'summary.json').read_text())
+            self.assertTrue(summary['passed'])
+            self.assertTrue(summary['originalApplicationsRetained'])
+            self.assertEqual(summary['owned']['applications'], {})
+            self.assertEqual(summary['owned']['releases'], {})
+            for client, expected in case['clients'].items():
+                with self.subTest(case=case['case'], client=client):
+                    records = analyzer.rows(folder/'client'/client/'requests.jsonl')
+                    rate = expected['ratePerSecond']
+                    actual = analyzer.summarize(records,
+                                                expected_count=rate * expected['durationSeconds'],
+                                                expected_total=rate * (expected['durationSeconds'] + expected['warmupSeconds']))
+                    for key, value in actual.items():
+                        self.assertEqual(value, expected[key], key)
+                    self.assertTrue(actual['complete'])
+                    self.assertTrue(actual['clientSchedulingValid'])
+                    self.assertTrue(expected['certificateVerification'])
+                    if client == 'management':
+                        self.assertEqual(case['case'], 'broker-continuity')
+                        self.assertEqual(actual['successful'], 367)
+                        self.assertEqual(actual['requests'], 375)
+                        self.assertFalse(actual['targetsPassed'])
+                        continue
+                    self.assertTrue(actual['targetsPassed'])
+                    group = ('steady' if case['case'].startswith('steady-') else
+                             'restoration' if case['case'] == 'unhealthy-restoration' else 'rollout')
+                    counts[group] += actual['successful']
+                    if case['case'].startswith('routing-'):
+                        timeline = json.loads((folder/'timeline.json').read_text())
+                        self.assertEqual([row['action'] for row in timeline], ['update', 'rollback', 'restart'])
+                        self.assertLessEqual(min(r['startedEpochSeconds'] for r in records), timeline[0]['submitted'])
+                        self.assertGreaterEqual(max(r['startedEpochSeconds'] for r in records), max(row['retired'] for row in timeline) + 2)
+                        for action in timeline:
+                            self.assertTrue(action['oldPodUIDs'])
+                            self.assertLessEqual(action['ready'] - action['submitted'], 30)
+                            self.assertGreaterEqual(action['retired'], action['ready'])
+        self.assertEqual(counts, {'rollout': 2400, 'steady': 2400, 'restoration': 660})
+        timeline = json.loads((data/'broker-continuity/timeline.json').read_text())
+        self.assertEqual(timeline[-1]['stage'], 'broker-ready-original-session-valid')
+        self.assertNotEqual(timeline[-2]['oldPodUID'], timeline[-1]['newPodUID'])
+        timing = json.loads((data/'unhealthy-restoration/timing.json').read_text())
+        self.assertEqual(timing['failurePolicySeconds'], 300)
+        self.assertGreaterEqual(timing['elapsedSeconds'], 300)
+        self.assertLessEqual(timing['elapsedSeconds'], 360)
+        self.assertEqual(timing['states'][-1]['state'], 'failed')
+        self.assertTrue(json.loads((data/'unhealthy-restoration/summary.json').read_text())['verifiedRestoration'])
+        before = json.loads((data/'retention/kube-before-retention.json').read_text())
+        after = json.loads((data/'retention/kube-after-reboot.json').read_text())
+        self.assertNotEqual(before['bootID'], after['bootID'])
+        for field in report['reinstall']['identicalFields']:
+            self.assertEqual(before[field], after[field], field)
+        self.assertFalse(report['reboot']['SSHOrManualServiceStartBeforeReady'])
+        self.assertTrue(json.loads((data/'retention/final-audit.json').read_text())['passed'])
+        self.assertTrue(json.loads((data/'retention/access-cleanup.json').read_text())['passed'])

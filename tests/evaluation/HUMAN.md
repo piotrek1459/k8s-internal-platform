@@ -1,8 +1,9 @@
 # Human timed walkthrough
 
 Human active time remains **pending** until a completed trial record is supplied.
-The trial is scheduled last, after the rollout correction passes published-release
-acceptance on the reference Pi.
+Published v0.1.12 passed the rollout correction's reference-Pi acceptance. The human
+trial is the final core requirement. The [prepared brief](2026-11-27-v0.1.12-native-brief.md)
+supplies the release/chart/image identities and preparation paths.
 The CSV template contains no invented measurements. The expected duration is
 approximately 10–15 minutes with the environment prepared; passive image pulls
 or troubleshooting may extend it.
@@ -72,7 +73,7 @@ the task. Both digests must already be imported by that release installer.
 | Cache | Exact v1/v2 native digests imported and verified before either task |
 
 A template for the manual file is supplied as
-[human-values.example.yaml](human-values.example.yaml). It reflects the published v0.1.11 measured profile; for an older release,
+[human-values.example.yaml](human-values.example.yaml). It reflects the published v0.1.12 measured profile; for an older release,
 adjust the prepared defaults to that release before timing. Editing its empty task
 fields is included in active time. The UI's equivalent name/image/hostname entry
 is also included. Common profile defaults may be prepared for both methods; note

@@ -1,0 +1,8 @@
+[
+  {
+    "check": "Public CA imported into isolated Chromium NSS trust store; no certificate-ignore or SPKI flags"
+  },
+  {
+    "check": "Original HTTPS API session and browser session, administrator/system, retained application/revisions/history and actual HTTPS v1 survived reboot"
+  }
+]

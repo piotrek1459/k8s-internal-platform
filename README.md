@@ -17,18 +17,18 @@ prerelease setting. Normal releases are the default. Published assets
 are listed on the [GitHub Releases page](https://github.com/piotrek1459/k8s-internal-platform/releases).
 
 The [installation guide](docs/installation.md) describes ARM64/AMD64 bundles,
-the dedicated Linux installer and initial SSH access. Its `v0.1.11` commands
+the dedicated Linux installer and initial SSH access. Its `v0.1.12` commands
 are version examples; the downloaded guide matches the selected release.
 
-Published v0.1.11 passed reference-Pi installation/preflight, normally trusted LAN
-browser/API workflows, measured resource defaults, repeated lifecycle/recovery,
-load checks, same-version retention and automatic reboot recovery. Rolling app
-HTTP did not meet its zero-error target: 373/375 requests succeeded.
-The [native report](tests/experiments/2026-11-27-v0.1.11-native.md) retains exact release/image identities and raw results.
-The [preceding evaluation](tests/experiments/2026-11-26-core-evaluation.md) records
-the profile derivation and old/source-chart comparison; earlier recovery/security
-acceptance retains its own release identity. The source [Service-routing correction](tests/experiments/2026-11-27-rollout-routing.md)
-requires manual release and Pi acceptance; the [human timed walkthrough](tests/evaluation/HUMAN.md) remains open in [status](docs/status.md).
+Published v0.1.12 passed reference-Pi installation, trusted LAN UI/API, defaults,
+lifecycle, repeated rollout continuity, steady load, unhealthy-update restoration
+and same-version/reboot retention. Its private controller routes through stable
+Kubernetes Service IPs. The [native report](tests/experiments/2026-11-27-v0.1.12-native.md)
+retains exact source/image identities, release CI and raw observations.
+The [preceding evaluation](tests/experiments/2026-11-26-core-evaluation.md) and
+[routing study](tests/experiments/2026-11-27-rollout-routing.md) preserve calibration,
+controls and the earlier failed v0.1.11 trace. The [human timed walkthrough](tests/evaluation/HUMAN.md)
+is the final M4 requirement in [status](docs/status.md).
 
 Private HTTPS requires the [configuration and trust setup](docs/private-lan.md).
 Public hosting, application volumes, verified backup restoration and cross-version

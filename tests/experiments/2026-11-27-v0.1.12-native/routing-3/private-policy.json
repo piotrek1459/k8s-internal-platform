@@ -1,0 +1,21 @@
+{
+  "UID": "e31d7270-eb23-47f4-9eb2-7d67d7a99bd0",
+  "arguments": [
+    "--global.checknewversion=false",
+    "--global.sendanonymoususage=false",
+    "--api.dashboard=false",
+    "--entrypoints.private.address=192.168.68.227:8443",
+    "--entrypoints.private.http.tls=true",
+    "--entrypoints.private.http.middlewares=private-source@file",
+    "--entrypoints.private.forwardedheaders.insecure=false",
+    "--providers.file.filename=/configuration/dynamic.yaml",
+    "--providers.kubernetesingress=true",
+    "--providers.kubernetesingress.nativelbbydefault=true",
+    "--providers.kubernetesingress.ingressclass=platform-private",
+    "--providers.kubernetesingress.namespaces=platform-system,platform-apps",
+    "--providers.kubernetesingress.labelselector=app.kubernetes.io/part-of=k8s-internal-platform",
+    "--entrypoints.health.address=127.0.0.1:9000",
+    "--ping=true",
+    "--ping.entrypoint=health"
+  ]
+}

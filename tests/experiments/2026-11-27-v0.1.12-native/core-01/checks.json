@@ -1,0 +1,52 @@
+[
+  {
+    "check": "Published private controller uses native Service routing without diagnostic or provider-delay overrides",
+    "epochSeconds": 1795787106.4385614,
+    "privateDeploymentUID": "e31d7270-eb23-47f4-9eb2-7d67d7a99bd0",
+    "arguments": [
+      "--global.checknewversion=false",
+      "--global.sendanonymoususage=false",
+      "--api.dashboard=false",
+      "--entrypoints.private.address=192.168.68.227:8443",
+      "--entrypoints.private.http.tls=true",
+      "--entrypoints.private.http.middlewares=private-source@file",
+      "--entrypoints.private.forwardedheaders.insecure=false",
+      "--providers.file.filename=/configuration/dynamic.yaml",
+      "--providers.kubernetesingress=true",
+      "--providers.kubernetesingress.nativelbbydefault=true",
+      "--providers.kubernetesingress.ingressclass=platform-private",
+      "--providers.kubernetesingress.namespaces=platform-system,platform-apps",
+      "--providers.kubernetesingress.labelselector=app.kubernetes.io/part-of=k8s-internal-platform",
+      "--entrypoints.health.address=127.0.0.1:9000",
+      "--ping=true",
+      "--ping.entrypoint=health"
+    ]
+  },
+  {
+    "check": "Omitted API resources rendered published 25m/48Mi requests, 250m/128Mi limits and native five-second drain; exact ARM64 broker image matched",
+    "epochSeconds": 1795787106.4389517,
+    "app": "app_56fa8b215c8b0b0a",
+    "resources": {
+      "requests": {
+        "cpu": "25m",
+        "memory": "48Mi"
+      },
+      "limits": {
+        "cpu": "250m",
+        "memory": "128Mi"
+      }
+    }
+  },
+  {
+    "check": "Published v2 update and stateless scaling 2/0/1 passed",
+    "epochSeconds": 1795787128.879772
+  },
+  {
+    "check": "Digest-stable restart replaced Pods; explicit rollback restored actual HTTPS v1",
+    "epochSeconds": 1795787142.478929
+  },
+  {
+    "check": "One healthy owned LAN application retained for repeated evaluation and persistence checks",
+    "epochSeconds": 1795787142.4908273
+  }
+]

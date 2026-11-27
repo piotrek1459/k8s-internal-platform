@@ -257,7 +257,7 @@ it does not install OS trust or establish native second-device browser acceptanc
 
 ## Rollout routing
 
-Current source configures `providers.kubernetesIngress.nativeLBByDefault=true`
+Published v0.1.12 configures `providers.kubernetesIngress.nativeLBByDefault=true`
 on the dedicated private controller. It forwards to the managed Service ClusterIP;
 Kubernetes selects its available endpoints. Pod replacement therefore does not
 require the proxy's backend-address configuration to converge before the old
@@ -274,8 +274,9 @@ long requests or host failure.
 Published v0.1.11 used Pod-address routing and returned 373/375 successful requests
 in native rollout acceptance. The [controlled correction study](../tests/experiments/2026-11-27-rollout-routing.md)
 separates the original failed trace, temporary native experiments and source CI
-from the following required manual-release/native gate. The original Pi controller
-configuration is restored after those experiments.
+from [published v0.1.12 native acceptance](../tests/experiments/2026-11-27-v0.1.12-native.md). The installed published
+configuration passed repeated rollout, broker-outage, load, restoration and
+reinstall/reboot checks; the human evaluation remains pending.
 
 ## SSH fallback, renewal and diagnosis
 

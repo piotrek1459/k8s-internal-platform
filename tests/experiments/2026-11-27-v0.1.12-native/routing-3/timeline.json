@@ -1,0 +1,53 @@
+[
+  {
+    "action": "update",
+    "submitted": 1795787478.2795067,
+    "oldPodUIDs": [
+      "d041dc11-389a-4fba-a077-8cc404f55b4b"
+    ],
+    "ready": 1795787483.2484741,
+    "operationID": "op_fd2d74c4cf2ae613",
+    "retired": 1795787488.103854,
+    "HTTPS": [
+      {
+        "epochSeconds": 1795787488.1122425,
+        "status": 200,
+        "expected": true
+      }
+    ]
+  },
+  {
+    "action": "rollback",
+    "submitted": 1795787493.2844896,
+    "oldPodUIDs": [
+      "0d799a62-dc7e-4d3c-a08a-3d6f596b4b2e"
+    ],
+    "ready": 1795787498.256858,
+    "operationID": "op_c999f72801950383",
+    "retired": 1795787503.4954066,
+    "HTTPS": [
+      {
+        "epochSeconds": 1795787503.5037017,
+        "status": 200,
+        "expected": true
+      }
+    ]
+  },
+  {
+    "action": "restart",
+    "submitted": 1795787508.2519834,
+    "oldPodUIDs": [
+      "53a9bcb0-596f-4ebb-8ab1-cc80e808900a"
+    ],
+    "ready": 1795787513.2377737,
+    "operationID": "op_b452bf8e76303c3c",
+    "retired": 1795787518.1582556,
+    "HTTPS": [
+      {
+        "epochSeconds": 1795787518.1665232,
+        "status": 200,
+        "expected": true
+      }
+    ]
+  }
+]

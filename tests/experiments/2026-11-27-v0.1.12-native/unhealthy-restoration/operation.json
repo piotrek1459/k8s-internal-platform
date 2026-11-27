@@ -1,0 +1,35 @@
+{
+  "applicationId": "app_3006d2f9328e0a41",
+  "events": [
+    {
+      "at": "2026-11-27T13:57:39.250318134Z",
+      "message": "operation accepted",
+      "stage": "queued"
+    },
+    {
+      "at": "2026-11-27T13:57:39.259407048Z",
+      "message": "operation started",
+      "stage": "running"
+    },
+    {
+      "at": "2026-11-27T13:57:39.266397285Z",
+      "message": "applying workload through Helm",
+      "stage": "applying"
+    },
+    {
+      "at": "2026-11-27T14:02:40.130742227Z",
+      "message": "restoring the previous successful revision",
+      "stage": "restoring"
+    },
+    {
+      "at": "2026-11-27T14:02:41.024396699Z",
+      "message": "candidate failed; previous successful revision restored and verified",
+      "stage": "restored"
+    }
+  ],
+  "id": "op_f61ba7eb803a5e81",
+  "recoveryOutcome": "previous successful revision restored and verified",
+  "stage": "restored",
+  "state": "failed",
+  "type": "update"
+}

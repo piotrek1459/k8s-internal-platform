@@ -62,7 +62,8 @@ workloads/rate. Two small HTTP applications cannot justify sizing arbitrary apps
 The measured defaults and hook presence passed [published v0.1.11 checks](../tests/experiments/2026-11-27-v0.1.11-native.md)
 under a separately retained plan fixed before collection. Application-rollout HTTP
 failed its zero-error target (373/375). The [source routing correction](../tests/experiments/2026-11-27-rollout-routing.md)
-retains controlled native comparisons and source CI; published acceptance remains required. The original calibration plan/results are unchanged; human
+retains controlled native comparisons and source CI. The [v0.1.12 report](../tests/experiments/2026-11-27-v0.1.12-native.md)
+accepts the unmodified published correction. The original calibration plan/results are unchanged; human
 measurements remain pending.
 
 ## Targets and interpretation

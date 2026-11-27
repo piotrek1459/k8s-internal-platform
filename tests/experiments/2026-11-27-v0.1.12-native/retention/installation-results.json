@@ -1,0 +1,44 @@
+{
+  "release": "0.1.12",
+  "provenance": "Observed command exits during this acceptance run; retained private installer logs are represented by hashes only. Existing-check intentionally refused a cross-version replacement.",
+  "commands": {
+    "existing-check.log": {
+      "exit": 1,
+      "privateLogSHA256": "59810007450a79435cbb48575e5e2854f4d35252ce78b6f0ff4da523709faefe"
+    },
+    "fresh-check.log": {
+      "exit": 0,
+      "privateLogSHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a"
+    },
+    "fresh-install.log": {
+      "exit": 0,
+      "privateLogSHA256": "7ae5fc2e8f287c64cf8382575e632895213e54ec3d434d3616a0715d7f606d08"
+    },
+    "installed-check.log": {
+      "exit": 0,
+      "privateLogSHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a"
+    },
+    "lan-install.log": {
+      "exit": 0,
+      "privateLogSHA256": "dd233bc559331699d1cece9525ccb11ec82092b1538c42f57663d48e9ac73172"
+    },
+    "lan-check.log": {
+      "exit": 0,
+      "privateLogSHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a"
+    },
+    "same-version-install.log": {
+      "exit": 0,
+      "privateLogSHA256": "8c9ee87b9456e9e545f867ebe634c3487f4faff0445db2c7311a9ea8da0ba2c6"
+    },
+    "same-version-check.log": {
+      "exit": 0,
+      "privateLogSHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a"
+    },
+    "rebooted-check.log": {
+      "exit": 0,
+      "privateLogSHA256": "15932deaaf2097e6cc893d11975ddfafbd3116e28f8938be8675c26e418d4b3a"
+    }
+  },
+  "crossVersionUpgradeTested": false,
+  "archiveRestoreTested": false
+}
